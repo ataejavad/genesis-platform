@@ -22,13 +22,17 @@ export default function LoginPage() {
   }
 
   return (
-    <main style={{ maxWidth: 380, margin: "10vh auto" }}>
-      <h1>ورود به کابین</h1>
-      <form onSubmit={onSubmit} className="card" style={{ display: "grid", gap: 12 }}>
-        <input name="email" type="email" placeholder="ایمیل" required autoComplete="email" dir="ltr" />
-        <input name="password" type="password" placeholder="رمز" required autoComplete="current-password" dir="ltr" />
-        <button className="ok" disabled={busy}>{busy ? "…" : "ورود"}</button>
+    <main style={{ maxWidth: 400, margin: "12vh auto", padding: 16 }}>
+      <div className="row" style={{ marginBottom: 18 }}>
+        <span className="logo">L</span>
+        <h1 style={{ margin: 0 }}>ورود به کابین</h1>
+      </div>
+      <form onSubmit={onSubmit} className="card stack">
+        <label className="field">ایمیل<input name="email" type="email" required autoComplete="email" dir="ltr" /></label>
+        <label className="field">رمز<input name="password" type="password" required autoComplete="current-password" dir="ltr" /></label>
+        <button className="btn primary" disabled={busy}>{busy ? "…" : "ورود"}</button>
         {error && <p style={{ color: "var(--bad)", margin: 0 }}>{error}</p>}
+        <p className="muted small" style={{ margin: 0 }}>نسخه محلی: admin@local.test / local-demo-password</p>
       </form>
     </main>
   );

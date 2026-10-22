@@ -19,5 +19,5 @@ export async function decide(formData: FormData) {
     // Already decided elsewhere (e.g. on Telegram): just refresh the list.
     if (!(err instanceof AppError)) throw err;
   }
-  revalidatePath("/cockpit");
+  revalidatePath("/cockpit/approvals");
 }

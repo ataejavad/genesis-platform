@@ -32,7 +32,7 @@ export default async function ContentPage(props: Params) {
     dateModified: page.updatedAt.toISOString(),
   };
   return (
-    <main>
+    <main className="wrap-site section" style={{ maxWidth: 820 }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <h1>{page.title}</h1>
       {page.summary && <p className="muted">{page.summary}</p>}

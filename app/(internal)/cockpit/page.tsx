@@ -1,56 +1,86 @@
-import { count, eq, isNull, and, gte } from "drizzle-orm";
-import ReactMarkdown from "react-markdown";
-import { getDb } from "@/db";
-import { contentItems, events } from "@/db/schema";
-import { requireAdmin } from "@/lib/auth";
-import { listPendingApprovals } from "@/server/content";
-import { MAX_ATTEMPTS } from "@/worker/dispatch";
-import { decide } from "./actions";
+import Link from "next/link";
+import { agents, fmtEur, leads, projects, qaQueue } from "@/mock/data";
+import { PageHead } from "@/ui/Shell";
+import { Progress, Stat, StatusBadge, Tone } from "@/ui/bits";
 
-export const dynamic = "force-dynamic";
-
-export default async function Cockpit() {
-  const user = await requireAdmin();
-  const db = getDb();
-  const [pending, [published], [stuck]] = await Promise.all([
-    listPendingApprovals(db),
-    db.select({ n: count() }).from(contentItems).where(eq(contentItems.status, "published")),
-    db.select({ n: count() }).from(events).where(and(isNull(events.dispatchedAt), gte(events.attempts, MAX_ATTEMPTS))),
-  ]);
-
+export default function CockpitHome() {
+  const funnel = [
+    { label: "سرنخ", n: 120 },
+    { label: "پیام فرستاده‌شده", n: 48 },
+    { label: "چک‌آپ رایگان", n: 11 },
+    { label: "جلسه", n: 5 },
+    { label: "مشتری", n: 1 },
+  ];
   return (
     <main>
-      <div className="row" style={{ justifyContent: "space-between" }}>
-        <h1>کابین</h1>
-        <span className="muted">{user.name}</span>
+      <PageHead title="نمای کلی شرکت" crumbs="کابین" sub="امروز، ۳۰ مهر ۱۴۰۵" actions={<Link className="btn primary" href="/cockpit/approvals">صف تأیید</Link>} />
+
+      <div className="callout ai" style={{ marginBottom: 18 }}>
+        <b>✦ خلاصه روزانه ایجنت گزارش:</b> ۱۲۰ شرکت تازه در فهرست شیشه آلمان؛ ۲۰ پیام شخصی منتظر تأیید توست. تحویل پروژه P-301 در QA یک معیار ناقص دارد. همکار H-22 یک بار سعی کرد شماره تلفن رد و بدل کند (نگه داشته شد). هزینه ایجنت‌ها دیروز: €2.4.
       </div>
 
-      <section className="stats">
-        <div className="card stat"><b>{pending.length}</b>منتظر تأیید</div>
-        <div className="card stat"><b>{published.n}</b>صفحه منتشرشده</div>
-        <div className="card stat"><b style={{ color: stuck.n ? "var(--bad)" : undefined }}>{stuck.n}</b>رویداد گیرکرده</div>
+      <section className="grid g4" style={{ marginBottom: 18 }}>
+        <Stat label="درآمد ماهانه تکراری (MRR)" value={fmtEur(1190)} delta="▲ ۷۵٪ نسبت به ماه قبل" up />
+        <Stat label="مشتری فعال" value="1" delta="هدف این فصل: ۱۰" />
+        <Stat label="حاشیه سود پروژه‌ها" value="۴۵٪" delta="کف تعیین‌شده: ۳۵٪" up />
+        <Stat label="هزینه ایجنت‌ها (این ماه)" value={fmtEur(19)} delta="زیر ۲٪ درآمد" up />
       </section>
 
-      <h2>صف تأیید</h2>
-      {pending.length === 0 && <p className="muted">چیزی منتظر تأیید نیست.</p>}
-      {pending.map((a) => (
-        <article key={a.id} className="card">
-          <h3 style={{ marginTop: 0 }}>{a.title}</h3>
-          <p className="muted" dir="ltr" style={{ textAlign: "right" }}>
-            /{a.locale}/{a.slug} · v{a.subjectVersion} · {a.requestedBy} · {a.createdAt.toISOString().slice(0, 16).replace("T", " ")}
-            {a.liveStatus === "published" ? " · ویرایش صفحه زنده" : " · صفحه تازه"}
-          </p>
-          <div className="preview" dir="auto">
-            <ReactMarkdown>{a.body}</ReactMarkdown>
+      <section className="grid g-2-1" style={{ marginBottom: 18 }}>
+        <div className="card">
+          <div className="card-head"><h3>قیف فروش (شیشه × آلمان)</h3><Link className="more" href="/cockpit/leads">همه سرنخ‌ها</Link></div>
+          <div className="stack">
+            {funnel.map((f) => (
+              <div key={f.label} className="row">
+                <span style={{ width: 130 }}>{f.label}</span>
+                <div style={{ flex: 1 }}><Progress value={(f.n / funnel[0].n) * 100} /></div>
+                <b className="num" style={{ width: 40, textAlign: "left" }}>{f.n}</b>
+              </div>
+            ))}
           </div>
-          <form action={decide} className="row" style={{ marginTop: 12 }}>
-            <input type="hidden" name="id" value={a.id} />
-            <input name="note" placeholder="یادداشت (اختیاری)" style={{ flex: 1, minWidth: 180 }} />
-            <button className="ok" name="decision" value="approved">تأیید و انتشار</button>
-            <button className="bad" name="decision" value="rejected">رد</button>
-          </form>
-        </article>
-      ))}
+        </div>
+        <div className="card">
+          <div className="card-head"><h3>منتظر تو</h3></div>
+          <div className="list">
+            <div className="item"><span>✉️</span><div className="grow">۲۰ پیام شخصی برای شرکت‌های شیشه</div><Link href="/cockpit/approvals" className="btn sm">بررسی</Link></div>
+            <div className="item"><span>🔍</span><div className="grow">{qaQueue.length} تحویل در QA</div><Link href="/cockpit/qa" className="btn sm">بررسی</Link></div>
+            <div className="item"><span>🤝</span><div className="grow">۳ درخواست همکاری</div><Link href="/cockpit/partners" className="btn sm">بررسی</Link></div>
+            <div className="item"><span>🛡️</span><div className="grow">۱ پیام نگه‌داشته‌شده</div><Link href="/cockpit/moderation" className="btn sm">بررسی</Link></div>
+          </div>
+        </div>
+      </section>
+
+      <section className="grid g2">
+        <div className="card">
+          <div className="card-head"><h3>پروژه‌ها</h3><Link className="more" href="/cockpit/projects">همه</Link></div>
+          <table className="table">
+            <thead><tr><th>پروژه</th><th>نوع</th><th>پیشرفت</th><th>وضعیت</th></tr></thead>
+            <tbody>
+              {projects.map((p) => (
+                <tr key={p.id}>
+                  <td><Link href={`/cockpit/projects/${p.id}`}>{p.title}</Link></td>
+                  <td><span className={`badge ${p.kind === "customer" ? "" : "gray"}`}>{p.kind === "customer" ? "مشتری" : "داخلی"}</span></td>
+                  <td style={{ width: 120 }}><Progress value={p.progress} /></td>
+                  <td><StatusBadge status={p.status} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="card">
+          <div className="card-head"><h3>ایجنت‌ها امروز</h3><Link className="more" href="/cockpit/agents">همه</Link></div>
+          <div className="list">
+            {agents.slice(0, 5).map((a) => (
+              <div className="item" key={a.id}>
+                <span>🤖</span>
+                <div className="grow"><b>{a.name}</b><div className="muted small">{a.output}</div></div>
+                <Tone text={a.status} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <p className="muted small" style={{ marginTop: 14 }}>سرنخ‌ها در این قیف: {leads.length} نمونه.</p>
     </main>
   );
 }
