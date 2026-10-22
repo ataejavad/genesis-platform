@@ -18,7 +18,8 @@ export function getDb(): Db {
   if (!globalForDb.db) {
     const url = process.env.DATABASE_URL;
     if (!url) throw new Error("DATABASE_URL is not set");
-    globalForDb.db = createDb(url);
+    // Local mode (npm run local) runs on PGlite, which needs one connection per process.
+    globalForDb.db = createDb(url, Number(process.env.DATABASE_POOL_MAX ?? 10));
   }
   return globalForDb.db;
 }

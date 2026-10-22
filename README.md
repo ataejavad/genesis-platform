@@ -28,7 +28,20 @@ Design: `business-plan/15-web-app-design.md` (project files). This repository is
 | `app/api/v1/drafts` | Agent API |
 | `app/llms.txt`, `app/sitemap.ts` | Agent and search-engine layer, generated from content |
 
-## Run locally
+## Try it on your own computer (no database to install)
+
+Needs Node.js 22 and Git.
+
+```bash
+git clone https://github.com/ataejavad/genesis-platform && cd genesis-platform
+npm ci
+npm run local
+```
+
+Opens on http://localhost:3000 with sample pages; the cockpit is http://localhost:3000/cockpit
+(`admin@local.test` / `local-demo-password`). Data lives in `./.localdb` (PGlite). Telegram and the worker are off in this mode.
+
+## Run locally with Postgres
 
 ```bash
 npm ci
