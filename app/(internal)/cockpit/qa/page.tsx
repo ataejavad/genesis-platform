@@ -1,27 +1,18 @@
-import { qaQueue } from "@/mock/data";
+import { qa } from "@/mock/cockpit";
 import { PageHead } from "@/ui/Shell";
 
-export default function QA() {
+export default function QaQueue() {
   return (
     <main>
-      <PageHead title="سنجش تحویل (QA)" crumbs="کابین › تحویل" sub="ایجنت QA هر تحویل را با معیارهای پروتکل می‌سنجد؛ تو تأیید نهایی می‌کنی (برای تحویل به مشتری همیشه)." />
-      <div className="stack">
-        {qaQueue.map((q) => (
-          <div className="card" key={q.project}>
-            <div className="card-head"><h3>{q.deliverable}</h3><span className="more badge">{q.forCustomer ? "برای مشتری" : "داخلی"}</span></div>
-            <div className="muted small">پروژه {q.project} · همکار {q.partner} · پروتکل {q.protocol}</div>
-            <div className="row" style={{ margin: "12px 0" }}>
-              <span className={`badge ${q.ai.passed === q.ai.total ? "ok" : "warn"}`}>{q.ai.passed} از {q.ai.total} معیار برقرار</span>
-            </div>
-            <div className="callout ai small">✦ {q.ai.note}</div>
-            <div className="row" style={{ marginTop: 12 }}>
-              <button className="btn ok">قبول{q.forCustomer ? " و تحویل به مشتری" : ""}</button>
-              <button className="btn">برگرداندن برای اصلاح</button>
-              <button className="btn danger">رد</button>
-            </div>
-          </div>
-        ))}
-      </div>
+      <PageHead title="QA queue" crumbs="Cockpit › Delivery" sub="The QA judge scores each criterion; medium risk comes here at final delivery, high risk always. Repeated failures feed protocol updates." />
+      <div className="stack">{qa.map((q) => (
+        <div key={q.project + q.deliverable} className="card">
+          <div className="card-head"><h3>{q.project} · {q.deliverable}</h3><span className={`badge ${q.risk === "medium" ? "warn" : "gray"}`}>{q.risk}</span>{q.forCustomer && <span className="badge">customer-facing</span>}</div>
+          <div className="row small"><span>By {q.by}</span><span>· {q.protocol}</span><span>· <b>{q.passed}/{q.total}</b> criteria passed</span></div>
+          <div className="callout ai small" style={{ margin: "10px 0" }}>✦ {q.note}</div>
+          <div className="row"><button className="btn ok sm">Accept → pay partner → send to customer</button><button className="btn sm">Return with notes</button></div>
+        </div>
+      ))}</div>
     </main>
   );
 }

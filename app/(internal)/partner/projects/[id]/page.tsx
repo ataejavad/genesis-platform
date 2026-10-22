@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { partnerMessages, projects, protocols } from "@/mock/data";
 import { PageHead } from "@/ui/Shell";
 import { Chat, Progress, Steps } from "@/ui/bits";
+import { SelfCheck } from "@/ui/SelfCheck";
 
 // Partner view: customer only by code; protocol attached; delivery checked against it.
 export default async function PartnerProject({ params }: { params: Promise<{ id: string }> }) {
@@ -26,12 +27,7 @@ export default async function PartnerProject({ params }: { params: Promise<{ id:
             <ul>{protocol.criteria?.slice(0, 4).map((c) => <li key={c.t}>{c.t} {c.must && <span className="badge bad">اجباری</span>}</li>)}</ul>
             <label className="row small"><input type="checkbox" style={{ width: "auto" }} defaultChecked /> پروتکل را خواندم و قبول دارم</label>
           </div>
-          <div className="card stack">
-            <h3>تحویل کار</h3>
-            <label className="field">فایل‌ها<input type="file" multiple /></label>
-            <label className="field">خودارزیابی با چک‌لیست پروتکل<textarea placeholder="برای هر معیار: انجام شد / توضیح" /></label>
-            <button className="btn primary">ارسال برای سنجش (ایجنت QA ← تأیید ما)</button>
-          </div>
+          <SelfCheck criteria={protocol.criteria ?? []} />
         </div>
         <div className="stack">
           <div className="card"><h3>مراحل</h3><Steps steps={p.steps} /></div>

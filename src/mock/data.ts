@@ -200,3 +200,68 @@ export const earnings = [
   { period: "مهر ۱۴۰۵", project: "P-288", amount: 1100, status: "پرداخت‌شده" },
   { period: "آبان ۱۴۰۵", project: "P-301", amount: 1300, status: "پس از تأیید QA" },
 ];
+
+// ── Customer dashboard additions (doc 15 §6و) ──
+export const myApps = [
+  { id: "quote", icon: "🧮", name: "ایجنت قیمت‌دهی شیشه", mode: "native" as const, status: "فعال", stat: "۸۴ قیمت این ماه · میانگین ۱۲ دقیقه", usage: 84 },
+  { id: "phone", icon: "📞", name: "پاسخ‌گوی ۲۴ ساعته تلفن و چت", mode: "embedded" as const, status: "فعال", stat: "۳۱۲ تماس · ۹۷٪ پاسخ", usage: 97 },
+  { id: "followup", icon: "🔁", name: "پیگیری خودکار پیشنهادها", mode: "sso" as const, status: "در حال راه‌اندازی", stat: "فعال‌سازی تا ۲ روز دیگر", usage: 0 },
+];
+export const appModeLabel = { native: "بومی (ساخت ما)", embedded: "جاسازی‌شده با برند ما", sso: "ورود یک‌کلیکی" };
+export const connections = [
+  { name: "HubSpot CRM", kind: "OAuth", status: "وصل" },
+  { name: "Outlook / Microsoft 365", kind: "OAuth", status: "وصل" },
+  { name: "DATEV", kind: "API", status: "درخواست اتصال" },
+];
+export const onboarding = [
+  { t: "چک‌آپ رایگان", done: true },
+  { t: "امضای قرارداد و DPA", done: true },
+  { t: "اتصال ایمیل و تقویم", done: true },
+  { t: "اولین ایجنت فعال شد", done: true },
+  { t: "اتصال CRM (کلید HubSpot)", done: false },
+  { t: "دعوت یک همکار به داشبورد", done: false },
+];
+export const insights = [
+  { tone: "warn", t: "۱۱ درخواست قیمت دیروز بیرون از ساعت کاری آمد و ۴ تا هنوز جواب نگرفته‌اند.", act: "فعال‌سازی پاسخ شبانه" },
+  { tone: "ok", t: "قیمت شیشه تخت ۴٪ پایین آمد؛ ۷ پیشنهاد قیمت باز را می‌شود به‌روز کرد.", act: "به‌روزرسانی پیشنهادها" },
+  { tone: "ai", t: "شرکت‌های مشابه شما با «رزرو خودکار بازدید» ماهی ۶ کار بیشتر گرفته‌اند.", act: "دیدن پیشنهاد" },
+];
+export const customerApprovals = [
+  { t: "تحویل: نسخه ۲ ایجنت قیمت‌دهی (پروژه P-301)", kind: "تحویل" },
+  { t: "درخواست تغییر: افزودن قیمت شیشه رنگی (+€180، +۳ روز)", kind: "تغییر دامنه" },
+  { t: "متن خوش‌آمد تلفن به ایتالیایی", kind: "محتوا" },
+];
+export const tickets = [
+  { no: "TK-208", t: "ایجنت تلفن شماره داخلی ۲۲ را نمی‌شناسد", status: "در حال بررسی", sla: "پاسخ تا ۴ ساعت" },
+  { no: "TK-201", t: "اضافه کردن کاربر حسابداری", status: "تمام", sla: "—" },
+];
+export const activity = [
+  { who: "Thomas Becker", what: "تحویل P-301 مرحله ۳ را تأیید کرد", when: "دیروز ۱۷:۲۰" },
+  { who: "Anna Becker", what: "فاکتور LP-2026-0041 را دانلود کرد", when: "۲ روز پیش" },
+  { who: "ایجنت قیمت‌دهی", what: "۱۴ پیش‌فاکتور فرستاد", when: "امروز" },
+];
+
+// ── Partner portal additions (doc 15 §6ب, final) ──
+export const jobOffers = [
+  { id: "J-77", title: "اتصال فرم سایت به HubSpot", customer: "C-1077", hub: "نصاب‌ها × بریتانیا", protocol: "اتصال CRM v1", days: 5, pay: 700, fit: 94, why: "۴ پروژه HubSpot موفق، ظرفیت آزاد این هفته، رتبه ۲ در این نوع کار" },
+  { id: "J-81", title: "نقشه فیلد تلفن ← Pipedrive", customer: "C-1090", hub: "شیشه × ایتالیا", protocol: "اتصال CRM v1", days: 3, pay: 450, fit: 81, why: "زبان ایتالیایی، تجربه API؛ Pipedrive را کمتر کار کرده‌اید" },
+  { id: "J-83", title: "داشبورد گزارش ماهانه در Looker", customer: "C-1042", hub: "شیشه × آلمان", protocol: "گزارش ماهانه v2", days: 4, pay: 520, fit: 63, why: "مهارت Looker در پروفایل نیست" },
+];
+export const vault = [
+  { t: "شماره مالیاتی (Partita IVA)", status: "تأییدشده", exp: "—" },
+  { t: "قرارداد همکاری + منع دور زدن", status: "امضاشده", exp: "۱۴۰۶/۰۵/۱۰" },
+  { t: "NDA", status: "امضاشده", exp: "۱۴۰۷/۰۱/۰۱" },
+  { t: "بیمه مسئولیت حرفه‌ای", status: "منقضی می‌شود", exp: "۱۴۰۵/۰۹/۰۱" },
+];
+export const tiers = [
+  { name: "تازه‌وارد", min: 0 },
+  { name: "تأییدشده", min: 3 },
+  { name: "حرفه‌ای", min: 10 },
+  { name: "برتر", min: 25 },
+];
+export const courses = [
+  { t: "اصول white-label و قواعد ارتباط با مشتری", min: 12, done: true },
+  { t: "پروتکل «اتصال CRM v1»: معیارها و نمونه تحویل خوب", min: 18, done: true },
+  { t: "n8n پیشرفته: خطاگیری و تکرار", min: 25, done: false },
+  { t: "AI Act برای سازندگان ایجنت", min: 15, done: false },
+];

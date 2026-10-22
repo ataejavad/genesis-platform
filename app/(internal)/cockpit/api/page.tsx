@@ -1,31 +1,33 @@
 import { PageHead } from "@/ui/Shell";
 
 const endpoints = [
-  { m: "POST", p: "/api/v1/drafts", d: "ایجنت پیش‌نویس صفحه می‌فرستد (فعال، واقعی)", live: true },
-  { m: "GET", p: "/api/v1/drafts/:id", d: "وضعیت تأیید یک پیش‌نویس (فعال، واقعی)", live: true },
-  { m: "GET", p: "/api/v1/catalog", d: "کاتالوگ خدمات و قیمت برای ایجنت‌های خریدار (نمونه)", live: true },
-  { m: "GET", p: "/llms.txt", d: "خلاصه ماشین‌خوان سایت برای AIها (فعال، واقعی)", live: true },
-  { m: "POST", p: "/api/v1/leads", d: "شکارچی سرنخ شرکت تازه ثبت می‌کند", live: false },
-  { m: "POST", p: "/api/v1/projects/:id/tasks", d: "ساخت کار برای همکار یا ایجنت", live: false },
-  { m: "POST", p: "/api/v1/deliverables/:id/checks", d: "ایجنت QA نتیجه سنجش هر معیار را ثبت می‌کند", live: false },
-  { m: "POST", p: "/api/v1/messages", d: "پیام با واسطه (پنهان‌سازی خودکار)", live: false },
-  { m: "MCP", p: "mcp://legendpartner", d: "سرور MCP برای ایجنت‌های بیرونی", live: false },
+  { m: "POST", p: "/api/v1/drafts", d: "Agent sends a page draft (live)", live: true },
+  { m: "GET", p: "/api/v1/drafts/:id", d: "Approval status of a draft (live)", live: true },
+  { m: "GET", p: "/api/v1/catalog", d: "Catalogue for buyer agents (sample)", live: true },
+  { m: "GET", p: "/llms.txt", d: "Machine-readable site summary (live)", live: true },
+  { m: "POST", p: "/api/v1/concierge", d: "Concierge chat turn (streaming) + detected need", live: false },
+  { m: "POST", p: "/api/v1/checkups", d: "Check-up answers → report + CRM lead", live: false },
+  { m: "POST", p: "/api/v1/companies/:id/signals", d: "Engagement signal → persona tier upgrade", live: false },
+  { m: "POST", p: "/api/v1/orders", d: "Order → invoice → provision My Apps", live: false },
+  { m: "POST", p: "/api/v1/contracts", d: "Generate contract for any relationship", live: false },
+  { m: "POST", p: "/api/v1/deliverables/:id/checks", d: "QA judge writes per-criterion results", live: false },
+  { m: "POST", p: "/api/v1/messages", d: "Mediated message (auto-masking, translation)", live: false },
+  { m: "MCP", p: "mcp://legendpartner", d: "MCP server for external agents", live: false },
 ];
 
 export default function Api() {
   return (
     <main>
-      <PageHead title="API و اتصال‌ها" crumbs="کابین › ماشین" sub="API-first: هر کاری که در صفحه‌ها می‌شود، یک API هم دارد؛ n8n، ایجنت‌ها و بعداً مشتری‌ها از همین‌ها استفاده می‌کنند." actions={<button className="btn primary">+ کلید API تازه</button>} />
+      <PageHead title="API & connections" crumbs="Cockpit › Machine" sub="API-first: every screen action is also an API, used by n8n, agents and later customers." actions={<button className="btn primary">＋ New API key</button>} />
       <div className="card table-wrap" style={{ marginBottom: 18 }}>
-        <table className="table">
-          <thead><tr><th>روش</th><th>مسیر</th><th>کار</th><th>وضعیت</th></tr></thead>
-          <tbody>{endpoints.map((e) => (<tr key={e.p}><td><span className="badge">{e.m}</span></td><td className="ltr">{e.p}</td><td>{e.d}</td><td>{e.live ? <span className="badge ok">ساخته شد</span> : <span className="badge gray">برنامه‌ریزی‌شده</span>}</td></tr>))}</tbody>
-        </table>
+        <table className="table"><thead><tr><th>Method</th><th>Path</th><th>What</th><th>Status</th></tr></thead>
+          <tbody>{endpoints.map((e) => (<tr key={e.p}><td><span className="badge">{e.m}</span></td><td className="ltr">{e.p}</td><td>{e.d}</td><td>{e.live ? <span className="badge ok">built</span> : <span className="badge gray">planned</span>}</td></tr>))}</tbody></table>
       </div>
-      <div className="grid g3">
-        <div className="card"><h3>n8n</h3><p className="muted small">هر رویداد سیستم (تأیید، انتشار، تحویل…) به وب‌هوک n8n فرستاده می‌شود.</p><span className="badge warn">آدرس وب‌هوک هنوز تنظیم نشده</span></div>
-        <div className="card"><h3>تلگرام</h3><p className="muted small">درخواست‌های تأیید با دکمه به تلگرام تو می‌آید.</p><span className="badge warn">ربات هنوز ساخته نشده</span></div>
-        <div className="card"><h3>Claude API</h3><p className="muted small">مغز ایجنت‌ها. کلید روی کامپیوتر تو در فایل ‎.env می‌نشیند، نه در چت.</p><span className="badge warn">منتظر کلید</span></div>
+      <div className="grid g4">
+        <div className="card"><h3>n8n</h3><p className="muted small">Runs the agents; every system event goes to its webhook.</p><span className="badge warn">webhook not set</span></div>
+        <div className="card"><h3>Langfuse</h3><p className="muted small">LLM traces, cost, prompt versions, A/B (self-hosted, EU).</p><span className="badge gray">to install</span></div>
+        <div className="card"><h3>Telegram</h3><p className="muted small">Approvals, alerts and emergency stop on your phone.</p><span className="badge warn">bot not created</span></div>
+        <div className="card"><h3>Claude API</h3><p className="muted small">The agents' brain. Key lives in .env on the server, never in chat.</p><span className="badge warn">waiting for key</span></div>
       </div>
     </main>
   );

@@ -2,17 +2,27 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { CommandBar } from "./CommandBar";
 
 export type NavItem = { href: string; label: string; icon: string; count?: number };
 export type NavGroup = { title?: string; items: NavItem[] };
 
-const doors: NavItem[] = [
-  { href: "/fa-ir", label: "سایت عمومی", icon: "🌐" },
-  { href: "/portal", label: "پورتال مشتری", icon: "🏢" },
-  { href: "/partner", label: "پورتال همکاران", icon: "🤝" },
-  { href: "/cockpit", label: "کابین مدیریت", icon: "🧭" },
-  { href: "/map", label: "نقشه همه صفحه‌ها", icon: "🗺️" },
-];
+const doorLinks = ["/fa-ir", "/portal", "/partner", "/cockpit", "/map"];
+const doorIcons = ["🌐", "🏢", "🤝", "🧭", "🗺️"];
+const text = {
+  fa: {
+    doors: ["سایت عمومی", "پورتال مشتری", "پورتال همکاران", "کابین مدیریت", "نقشه همه صفحه‌ها"],
+    doorsTitle: "درهای پلتفرم",
+    demo: "نسخه نمایشی: داده‌های این صفحه نمونه‌اند و بعداً به پایگاه داده، n8n و ایجنت‌ها وصل می‌شوند.",
+    skip: "رفتن به محتوا",
+  },
+  en: {
+    doors: ["Public site", "Customer portal", "Partner portal", "Cockpit", "Map of all pages"],
+    doorsTitle: "Platform doors",
+    demo: "Demo: sample data. Screens get wired to the database, n8n and agents during the build days.",
+    skip: "Skip to content",
+  },
+};
 
 export function Shell({
   brand,
@@ -20,6 +30,7 @@ export function Shell({
   groups,
   user,
   demo = true,
+  lang = "fa",
   children,
 }: {
   brand: string;
@@ -27,12 +38,15 @@ export function Shell({
   groups: NavGroup[];
   user: { name: string; sub: string };
   demo?: boolean;
+  lang?: "fa" | "en";
   children: React.ReactNode;
 }) {
   const path = usePathname();
   const isActive = (href: string) => path === href || (href.split("/").length > 2 && path.startsWith(href + "/"));
+  const t = text[lang];
   return (
-    <div className="shell">
+    <div className="shell" dir={lang === "en" ? "ltr" : "rtl"} lang={lang}>
+      <a className="skip" href="#main">{t.skip}</a>
       <aside className="sidebar">
         <Link href="/map" className="brand" style={{ textDecoration: "none" }}>
           <span className="logo">L</span>
@@ -52,21 +66,20 @@ export function Shell({
           </nav>
         ))}
         <nav className="switch">
-          <div className="door">درهای پلتفرم</div>
-          {doors.map((it) => (
-            <Link key={it.href} href={it.href}>
-              <span>{it.icon}</span>
-              <span>{it.label}</span>
+          <div className="door">{t.doorsTitle}</div>
+          {doorLinks.map((href, i) => (
+            <Link key={href} href={href}>
+              <span>{doorIcons[i]}</span>
+              <span>{t.doors[i]}</span>
             </Link>
           ))}
         </nav>
       </aside>
       <div className="main">
-        {demo && <div className="demo-banner">نسخه نمایشی: داده‌های این صفحه نمونه‌اند و بعداً به پایگاه داده، n8n و ایجنت‌ها وصل می‌شوند.</div>}
+        {demo && <div className="demo-banner">{t.demo}</div>}
         <header className="topbar">
-          <input className="search" placeholder="جستجو در پروژه‌ها، کارها، شرکت‌ها… (به‌زودی با AI)" />
+          <CommandBar lang={lang} />
           <div className="user">
-            <span className="badge ai">✦ دستیار AI</span>
             <div style={{ textAlign: "start", lineHeight: 1.3 }}>
               <div style={{ fontWeight: 600, fontSize: 14 }}>{user.name}</div>
               <div className="muted small">{user.sub}</div>
@@ -74,7 +87,7 @@ export function Shell({
             <span className="avatar">{user.name.slice(0, 1)}</span>
           </div>
         </header>
-        <div className="content">{children}</div>
+        <div className="content" id="main">{children}</div>
       </div>
     </div>
   );

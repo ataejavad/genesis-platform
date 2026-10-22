@@ -8,4 +8,4 @@
 - Content and data live in Postgres; code, prompts and templates live in Git.
 - Schema changes: edit `src/db/schema.ts`, run `npm run db:generate -- --name <what>`, commit the SQL in `drizzle/`.
 - Before pushing: `npm run lint`, `npm test` (needs `TEST_DATABASE_URL`), `npm run build`.
-- User-facing text for the founders is Persian; public site text comes from content, not code.
+- The cockpit UI is English (Javad's choice); customer and partner portals are multilingual. Public site text comes from content and per-language dictionaries, not hard-coded strings.

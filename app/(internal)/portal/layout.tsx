@@ -1,6 +1,7 @@
 import { BRAND, customer } from "@/mock/data";
 import { Shell } from "@/ui/Shell";
 
+// Customer dashboard: 10 sections decided with Javad (doc 15 §6و).
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
   return (
     <Shell
@@ -8,13 +9,16 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
       door="پورتال مشتری"
       user={{ name: customer.contact, sub: customer.name }}
       groups={[{ items: [
-        { href: "/portal", label: "داشبورد", icon: "🏠" },
+        { href: "/portal", label: "خانه", icon: "🏠" },
+        { href: "/portal/advisor", label: "مشاور AI", icon: "✦" },
         { href: "/portal/projects", label: "پروژه‌ها", icon: "📁", count: 2 },
-        { href: "/portal/services", label: "خدمات و نردبان رشد", icon: "🪜" },
-        { href: "/portal/advisor", label: "مشاور AI شما", icon: "✦" },
-        { href: "/portal/reports", label: "گزارش‌های ماهانه", icon: "📈" },
-        { href: "/portal/invoices", label: "فاکتورها", icon: "🧾" },
-        { href: "/portal/company", label: "پروفایل و داده شرکت", icon: "🏢" },
+        { href: "/portal/apps", label: "اپ‌های من", icon: "🧩" },
+        { href: "/portal/services", label: "نردبان رشد", icon: "🪜" },
+        { href: "/portal/reports", label: "گزارش‌ها", icon: "📈" },
+        { href: "/portal/inbox", label: "پیام و پشتیبانی", icon: "💬", count: 1 },
+        { href: "/portal/billing", label: "قرارداد و فاکتور", icon: "🧾" },
+        { href: "/portal/data", label: "داده من", icon: "🗂️" },
+        { href: "/portal/settings", label: "تنظیمات و تیم", icon: "⚙️" },
       ] }]}
     >
       {children}

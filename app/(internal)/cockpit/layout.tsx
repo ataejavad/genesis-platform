@@ -4,33 +4,39 @@ import { Shell } from "@/ui/Shell";
 
 export const dynamic = "force-dynamic";
 
+// Cockpit is English (Javad, 2026-10-22) and designed last: it gathers what every other area needs managed.
 export default async function CockpitLayout({ children }: { children: React.ReactNode }) {
   const user = await requireAdmin();
   return (
     <Shell
       brand={BRAND}
-      door="کابین مدیریت"
-      user={{ name: user.name, sub: "مدیر" }}
+      door="Cockpit"
+      lang="en"
+      user={{ name: user.name, sub: "Founder" }}
       groups={[
         { items: [
-          { href: "/cockpit", label: "نمای کلی", icon: "📊" },
-          { href: "/cockpit/approvals", label: "صف تأیید", icon: "✅" },
+          { href: "/cockpit", label: "Today", icon: "📊" },
+          { href: "/cockpit/approvals", label: "Approvals", icon: "✋", count: 5 },
         ] },
-        { title: "فروش و مشتری", items: [
-          { href: "/cockpit/markets", label: "بازارها (فیلترها)", icon: "🎯" },
-          { href: "/cockpit/leads", label: "سرنخ‌ها و مشتری‌ها", icon: "📇" },
-          { href: "/cockpit/contracts", label: "کارخانه قرارداد", icon: "📝" },
+        { title: "Growth", items: [
+          { href: "/cockpit/markets", label: "Markets & hubs", icon: "🎯" },
+          { href: "/cockpit/crm", label: "CRM & personas", icon: "📇" },
+          { href: "/cockpit/catalog", label: "Marketplace catalogue", icon: "🛒" },
         ] },
-        { title: "تحویل و همکاران", items: [
-          { href: "/cockpit/projects", label: "پروژه‌ها و کارها", icon: "📁" },
-          { href: "/cockpit/partners", label: "همکاران", icon: "🤝", count: 3 },
-          { href: "/cockpit/protocols", label: "پروتکل‌ها", icon: "📐" },
-          { href: "/cockpit/qa", label: "سنجش تحویل (QA)", icon: "🔍", count: 2 },
-          { href: "/cockpit/moderation", label: "نظارت پیام‌ها", icon: "🛡️", count: 1 },
+        { title: "Delivery", items: [
+          { href: "/cockpit/projects", label: "Projects", icon: "📁" },
+          { href: "/cockpit/partners", label: "Partners", icon: "🤝", count: 3 },
+          { href: "/cockpit/protocols", label: "Protocols", icon: "📐" },
+          { href: "/cockpit/qa", label: "QA queue", icon: "🔍", count: 2 },
+          { href: "/cockpit/moderation", label: "Moderation", icon: "🛡️", count: 2 },
         ] },
-        { title: "ماشین", items: [
-          { href: "/cockpit/agents", label: "ایجنت‌ها", icon: "🤖" },
-          { href: "/cockpit/api", label: "API و اتصال‌ها", icon: "🔌" },
+        { title: "Money & legal", items: [
+          { href: "/cockpit/contracts", label: "Contracts", icon: "📝" },
+          { href: "/cockpit/finance", label: "Finance", icon: "💶" },
+        ] },
+        { title: "Machine", items: [
+          { href: "/cockpit/agents", label: "Agent center", icon: "🤖" },
+          { href: "/cockpit/api", label: "API & connections", icon: "🔌" },
         ] },
       ]}
     >

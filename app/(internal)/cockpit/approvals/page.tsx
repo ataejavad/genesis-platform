@@ -6,6 +6,7 @@ import { listPendingApprovals } from "@/server/content";
 import { MAX_ATTEMPTS } from "@/worker/dispatch";
 import { PageHead } from "@/ui/Shell";
 import { decide } from "../actions";
+import { approvals } from "@/mock/cockpit";
 
 export const dynamic = "force-dynamic";
 
@@ -19,20 +20,26 @@ export default async function Approvals() {
 
   return (
     <main>
-      <PageHead title="صف تأیید" crumbs="کابین" sub="هر چیزی که ایجنت‌ها یا همکاران پیشنهاد می‌دهند، قبل از انتشار از اینجا (یا تلگرام) تأیید می‌شود. این صفحه به پایگاه داده واقعی وصل است." />
+      <PageHead title="Approvals" crumbs="Cockpit" sub="Risk-tiered: low risk is automatic with sampling, medium goes to the QA judge, high and the hard limits come here (or Telegram)." />
+      <div className="card" style={{ marginBottom: 20 }}>
+        <div className="card-head"><h3>Agent & partner proposals</h3><span className="badge gray">sample data</span></div>
+        <table className="table"><thead><tr><th>Type</th><th>What</th><th>From</th><th>Risk</th><th>Why it is here</th><th /></tr></thead>
+          <tbody>{approvals.map((a) => <tr key={a.t}><td>{a.kind}</td><td><b>{a.t}</b></td><td>{a.by}</td><td><span className={`badge ${a.risk === "high" ? "bad" : a.risk === "medium" ? "warn" : "gray"}`}>{a.risk}</span></td><td className="muted small">{a.why}</td><td><div className="row"><button className="btn sm ok">Approve</button><button className="btn sm danger">Reject</button></div></td></tr>)}</tbody></table>
+      </div>
+      <h2>Website content <span className="badge ok">live database</span></h2>
       <section className="grid g3" style={{ marginBottom: 20 }}>
-        <div className="card stat"><div className="label">منتظر تأیید</div><div className="value">{pending.length}</div></div>
-        <div className="card stat"><div className="label">صفحه منتشرشده</div><div className="value">{published.n}</div></div>
-        <div className="card stat"><div className="label">رویداد گیرکرده</div><div className="value" style={{ color: stuck.n ? "var(--bad)" : undefined }}>{stuck.n}</div></div>
+        <div className="card stat"><div className="label">Waiting</div><div className="value">{pending.length}</div></div>
+        <div className="card stat"><div className="label">Published pages</div><div className="value">{published.n}</div></div>
+        <div className="card stat"><div className="label">Stuck events</div><div className="value" style={{ color: stuck.n ? "var(--bad)" : undefined }}>{stuck.n}</div></div>
       </section>
-      {pending.length === 0 && <div className="card empty">چیزی منتظر تأیید نیست.</div>}
+      {pending.length === 0 && <div className="card empty">Nothing is waiting for approval.</div>}
       {pending.map((a) => (
         <article key={a.id} className="card" style={{ marginBottom: 14 }}>
           <div className="card-head">
             <h3>{a.title}</h3>
-            <span className="badge">{a.liveStatus === "published" ? "ویرایش صفحه زنده" : "صفحه تازه"}</span>
+            <span className="badge">{a.liveStatus === "published" ? "Edit of live page" : "New page"}</span>
           </div>
-          <p className="muted small ltr" style={{ textAlign: "right" }}>
+          <p className="muted small ltr" style={{ textAlign: "left" }}>
             /{a.locale}/{a.slug} · v{a.subjectVersion} · {a.requestedBy} · {a.createdAt.toISOString().slice(0, 16).replace("T", " ")}
           </p>
           <div dir="auto" style={{ maxHeight: 300, overflow: "auto", borderTop: "1px solid var(--line)", paddingTop: 8 }}>
@@ -40,9 +47,9 @@ export default async function Approvals() {
           </div>
           <form action={decide} className="row" style={{ marginTop: 12 }}>
             <input type="hidden" name="id" value={a.id} />
-            <input name="note" placeholder="یادداشت (اختیاری)" style={{ flex: 1, minWidth: 180 }} />
-            <button className="btn ok" name="decision" value="approved">تأیید و انتشار</button>
-            <button className="btn danger" name="decision" value="rejected">رد</button>
+            <input name="note" placeholder="Note (optional)" style={{ flex: 1, minWidth: 180 }} />
+            <button className="btn ok" name="decision" value="approved">Approve & publish</button>
+            <button className="btn danger" name="decision" value="rejected">Reject</button>
           </form>
         </article>
       ))}

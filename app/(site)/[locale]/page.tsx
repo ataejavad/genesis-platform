@@ -2,66 +2,59 @@ import Link from "next/link";
 import { getDb } from "@/db";
 import { copyFor } from "@/config/site-copy";
 import { listPublished } from "@/server/content";
+import { freeTools, hubs, news, pick, tenders } from "@/mock/site";
+import { Concierge } from "@/ui/site/Concierge";
 
-export const revalidate = 3600;
+const brand = process.env.SITE_NAME ?? "Legend Partner";
 
-export default async function LocaleHome({ params }: { params: Promise<{ locale: string }> }) {
+type Props = { params: Promise<{ locale: string }>; searchParams: Promise<{ as?: string }> };
+
+export default async function LocaleHome({ params, searchParams }: Props) {
   const { locale } = await params;
+  // Demo of logged-in personalisation (doc 15 §6و): ?as=glas-becker shows the site as that customer sees it.
+  const { as } = await searchParams;
   const c = copyFor(locale);
-  // The prototype must render even before the database has any published page.
   const pages = await listPublished(getDb(), locale).catch(() => []);
   const checkup = `/${locale}/checkup`;
+  const myHub = as === "glas-becker" ? hubs[0] : undefined;
   return (
     <main>
-      <section className="wrap-site hero">
-        <div>
-          <span className="badge ai" style={{ marginBottom: 14 }}>✦ {c.hero.kicker}</span>
-          <h1>{c.hero.title[0]} <em>{c.hero.title[1]}</em></h1>
-          <p className="lead">{c.hero.lead}</p>
-          <div className="row">
-            <Link className="btn primary lg" href={checkup}>{c.hero.primary}</Link>
-            <a className="btn lg" href="#how">{c.hero.secondary}</a>
-          </div>
-          <div className="row small muted" style={{ marginTop: 18, gap: 18 }}>
-            {c.hero.proof.map((p) => <span key={p}>✓ {p}</span>)}
-          </div>
-        </div>
-        <div className="hero-card">
-          <div className="row" style={{ marginBottom: 12 }}>
-            <b>{c.heroCard.title}</b>
+      {myHub && (
+        <section className="wrap-site" style={{ paddingTop: 20 }}>
+          <div className="callout ai row">
+            <span>✦ {c.personal.welcome}, Thomas · <b>{c.personal.yourHub}: {myHub.flag} {pick(myHub.name, locale)}</b> · {news.filter((n) => n.hub === myHub.slug).length} news · {tenders.filter((t) => t.hub === myHub.slug).length} tenders</span>
             <span className="spacer" />
-            <span className="muted small">{c.heroCard.company}</span>
+            <Link className="btn sm primary" href={`/${locale}/hub/${myHub.slug}`}>{c.hubs.open}</Link>
+            <Link className="btn sm" href={`/${locale}`}>{c.personal.all}</Link>
           </div>
-          <div className="row" style={{ gap: 24, alignItems: "center" }}>
-            <div style={{ display: "grid", justifyItems: "center", gap: 6 }}>
-              <div className="ring" style={{ ["--p" as string]: 68 }}><div>68</div></div>
-              <div className="muted small">{c.heroCard.score}</div>
-            </div>
-            <div className="stack" style={{ flex: 1 }}>
-              <div className="muted small">{c.heroCard.save}</div>
-              <div style={{ fontSize: 30, fontWeight: 800 }} className="num">46 <span className="small muted">{c.heroCard.hours}</span></div>
-              {c.heroCard.items.map((it, i) => (
-                <div key={it} className="row small"><span className="badge ok">{i + 1}</span>{it}</div>
-              ))}
-            </div>
-          </div>
+        </section>
+      )}
+      <section className="wrap-site" style={{ padding: "48px 20px 40px" }}>
+        <span className="badge ai" style={{ marginBottom: 14 }}>✦ {c.hero.kicker}</span>
+        <div className="hero" style={{ padding: 0, gridTemplateColumns: "1fr", gap: 10 }}>
+          <h1 style={{ margin: 0 }}>{c.hero.title[0]} <em>{c.hero.title[1]}</em></h1>
+          <p className="lead" style={{ maxWidth: 760 }}>{c.hero.lead}</p>
+        </div>
+        <Concierge locale={locale} c={c} brand={brand} />
+        <div className="row small muted" style={{ marginTop: 18, gap: 18 }}>
+          {c.hero.proof.map((p) => <span key={p}>✓ {p}</span>)}
         </div>
       </section>
 
-      <section className="section" id="solutions">
+      <section className="section" id="solutions" style={{ background: "var(--panel)", borderBlock: "1px solid var(--line)" }}>
         <div className="wrap-site">
           <h2>{c.ladder.title}</h2>
           <p className="sub">{c.ladder.sub}</p>
           <div className="ladder">
             {c.ladder.items.map((r) => (
-              <div key={r.n} className={`rung ${r.free ? "free" : ""}`}>
+              <div key={r.n} className={`rung ${r.free ? "free" : ""}`} style={{ background: "var(--bg)" }}>
                 <div className="n">{r.n}</div>
                 <h3>{r.title}</h3>
                 <p className="muted small">{r.desc}</p>
                 <div className="row" style={{ marginTop: 8 }}>
                   <b className="small">{r.price}</b>
                   <span className="spacer" />
-                  {r.free && <Link className="btn primary sm" href={checkup}>{c.ladder.cta}</Link>}
+                  {r.free ? <Link className="btn primary sm" href={checkup}>{c.ladder.cta}</Link> : <Link className="btn sm" href={`/${locale}/market`}>→</Link>}
                 </div>
               </div>
             ))}
@@ -69,20 +62,19 @@ export default async function LocaleHome({ params }: { params: Promise<{ locale:
         </div>
       </section>
 
-      <section className="section" id="industries" style={{ background: "var(--panel)", borderBlock: "1px solid var(--line)" }}>
+      <section className="section" id="industries">
         <div className="wrap-site">
-          <h2>{c.industries.title}</h2>
-          <p className="sub">{c.industries.sub}</p>
+          <h2>{c.hubs.title}</h2>
+          <p className="sub">{c.hubs.sub}</p>
           <div className="grid g3">
-            {c.industries.items.map((ind) => (
-              <div key={ind.slug} className="industry" style={{ background: "var(--bg)" }}>
-                <div className="icon">{ind.icon}</div>
-                <h3 style={{ margin: 0 }}>{ind.name}</h3>
-                <div className="muted small">{c.industries.painLabel} {ind.pain}</div>
+            {hubs.map((h) => (
+              <div key={h.slug} className="industry">
+                <div className="row"><span className="icon">{h.icon}</span><span style={{ fontSize: 22 }}>{h.flag}</span><span className="spacer" /><span className="badge gray ltr">NACE {h.nace}</span></div>
+                <h3 style={{ margin: 0 }}>{pick(h.name, locale)}</h3>
+                <div className="muted small">{h.stats.companies.toLocaleString("en-US")} {c.hubs.companies} · {h.pains.map((p) => pick(p, locale)).join(" · ")}</div>
                 <div className="row">
-                  {ind.markets.map((m) => <span key={m} className="badge gray">{m}</span>)}
                   <span className="spacer" />
-                  <Link className="small" href={checkup}>{c.industries.more} ←</Link>
+                  {h.live ? <Link className="btn sm primary" href={`/${locale}/hub/${h.slug}`}>{c.hubs.open}</Link> : <span className="badge warn">{c.hubs.soon}</span>}
                 </div>
               </div>
             ))}
@@ -90,36 +82,40 @@ export default async function LocaleHome({ params }: { params: Promise<{ locale:
         </div>
       </section>
 
-      <section className="section" id="how">
+      <section className="section" style={{ paddingTop: 0 }}>
         <div className="wrap-site">
-          <h2>{c.how.title}</h2>
-          <div className="grid g4" style={{ marginTop: 20 }}>
-            {c.how.items.map((s, i) => (
-              <div key={s.t} className="card">
-                <div className="badge" style={{ marginBottom: 8 }}>{i + 1}</div>
-                <h3>{s.t}</h3>
-                <p className="muted small" style={{ margin: 0 }}>{s.d}</p>
-              </div>
+          <h2>{c.tools.title}</h2>
+          <p className="sub">{c.tools.sub}</p>
+          <div className="grid g4">
+            {freeTools.map((t) => (
+              <Link key={t.slug} className="tile" href={t.slug === "checkup" ? checkup : `/${locale}/tools`}>
+                <span className="ico">{t.icon}</span>
+                <b>{pick(t.name, locale)}</b>
+                <span className="muted small">{pick(t.desc, locale)}</span>
+              </Link>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="section" id="latest">
+      <section className="section" id="latest" style={{ paddingTop: 0 }}>
         <div className="wrap-site">
-          <h2>{c.latest.title}</h2>
-          {pages.length === 0 ? (
-            <div className="card empty">{c.latest.empty}</div>
-          ) : (
-            <div className="grid g3" style={{ marginTop: 20 }}>
-              {pages.slice(0, 6).map((p) => (
-                <article key={p.slug} className="card">
-                  <h3><Link href={`/${locale}/${p.slug}`}>{p.title}</Link></h3>
-                  {p.summary && <p className="muted small">{p.summary}</p>}
-                </article>
-              ))}
-            </div>
-          )}
+          <h2>{c.nav.media}</h2>
+          <div className="grid g3" style={{ marginTop: 16 }}>
+            {pages.slice(0, 3).map((p) => (
+              <article key={p.slug} className="card">
+                <h3><Link href={`/${locale}/${p.slug}`}>{p.title}</Link></h3>
+                {p.summary && <p className="muted small">{p.summary}</p>}
+              </article>
+            ))}
+            {news.slice(0, 3 - Math.min(3, pages.length)).map((n) => (
+              <article key={n.t.en} className="card">
+                <div className="muted small">{n.src} · {n.date}</div>
+                <h3>{pick(n.t, locale)}</h3>
+                <p className="small" style={{ margin: 0 }}>✦ {pick(n.ai, locale)}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 

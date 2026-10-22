@@ -25,7 +25,7 @@ export default function PartnerProfile() {
             <table className="table"><thead><tr><th>خدمت</th><th>مدل</th><th>قیمت شما</th><th>زمان</th></tr></thead>
               <tbody>{myServices.map((s) => (<tr key={s.name}><td>{s.name}</td><td>{s.model}</td><td>{s.price}</td><td>{s.sla}</td></tr>))}</tbody></table>
           </div>
-          <div className="card"><h3>مدارک و قراردادها</h3><div className="list">
+          <div className="card"><h3>🔐 گاوصندوق مدارک (با یادآوری انقضا)</h3><div className="list">
             <div className="item">📝<div className="grow">قرارداد همکاری (عدم دور زدن، وایت‌لیبل)</div><span className="badge ok">امضاشده</span></div>
             <div className="item">🔒<div className="grow">قرارداد پردازش داده (DPA)</div><span className="badge ok">امضاشده</span></div>
             <div className="item">🛡️<div className="grow">بیمه مسئولیت حرفه‌ای</div><span className="badge warn">تا ۱۴۰۵/۰۹ معتبر</span></div>

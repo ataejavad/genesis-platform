@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { Checkup } from "./checkup";
 
-export const metadata: Metadata = { title: "چک‌آپ رایگان AI" };
+export const metadata: Metadata = { title: "AI check-up" };
 
-export default function CheckupPage() {
+export default async function CheckupPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   return (
-    <main className="wrap-site section" style={{ maxWidth: 760 }}>
-      <Checkup />
+    <main className="wrap-site section" style={{ maxWidth: 860 }}>
+      <Checkup locale={locale} />
     </main>
   );
 }
