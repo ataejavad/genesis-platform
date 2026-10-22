@@ -19,11 +19,31 @@ export const alerts = [
   { tone: "ok", t: "Hub Glass × Italy seed content ready → can go live." },
 ];
 
+// Sub-industry × country filters. "value" is the KPI that decides expand / keep / pause once live.
 export const markets = [
-  { filter: "Glass × Germany", nace: "C23.12", demand: 8.6, competition: 6.1, access: 7.8, law: 7.0, margin: 8.0, total: 7.7, hub: "live" },
-  { filter: "Glass × Italy", nace: "C23.12", demand: 7.9, competition: 7.4, access: 6.5, law: 7.5, margin: 7.2, total: 7.3, hub: "seed ready" },
-  { filter: "Heating installers × UK", nace: "F43.22", demand: 8.8, competition: 5.2, access: 8.1, law: 8.0, margin: 7.0, total: 7.4, hub: "candidate" },
-  { filter: "Dental clinics × Germany", nace: "Q86.23", demand: 7.1, competition: 4.8, access: 6.0, law: 5.5, margin: 8.4, total: 6.4, hub: "rejected" },
+  { filter: "Glass × Germany", nace: "C23.12 / F43.34", demand: 8.6, competition: 6.1, access: 7.8, law: 7.0, margin: 8.0, total: 7.7, hub: "live", value: { mrr: 2840, leads: 31, trend: "expand" } },
+  { filter: "Glass × Italy", nace: "C23.12 / F43.34", demand: 7.9, competition: 7.4, access: 6.5, law: 7.5, margin: 7.2, total: 7.3, hub: "live", value: { mrr: 380, leads: 6, trend: "watch" } },
+  { filter: "Heating installers × UK", nace: "F43.22", demand: 8.8, competition: 5.2, access: 8.1, law: 8.0, margin: 7.0, total: 7.4, hub: "seed ready", value: null },
+  { filter: "Roofing × Germany", nace: "F43.91", demand: 7.4, competition: 6.0, access: 7.2, law: 7.0, margin: 6.8, total: 6.9, hub: "candidate", value: null },
+  { filter: "Dental clinics × Germany", nace: "Q86.23", demand: 7.1, competition: 4.8, access: 6.0, law: 5.5, margin: 8.4, total: 6.4, hub: "rejected", value: null },
+];
+
+// Hub builder: one template, the agent fills and refreshes every block from the hub's trusted-source whitelist.
+export const hubFreshness = [
+  { hub: "Glass × Germany", block: "Market facts", sources: "Eurostat SBS, Destatis", age: "1 d", max: "30 d", state: "fresh" },
+  { hub: "Glass × Germany", block: "News", sources: "Glaswelt, BMWK, Handelsblatt", age: "4 h", max: "1 d", state: "fresh" },
+  { hub: "Glass × Germany", block: "Key rules", sources: "EUR-Lex, BMWK", age: "20 d", max: "30 d", state: "fresh" },
+  { hub: "Glass × Italy", block: "Key rules", sources: "Agenzia delle Entrate, ENEA", age: "53 d", max: "30 d", state: "stale" },
+  { hub: "Glass × Italy", block: "Directory", sources: "Registro Imprese, websites", age: "9 d", max: "14 d", state: "fresh" },
+  { hub: "Glass × Italy", block: "News: Ecobonus 2027", sources: "Il Sole 24 Ore (1 of 2 sources)", age: "2 h", max: "1 d", state: "needs 2nd source" },
+];
+
+// Visitors and sign-ups from industries without a hub: demand evidence the market-selection agent scores next run.
+export const demandSignals = [
+  { industry: "Dental practice", nace: "Q86.23", country: "IT", signups: 7, chats: 12, checkups: 3, last: "2026-10-22" },
+  { industry: "Roofing", nace: "F43.91", country: "DE", signups: 4, chats: 9, checkups: 2, last: "2026-10-21" },
+  { industry: "Accounting and tax advice", nace: "M69.20", country: "DE", signups: 2, chats: 6, checkups: 1, last: "2026-10-20" },
+  { industry: "Restaurants", nace: "I56.10", country: "IT", signups: 1, chats: 4, checkups: 0, last: "2026-10-18" },
 ];
 
 export const leads = [

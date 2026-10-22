@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { isLocale, LOCALES } from "@/config/locales";
 import { copyFor } from "@/config/site-copy";
+import { pick } from "@/mock/site";
+import { visitorIndustry } from "@/ui/site/country";
 import { CookieBanner, Newsletter } from "@/ui/site/SiteClient";
 import { LanguageSuggest, LanguageSwitcher } from "@/ui/site/Language";
 import "../../ui.css";
@@ -19,6 +21,7 @@ export default async function SiteLayout({ children, params }: { children: React
   const { lang, dir } = LOCALES[locale];
   const c = copyFor(locale);
   const home = `/${locale}`;
+  const mine = await visitorIndustry();
   return (
     <html lang={lang} dir={dir}>
       <head>
@@ -36,7 +39,8 @@ export default async function SiteLayout({ children, params }: { children: React
             </Link>
             <nav>
               <Link href={`${home}/market`}>{c.nav.market}</Link>
-              <Link href={`${home}/industries`}>{c.nav.hubs}</Link>
+              {mine && <Link href={`${home}/hub/${mine.slug}`} title={c.nav.myIndustry}>{mine.icon} {pick(mine.name, locale)}</Link>}
+              <Link href={`${home}/explore`}>{c.nav.explore}</Link>
               <Link href={`${home}/tools`}>{c.nav.tools}</Link>
               <a href={`${home}#latest`}>{c.nav.media}</a>
               <Link href={`${home}/partners`}>{c.nav.partners}</Link>
@@ -47,6 +51,11 @@ export default async function SiteLayout({ children, params }: { children: React
               <Link className="btn primary sm" href={`${home}/checkup`}>{c.nav.checkup}</Link>
             </div>
           </div>
+          {mine && (
+            <div className="wrap-site small mine-bar">
+              ✦ {c.nav.myIndustry}: <b>{mine.icon} {pick(mine.name, locale)}</b> · <Link href={`${home}/explore`}>{c.nav.change}</Link>
+            </div>
+          )}
         </header>
         <div id="main">{children}</div>
         <footer className="site-footer">
@@ -60,13 +69,14 @@ export default async function SiteLayout({ children, params }: { children: React
               <b style={{ color: "var(--fg)" }}>{c.nav.market}</b>
               <Link href={`${home}/checkup`}>{c.nav.checkup}</Link>
               <Link href={`${home}/market`}>{c.nav.market}</Link>
-              <Link href={`${home}/industries`}>{c.nav.hubs}</Link>
+              <Link href={`${home}/explore`}>{c.nav.explore}</Link>
               <Link href={`${home}/tools`}>{c.nav.tools}</Link>
             </div>
             <div className="stack">
               <b style={{ color: "var(--fg)" }}>{c.footer.company}</b>
               <Link href={`${home}/partners`}>{c.nav.partners}</Link>
               <Link href="/portal">{c.nav.login}</Link>
+              <Link href={`${home}/signup`}>{c.nav.signup}</Link>
               <Link href={`${home}/legal`}>{c.footer.legal}</Link>
               <span className="small">🎁 {c.footer.referral}</span>
             </div>

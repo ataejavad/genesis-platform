@@ -3,7 +3,7 @@
 // Page content itself (hubs, products, articles) comes from the database per locale.
 
 const en = {
-  nav: { market: "Solutions", hubs: "Industries", tools: "Free tools", media: "Insights", partners: "Work with us", login: "Client login", checkup: "Free check-up" },
+  nav: { market: "Solutions", hubs: "Industries", myIndustry: "My industry", explore: "Explore", change: "Change industry", signup: "Create account", tools: "Free tools", media: "Insights", partners: "Work with us", login: "Client login", checkup: "Free check-up" },
   hero: {
     kicker: "The AI gateway for European SMEs",
     title: ["Tell us your problem.", "We find the AI that solves it."],
@@ -29,20 +29,21 @@ const en = {
     { n: 4, title: "Technology partner", desc: "We scout, test and roll out new tools for you.", price: "from €900/month" },
     { n: 5, title: "Company persona", desc: "Your company's own AI that works with other companies' agents.", price: "monthly" },
   ] },
-  hubs: { title: "Your industry, your country", sub: "Each hub is a daily reference and a small professional network for one trade in one country.", open: "Open hub", soon: "Coming soon", companies: "companies" },
+  hubs: { title: "Your industry", sub: "One hub per trade: daily news, solutions, a company directory and a small professional network. Pick your country inside the hub.", open: "Open hub", soon: "Coming soon", companies: "companies" },
   market: { title: "Solutions for your industry", sub: "No generic store: pick your industry and see only what works for it.", pick: "Choose your industry", from: "from", per: "/month", view: "Details" },
   tools: { title: "Free tools", sub: "Useful on day one, no sign-up needed." },
   band: { title: "See where AI makes money in your company", sub: "Free, no sales call, instant result.", cta: "Start the check-up" },
   newsletter: { title: "Weekly brief for your industry", sub: "News, innovations and tenders for your trade. Double opt-in, unsubscribe any time.", placeholder: "Work email", cta: "Subscribe", ok: "Check your inbox to confirm." },
   cookie: { text: "We use cookies only with your consent: necessary ones always, analytics to improve the site. No tracking before you choose.", accept: "Accept all", reject: "Necessary only", settings: "Settings" },
   footer: { about: "The technology partner for European SMEs. We pick and run the world's best tools for you.", company: "Company", forAgents: "For agents", legal: "Legal notice & privacy", referral: "Refer a company, earn 10% of its first year", rights: "Demo version" },
+  explore: { title: "Explore all industries", sub: "The full standard tree (NACE): sector › sub-industry › country. Pick yours and the whole site adapts to it.", search: "Search an industry or NACE code", live: "Open hub", soon: "Coming soon", request: "Request this industry", requested: "Thanks, noted. We open industries by demand.", none: "Nothing found. Try the check-up and tell us your trade." },
   personal: { welcome: "Welcome back", yourHub: "Your hub", all: "See all industries" },
 };
 
 export type SiteCopy = typeof en;
 
 const fa: SiteCopy = {
-  nav: { market: "راه‌حل‌ها", hubs: "صنایع", tools: "ابزار رایگان", media: "رسانه", partners: "همکاری با ما", login: "ورود مشتریان", checkup: "چک‌آپ رایگان" },
+  nav: { market: "راه‌حل‌ها", hubs: "صنایع", myIndustry: "صنعت من", explore: "کاوش صنایع", change: "تغییر صنعت", signup: "ساخت حساب", tools: "ابزار رایگان", media: "رسانه", partners: "همکاری با ما", login: "ورود مشتریان", checkup: "چک‌آپ رایگان" },
   hero: {
     kicker: "دروازه AI برای شرکت‌های کوچک و متوسط اروپا",
     title: ["مشکلتان را بگویید.", "ما AIای را که حلش می‌کند پیدا می‌کنیم."],
@@ -68,43 +69,46 @@ const fa: SiteCopy = {
     { n: 4, title: "شریک دائمی تکنولوژی", desc: "ابزارهای تازه را برایتان رصد، آزمایش و اجرا می‌کنیم.", price: "از €900 در ماه" },
     { n: 5, title: "پرسونای شرکت", desc: "AI اختصاصی شرکت شما که با ایجنت‌های شرکت‌های دیگر کار می‌کند.", price: "ماهانه" },
   ] },
-  hubs: { title: "صنعت شما، کشور شما", sub: "هر هاب مرجع روزانه و شبکه حرفه‌ای کوچک یک صنف در یک کشور است.", open: "ورود به هاب", soon: "به‌زودی", companies: "شرکت" },
+  hubs: { title: "صنعت شما", sub: "برای هر صنف یک هاب: خبر روزانه، راه‌حل‌ها، دایرکتوری شرکت‌ها و یک شبکه حرفه‌ای کوچک. کشور را داخل خود هاب انتخاب کنید.", open: "ورود به هاب", soon: "به‌زودی", companies: "شرکت" },
   market: { title: "راه‌حل‌های صنعت شما", sub: "فروشگاه عمومی نیستیم: صنعتتان را انتخاب کنید تا فقط چیزهایی را ببینید که برایش کار می‌کند.", pick: "صنعت خود را انتخاب کنید", from: "از", per: "/ماه", view: "جزئیات" },
   tools: { title: "ابزارهای رایگان", sub: "از روز اول مفید، بدون ثبت‌نام." },
   band: { title: "ببینید AI در شرکت شما کجا پول می‌سازد", sub: "رایگان، بدون تماس فروش، نتیجه فوری.", cta: "شروع چک‌آپ" },
   newsletter: { title: "خلاصه هفتگی صنعت شما", sub: "خبر، نوآوری و مناقصه‌های صنف شما. با تأیید دوباره ایمیل؛ لغو در هر زمان.", placeholder: "ایمیل کاری", cta: "عضویت", ok: "ایمیلتان را برای تأیید ببینید." },
   cookie: { text: "کوکی‌ها فقط با رضایت شما: ضروری‌ها همیشه، آماری برای بهبود سایت. پیش از انتخاب شما هیچ ردیابی نیست.", accept: "قبول همه", reject: "فقط ضروری", settings: "تنظیمات" },
   footer: { about: "شریک فناوری شرکت‌های کوچک و متوسط اروپا. بهترین ابزارهای دنیا را برایتان انتخاب و اداره می‌کنیم.", company: "شرکت", forAgents: "برای ایجنت‌ها", legal: "اطلاعات حقوقی و حریم خصوصی", referral: "یک شرکت معرفی کنید و ۱۰٪ سال اولش را بگیرید", rights: "نسخه نمایشی" },
+  explore: { title: "کاوش همه صنایع", sub: "درخت کامل استاندارد (NACE): بخش › زیرصنعت › کشور. صنعت خودتان را انتخاب کنید تا کل سایت برای آن تنظیم شود.", search: "جستجوی صنعت یا کد NACE", live: "ورود به هاب", soon: "به‌زودی", request: "درخواست این صنعت", requested: "ممنون، ثبت شد. صنعت‌ها بر اساس تقاضا باز می‌شوند.", none: "چیزی پیدا نشد. چک‌آپ را بزنید و صنف خود را بگویید." },
   personal: { welcome: "خوش برگشتید", yourHub: "هاب شما", all: "دیدن همه صنعت‌ها" },
 };
 
 const de: SiteCopy = {
   ...en,
-  nav: { market: "Lösungen", hubs: "Branchen", tools: "Gratis-Tools", media: "Wissen", partners: "Mit uns arbeiten", login: "Kunden-Login", checkup: "Gratis-Check" },
+  nav: { market: "Lösungen", hubs: "Branchen", myIndustry: "Meine Branche", explore: "Branchen entdecken", change: "Branche ändern", signup: "Konto erstellen", tools: "Gratis-Tools", media: "Wissen", partners: "Mit uns arbeiten", login: "Kunden-Login", checkup: "Gratis-Check" },
   hero: { kicker: "Das KI-Tor für den europäischen Mittelstand", title: ["Nennen Sie uns Ihr Problem.", "Wir finden die KI, die es löst."], lead: "Wir verkaufen keine Software, sondern Ergebnisse: Wir wählen, installieren und betreiben die beste KI für Ihre Branche und berichten jeden Monat die Ersparnis.", proof: ["KI-gestützt, Menschen geben frei", "Daten bleiben in der EU", "Kein Langzeitvertrag"] },
   chat: { ...en.chat, title: "Fragen Sie unseren KI-Berater", disclosure: "Sie sprechen mit einer KI. Antworten stammen aus unserem geprüften Katalog; Angebote prüft ein Mensch.", placeholder: "z. B. Wir verpassen Anrufe und Angebote dauern zwei Tage…", send: "Senden", examples: ["Wir verpassen Anrufe", "Angebote sind langsam", "Zu viel Papierkram"], hello: "Hallo! Ich bin der Berater von {brand}. Beschreiben Sie ein Problem und ich zeige Ihnen, was es löst – mit echten Zahlen.", live: "Passend zu Ihrem Bedarf", liveEmpty: "Während Sie schreiben, erscheinen hier passende Lösungen, Fallstudien und Tools.", book: "20-Minuten-Termin buchen", start: "Gratis-Check starten" },
-  hubs: { title: "Ihre Branche, Ihr Land", sub: "Jeder Hub ist tägliche Referenz und kleines Fachnetzwerk einer Branche in einem Land.", open: "Hub öffnen", soon: "Bald verfügbar", companies: "Unternehmen" },
+  hubs: { title: "Ihre Branche", sub: "Ein Hub pro Branche: tägliche News, Lösungen, Firmenverzeichnis und ein kleines Fachnetzwerk. Ihr Land wählen Sie im Hub.", open: "Hub öffnen", soon: "Bald verfügbar", companies: "Unternehmen" },
   market: { title: "Lösungen für Ihre Branche", sub: "Kein Gemischtwarenladen: Branche wählen und nur sehen, was dafür funktioniert.", pick: "Branche wählen", from: "ab", per: "/Monat", view: "Details" },
   tools: { title: "Gratis-Tools", sub: "Ab Tag eins nützlich, ohne Anmeldung." },
   band: { title: "Sehen Sie, wo KI in Ihrem Betrieb Geld verdient", sub: "Kostenlos, kein Verkaufsgespräch, sofortiges Ergebnis.", cta: "Check starten" },
   newsletter: { title: "Wöchentlicher Branchen-Brief", sub: "News, Innovationen und Ausschreibungen. Double-Opt-in, jederzeit abbestellbar.", placeholder: "Geschäftliche E-Mail", cta: "Abonnieren", ok: "Bitte bestätigen Sie die E-Mail." },
   cookie: { text: "Cookies nur mit Ihrer Einwilligung: notwendige immer, Statistik zur Verbesserung. Kein Tracking vor Ihrer Wahl.", accept: "Alle akzeptieren", reject: "Nur notwendige", settings: "Einstellungen" },
   footer: { about: "Der Technologiepartner für den europäischen Mittelstand.", company: "Unternehmen", forAgents: "Für Agenten", legal: "Impressum & Datenschutz", referral: "Empfehlen Sie ein Unternehmen und erhalten Sie 10 % des ersten Jahres", rights: "Demoversion" },
+  explore: { title: "Alle Branchen entdecken", sub: "Der vollständige Standardbaum (NACE): Abschnitt › Branche › Land. Wählen Sie Ihre, und die ganze Website passt sich an.", search: "Branche oder NACE-Code suchen", live: "Hub öffnen", soon: "Bald verfügbar", request: "Diese Branche anfragen", requested: "Danke, notiert. Wir öffnen Branchen nach Nachfrage.", none: "Nichts gefunden. Machen Sie den Check und nennen Sie Ihre Branche." },
   personal: { welcome: "Willkommen zurück", yourHub: "Ihr Hub", all: "Alle Branchen anzeigen" },
 };
 
 const it: SiteCopy = {
   ...en,
-  nav: { market: "Soluzioni", hubs: "Settori", tools: "Strumenti gratuiti", media: "Approfondimenti", partners: "Lavora con noi", login: "Area clienti", checkup: "Check-up gratuito" },
+  nav: { market: "Soluzioni", hubs: "Settori", myIndustry: "Il mio settore", explore: "Esplora settori", change: "Cambia settore", signup: "Crea account", tools: "Strumenti gratuiti", media: "Approfondimenti", partners: "Lavora con noi", login: "Area clienti", checkup: "Check-up gratuito" },
   hero: { kicker: "La porta d'accesso all'IA per le PMI europee", title: ["Diteci il vostro problema.", "Troviamo l'IA che lo risolve."], lead: "Non vendiamo software, vendiamo risultati: scegliamo, installiamo e gestiamo la migliore IA per il vostro settore e ogni mese riportiamo i risparmi.", proof: ["IA, con approvazione umana", "Dati nell'UE", "Nessun contratto lungo"] },
   chat: { ...en.chat, title: "Chiedi al nostro consulente IA", disclosure: "Stai parlando con un'IA. Le risposte vengono dal nostro catalogo approvato; le offerte sono verificate da una persona.", placeholder: "es. Perdiamo chiamate e i preventivi richiedono due giorni…", send: "Invia", examples: ["Perdiamo chiamate", "Preventivi lenti", "Troppa burocrazia"], hello: "Ciao! Sono il consulente di {brand}. Descrivi un problema e ti mostro cosa lo risolve, con numeri reali.", live: "In base alla tua esigenza", liveEmpty: "Mentre scrivi, qui compaiono soluzioni, casi e strumenti adatti.", book: "Prenota una call di 20 minuti", start: "Inizia il check-up" },
-  hubs: { title: "Il tuo settore, il tuo paese", sub: "Ogni hub è un riferimento quotidiano e una piccola rete professionale di un settore in un paese.", open: "Apri hub", soon: "Presto", companies: "aziende" },
+  hubs: { title: "Il tuo settore", sub: "Un hub per settore: notizie quotidiane, soluzioni, elenco aziende e una piccola rete professionale. Il paese si sceglie dentro l'hub.", open: "Apri hub", soon: "Presto", companies: "aziende" },
   market: { title: "Soluzioni per il tuo settore", sub: "Nessun negozio generico: scegli il settore e vedi solo ciò che funziona.", pick: "Scegli il settore", from: "da", per: "/mese", view: "Dettagli" },
   tools: { title: "Strumenti gratuiti", sub: "Utili dal primo giorno, senza registrazione." },
   band: { title: "Scopri dove l'IA fa guadagnare la tua azienda", sub: "Gratis, nessuna chiamata commerciale, risultato immediato.", cta: "Inizia il check-up" },
   newsletter: { title: "Brief settimanale del tuo settore", sub: "Notizie, innovazioni e gare. Doppio opt-in, disiscrizione in ogni momento.", placeholder: "Email di lavoro", cta: "Iscriviti", ok: "Conferma dalla tua email." },
   cookie: { text: "Cookie solo con il tuo consenso: necessari sempre, statistici per migliorare il sito. Nessun tracciamento prima della scelta.", accept: "Accetta tutti", reject: "Solo necessari", settings: "Impostazioni" },
   footer: { about: "Il partner tecnologico delle PMI europee.", company: "Azienda", forAgents: "Per agenti", legal: "Note legali e privacy", referral: "Segnala un'azienda e ricevi il 10% del primo anno", rights: "Versione demo" },
+  explore: { title: "Esplora tutti i settori", sub: "L'albero standard completo (NACE): sezione › settore › paese. Scegli il tuo e tutto il sito si adatta.", search: "Cerca un settore o codice NACE", live: "Apri hub", soon: "Presto", request: "Richiedi questo settore", requested: "Grazie, registrato. Apriamo i settori in base alla domanda.", none: "Nessun risultato. Fai il check-up e dicci il tuo settore." },
   personal: { welcome: "Bentornato", yourHub: "Il tuo hub", all: "Vedi tutti i settori" },
 };
 

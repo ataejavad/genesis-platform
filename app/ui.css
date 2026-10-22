@@ -251,3 +251,6 @@ a.tile:hover { border-color: var(--brand); text-decoration: none; }
 .lang-switch { display: inline-flex; align-items: center; gap: 4px; font-size: 14px; }
 .lang-switch select { width: auto; padding: 4px 8px; border-radius: 8px; }
 .lang-suggest { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; padding: 8px 16px; background: var(--panel); border-bottom: 1px solid var(--line); font-size: 14px; }
+.country-switch { display: inline-flex; align-items: center; gap: 8px; }
+.country-switch select { width: auto; padding: 6px 10px; font-weight: 600; }
+.mine-bar { padding-bottom: 8px; color: var(--muted); }

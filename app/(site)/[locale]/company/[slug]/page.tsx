@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { tx } from "@/config/tx";
-import { companies, hubs, pick } from "@/mock/site";
+import { companies, industryOfKey, pick } from "@/mock/site";
 import { ActionButton } from "@/ui/site/SiteClient";
 
 // Public company page (directory, persona tier 0): public facts only until the company claims it (doc 15 §6ح).
@@ -10,10 +10,11 @@ export default async function CompanyPage({ params }: { params: Promise<{ locale
   const co = companies.find((x) => x.slug === slug);
   if (!co) notFound();
   const t = (fa: string, en: string) => tx(locale, fa, en);
-  const hub = hubs.find((h) => h.slug === co.hub)!;
+  const { industry: hub, facts } = industryOfKey(co.hub);
+  const hubHref = `/${locale}/hub/${hub.slug}/${facts.country.toLowerCase()}`;
   return (
     <main className="wrap-site section" style={{ maxWidth: 900 }}>
-      <div className="crumbs"><Link href={`/${locale}/hub/${hub.slug}#directory`}>{pick(hub.name, locale)}</Link></div>
+      <div className="crumbs"><Link href={`${hubHref}#directory`}>{pick(hub.name, locale)} {facts.flag}</Link></div>
       <div className="row"><span className="avatar" style={{ width: 56, height: 56, fontSize: 24 }}>{co.name[0]}</span><div><h1 style={{ margin: 0 }}>{co.name}</h1><div className="muted">{co.city} · {t("تأسیس", "Founded")} {co.founded} · {co.size} {t("نفر", "staff")}</div></div><span className="spacer" />{co.claimed ? <span className="badge ok">✓ {t("تأییدشده توسط خود شرکت", "Verified by the company")}</span> : <span className="badge gray">{t("ادعا نشده", "Unclaimed")}</span>}</div>
       <div className="grid g2" style={{ marginTop: 20 }}>
         <div className="card"><h3>{t("خدمات", "Services")}</h3><p>{pick(co.services, locale)}</p><div className="muted small">{t("منبع: ثبت شرکت‌ها و وب‌سایت عمومی شرکت", "Source: company register and the company's public website")}</div></div>

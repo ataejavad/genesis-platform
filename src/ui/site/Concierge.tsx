@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { SiteCopy } from "@/config/site-copy";
-import { pick, products, freeTools } from "@/mock/site";
+import { pick, products, freeTools, liveIndustries } from "@/mock/site";
+import { rememberIndustry } from "@/ui/site/Remember";
 
 // Home-page concierge (doc 15 §6ه.1): the agent answers from the approved catalogue and, beside the chat,
 // the page shows content matched to the need it detects. Prototype: keyword detection + canned replies.
@@ -14,6 +16,8 @@ const detect: [Need, RegExp][] = [
   ["paperwork", /paper|papier|burocr|ecobonus|invoice|rechnung|fattur|کاغذ|اسناد|مدارک|مشوق|فاکتور/i],
   ["followup", /follow|nachfass|segui|پیگیری|جواب نمی/i],
 ];
+// Industry words route the visitor to that industry's hub (one hub per industry; country is picked inside).
+const industryWords: Record<string, RegExp> = { glass: /glass|glas|window|fenster|vetr|finestr|شیشه|پنجره/i };
 const productFor: Record<Need, string[]> = { calls: ["phone-agent"], quotes: ["quote-agent", "followup-agent"], paperwork: ["incentive-docs"], followup: ["followup-agent"] };
 type Lang = "fa" | "en" | "de" | "it";
 const replies: Record<Lang, Record<Need | "other", string>> = {
@@ -52,11 +56,19 @@ export function Concierge({ locale, c, brand }: { locale: string; c: SiteCopy; b
   const [log, setLog] = useState([{ me: false, t: c.chat.hello.replace("{brand}", brand) }]);
   const [q, setQ] = useState("");
   const [needs, setNeeds] = useState<Need[]>([]);
+  const [industry, setIndustry] = useState<string | null>(null);
+  const router = useRouter();
   const send = (text: string) => {
     if (!text.trim()) return;
     const found = detect.find(([, re]) => re.test(text))?.[0];
     setLog((l) => [...l, { me: true, t: text }, { me: false, t: replies[lang][found ?? "other"] }]);
     if (found) setNeeds((n) => (n.includes(found) ? n : [found, ...n]));
+    const ind = liveIndustries.find((i) => industryWords[i.slug]?.test(text));
+    if (ind) {
+      // Detected industry becomes the visitor's industry site-wide (header, home, solutions).
+      setIndustry(ind.slug);
+      if (rememberIndustry(ind.slug)) router.refresh();
+    }
     setQ("");
   };
   const matched = [...new Set(needs.flatMap((n) => productFor[n]))].map((s) => products.find((p) => p.slug === s)!);
@@ -84,7 +96,11 @@ export function Concierge({ locale, c, brand }: { locale: string; c: SiteCopy; b
       </div>
       <div className="live">
         <div className="muted small" style={{ fontWeight: 700 }}>✦ {c.chat.live}</div>
-        {matched.length === 0 && <div className="card empty small">{c.chat.liveEmpty}</div>}
+        {industry && (() => {
+          const i = liveIndustries.find((x) => x.slug === industry)!;
+          return <Link href={`/${locale}/hub/${i.slug}`} className="tile fade-in"><div className="row"><span className="ico">{i.icon}</span><b>{pick(i.name, locale)}</b><span className="spacer" />→</div></Link>;
+        })()}
+        {matched.length === 0 && !industry && <div className="card empty small">{c.chat.liveEmpty}</div>}
         {matched.map((p) => (
           <Link key={p.slug} href={`/${locale}/market/${p.slug}`} className="tile fade-in">
             <div className="row"><span className="ico">{p.icon}</span><div><b>{pick(p.name, locale)}</b><div className="muted small">{pick(p.kind, locale)} · ★ {p.rating}</div></div></div>

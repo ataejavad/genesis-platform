@@ -2,7 +2,8 @@ import Link from "next/link";
 import { getDb } from "@/db";
 import { copyFor } from "@/config/site-copy";
 import { listPublished } from "@/server/content";
-import { freeTools, hubs, news, pick, tenders } from "@/mock/site";
+import { factsFor, freeTools, hubKey, liveIndustries, news, pick, tenders } from "@/mock/site";
+import { visitorCountries, visitorIndustry } from "@/ui/site/country";
 import { Concierge } from "@/ui/site/Concierge";
 
 const brand = process.env.SITE_NAME ?? "Legend Partner";
@@ -16,16 +17,25 @@ export default async function LocaleHome({ params, searchParams }: Props) {
   const c = copyFor(locale);
   const pages = await listPublished(getDb(), locale).catch(() => []);
   const checkup = `/${locale}/checkup`;
-  const myHub = as === "glas-becker" ? hubs[0] : undefined;
+  // A known industry (saved choice, or the demo customer ?as=glas-becker) turns the home page specialist.
+  const mine = as === "glas-becker" ? liveIndustries[0] : await visitorIndustry();
+  const facts = mine && factsFor(mine, as === "glas-becker" ? "DE" : (await visitorCountries(locale)).find((cc) => mine.countries.some((f) => f.country === cc)));
+  const myHub = mine && facts ? { ...mine, flag: facts.flag, key: hubKey(mine.slug, facts.country), href: `/${locale}/hub/${mine.slug}/${facts.country.toLowerCase()}` } : undefined;
   return (
     <main>
       {myHub && (
         <section className="wrap-site" style={{ paddingTop: 20 }}>
-          <div className="callout ai row">
-            <span>✦ {c.personal.welcome}, Thomas · <b>{c.personal.yourHub}: {myHub.flag} {pick(myHub.name, locale)}</b> · {news.filter((n) => n.hub === myHub.slug).length} news · {tenders.filter((t) => t.hub === myHub.slug).length} tenders</span>
-            <span className="spacer" />
-            <Link className="btn sm primary" href={`/${locale}/hub/${myHub.slug}`}>{c.hubs.open}</Link>
-            <Link className="btn sm" href={`/${locale}`}>{c.personal.all}</Link>
+          <div className="callout ai">
+            <div className="row">
+              <span>✦ {as === "glas-becker" && <>{c.personal.welcome}, Thomas · </>}<b>{c.personal.yourHub}: {myHub.icon} {pick(myHub.name, locale)} {myHub.flag}</b></span>
+              <span className="spacer" />
+              <Link className="btn sm primary" href={myHub.href}>{c.hubs.open}</Link>
+              <Link className="btn sm" href={`/${locale}/explore`}>{c.nav.change}</Link>
+            </div>
+            <ul className="small" style={{ margin: "8px 0 0" }}>
+              {news.filter((n) => n.hub === myHub.key).slice(0, 2).map((n) => <li key={n.t.en}>📰 {pick(n.t, locale)}</li>)}
+              {tenders.filter((t) => t.hub === myHub.key).slice(0, 1).map((t) => <li key={t.title.en}>📣 {pick(t.title, locale)} · {t.value}</li>)}
+            </ul>
           </div>
         </section>
       )}
@@ -67,14 +77,15 @@ export default async function LocaleHome({ params, searchParams }: Props) {
           <h2>{c.hubs.title}</h2>
           <p className="sub">{c.hubs.sub}</p>
           <div className="grid g3">
-            {hubs.map((h) => (
-              <div key={h.slug} className="industry">
-                <div className="row"><span className="icon">{h.icon}</span><span style={{ fontSize: 22 }}>{h.flag}</span><span className="spacer" /><span className="badge gray ltr">NACE {h.nace}</span></div>
-                <h3 style={{ margin: 0 }}>{pick(h.name, locale)}</h3>
-                <div className="muted small">{h.stats.companies.toLocaleString("en-US")} {c.hubs.companies} · {h.pains.map((p) => pick(p, locale)).join(" · ")}</div>
+            {liveIndustries.map((i) => (
+              <div key={i.slug} className="industry">
+                <div className="row"><span className="icon">{i.icon}</span><span className="spacer" /><span className="badge gray ltr">NACE {i.nace}</span></div>
+                <h3 style={{ margin: 0 }}>{pick(i.name, locale)}</h3>
+                <div className="muted small">{i.countries.reduce((n, f) => n + f.stats.companies, 0).toLocaleString("en-US")} {c.hubs.companies} · {i.countries[0].pains.map((p) => pick(p, locale)).join(" · ")}</div>
                 <div className="row">
+                  {i.countries.map((f) => <span key={f.country} title={f.country} style={{ fontSize: 20 }}>{f.flag}</span>)}
                   <span className="spacer" />
-                  {h.live ? <Link className="btn sm primary" href={`/${locale}/hub/${h.slug}`}>{c.hubs.open}</Link> : <span className="badge warn">{c.hubs.soon}</span>}
+                  <Link className="btn sm primary" href={`/${locale}/hub/${i.slug}`}>{c.hubs.open}</Link>
                 </div>
               </div>
             ))}

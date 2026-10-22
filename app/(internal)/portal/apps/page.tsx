@@ -7,7 +7,7 @@ import { Tone } from "@/ui/bits";
 export default function MyApps() {
   return (
     <main>
-      <PageHead title="اپ‌های من" crumbs="پورتال مشتری" sub="هر چیزی که خریده‌اید همین‌جاست و همه کارش داخل همین داشبورد انجام می‌شود." actions={<Link className="btn primary" href="/fa-ir/market?hub=glass-de">＋ افزودن از بازار</Link>} />
+      <PageHead title="اپ‌های من" crumbs="پورتال مشتری" sub="هر چیزی که خریده‌اید همین‌جاست و همه کارش داخل همین داشبورد انجام می‌شود." actions={<Link className="btn primary" href="/fa-ir/market?industry=glass&country=de">＋ افزودن از بازار</Link>} />
       <section className="grid g3" style={{ marginBottom: 20 }}>
         {myApps.map((a) => (
           <Link key={a.id} href={`/portal/apps/${a.id}`} className="tile">

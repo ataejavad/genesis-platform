@@ -2,21 +2,22 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { copyFor } from "@/config/site-copy";
 import { tx } from "@/config/tx";
-import { hubs, pick, products } from "@/mock/site";
+import { factsFor, industries, pick, products } from "@/mock/site";
 import { OrderBox } from "@/ui/site/OrderBox";
 
-export default async function ProductPage({ params, searchParams }: { params: Promise<{ locale: string; slug: string }>; searchParams: Promise<{ hub?: string }> }) {
+export default async function ProductPage({ params, searchParams }: { params: Promise<{ locale: string; slug: string }>; searchParams: Promise<{ industry?: string; country?: string }> }) {
   const { locale, slug } = await params;
-  const { hub } = await searchParams;
+  const { industry, country } = await searchParams;
   const p = products.find((x) => x.slug === slug);
   if (!p) notFound();
   const c = copyFor(locale);
   const t = (fa: string, en: string) => tx(locale, fa, en);
-  const h = hubs.find((x) => x.slug === (hub ?? p.hubs[0]))!;
+  const ind = industries.find((x) => x.slug === industry && p.industries.includes(x.slug)) ?? industries.find((x) => x.slug === p.industries[0])!;
+  const cc = factsFor(ind, country ?? p.countries?.[0]).country.toLowerCase();
   const delivery = { native: t("داخل داشبورد شما (ساخت خودمان)", "Inside your dashboard (built by us)"), embedded: t("داخل داشبورد شما، با برند ما", "Inside your dashboard, our branding"), sso: t("ورود یک‌کلیکی از داشبورد", "One-click launch from your dashboard") }[p.delivery];
   return (
     <main className="wrap-site section">
-      <div className="crumbs"><Link href={`/${locale}/market?hub=${h.slug}`}>{c.nav.market} › {pick(h.name, locale)}</Link></div>
+      <div className="crumbs"><Link href={`/${locale}/market?industry=${ind.slug}&country=${cc}`}>{c.nav.market} › {pick(ind.name, locale)}</Link></div>
       <div className="grid g-2-1" style={{ alignItems: "start" }}>
         <div className="stack" style={{ gap: 18 }}>
           <div className="row"><span className="ico tile" style={{ padding: 0, width: 56, height: 56, fontSize: 30, placeItems: "center" }}>{p.icon}</span><div><h1 style={{ margin: 0 }}>{pick(p.name, locale)}</h1><div className="muted">{pick(p.kind, locale)} · ★ {p.rating} ({p.reviews}) · <span className="ltr">{p.process}</span></div></div></div>
