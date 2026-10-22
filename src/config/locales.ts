@@ -13,9 +13,9 @@ export function isLocale(value: string): value is Locale {
   return Object.hasOwn(LOCALES, value);
 }
 
-// Picks the best configured locale from an Accept-Language header.
-export function negotiateLocale(acceptLanguage: string | null): Locale {
-  if (!acceptLanguage) return DEFAULT_LOCALE;
+// Best configured locale for an Accept-Language header, or null when none of the wanted languages exists.
+export function matchLocale(acceptLanguage: string | null): Locale | null {
+  if (!acceptLanguage) return null;
   const wanted = acceptLanguage
     .split(",")
     .map((part) => {
@@ -28,5 +28,22 @@ export function negotiateLocale(acceptLanguage: string | null): Locale {
     const byLang = (Object.keys(LOCALES) as Locale[]).find((l) => LOCALES[l].lang === tag.split("-")[0]);
     if (byLang) return byLang;
   }
-  return DEFAULT_LOCALE;
+  return null;
 }
+
+// Picks the best configured locale from an Accept-Language header.
+export function negotiateLocale(acceptLanguage: string | null): Locale {
+  return matchLocale(acceptLanguage) ?? DEFAULT_LOCALE;
+}
+
+// Countries whose visitors default to a locale when the browser language is not one we offer.
+const COUNTRY_LOCALE: Record<string, Locale> = { DE: "de-de", AT: "de-de", CH: "de-de", IT: "it-it", SM: "it-it", GB: "en-gb", IE: "en-gb", IR: "fa-ir" };
+
+// First visit order: saved choice (cookie) → browser language → IP country (hint only) → default.
+// IP never overrides an explicit choice or the browser, and only "/" uses it: pages keep their URL (SEO, travellers).
+export function pickLocale(input: { saved?: string | null; acceptLanguage?: string | null; country?: string | null }): Locale {
+  if (input.saved && isLocale(input.saved)) return input.saved;
+  return matchLocale(input.acceptLanguage ?? null) ?? COUNTRY_LOCALE[(input.country ?? "").toUpperCase()] ?? DEFAULT_LOCALE;
+}
+
+export const LOCALE_COOKIE = "lang";

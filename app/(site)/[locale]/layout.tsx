@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { isLocale, LOCALES } from "@/config/locales";
 import { copyFor } from "@/config/site-copy";
 import { CookieBanner, Newsletter } from "@/ui/site/SiteClient";
+import { LanguageSuggest, LanguageSwitcher } from "@/ui/site/Language";
 import "../../ui.css";
 
 const siteName = process.env.SITE_NAME ?? "Legend Partner";
@@ -26,6 +27,7 @@ export default async function SiteLayout({ children, params }: { children: React
       </head>
       <body>
         <a className="skip" href="#main">Skip to content</a>
+        <LanguageSuggest locale={locale} />
         <header className="site-header">
           <div className="in">
             <Link className="brand" href={home} style={{ textDecoration: "none" }}>
@@ -40,14 +42,10 @@ export default async function SiteLayout({ children, params }: { children: React
               <Link href={`${home}/partners`}>{c.nav.partners}</Link>
             </nav>
             <div className="cta">
+              <LanguageSwitcher locale={locale} />
               <Link className="btn sm" href="/portal">{c.nav.login}</Link>
               <Link className="btn primary sm" href={`${home}/checkup`}>{c.nav.checkup}</Link>
             </div>
-          </div>
-          <div className="wrap-site row small" style={{ gap: 14, paddingBottom: 8 }}>
-            {Object.entries(LOCALES).map(([code, l]) => (
-              <Link key={code} href={`/${code}`} hrefLang={l.lang} style={{ fontWeight: code === locale ? 700 : 400 }}>{l.label}</Link>
-            ))}
           </div>
         </header>
         <div id="main">{children}</div>
