@@ -5,6 +5,7 @@ Find up to 50 new companies a day and fill `CompanySignals` (`src/server/market-
 
 Sources: company registers (DE Unternehmensregister, IT Registro Imprese, UK Companies House API),
 Google Maps / Europages (Apify), company websites (Firecrawl), job boards, Wappalyzer.
+Optional enrichment (test first): Apollo.io free plan for decision-maker names and roles only; check its coverage of Italian 20–249 staff firms, and never mail its addresses where the country needs prior consent.
 Signals: hiring for repetitive roles, growth, outdated site, no online booking/forms, old tech, slow-service
 reviews, new manager, affected by an obligation in the regulatory radar. Keep the evidence URL for each.
 
