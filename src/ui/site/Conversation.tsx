@@ -26,7 +26,7 @@ type Props = {
 };
 
 type Msg = { role: "user" | "assistant"; text?: string; node?: "report" | "plan" | "other" };
-type Stage = "greet" | "trade" | "q" | "busy" | "email" | "consent" | "remind" | "plan" | "done";
+type Stage = "greet" | "trade" | "q" | "busy" | "email" | "consent" | "remind" | "plan" | "phone" | "done";
 
 const SPEECH_LANG: Record<string, string> = { it: "it-IT", en: "en-GB", de: "de-DE", fa: "fa-IR" };
 
@@ -134,6 +134,15 @@ export function Conversation({ defs, industry: initial, locale, entrance, source
       if (!pickYes) return say(bot(k.notSure));
       return stage === "consent" ? consent(pickYes === "y") : void unlock(pickYes === "y");
     }
+    if (stage === "phone") {
+      // Speed to lead: the call request reaches Javad at once; the visitor can add a time in the same line.
+      if ((text.match(/\d/g) ?? []).length < 6) return say(bot(k.badPhone));
+      setStage("busy");
+      const ok = await post(`/api/v1/checkups/${result!.id}/call`, { phone: text.slice(0, 80) });
+      setCalled(Boolean(ok));
+      say(bot(ok ? k.called : k.error));
+      return setStage("plan");
+    }
     if (stage === "plan" || stage === "done") return reply ? say(bot(reply)) : undefined;
 
     if (llm) {
@@ -229,14 +238,14 @@ export function Conversation({ defs, industry: initial, locale, entrance, source
         {stage === "remind" && <>{chip("y", k.yes, () => { say({ role: "user", text: k.yes }); void unlock(true); })}{chip("n", k.no, () => { say({ role: "user", text: k.no }); void unlock(false); })}</>}
         {stage === "plan" && result && (
           <>
-            {called ? <span className="badge ok" role="status">✓ {k.called}</span> : <button className="btn sm primary" onClick={async () => setCalled(Boolean(await post(`/api/v1/checkups/${result.id}/call`, {})))}>{k.call}</button>}
+            {called ? <span className="badge ok" role="status">✓ {k.called}</span> : chip("call", `📞 ${k.call}`, () => { say({ role: "user", text: k.call }, bot(k.askPhone)); setStage("phone"); })}
             <Link className="btn sm" href={`/${locale}/checkup/r/${result.id}`}>{k.link}</Link>
           </>
         )}
       </div>
       <form className="row" onSubmit={(e) => { e.preventDefault(); void handle(input); }}>
         <label className="sr-only" htmlFor={`conv-${entrance}`}>{k.placeholder}</label>
-        <input id={`conv-${entrance}`} value={input} onChange={(e) => setInput(e.target.value)} placeholder={listening ? k.listening : stage === "email" ? k.email : k.placeholder} type={stage === "email" ? "email" : "text"} style={{ flex: 1 }} />
+        <input id={`conv-${entrance}`} value={input} onChange={(e) => setInput(e.target.value)} placeholder={listening ? k.listening : stage === "email" ? k.email : k.placeholder} type={stage === "email" ? "email" : stage === "phone" ? "tel" : "text"} style={{ flex: 1 }} />
         <button type="button" className="btn" onClick={listen} aria-label={k.mic} title={k.mic}>🎤</button>
         <button className="btn primary">{k.send}</button>
       </form>

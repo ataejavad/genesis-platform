@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import type { Db } from "@/db";
 import { events } from "@/db/schema";
-import { sendApprovalRequest, type TelegramConfig } from "@/server/telegram";
+import { sendAlert, sendApprovalRequest, type TelegramConfig } from "@/server/telegram";
 
 export const MAX_ATTEMPTS = 10;
 
@@ -23,6 +23,20 @@ async function handle(db: Db, deps: DispatchDeps, event: Event) {
       { id: event.subjectId!, title: p.title ?? "", summary: p.summary, requestedBy: event.actor },
       fetchImpl,
     );
+  }
+  // Speed to lead: a person asked for a call or answered us; the target is a reply within 5 minutes.
+  if (deps.telegram && event.type === "company_page.viewed") {
+    const p = event.payload as { company?: string; industry?: string };
+    await sendAlert(deps.telegram, [`👀 ${p.company} (${p.industry}) صفحه‌اش را باز کرد`], `/cockpit/crm/${event.subjectId}`, fetchImpl);
+  }
+  if (deps.telegram && event.type === "whatsapp.received") {
+    const p = event.payload as { from?: string; text?: string };
+    await sendAlert(deps.telegram, [`💬 WhatsApp ${p.from}: ${String(p.text ?? "").slice(0, 200)}`], "/cockpit/outreach", fetchImpl);
+  }
+  if (deps.telegram && (event.type === "checkup.call_requested" || (event.type === "prospect.stage_changed" && ["replied", "interested", "meeting"].includes(String(event.payload.to))))) {
+    const p = event.payload as { industry?: string; totalEur?: number; to?: string; why?: string };
+    const head = event.type === "checkup.call_requested" ? `📞 درخواست تماس (${p.industry}, €${p.totalEur ?? "?"}): تا ۵ دقیقه زنگ بزن` : `💬 ${p.industry}: ${p.to} (${p.why ?? ""})`;
+    await sendAlert(deps.telegram, [head], "/cockpit/outreach", fetchImpl);
   }
   // Every event also goes to n8n, where Genesis workflows subscribe to what they need.
   if (deps.n8nWebhookUrl) {

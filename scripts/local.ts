@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { writeFileSync } from "node:fs";
 import { PGlite } from "@electric-sql/pglite";
 import { PGLiteSocketServer } from "@electric-sql/pglite-socket";
 import { and, count, eq, isNull } from "drizzle-orm";
@@ -36,6 +37,13 @@ const [{ n }] = await db.select({ n: count() }).from(contentItems);
 const agentName = "hub-builder (local)";
 await db.update(apiKeys).set({ revokedAt: new Date() }).where(and(eq(apiKeys.name, agentName), isNull(apiKeys.revokedAt)));
 const { key: hubKey } = await createApiKey(db, { name: agentName, scopes: ["content:draft"] });
+// Outbound: the company agent adds companies (crm:write); the outbox sends due emails / AI calls (outreach:run).
+const fresh = async (name: string, scopes: Parameters<typeof createApiKey>[1]["scopes"]) => {
+  await db.update(apiKeys).set({ revokedAt: new Date() }).where(and(eq(apiKeys.name, name), isNull(apiKeys.revokedAt)));
+  return (await createApiKey(db, { name, scopes })).key;
+};
+const outboundKey = await fresh("company-finder (local)", ["crm:write"]);
+const outboxKey = await fresh("outbox (local)", ["outreach:run"]);
 await db.$client.end();
 if (n === 0) {
   await run("npm run seed");
@@ -57,6 +65,11 @@ void (async () => {
     if (up) {
       const agent = spawn("npm", ["run", "agents:hubs"], { stdio: "inherit", env: { ...env, APP_URL: "http://localhost:3000", HUB_AGENT_KEY: hubKey }, shell: true });
       agent.on("exit", (code) => code && console.log("hub-builder finished with warnings; see above"));
+      // Outbox every 10 minutes: due emails (once a provider key exists) and AI calls (once switched on).
+      const outbox = () => fetch("http://localhost:3000/api/v1/outreach/run", { method: "POST", headers: { authorization: `Bearer ${outboxKey}` } }).catch(() => null);
+      setInterval(outbox, 10 * 60_000);
+      // The outbound agent finds this run's key on its own (local mode only).
+      writeFileSync("./.localdb/outbound-agent.key", outboundKey, { mode: 0o600 });
       return;
     }
     await new Promise((r) => setTimeout(r, 2000));

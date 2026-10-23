@@ -5,7 +5,7 @@ import { apiKeys } from "@/db/schema";
 import type { Actor } from "./actor";
 import { AppError, forbidden } from "./errors";
 
-export const SCOPES = ["content:draft", "content:read"] as const;
+export const SCOPES = ["content:draft", "content:read", "crm:write", "outreach:run"] as const;
 export type Scope = (typeof SCOPES)[number];
 
 const hashKey = (key: string) => createHash("sha256").update(key).digest("hex");

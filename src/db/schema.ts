@@ -312,3 +312,164 @@ export const checkups = pgTable(
   },
   (t) => [index("checkups_created_idx").on(t.createdAt)],
 );
+
+/* ───────────── Outbound sales + CRM (step 4, doc 15 §6ب گام ۴) ───────────── */
+
+// A company we sell to: found by the company agent (outbound) or created from a hub lead or a check-up (inbound).
+// Our own sales data, not a customer's: org_id is set when the company signs (slice D).
+export const prospects = pgTable(
+  "prospects",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orgId: uuid("org_id").references(() => organizations.id),
+    name: text("name").notNull(),
+    // normalised website host (or Maps place id) so the same firm found twice stays one row
+    key: text("key").notNull(),
+    website: text("website"),
+    phone: text("phone"),
+    industry: text("industry").notNull(),
+    country: text("country").notNull(),
+    region: text("region"),
+    city: text("city"),
+    nace: text("nace"),
+    staff: integer("staff"),
+    // "maps", "import", "hub", "checkup"
+    source: text("source").notNull(),
+    // need signals with the evidence URL for each (company agent, §2.6 ج)
+    signals: jsonb("signals").$type<Record<string, unknown>>().notNull().default({}),
+    score: numeric("score", { precision: 5, scale: 1 }),
+    criterionScores: jsonb("criterion_scores").$type<Record<string, number>>(),
+    // new → contacted → replied → interested → meeting → won | lost; do_not_contact stops everything
+    stage: text("stage").notNull().default("new"),
+    // which outreach sequence it is in: cold (LinkedIn + phone), warm (consented email), callback
+    sequence: text("sequence"),
+    leadId: uuid("lead_id").references(() => leads.id),
+    checkupId: uuid("checkup_id").references(() => checkups.id),
+    // Italy: phone numbers must be checked against the Registro Pubblico delle Opposizioni (valid 15 days)
+    rpoCheckedAt: timestamp("rpo_checked_at", { withTimezone: true }),
+    rpoListed: boolean("rpo_listed"),
+    doNotContactReason: text("do_not_contact_reason"),
+    note: text("note"),
+    // funnel timestamps: counts per step come from these, so a later stage never hides an earlier one
+    contactedAt: timestamp("contacted_at", { withTimezone: true }),
+    repliedAt: timestamp("replied_at", { withTimezone: true }),
+    interestedAt: timestamp("interested_at", { withTimezone: true }),
+    meetingAt: timestamp("meeting_at", { withTimezone: true }),
+    wonAt: timestamp("won_at", { withTimezone: true }),
+    lostAt: timestamp("lost_at", { withTimezone: true }),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [uniqueIndex("prospects_key_idx").on(t.country, t.key), index("prospects_stage_idx").on(t.stage, t.industry)],
+);
+
+// Decision-makers at a prospect. Email is only used where the country's rules allow it (see outreach-rules).
+export const contacts = pgTable(
+  "contacts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    prospectId: uuid("prospect_id").notNull().references(() => prospects.id, { onDelete: "cascade" }),
+    name: text("name"),
+    role: text("role"),
+    email: text("email"),
+    phone: text("phone"),
+    linkedinUrl: text("linkedin_url"),
+    // "website", "apollo", "lead", "manual"
+    source: text("source").notNull(),
+    // true when the person gave consent on our site (lead) or in a list Javad imports with its consent record
+    emailConsent: boolean("email_consent").notNull().default(false),
+    // legal basis Javad records for contacting this person: consent, legitimate_interest, existing_customer;
+    // cold email and AI voice calls check it right before sending
+    legalBasis: text("legal_basis"),
+    // where the basis comes from, e.g. "site form 2026-10-23" or "fiera Milano 2026 list"
+    basisSource: text("basis_source"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("contacts_prospect_idx").on(t.prospectId)],
+);
+
+// Channel switches per country (Javad turns them on in the cockpit). Off by default: cold email, AI voice calls.
+export const channelSwitches = pgTable(
+  "channel_switches",
+  {
+    country: text("country").notNull(),
+    // "email-cold", "voice-ai", "letter"
+    channel: text("channel").notNull(),
+    enabled: boolean("enabled").notNull().default(false),
+    updatedBy: text("updated_by"),
+    updatedAt: updatedAt(),
+  },
+  (t) => [primaryKey({ columns: [t.country, t.channel] })],
+);
+
+// One planned contact attempt in a sequence: an email, a LinkedIn note or a phone call.
+export const touches = pgTable(
+  "touches",
+  {
+    // random: doubles as the unsubscribe token in emails
+    id: uuid("id").primaryKey().defaultRandom(),
+    prospectId: uuid("prospect_id").notNull().references(() => prospects.id, { onDelete: "cascade" }),
+    contactId: uuid("contact_id").references(() => contacts.id, { onDelete: "set null" }),
+    step: text("step").notNull(),
+    position: integer("position").notNull(),
+    channel: text("channel").notNull(),
+    locale: text("locale").notNull(),
+    subject: text("subject"),
+    body: text("body").notNull(),
+    // Persian version for Javad's review; never sent
+    bodyFa: text("body_fa"),
+    // draft (waits for approval) → approved → sent | done; skipped, blocked (rule), cancelled (reply or opt-out)
+    status: text("status").notNull().default("draft"),
+    blockedReason: text("blocked_reason"),
+    dueAt: timestamp("due_at", { withTimezone: true }).notNull(),
+    approvedBy: text("approved_by"),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    // what happened: e.g. "no_answer", "callback", "accepted", provider message id
+    outcome: text("outcome"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("touches_due_idx").on(t.status, t.channel, t.dueAt), index("touches_prospect_idx").on(t.prospectId)],
+);
+
+// A page made for one company before we contact it (research 2026-10-23, Javad): public facts with sources, an
+// estimated check-up, and a free starter persona it can talk to. Private link, not indexed; live once Javad
+// approves the company's sequence.
+export const companyPages = pgTable(
+  "company_pages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    prospectId: uuid("prospect_id").notNull().references(() => prospects.id, { onDelete: "cascade" }),
+    // short random code in the link /<locale>/for/<code>
+    code: text("code").notNull().unique(),
+    locale: text("locale").notNull(),
+    doc: jsonb("doc").$type<Record<string, unknown>>().notNull(),
+    // draft → live (with the sequence approval) → archived (opt-out)
+    status: text("status").notNull().default("draft"),
+    views: integer("views").notNull().default(0),
+    firstViewedAt: timestamp("first_viewed_at", { withTimezone: true }),
+    lastViewedAt: timestamp("last_viewed_at", { withTimezone: true }),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [uniqueIndex("company_pages_prospect_idx").on(t.prospectId)],
+);
+
+// Unified inbox: every message a company sends us or we send it outside sequences (WhatsApp first).
+export const inbox = pgTable(
+  "inbox",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    prospectId: uuid("prospect_id").references(() => prospects.id, { onDelete: "set null" }),
+    channel: text("channel").notNull(),
+    // "in" from the company, "out" from us (agent or person)
+    direction: text("direction").notNull(),
+    // phone number or address on the other side
+    party: text("party").notNull(),
+    body: text("body").notNull(),
+    // who answered: "agent:whatsapp", "user:<id>"
+    author: text("author"),
+    providerId: text("provider_id"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("inbox_party_idx").on(t.channel, t.party, t.createdAt), uniqueIndex("inbox_provider_idx").on(t.channel, t.providerId)],
+);

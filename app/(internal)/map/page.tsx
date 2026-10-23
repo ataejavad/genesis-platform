@@ -60,7 +60,7 @@ const doors = [
       { href: "/cockpit/agents", t: "Agent center + نقشه زنده" },
       { href: "/cockpit/markets", t: "Markets & hubs" },
       { href: "/cockpit/crm", t: "CRM & personas" },
-      { href: "/cockpit/crm/glastec-nord", t: "یک پرسونا" },
+      { href: "/cockpit/outreach", t: "صف فروش بیرونی (تأیید، کارها، کلیدها)" },
       { href: "/cockpit/catalog", t: "Marketplace catalogue" },
       { href: "/cockpit/projects", t: "Projects" },
       { href: "/cockpit/projects/P-301", t: "یک پروژه: مایلستون، تغییر، هزینه" },

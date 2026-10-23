@@ -36,6 +36,12 @@ async function call(cfg: TelegramConfig, method: string, body: unknown, fetchImp
   return json.result;
 }
 
+/** Speed-to-lead alert (target: answer inbound within 5 minutes). */
+export async function sendAlert(cfg: TelegramConfig, lines: string[], link?: string, fetchImpl: Fetch = fetch) {
+  const text = [...lines.map(escapeHtml), link && cfg.appUrl ? `<a href="${cfg.appUrl}${link}">باز کردن</a>` : ""].filter(Boolean).join("\n");
+  await call(cfg, "sendMessage", { chat_id: cfg.adminChatId, text, parse_mode: "HTML" }, fetchImpl);
+}
+
 export async function sendApprovalRequest(
   db: Db,
   cfg: TelegramConfig,

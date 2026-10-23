@@ -54,7 +54,7 @@ describe("check-up funnel", () => {
     expect(full.advice).toBe("Inizia dai preventivi.");
     expect(await requestCall(db, site, id)).toEqual({ already: false });
     expect(await db.select().from(leads)).toMatchObject([{ email: "anna@officina.it", industry: "metal", hook: "checkup", tags: ["import"] }]);
-    expect((await db.select().from(events)).map((e) => e.type)).toEqual(["checkup.completed", "lead.captured", "checkup.unlocked", "checkup.call_requested"]);
+    expect((await db.select().from(events)).map((e) => e.type).filter((t) => !t.startsWith("prospect."))).toEqual(["checkup.completed", "lead.captured", "checkup.unlocked", "checkup.call_requested"]);
     expect(await checkupFunnel(db)).toEqual([{ industry: "metal", entrance: "home", completed: 1, unlocked: 1, calls: 1 }]);
   });
 });

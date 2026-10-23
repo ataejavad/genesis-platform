@@ -41,7 +41,7 @@ const en = {
   personal: { welcome: "Welcome back", yourHub: "Your hub", all: "See all industries" },
   checkup: {
     hello: "Hi! Tell me what your firm does and what costs you the most time. Write, speak or pick below.", askTrade: "To measure it for your firm: what is your trade?", gotTrade: "{name}, perfect. In about 2 minutes I'll show you where you lose money.", notSure: "I didn't quite get that. Pick one of these or say it differently.", acks: ["Ok.", "Got it.", "Clear.", "Thanks."],
-    resultIntro: "Here is your result:", askEmail: "Want the plan with 3 solutions and their payback? Write your work email here.", badEmail: "That doesn't look like an email address. Try again?", consentAsk: "One click to confirm:", consentYes: "Yes, I agree", consentNo: "No, thanks", remindAsk: "Shall I also remind you before your deadlines?", yes: "Yes", no: "No", planIntro: "Here is your plan:", noThanks: "No problem. Your result stays on this page.", placeholder: "Write or speak…", mic: "Speak", listening: "Listening…", send: "Send",
+    resultIntro: "Here is your result:", askEmail: "Want the plan with 3 solutions and their payback? Write your work email here.", badEmail: "That doesn't look like an email address. Try again?", consentAsk: "One click to confirm:", consentYes: "Yes, I agree", consentNo: "No, thanks", remindAsk: "Shall I also remind you before your deadlines?", yes: "Yes", no: "No", planIntro: "Here is your plan:", askPhone: "Which number should we call, and when suits you?", badPhone: "I need a phone number with at least 6 digits.", noThanks: "No problem. Your result stays on this page.", placeholder: "Write or speak…", mic: "Speak", listening: "Listening…", send: "Send",
     title: "Free check-up", sub: "{n} minutes, no sales call. See where your firm loses money and what fixes it first.", industry: "What is your trade?", other: "Another trade", otherText: "We are specialists: today the check-up covers these trades. Tell us yours and we will open it by demand.", explore: "Find your trade",
     next: "Continue", back: "Back", step: "Question {i} of {n}", computing: "Calculating…",
     total: "Estimated money lost per year", payroll: "about {p}% of your labour cost", leaks: "Where the money goes", how: "How we calculated it", basis: "Your answers, the official sector margin (Eurostat) and the cautious assumptions marked as such. An estimate, not a promise.",
@@ -58,6 +58,14 @@ const en = {
     pains: "What costs firms time right now", news: "News that matters, with our take", ourTake: "Our take", readAt: "Read at",
     solutions: "Solutions for this trade", checkup: "Book a free check-up", pending: "This hub is being prepared. The checked version is waiting for our editors' approval.",
     hook: { cta: "Get my list", next: "Next", back: "Back", email: "Work email", consent: "I agree to receive emails from {brand} about deadlines and offers for my trade. I can unsubscribe with one click.", reminders: "Also remind me 30 days before each deadline", sent: "Done. Check your inbox to confirm; your list is below.", yours: "Your deadlines", none: "Nothing urgent for your answers right now. We will tell you when that changes.", privacy: "We use your email only for this. No sharing, EU servers.", calc: "Estimate", error: "Something went wrong. Please try again.", consentNeeded: "Please tick the consent box." },
+  },
+  forPage: {
+    kicker: "Prepared for", sub: "We made this page from public sources before writing to you. Every number below is an estimate you can correct in the chat.",
+    facts: "What we found", estimate: "Estimated check-up", estimateNote: "Estimated from public data and typical values for your trade; correct it in the chat for your real numbers.",
+    persona: "Your company assistant (free)", personaNote: "A first profile of your company. Correct it and it becomes your own assistant: it answers customers and prepares quotes the way you work.",
+    pains: "What may cost you time", questions: "Questions worth answering",
+    chat: "Talk to it", hello: "Hi, I am the first assistant of {company}. I know what is on this page. Tell me what is wrong or missing, or answer a few questions and I will turn the estimate into your real numbers.",
+    remove: "Do not want this page? Remove it", prepared: "Prepared on {d}",
   },
 };
 
@@ -102,7 +110,7 @@ const fa: SiteCopy = {
   personal: { welcome: "خوش برگشتید", yourHub: "هاب شما", all: "دیدن همه صنعت‌ها" },
   checkup: {
     hello: "سلام! بگویید شرکتتان چه کار می‌کند و بیشترین وقت را کجا از دست می‌دهید. بنویسید، بگویید یا از پایین انتخاب کنید.", askTrade: "برای اینکه برای شرکت شما اندازه بگیرم: صنفتان چیست؟", gotTrade: "{name}، عالی. حدود ۲ دقیقه دیگر نشان می‌دهم کجا پول از دست می‌دهید.", notSure: "درست متوجه نشدم. یکی از این‌ها را انتخاب کنید یا جور دیگری بگویید.", acks: ["باشه.", "فهمیدم.", "روشن است.", "ممنون."],
-    resultIntro: "این هم نتیجه شما:", askEmail: "برنامه با ۳ راه‌حل و بازگشت سرمایه‌شان را می‌خواهید؟ ایمیل کاری‌تان را همین‌جا بنویسید.", badEmail: "این شبیه ایمیل نیست. دوباره امتحان می‌کنید؟", consentAsk: "با یک کلیک تأیید کنید:", consentYes: "بله، موافقم", consentNo: "نه، ممنون", remindAsk: "پیش از مهلت‌هایتان هم یادآوری کنم؟", yes: "بله", no: "نه", planIntro: "این برنامه شماست:", noThanks: "اشکالی ندارد. نتیجه‌تان در همین صفحه می‌ماند.", placeholder: "بنویسید یا بگویید…", mic: "صحبت کنید", listening: "در حال شنیدن…", send: "ارسال",
+    resultIntro: "این هم نتیجه شما:", askEmail: "برنامه با ۳ راه‌حل و بازگشت سرمایه‌شان را می‌خواهید؟ ایمیل کاری‌تان را همین‌جا بنویسید.", badEmail: "این شبیه ایمیل نیست. دوباره امتحان می‌کنید؟", consentAsk: "با یک کلیک تأیید کنید:", consentYes: "بله، موافقم", consentNo: "نه، ممنون", remindAsk: "پیش از مهلت‌هایتان هم یادآوری کنم؟", yes: "بله", no: "نه", planIntro: "این برنامه شماست:", askPhone: "با چه شماره‌ای و چه ساعتی تماس بگیریم؟", badPhone: "یک شماره تلفن با دست‌کم ۶ رقم لازم دارم.", noThanks: "اشکالی ندارد. نتیجه‌تان در همین صفحه می‌ماند.", placeholder: "بنویسید یا بگویید…", mic: "صحبت کنید", listening: "در حال شنیدن…", send: "ارسال",
     title: "چک‌آپ رایگان", sub: "{n} دقیقه، بدون تماس فروش. ببینید شرکتتان کجا پول از دست می‌دهد و اول چه چیزی حلش می‌کند.", industry: "صنف شما چیست؟", other: "صنف دیگر", otherText: "ما متخصصیم: چک‌آپ امروز این صنف‌ها را پوشش می‌دهد. صنف خود را بگویید تا بر اساس تقاضا بازش کنیم.", explore: "پیدا کردن صنف",
     next: "ادامه", back: "قبلی", step: "سؤال {i} از {n}", computing: "در حال محاسبه…",
     total: "برآورد پول از دست رفته در سال", payroll: "حدود {p}٪ هزینه نیروی کار شما", leaks: "پول کجا می‌رود", how: "چطور حساب کردیم", basis: "پاسخ‌های شما، حاشیه سود رسمی بخش (Eurostat) و فرض‌های محتاطانه‌ای که علامت خورده‌اند. برآورد است، نه قول.",
@@ -119,6 +127,14 @@ const fa: SiteCopy = {
     pains: "چیزی که الان وقت شرکت‌ها را می‌گیرد", news: "خبرهای مهم، با تحلیل ما", ourTake: "تحلیل ما", readAt: "خواندن در",
     solutions: "راه‌حل‌های این صنف", checkup: "رزرو چک‌آپ رایگان", pending: "این هاب در حال آماده‌سازی است. نسخه بررسی‌شده منتظر تأیید ویراستاران ماست.",
     hook: { cta: "فهرست من را بده", next: "بعدی", back: "قبلی", email: "ایمیل کاری", consent: "موافقم که {brand} درباره مهلت‌ها و پیشنهادهای صنف من ایمیل بفرستد. با یک کلیک لغو می‌کنم.", reminders: "۳۰ روز پیش از هر مهلت هم یادآوری کن", sent: "انجام شد. ایمیلتان را برای تأیید ببینید؛ فهرستتان پایین است.", yours: "مهلت‌های شما", none: "برای پاسخ‌های شما الان مورد فوری نیست. اگر تغییر کرد خبر می‌دهیم.", privacy: "ایمیل شما فقط برای همین استفاده می‌شود. بدون اشتراک‌گذاری، سرور در اتحادیه اروپا.", calc: "برآورد", error: "مشکلی پیش آمد. دوباره امتحان کنید.", consentNeeded: "لطفاً تیک رضایت را بزنید." },
+  },
+  forPage: {
+    kicker: "آماده‌شده برای", sub: "این صفحه را پیش از نوشتن به شما، از منابع عمومی ساختیم. هر عدد اینجا برآورد است و در چت اصلاحش می‌کنید.",
+    facts: "آنچه پیدا کردیم", estimate: "چک‌آپ برآوردی", estimateNote: "از داده‌های عمومی و مقدارهای معمول صنف شما برآورد شده؛ در چت عددهای واقعی را بدهید.",
+    persona: "دستیار شرکت شما (رایگان)", personaNote: "نخستین پروفایل شرکت شما. اصلاحش کنید تا دستیار خودتان شود: به مشتری جواب می‌دهد و پیش‌فاکتور را به روش شما آماده می‌کند.",
+    pains: "چیزهایی که شاید وقتتان را می‌گیرد", questions: "سؤال‌هایی که ارزش جواب دادن دارد",
+    chat: "با آن حرف بزنید", hello: "سلام، من نخستین دستیار {company} هستم. آنچه در این صفحه است را می‌دانم. بگویید چه چیزی غلط است یا جا افتاده، یا به چند سؤال جواب دهید تا برآورد به عددهای واقعی شما تبدیل شود.",
+    remove: "این صفحه را نمی‌خواهید؟ حذفش کنید", prepared: "آماده‌شده در {d}",
   },
 };
 
@@ -146,7 +162,7 @@ const de: SiteCopy = {
   personal: { welcome: "Willkommen zurück", yourHub: "Ihr Hub", all: "Alle Branchen anzeigen" },
   checkup: {
     hello: "Hallo! Erzählen Sie, was Ihr Betrieb macht und was Sie am meisten Zeit kostet. Schreiben, sprechen oder unten wählen.", askTrade: "Damit ich es für Ihren Betrieb messen kann: Was ist Ihr Gewerk?", gotTrade: "{name}, prima. In etwa 2 Minuten zeige ich Ihnen, wo Sie Geld verlieren.", notSure: "Das habe ich nicht ganz verstanden. Wählen Sie eine Option oder sagen Sie es anders.", acks: ["Ok.", "Verstanden.", "Klar.", "Danke."],
-    resultIntro: "Hier ist Ihr Ergebnis:", askEmail: "Möchten Sie den Plan mit 3 Lösungen und Amortisation? Schreiben Sie hier Ihre geschäftliche E-Mail.", badEmail: "Das sieht nicht nach einer E-Mail aus. Noch einmal?", consentAsk: "Mit einem Klick bestätigen:", consentYes: "Ja, einverstanden", consentNo: "Nein, danke", remindAsk: "Soll ich Sie auch vor Ihren Fristen erinnern?", yes: "Ja", no: "Nein", planIntro: "Hier ist Ihr Plan:", noThanks: "Kein Problem. Ihr Ergebnis bleibt auf dieser Seite.", placeholder: "Schreiben oder sprechen…", mic: "Sprechen", listening: "Ich höre zu…", send: "Senden",
+    resultIntro: "Hier ist Ihr Ergebnis:", askEmail: "Möchten Sie den Plan mit 3 Lösungen und Amortisation? Schreiben Sie hier Ihre geschäftliche E-Mail.", badEmail: "Das sieht nicht nach einer E-Mail aus. Noch einmal?", consentAsk: "Mit einem Klick bestätigen:", consentYes: "Ja, einverstanden", consentNo: "Nein, danke", remindAsk: "Soll ich Sie auch vor Ihren Fristen erinnern?", yes: "Ja", no: "Nein", planIntro: "Hier ist Ihr Plan:", askPhone: "Unter welcher Nummer und wann dürfen wir anrufen?", badPhone: "Ich brauche eine Telefonnummer mit mindestens 6 Ziffern.", noThanks: "Kein Problem. Ihr Ergebnis bleibt auf dieser Seite.", placeholder: "Schreiben oder sprechen…", mic: "Sprechen", listening: "Ich höre zu…", send: "Senden",
     title: "Gratis-Check", sub: "{n} Minuten, kein Verkaufsgespräch. Sehen Sie, wo Ihr Betrieb Geld verliert und was zuerst hilft.", industry: "Was ist Ihr Gewerk?", other: "Anderes Gewerk", otherText: "Wir sind Spezialisten: Der Check deckt heute diese Gewerke ab. Nennen Sie uns Ihres, wir öffnen es nach Nachfrage.", explore: "Gewerk finden",
     next: "Weiter", back: "Zurück", step: "Frage {i} von {n}", computing: "Wird berechnet…",
     total: "Geschätzter Verlust pro Jahr", payroll: "etwa {p} % Ihrer Personalkosten", leaks: "Wohin das Geld geht", how: "So haben wir gerechnet", basis: "Ihre Antworten, die amtliche Branchenmarge (Eurostat) und vorsichtige, gekennzeichnete Annahmen. Eine Schätzung, kein Versprechen.",
@@ -163,6 +179,14 @@ const de: SiteCopy = {
     pains: "Was Betriebe gerade Zeit kostet", news: "Wichtige Nachrichten, mit unserer Einordnung", ourTake: "Unsere Einordnung", readAt: "Lesen bei",
     solutions: "Lösungen für dieses Handwerk", checkup: "Gratis-Check buchen", pending: "Dieser Hub wird vorbereitet. Die geprüfte Fassung wartet auf die Freigabe der Redaktion.",
     hook: { cta: "Meine Liste erhalten", next: "Weiter", back: "Zurück", email: "Geschäftliche E-Mail", consent: "Ich willige ein, E-Mails von {brand} zu Fristen und Angeboten für meine Branche zu erhalten. Abmeldung mit einem Klick.", reminders: "Auch 30 Tage vor jeder Frist erinnern", sent: "Erledigt. Bitte bestätigen Sie per E-Mail; Ihre Liste steht unten.", yours: "Ihre Fristen", none: "Für Ihre Antworten ist gerade nichts dringend. Wir melden uns, wenn sich das ändert.", privacy: "Ihre E-Mail nutzen wir nur dafür. Keine Weitergabe, Server in der EU.", calc: "Berechnen", error: "Etwas ist schiefgelaufen. Bitte erneut versuchen.", consentNeeded: "Bitte die Einwilligung ankreuzen." },
+  },
+  forPage: {
+    kicker: "Vorbereitet für", sub: "Diese Seite haben wir aus öffentlichen Quellen erstellt, bevor wir Ihnen schreiben. Jede Zahl ist eine Schätzung, die Sie im Chat korrigieren.",
+    facts: "Was wir gefunden haben", estimate: "Geschätzter Check", estimateNote: "Geschätzt aus öffentlichen Daten und typischen Werten Ihres Handwerks; im Chat werden es Ihre echten Zahlen.",
+    persona: "Ihr Firmenassistent (gratis)", personaNote: "Ein erstes Profil Ihres Betriebs. Korrigieren Sie es, und es wird Ihr eigener Assistent: beantwortet Kunden und bereitet Angebote so vor, wie Sie arbeiten.",
+    pains: "Was Sie Zeit kosten könnte", questions: "Fragen, die sich lohnen",
+    chat: "Mit ihm sprechen", hello: "Hallo, ich bin der erste Assistent von {company}. Ich kenne, was auf dieser Seite steht. Sagen Sie mir, was falsch ist oder fehlt, oder beantworten Sie ein paar Fragen für Ihre echten Zahlen.",
+    remove: "Diese Seite nicht gewünscht? Entfernen", prepared: "Erstellt am {d}",
   },
 };
 
@@ -190,7 +214,7 @@ const it: SiteCopy = {
   personal: { welcome: "Bentornato", yourHub: "Il tuo hub", all: "Vedi tutti i settori" },
   checkup: {
     hello: "Ciao! Raccontami cosa fa la tua impresa e cosa ti fa perdere più tempo. Scrivi, parla o scegli qui sotto.", askTrade: "Per misurarlo per la tua impresa: qual è il tuo mestiere?", gotTrade: "{name}, perfetto. In circa 2 minuti ti mostro dove perdi soldi.", notSure: "Non ho capito bene. Scegli una di queste o dimmelo in un altro modo.", acks: ["Ok.", "Capito.", "Chiaro.", "Grazie."],
-    resultIntro: "Ecco il tuo risultato:", askEmail: "Vuoi il piano con 3 soluzioni e il loro ritorno? Scrivi qui la tua email di lavoro.", badEmail: "Non sembra un'email. Riprovi?", consentAsk: "Conferma con un clic:", consentYes: "Sì, acconsento", consentNo: "No, grazie", remindAsk: "Vuoi anche un promemoria prima delle tue scadenze?", yes: "Sì", no: "No", planIntro: "Ecco il tuo piano:", noThanks: "Nessun problema. Il risultato resta su questa pagina.", placeholder: "Scrivi o parla…", mic: "Parla", listening: "Ti ascolto…", send: "Invia",
+    resultIntro: "Ecco il tuo risultato:", askEmail: "Vuoi il piano con 3 soluzioni e il loro ritorno? Scrivi qui la tua email di lavoro.", badEmail: "Non sembra un'email. Riprovi?", consentAsk: "Conferma con un clic:", consentYes: "Sì, acconsento", consentNo: "No, grazie", remindAsk: "Vuoi anche un promemoria prima delle tue scadenze?", yes: "Sì", no: "No", planIntro: "Ecco il tuo piano:", askPhone: "A che numero e a che ora preferisci essere chiamato?", badPhone: "Mi serve un numero di telefono con almeno 6 cifre.", noThanks: "Nessun problema. Il risultato resta su questa pagina.", placeholder: "Scrivi o parla…", mic: "Parla", listening: "Ti ascolto…", send: "Invia",
     title: "Check-up gratuito", sub: "{n} minuti, nessuna chiamata commerciale. Scopri dove la tua impresa perde soldi e cosa risolve per primo.", industry: "Qual è il tuo mestiere?", other: "Un altro settore", otherText: "Siamo specialisti: oggi il check-up copre questi settori. Dicci il tuo e lo apriremo in base alla domanda.", explore: "Trova il tuo settore",
     next: "Avanti", back: "Indietro", step: "Domanda {i} di {n}", computing: "Sto calcolando…",
     total: "Soldi persi stimati all'anno", payroll: "circa il {p}% del costo del personale", leaks: "Dove vanno i soldi", how: "Come l'abbiamo calcolato", basis: "Le tue risposte, il margine ufficiale del settore (Eurostat) e ipotesi prudenti indicate come tali. Una stima, non una promessa.",
@@ -207,6 +231,14 @@ const it: SiteCopy = {
     pains: "Cosa fa perdere tempo alle imprese adesso", news: "Le notizie che contano, con il nostro commento", ourTake: "Il nostro commento", readAt: "Leggi su",
     solutions: "Soluzioni per il tuo mestiere", checkup: "Prenota un check-up gratuito", pending: "Questo hub è in preparazione. La versione verificata attende l'approvazione della redazione.",
     hook: { cta: "Ricevi la mia lista", next: "Avanti", back: "Indietro", email: "Email di lavoro", consent: "Acconsento a ricevere email da {brand} su scadenze e offerte per il mio settore. Posso disiscrivermi con un clic.", reminders: "Avvisami anche 30 giorni prima di ogni scadenza", sent: "Fatto. Conferma dalla tua email; la tua lista è qui sotto.", yours: "Le tue scadenze", none: "Per le tue risposte non c'è nulla di urgente ora. Ti avviseremo se cambia.", privacy: "Usiamo la tua email solo per questo. Nessuna cessione, server nell'UE.", calc: "Calcola", error: "Qualcosa è andato storto. Riprova.", consentNeeded: "Spunta la casella del consenso." },
+  },
+  forPage: {
+    kicker: "Preparato per", sub: "Abbiamo preparato questa pagina da fonti pubbliche prima di scrivervi. Ogni numero è una stima che potete correggere nella chat.",
+    facts: "Cosa abbiamo trovato", estimate: "Check-up stimato", estimateNote: "Stimato da dati pubblici e valori tipici del vostro mestiere; nella chat diventa con i vostri numeri reali.",
+    persona: "Il vostro assistente aziendale (gratis)", personaNote: "Un primo profilo della vostra impresa. Correggetelo e diventa il vostro assistente: risponde ai clienti e prepara i preventivi come lavorate voi.",
+    pains: "Cosa potrebbe farvi perdere tempo", questions: "Domande che vale la pena chiarire",
+    chat: "Parlategli", hello: "Ciao, sono il primo assistente di {company}. So cosa c'è in questa pagina. Ditemi cosa è sbagliato o manca, oppure rispondete a qualche domanda e trasformo la stima nei vostri numeri reali.",
+    remove: "Non volete questa pagina? Rimuovetela", prepared: "Preparata il {d}",
   },
 };
 

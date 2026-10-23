@@ -8,6 +8,7 @@ import { LOCALES } from "@/config/locales";
 import { products } from "@/mock/site";
 import type { Actor } from "./actor";
 import { AppError, conflict, notFound } from "./errors";
+import { planEnv, prospectFromCheckup } from "./crm";
 import { audit, emit } from "./events";
 import { hubSlug, loadFacts, loadResearch } from "./hubs";
 import { insertLead, monthStart } from "./leads";
@@ -220,6 +221,8 @@ export async function unlockCheckup(db: Db, actor: Actor, id: string, raw: Recor
       tags,
     });
     await tx.update(checkups).set({ leadId: lead.id, unlockedAt: row.unlockedAt ?? new Date(), report }).where(eq(checkups.id, id));
+    // Into the CRM with the warm sequence (emails wait for Javad's approval).
+    await prospectFromCheckup(tx, actor, id, planEnv());
     const facts = { industry: row.industry, entrance: row.entrance, totalEur: row.totalEur, leadScore: report.leadScore };
     await emit(tx, actor, "checkup.unlocked", { type: "checkup", id }, { ...facts, leadId: lead.id });
     await audit(tx, actor, "checkup.unlocked", { type: "checkup", id }, null, facts);
@@ -227,7 +230,8 @@ export async function unlockCheckup(db: Db, actor: Actor, id: string, raw: Recor
   });
 }
 
-export async function requestCall(db: Db, actor: Actor, id: string) {
+export async function requestCall(db: Db, actor: Actor, id: string, raw: { phone?: unknown } = {}) {
+  const phone = z.string().trim().min(6).max(80).optional().parse(raw.phone ?? undefined);
   if (!z.uuid().safeParse(id).success) throw notFound("check-up");
   return db.transaction(async (tx) => {
     const [row] = await tx.select().from(checkups).where(eq(checkups.id, id)).for("update");
@@ -235,6 +239,8 @@ export async function requestCall(db: Db, actor: Actor, id: string) {
     if (!row.unlockedAt || !row.leadId) throw conflict("leave an email first");
     if (row.callRequestedAt) return { already: true };
     await tx.update(checkups).set({ callRequestedAt: new Date() }).where(eq(checkups.id, id));
+    // A call task due now; the worker also pings Javad on Telegram (answer within 5 minutes).
+    await prospectFromCheckup(tx, actor, id, planEnv(), true, phone);
     await emit(tx, actor, "checkup.call_requested", { type: "checkup", id }, { industry: row.industry, entrance: row.entrance, leadId: row.leadId, totalEur: row.totalEur });
     await audit(tx, actor, "checkup.call_requested", { type: "checkup", id }, null, { leadId: row.leadId });
     return { already: false };

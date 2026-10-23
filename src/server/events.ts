@@ -10,7 +10,14 @@ export type EventType =
   | "lead.captured"
   | "checkup.completed"
   | "checkup.unlocked"
-  | "checkup.call_requested";
+  | "checkup.call_requested"
+  | "prospect.added"
+  | "prospect.stage_changed"
+  | "prospect.opted_out"
+  | "outreach.approved"
+  | "outreach.switch_changed"
+  | "company_page.viewed"
+  | "whatsapp.received";
 
 // Call inside the same transaction as the change it describes (transactional outbox).
 export async function emit(
