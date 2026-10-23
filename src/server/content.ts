@@ -40,6 +40,18 @@ export async function createDraft(db: Db, actor: Actor, raw: unknown, opts: { al
 
     let item = existing;
     let version = 1;
+    if (item) {
+      // Agents re-send whole pages on every run; an identical proposal is not a new revision.
+      const [last] = await tx
+        .select({ version: contentRevisions.version, title: contentRevisions.title, summary: contentRevisions.summary, body: contentRevisions.body })
+        .from(contentRevisions)
+        .where(eq(contentRevisions.contentId, item.id))
+        .orderBy(desc(contentRevisions.version))
+        .limit(1);
+      if (last && last.body === input.body && last.title === input.title && (last.summary ?? undefined) === input.summary) {
+        return { contentId: item.id, version: last.version, approvalId: null, unchanged: true };
+      }
+    }
     if (!item) {
       [item] = await tx
         .insert(contentItems)
@@ -98,7 +110,7 @@ export async function createDraft(db: Db, actor: Actor, raw: unknown, opts: { al
     });
     await audit(tx, actor, "content.draft", { type: "content", id: item.id }, null, { version, title: input.title });
 
-    return { contentId: item.id, version, approvalId: approval.id };
+    return { contentId: item.id, version, approvalId: approval.id as string | null, unchanged: false };
   });
 }
 

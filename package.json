@@ -16,9 +16,11 @@
     "worker": "tsx src/worker/index.ts",
     "smoke": "tsx scripts/smoke.ts",
     "demo": "tsx scripts/demo.ts",
-    "local": "tsx scripts/local.ts"
+    "local": "tsx scripts/local.ts",
+    "agents:hubs": "tsx scripts/hub-builder.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.1.0",
     "better-auth": "^1.7.12",
     "drizzle-orm": "^0.45.4",
     "next": "^16.4.2",

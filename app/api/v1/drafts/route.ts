@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     const db = getDb();
     const auth = await authenticateAgent(db, req.headers.get("authorization"), "content:draft");
     const result = await createDraft(db, auth.actor, await req.json(), { allowedMarketId: auth.marketId });
-    return Response.json(result, { status: 201 });
+    return Response.json(result, { status: result.unchanged ? 200 : 201 });
   } catch (err) {
     return errorResponse(err);
   }

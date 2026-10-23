@@ -1,9 +1,10 @@
 import { spawn } from "node:child_process";
 import { PGlite } from "@electric-sql/pglite";
 import { PGLiteSocketServer } from "@electric-sql/pglite-socket";
-import { count } from "drizzle-orm";
+import { and, count, eq, isNull } from "drizzle-orm";
 import { createDb } from "../src/db";
-import { contentItems } from "../src/db/schema";
+import { apiKeys, contentItems } from "../src/db/schema";
+import { createApiKey } from "../src/server/api-keys";
 
 // `npm run local`: the whole app on this computer with no database to install.
 // Data is kept in ./.localdb between runs. For trying things out only; production uses real Postgres.
@@ -31,6 +32,10 @@ const run = (cmd: string) =>
 await run("npm run db:migrate");
 const db = createDb(env.DATABASE_URL, 1);
 const [{ n }] = await db.select({ n: count() }).from(contentItems);
+// The hub-builder agent writes through the API like in production, with a fresh key for this run.
+const agentName = "hub-builder (local)";
+await db.update(apiKeys).set({ revokedAt: new Date() }).where(and(eq(apiKeys.name, agentName), isNull(apiKeys.revokedAt)));
+const { key: hubKey } = await createApiKey(db, { name: agentName, scopes: ["content:draft"] });
 await db.$client.end();
 if (n === 0) {
   await run("npm run seed");
@@ -44,6 +49,19 @@ console.log(`
 `);
 
 const app = spawn("npm", ["run", "dev"], { stdio: "inherit", env, shell: true });
+
+// Once the site answers, send the newest hub research as drafts (unchanged pages are skipped).
+void (async () => {
+  for (let i = 0; i < 90; i++) {
+    const up = await fetch("http://localhost:3000/api/health").then((r) => r.ok, () => false);
+    if (up) {
+      const agent = spawn("npm", ["run", "agents:hubs"], { stdio: "inherit", env: { ...env, APP_URL: "http://localhost:3000", HUB_AGENT_KEY: hubKey }, shell: true });
+      agent.on("exit", (code) => code && console.log("hub-builder finished with warnings; see above"));
+      return;
+    }
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+})();
 const stop = async () => {
   app.kill();
   await server.stop();

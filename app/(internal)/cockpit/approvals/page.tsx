@@ -3,6 +3,10 @@ import ReactMarkdown from "react-markdown";
 import { getDb } from "@/db";
 import { contentItems, events } from "@/db/schema";
 import { listPendingApprovals } from "@/server/content";
+import { parseHubDoc } from "@/server/hubs";
+import { copyFor } from "@/config/site-copy";
+import { BRAND } from "@/mock/data";
+import { HubView } from "@/ui/site/HubView";
 import { MAX_ATTEMPTS } from "@/worker/dispatch";
 import { PageHead } from "@/ui/Shell";
 import { decide } from "../actions";
@@ -42,9 +46,7 @@ export default async function Approvals() {
           <p className="muted small ltr" style={{ textAlign: "left" }}>
             /{a.locale}/{a.slug} · v{a.subjectVersion} · {a.requestedBy} · {a.createdAt.toISOString().slice(0, 16).replace("T", " ")}
           </p>
-          <div dir="auto" style={{ maxHeight: 300, overflow: "auto", borderTop: "1px solid var(--line)", paddingTop: 8 }}>
-            <ReactMarkdown>{a.body}</ReactMarkdown>
-          </div>
+          <BodyPreview body={a.body} locale={a.locale} />
           <form action={decide} className="row" style={{ marginTop: 12 }}>
             <input type="hidden" name="id" value={a.id} />
             <input name="note" placeholder="Note (optional)" style={{ flex: 1, minWidth: 180 }} />
@@ -54,5 +56,24 @@ export default async function Approvals() {
         </article>
       ))}
     </main>
+  );
+}
+
+// Hub pages are JSON from the hub-builder agent: show them as the visitor will see them, sources included.
+function BodyPreview({ body, locale }: { body: string; locale: string }) {
+  const hub = parseHubDoc(body);
+  const box = { maxHeight: hub ? 520 : 300, overflow: "auto", borderTop: "1px solid var(--line)", paddingTop: 8 } as const;
+  if (!hub) return <div dir="auto" style={box}><ReactMarkdown>{body}</ReactMarkdown></div>;
+  const official = [...hub.deadlines, hub.overview].flatMap((x) => x.sources).filter((s) => s.kind === "official").length;
+  return (
+    <>
+      <p className="small">
+        Industry hub · {hub.deadlines.length} deadlines · {hub.news.length} news · {hub.pains.length} pains · {official} official sources ·
+        hook <b>{hub.hook.id}</b> · KPI: {hub.kpi.name} (target {hub.kpi.target}/month)
+      </p>
+      <div dir={locale.startsWith("fa") ? "rtl" : "ltr"} lang={locale.slice(0, 2)} style={box}>
+        <HubView doc={hub} c={copyFor(locale)} locale={locale} brand={BRAND} country={null} preview />
+      </div>
+    </>
   );
 }

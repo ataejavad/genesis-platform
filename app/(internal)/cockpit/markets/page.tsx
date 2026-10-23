@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { getDb } from "@/db";
 import { demandSignals, hubFreshness, markets } from "@/mock/cockpit";
+import { hubStatus } from "@/server/hubs";
 import { PageHead } from "@/ui/Shell";
 
 const tone: Record<string, string> = { live: "ok", "seed ready": "warn", candidate: "", rejected: "gray" };
@@ -12,7 +14,10 @@ const steps = [
 ];
 
 // Only sub-industries we actively work on go live. Adding one is data (a markets row + seed content), not code.
-export default function Markets() {
+export const dynamic = "force-dynamic";
+
+export default async function Markets() {
+  const hubs = await hubStatus(getDb()).catch(() => []);
   return (
     <main>
       <PageHead title="Markets & hubs" crumbs="Cockpit › Growth" sub="Genesis stage 0: the market-selection agent scores sub-industry × country filters. Only the ones we work on go live." actions={<button className="btn primary">Run selection now</button>} />
@@ -20,6 +25,21 @@ export default function Markets() {
         {steps.map(([icon, name, what]) => (
           <div key={name} className="stage"><div className="node"><b>{icon} {name}</b><div className="muted small">{what}</div></div></div>
         ))}
+      </div>
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div className="card-head"><h3>Live hubs</h3><span className="badge ok">live database</span><span className="more muted small">Built by the hub-builder agent (npm run agents:hubs). KPI = opted-in leads this month from the hub&apos;s hook.</span></div>
+        <table className="table"><thead><tr><th>Hub</th><th>Research</th><th>Pages live</th><th>Waiting for approval</th><th>KPI this month</th><th>Checks</th><th /></tr></thead>
+          <tbody>{hubs.map((h) => (
+            <tr key={h.industry + h.country}>
+              <td><b>{h.name}</b> · {h.country}</td>
+              <td className="num">{h.researchedAt}</td>
+              <td className="small">{h.live.join(", ") || "—"}</td>
+              <td className="small">{h.waiting.length ? <Link href="/cockpit/approvals">{h.waiting.join(", ")}</Link> : "—"}</td>
+              <td className="small"><b>{h.leads}</b> / {h.kpi.target} <span className={`badge ${h.leads >= h.kpi.target ? "ok" : "warn"}`}>{Math.round((h.leads / h.kpi.target) * 100)}%</span><div className="muted">{h.kpi.name}</div></td>
+              <td className="small">{h.issues.length ? h.issues.map((i) => <div key={i.where}>{i.level}: {i.where}, {i.why}</div>) : <span className="badge ok">all sourced</span>}</td>
+              <td><Link className="btn sm" href={`/it-it/hub/${h.industry}/${h.country.toLowerCase()}`}>Open</Link></td>
+            </tr>
+          ))}</tbody></table>
       </div>
       <div className="card table-wrap">
         <table className="table"><thead><tr><th>Filter</th><th>NACE</th><th>Demand</th><th>Competition</th><th>Access</th><th>Law</th><th>Margin</th><th>Total</th><th>Status</th><th>Value KPI (30 d)</th><th /></tr></thead>

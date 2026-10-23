@@ -1,0 +1,319 @@
+{
+  "industry": "metal",
+  "country": "IT",
+  "nace": ["C25.11", "C25.12", "C25.62"],
+  "researchedAt": "2026-10-23",
+  "researcher": "hub-builder research step, run in a Claude session (no API key yet)",
+  "name": {
+    "it": "Carpenteria metallica e lavorazioni meccaniche",
+    "en": "Metal fabrication and machining",
+    "fa": "ساخت سازه‌های فلزی و ماشین‌کاری"
+  },
+  "tagline": {
+    "it": "Costi, obblighi e incentivi per chi lavora il metallo in Italia. Aggiornato ogni settimana, con le fonti.",
+    "en": "Costs, obligations and incentives for metalworking firms in Italy. Updated weekly, with sources.",
+    "fa": "هزینه‌ها، الزام‌ها و مشوق‌ها برای شرکت‌های فلزکاری در ایتالیا. هر هفته به‌روز، با منبع."
+  },
+  "overview": {
+    "text": {
+      "it": "L'Italia è specializzata nei prodotti in metallo più della media europea: quasi 6.000 imprese con 20–249 addetti e oltre 600.000 occupati. Molte sono officine conto terzi, dove i preventivi da disegno si fanno ancora a mano mentre acciaio ed energia cambiano prezzo ogni mese.",
+      "en": "Italy is more specialised in metal products than the EU average: almost 6,000 firms with 20–249 staff and over 600,000 jobs. Many are job shops where quotes from drawings are still done by hand while steel and energy prices move every month.",
+      "fa": "ایتالیا در محصولات فلزی از میانگین اروپا تخصصی‌تر است: نزدیک ۶٬۰۰۰ شرکت با ۲۰ تا ۲۴۹ نفر و بیش از ۶۰۰ هزار شاغل. بسیاری کارگاه‌های پیمانکاری‌اند که پیش‌فاکتور از روی نقشه هنوز دستی است، در حالی که قیمت فولاد و انرژی هر ماه تغییر می‌کند."
+    },
+    "sources": [
+      { "name": "Eurostat sbs_sc_ovw 2024 (via market-selection run 2026-10-23)", "url": "https://ec.europa.eu/eurostat/databrowser/view/sbs_sc_ovw/default/table", "date": "2026-10-23", "kind": "official" }
+    ]
+  },
+  "pains": [
+    {
+      "text": {
+        "it": "Preventivi da disegno (taglio, piega, saldatura) calcolati a mano: ore di ufficio tecnico e offerte che arrivano tardi.",
+        "en": "Quotes from drawings (cutting, bending, welding) calculated by hand: hours of engineering time and offers that arrive late.",
+        "fa": "پیش‌فاکتور از روی نقشه (برش، خم، جوش) دستی محاسبه می‌شود: ساعت‌ها وقت دفتر فنی و پیشنهادهایی که دیر می‌رسند."
+      },
+      "sources": [
+        { "name": "Hexagon (Radan Radquote)", "url": "https://hexagon.com/it/products/radan-radquote", "date": "2026-10-23", "kind": "press" },
+        { "name": "Itis Magazine", "url": "https://www.itismagazine.it/tecnologie/quanto-costa-una-lavorazioni-cnc-te-lo-dice-quotify", "date": "2026-10-23", "kind": "press" }
+      ]
+    },
+    {
+      "text": {
+        "it": "Prezzi dell'acciaio in rialzo e incerti: i listini vanno aggiornati spesso e i margini si erodono.",
+        "en": "Steel prices rising and uncertain: price lists need frequent updates and margins erode.",
+        "fa": "قیمت فولاد رو به بالا و نامطمئن است: لیست قیمت باید مرتب به‌روز شود و حاشیه سود کم می‌شود."
+      },
+      "sources": [
+        { "name": "Siderweb (Anima Confindustria)", "url": "https://www.siderweb.com/articoli/news/731972-acciaio-prezzi-in-rialzo-e-incertezza-il-punto-di-anima-confindustria", "date": "2026-09-24", "kind": "press" }
+      ]
+    },
+    {
+      "text": {
+        "it": "Ordini deboli e costi alti: quasi un'impresa metalmeccanica su quattro ha avviato procedure di crisi o ristrutturazione.",
+        "en": "Weak orders and high costs: almost one metalworking firm in four has started crisis or restructuring procedures.",
+        "fa": "سفارش ضعیف و هزینه بالا: از هر چهار شرکت فلزکاری تقریباً یکی وارد روند بحران یا بازسازی شده است."
+      },
+      "sources": [
+        { "name": "AGI (Federmeccanica, 179ª indagine)", "url": "https://www.agi.it/economia/news/2026-09-17/effetti-guerra-imprese-federmeccanica-39109719/", "date": "2026-09-17", "kind": "press" }
+      ]
+    }
+  ],
+  "deadlines": [
+    {
+      "id": "cbam-2026",
+      "tags": ["import"],
+      "date": null,
+      "title": {
+        "it": "CBAM: dal 2026 serve lo status di dichiarante autorizzato oltre 50 tonnellate",
+        "en": "CBAM: from 2026, authorised-declarant status needed above 50 tonnes",
+        "fa": "CBAM: از ۲۰۲۶ برای واردات بیش از ۵۰ تن، مجوز «اظهارکننده مجاز» لازم است"
+      },
+      "what": {
+        "it": "Dal 1° gennaio 2026 il CBAM è nella fase definitiva. Chi importa da fuori UE più di 50 tonnellate all'anno di merci CBAM (ferro, acciaio, alluminio e altre) deve essere dichiarante autorizzato; sotto la soglia si è esenti. Superare la soglia fa scattare gli obblighi per tutto l'anno.",
+        "en": "Since 1 January 2026 CBAM is in its definitive phase. Anyone importing from outside the EU more than 50 tonnes a year of CBAM goods (iron, steel, aluminium and others) must be an authorised declarant; below the threshold you are exempt. Crossing it triggers the obligations for the whole year.",
+        "fa": "از ۱ ژانویه ۲۰۲۶ سازوکار CBAM در مرحله قطعی است. هر کس سالانه بیش از ۵۰ تن کالای مشمول (آهن، فولاد، آلومینیوم و...) از خارج اتحادیه وارد کند باید «اظهارکننده مجاز» باشد؛ زیر این حد معاف است. عبور از حد، الزام‌ها را برای کل سال فعال می‌کند."
+      },
+      "offer": {
+        "it": "Conteggio tonnellate per codice doganale, richiesta di status e raccolta dati emissioni dai fornitori.",
+        "en": "Tonnage count per customs code, status application and emissions data from suppliers.",
+        "fa": "شمارش تناژ بر اساس کد گمرکی، درخواست مجوز و جمع‌آوری داده انتشار از تأمین‌کننده‌ها."
+      },
+      "sources": [
+        { "name": "Edotto", "url": "https://edotto.com/articolo/cbam-avvio-dal-1-gennaio-2026-obblighi-per-importatori", "date": "2026-10-23", "kind": "press" },
+        { "name": "Customs Support", "url": "https://www.customssupport.com/it/cbam-aggiornamenti-2026/", "date": "2026-10-23", "kind": "press" }
+      ]
+    },
+    {
+      "id": "cbam-downstream",
+      "tags": ["import", "all"],
+      "date": "2028-01-01",
+      "title": {
+        "it": "CBAM esteso ai prodotti finiti in acciaio e alluminio (proposta)",
+        "en": "CBAM extended to finished steel and aluminium products (proposal)",
+        "fa": "گسترش CBAM به محصولات نهایی فولادی و آلومینیومی (پیشنهاد)"
+      },
+      "what": {
+        "it": "La Commissione propone di estendere il CBAM a circa 180 prodotti a valle in ferro, acciaio e alluminio dal 1° gennaio 2028. Il Parlamento europeo ha approvato la sua posizione il 16 settembre 2026; ora si negozia con il Consiglio. Per chi produce in Italia può ridurre la concorrenza dei pezzi importati; per chi compra componenti extra-UE può aumentare i costi.",
+        "en": "The Commission proposes extending CBAM to about 180 downstream iron, steel and aluminium products from 1 January 2028. The European Parliament adopted its position on 16 September 2026; talks with the Council follow. For producers in Italy it may reduce competition from imported parts; for buyers of non-EU components it may raise costs.",
+        "fa": "کمیسیون پیشنهاد کرده CBAM از ۱ ژانویه ۲۰۲۸ به حدود ۱۸۰ محصول پایین‌دستی آهن، فولاد و آلومینیوم گسترش یابد. پارلمان اروپا ۱۶ سپتامبر ۲۰۲۶ موضع خود را تصویب کرد و مذاکره با شورا در پیش است. برای تولیدکننده ایتالیایی رقابت قطعات وارداتی را کم می‌کند؛ برای خریدار قطعات غیراروپایی هزینه را بالا می‌برد."
+      },
+      "offer": {
+        "it": "Mappa dei tuoi acquisti extra-UE e scenario costi 2028.",
+        "en": "A map of your non-EU purchases and a 2028 cost scenario.",
+        "fa": "نقشه خریدهای غیراروپایی شما و سناریوی هزینه ۲۰۲۸."
+      },
+      "sources": [
+        { "name": "AlCircle", "url": "https://www.alcircle.com/news/mpe-backs-cbam-extension-from-2028-into-downstream-aluminium-steel-amp-iron-products-117134", "date": "2026-02-21", "kind": "press" },
+        { "name": "SteelOrbis", "url": "https://www.steelorbis.com/steel-news/latest-news/european-parliament-backs-cbam-extension-to-cover-downstream-steel-products-1477646.htm", "date": "2026-09-16", "kind": "press" }
+      ]
+    },
+    {
+      "id": "iperammortamento",
+      "tags": ["invest"],
+      "date": "2028-09-30",
+      "title": {
+        "it": "Iperammortamento: maggiorazione fino al 180% per macchine 4.0",
+        "en": "Super-depreciation: up to 180% uplift for Industry 4.0 machines",
+        "fa": "استهلاک افزوده: تا ۱۸۰٪ برای ماشین‌آلات صنعت ۴٫۰"
+      },
+      "what": {
+        "it": "La Legge di bilancio 2026 (L. 199/2025, art. 1, commi 427-436) maggiora il costo ammortizzabile dei beni 4.0 interconnessi: 180% fino a 2,5 milioni, 100% da 2,5 a 10 milioni, 50% da 10 a 20 milioni. Vale per investimenti dal 1° gennaio 2026 al 30 settembre 2028, per beni prodotti nell'UE o nel SEE e destinati a stabilimenti in Italia, con comunicazioni al GSE.",
+        "en": "The 2026 Budget Law (Law 199/2025, art. 1, paragraphs 427-436) raises the depreciable cost of interconnected Industry 4.0 assets: 180% up to €2.5m, 100% from €2.5m to €10m, 50% from €10m to €20m. It covers investments from 1 January 2026 to 30 September 2028, for goods made in the EU or EEA and used in Italian plants, with notifications to GSE.",
+        "fa": "قانون بودجه ۲۰۲۶ ایتالیا (L. 199/2025، بند ۴۲۷ تا ۴۳۶) هزینه قابل‌استهلاک دارایی‌های متصل صنعت ۴٫۰ را افزایش می‌دهد: ۱۸۰٪ تا ۲٫۵ میلیون، ۱۰۰٪ از ۲٫۵ تا ۱۰ میلیون، ۵۰٪ از ۱۰ تا ۲۰ میلیون یورو. برای سرمایه‌گذاری از ۱ ژانویه ۲۰۲۶ تا ۳۰ سپتامبر ۲۰۲۸، کالای ساخت اتحادیه اروپا یا EEA و کارخانه در ایتالیا، با اطلاع به GSE."
+      },
+      "offer": {
+        "it": "Dossier completo: perizia di interconnessione, attestazione Made in UE e comunicazioni al GSE.",
+        "en": "A complete file: interconnection appraisal, Made in EU certificate and GSE notifications.",
+        "fa": "پرونده کامل: گزارش اتصال ماشین، گواهی ساخت اروپا و اطلاعیه‌های GSE."
+      },
+      "sources": [
+        { "name": "We Wealth", "url": "https://www.we-wealth.com/news/iper-ammortamento-2026-regole-e-vantaggi-per-investimenti-4-0", "date": "2026-10-23", "kind": "press" },
+        { "name": "MySolution", "url": "https://www.mysolution.it/fisco/strumenti/schede-pratiche/2026/01/iper-ammortamento/", "date": "2026-10-23", "kind": "press" }
+      ]
+    },
+    {
+      "id": "cpr-2026",
+      "tags": ["structural"],
+      "date": "2027-01-08",
+      "title": {
+        "it": "Nuovo Regolamento prodotti da costruzione: sanzioni dall'8 gennaio 2027",
+        "en": "New Construction Products Regulation: penalties from 8 January 2027",
+        "fa": "مقررات تازه محصولات ساختمانی: جریمه‌ها از ۸ ژانویه ۲۰۲۷"
+      },
+      "what": {
+        "it": "Il Regolamento (UE) 2024/3110 si applica dall'8 gennaio 2026 e prevede la dichiarazione di prestazione in formato elettronico; l'articolo sulle sanzioni si applica dall'8 gennaio 2027. Le norme armonizzate esistenti (come la EN 1090 per le strutture in acciaio) restano valide finché non vengono sostituite.",
+        "en": "Regulation (EU) 2024/3110 applies since 8 January 2026 and requires the declaration of performance in electronic form; the penalties article applies from 8 January 2027. Existing harmonised standards (such as EN 1090 for steel structures) remain valid until replaced.",
+        "fa": "مقررات (EU) 2024/3110 از ۸ ژانویه ۲۰۲۶ اجرا می‌شود و اعلامیه عملکرد (DoP) را الکترونیکی می‌خواهد؛ ماده جریمه‌ها از ۸ ژانویه ۲۰۲۷. استانداردهای فعلی (مثل EN 1090 برای سازه فولادی) تا جایگزینی معتبرند."
+      },
+      "offer": {
+        "it": "DoP elettronica e fascicolo tecnico EN 1090 sempre aggiornati, per commessa.",
+        "en": "Electronic DoP and EN 1090 technical file kept current, per order.",
+        "fa": "DoP الکترونیکی و پرونده فنی EN 1090 همیشه به‌روز، برای هر سفارش."
+      },
+      "sources": [
+        { "name": "Certifico", "url": "https://certifico.com/component/acym/archive/746-regolamento-ue-2024-3110-regolamento-prodotti-da-costruzione-cpr-si-applica-dal-08-gennaio-2026", "date": "2026-10-23", "kind": "press" },
+        { "name": "ANCE", "url": "https://ance.it/wp-content/uploads/allegati/Approfondimento_CPR.pdf", "date": "2026-10-23", "kind": "association" }
+      ]
+    },
+    {
+      "id": "machinery-2027",
+      "tags": ["machines"],
+      "date": "2027-01-20",
+      "title": {
+        "it": "Nuovo Regolamento macchine dal 20 gennaio 2027",
+        "en": "New Machinery Regulation from 20 January 2027",
+        "fa": "مقررات تازه ماشین‌آلات از ۲۰ ژانویه ۲۰۲۷"
+      },
+      "what": {
+        "it": "Il Regolamento (UE) 2023/1230 sostituisce la Direttiva macchine e si applica dal 20 gennaio 2027: riguarda chi costruisce macchine o le modifica in modo sostanziale (fascicolo tecnico, valutazione dei rischi, istruzioni anche digitali).",
+        "en": "Regulation (EU) 2023/1230 replaces the Machinery Directive and applies from 20 January 2027: it concerns anyone who builds machines or substantially modifies them (technical file, risk assessment, instructions, also digital).",
+        "fa": "مقررات (EU) 2023/1230 جای دستورالعمل ماشین‌آلات را می‌گیرد و از ۲۰ ژانویه ۲۰۲۷ اجرا می‌شود: شامل هر کسی است که ماشین می‌سازد یا آن را اساساً تغییر می‌دهد (پرونده فنی، ارزیابی ریسک، دستورالعمل دیجیتال)."
+      },
+      "offer": {
+        "it": "Check del fascicolo tecnico e istruzioni digitali pronti prima della scadenza.",
+        "en": "Technical-file check and digital instructions ready before the deadline.",
+        "fa": "بررسی پرونده فنی و آماده‌سازی دستورالعمل دیجیتال پیش از مهلت."
+      },
+      "sources": [
+        { "name": "Certifico", "url": "https://certifico.com/macchine/regolamento-ue-2023-1230", "date": "2026-10-23", "kind": "press" },
+        { "name": "CNA Modena", "url": "https://www.mo.cna.it/wp-content/uploads/2023/11/2023_Regolamento-macchine-approfondimento.pdf", "date": "2026-10-23", "kind": "association" }
+      ]
+    },
+    {
+      "id": "patente-crediti",
+      "tags": ["site"],
+      "date": null,
+      "title": {
+        "it": "Montaggi in cantiere: serve la patente a crediti",
+        "en": "Installing on building sites: the credit-based licence is required",
+        "fa": "نصب در کارگاه ساختمانی: گواهی امتیازی لازم است"
+      },
+      "what": {
+        "it": "Se monti strutture o carpenterie in cantieri temporanei o mobili, dal 1° ottobre 2024 serve la patente a crediti (D.L. 19/2024): 30 crediti iniziali, minimo 15 per lavorare, esenti le imprese con SOA dalla III classifica, sanzione di almeno 6.000 euro.",
+        "en": "If you install structures or metalwork on temporary or mobile sites, since 1 October 2024 you need the credit-based licence (Decree-Law 19/2024): 30 starting credits, at least 15 to work, firms with SOA class III or higher exempt, fine of at least €6,000.",
+        "fa": "اگر سازه یا قطعات فلزی را در کارگاه‌های موقت یا سیار نصب می‌کنید، از ۱ اکتبر ۲۰۲۴ گواهی امتیازی لازم است: ۳۰ امتیاز اولیه، حداقل ۱۵ برای کار، شرکت‌های SOA رده III به بالا معاف، جریمه دست‌کم ۶٬۰۰۰ یورو."
+      },
+      "offer": {
+        "it": "Crediti e documenti di sicurezza sotto controllo per ogni cantiere.",
+        "en": "Credits and safety documents under control for every site.",
+        "fa": "امتیازها و مدارک ایمنی برای هر کارگاه زیر کنترل."
+      },
+      "sources": [
+        { "name": "Euroconference News (circolare INL n. 4/2024)", "url": "https://www.ecnews.it/lavoro/news-del-giorno/patente-crediti-nei-cantieri-le-prime-istruzioni-inl/", "date": "2026-10-23", "kind": "press" },
+        { "name": "LentePubblica", "url": "https://lentepubblica.it/cittadini-e-imprese/patente-crediti-cantiere-edilizio/", "date": "2026-10-23", "kind": "press" }
+      ]
+    }
+  ],
+  "news": [
+    {
+      "date": "2026-09-24",
+      "publisher": "Siderweb",
+      "url": "https://www.siderweb.com/articoli/news/731972-acciaio-prezzi-in-rialzo-e-incertezza-il-punto-di-anima-confindustria",
+      "title": {
+        "it": "Acciaio, prezzi in rialzo e incertezza: il punto di Anima Confindustria",
+        "en": "Steel: rising prices and uncertainty, says Anima Confindustria",
+        "fa": "فولاد: قیمت رو به بالا و بی‌ثباتی، به گفته Anima Confindustria"
+      },
+      "takeaway": {
+        "it": "Aggiorna i listini più spesso e indica nei preventivi la validità del prezzo dell'acciaio.",
+        "en": "Update price lists more often and state how long the steel price in each quote is valid.",
+        "fa": "لیست قیمت را مرتب‌تر به‌روز کنید و در هر پیش‌فاکتور مدت اعتبار قیمت فولاد را بنویسید."
+      }
+    },
+    {
+      "date": "2026-09-17",
+      "publisher": "AGI",
+      "url": "https://www.agi.it/economia/news/2026-09-17/effetti-guerra-imprese-federmeccanica-39109719/",
+      "title": {
+        "it": "Federmeccanica: il 46% delle imprese ha risentito degli effetti della guerra",
+        "en": "Federmeccanica: 46% of firms felt significant effects of the war",
+        "fa": "Federmeccanica: ۴۶٪ شرکت‌ها اثر جدی جنگ را حس کرده‌اند"
+      },
+      "takeaway": {
+        "it": "Produzione +0,5% sull'anno e export +8,3% nel primo semestre, ma solo il 26% vede ordini in crescita: conviene presidiare i clienti esistenti.",
+        "en": "Output +0.5% year on year and exports +8.3% in the first half, but only 26% see growing orders: look after existing customers.",
+        "fa": "تولید ۰٫۵٪ و صادرات نیمه اول ۸٫۳٪ رشد کرد، اما فقط ۲۶٪ رشد سفارش می‌بینند: مشتری‌های فعلی را حفظ کنید."
+      }
+    },
+    {
+      "date": "2026-09-16",
+      "publisher": "SteelOrbis",
+      "url": "https://www.steelorbis.com/steel-news/latest-news/european-parliament-backs-cbam-extension-to-cover-downstream-steel-products-1477646.htm",
+      "title": {
+        "it": "Il Parlamento europeo approva l'estensione del CBAM ai prodotti a valle in acciaio",
+        "en": "European Parliament backs CBAM extension to downstream steel products",
+        "fa": "پارلمان اروپا گسترش CBAM به محصولات پایین‌دستی فولاد را تأیید کرد"
+      },
+      "takeaway": {
+        "it": "464 voti a favore: ora il negoziato con il Consiglio. Chi importa componenti finiti dovrebbe stimare l'impatto dal 2028.",
+        "en": "464 votes in favour; negotiations with the Council are next. Importers of finished components should estimate the impact from 2028.",
+        "fa": "۴۶۴ رأی موافق؛ مرحله بعد مذاکره با شوراست. واردکنندگان قطعات نهایی اثر آن از ۲۰۲۸ را برآورد کنند."
+      }
+    }
+  ],
+  "solutions": [
+    {
+      "title": { "it": "Preventivo da disegno in minuti", "en": "Quote from a drawing in minutes", "fa": "پیش‌فاکتور از روی نقشه در چند دقیقه" },
+      "outcome": { "it": "Carichi DXF o STEP e ottieni tempi e costi di taglio, piega e saldatura con il prezzo aggiornato dell'acciaio.", "en": "Upload a DXF or STEP and get cutting, bending and welding time and cost with the current steel price.", "fa": "فایل DXF یا STEP را بدهید و زمان و هزینه برش، خم و جوش را با قیمت روز فولاد بگیرید." }
+    },
+    {
+      "title": { "it": "Dossier iperammortamento", "en": "Super-depreciation file", "fa": "پرونده استهلاک افزوده" },
+      "outcome": { "it": "Tutto pronto per la maggiorazione: interconnessione, Made in UE, comunicazioni GSE.", "en": "Everything ready for the uplift: interconnection, Made in EU, GSE notifications.", "fa": "همه چیز برای افزایش استهلاک آماده: اتصال، ساخت اروپا، اطلاعیه‌های GSE." }
+    },
+    {
+      "title": { "it": "CBAM senza sorprese", "en": "CBAM without surprises", "fa": "CBAM بدون غافلگیری" },
+      "outcome": { "it": "Tonnellate monitorate, status di dichiarante e dati dei fornitori raccolti in automatico.", "en": "Tonnage monitored, declarant status and supplier data collected automatically.", "fa": "تناژ زیر نظر، مجوز اظهارکننده و داده تأمین‌کننده‌ها خودکار جمع می‌شود." }
+    },
+    {
+      "title": { "it": "Documenti EN 1090 e DoP elettronica", "en": "EN 1090 documents and electronic DoP", "fa": "مدارک EN 1090 و DoP الکترونیکی" },
+      "outcome": { "it": "Fascicolo tecnico per commessa generato dai dati di produzione.", "en": "A technical file per order generated from production data.", "fa": "پرونده فنی هر سفارش از داده‌های تولید ساخته می‌شود." }
+    }
+  ],
+  "hook": {
+    "id": "check-metallo",
+    "title": { "it": "Quanto puoi risparmiare e quali obblighi ti riguardano?", "en": "How much can you save, and which obligations apply to you?", "fa": "چقدر می‌توانید صرفه‌جویی کنید و کدام الزام‌ها شامل شما می‌شود؟" },
+    "promise": { "it": "1 minuto, gratis. Stima del vantaggio fiscale sugli investimenti e lista degli obblighi, con le fonti.", "en": "1 minute, free. An estimate of the tax benefit on investments and your list of obligations, with sources.", "fa": "۱ دقیقه، رایگان. برآورد مزیت مالیاتی سرمایه‌گذاری و فهرست الزام‌ها، با منبع." },
+    "questions": [
+      {
+        "id": "work",
+        "multi": true,
+        "label": { "it": "Cosa fai?", "en": "What do you do?", "fa": "چه کاری انجام می‌دهید؟" },
+        "options": [
+          { "tag": "structural", "label": { "it": "Strutture e carpenteria per l'edilizia (EN 1090)", "en": "Structures and metalwork for buildings (EN 1090)", "fa": "سازه و قطعات فلزی ساختمان (EN 1090)" } },
+          { "tag": "machines", "label": { "it": "Costruisco o modifico macchine", "en": "I build or modify machines", "fa": "ماشین می‌سازم یا تغییر می‌دهم" } },
+          { "tag": "site", "label": { "it": "Monto in cantiere", "en": "I install on building sites", "fa": "در کارگاه ساختمانی نصب می‌کنم" } },
+          { "tag": "import", "label": { "it": "Compro acciaio o alluminio da fuori UE", "en": "I buy steel or aluminium from outside the EU", "fa": "فولاد یا آلومینیوم از خارج اتحادیه می‌خرم" } }
+        ]
+      },
+      {
+        "id": "invest",
+        "multi": false,
+        "label": { "it": "Pensi di investire in macchinari entro settembre 2028?", "en": "Are you planning to invest in machinery by September 2028?", "fa": "تا سپتامبر ۲۰۲۸ قصد خرید ماشین‌آلات دارید؟" },
+        "options": [
+          { "tag": "invest", "label": { "it": "Sì", "en": "Yes", "fa": "بله" } },
+          { "tag": "", "label": { "it": "No", "en": "No", "fa": "نه" } }
+        ]
+      }
+    ],
+    "calc": {
+      "kind": "uplift",
+      "when": "invest",
+      "label": { "it": "Importo dell'investimento (€)", "en": "Investment amount (€)", "fa": "مبلغ سرمایه‌گذاری (یورو)" },
+      "bands": [
+        { "upTo": 2500000, "rate": 1.8 },
+        { "upTo": 10000000, "rate": 1.0 },
+        { "upTo": 20000000, "rate": 0.5 }
+      ],
+      "taxRate": 0.24,
+      "result": {
+        "it": "Risparmio IRES stimato nel periodo di ammortamento (aliquota 24%, indicativo):",
+        "en": "Estimated corporate-tax (IRES 24%) saving over the depreciation period, indicative:",
+        "fa": "برآورد صرفه‌جویی مالیات شرکت (IRES ۲۴٪) در دوره استهلاک، تقریبی:"
+      }
+    }
+  },
+  "kpi": {
+    "name": "Check metallo completati con opt-in al mese",
+    "target": 30,
+    "northStar": "Check-up prenotati da questo hub"
+  }
+}

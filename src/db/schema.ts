@@ -253,3 +253,33 @@ export const auditLog = pgTable(
   },
   (t) => [index("audit_subject_idx").on(t.subjectType, t.subjectId)],
 );
+
+/* ───────────── Leads (consent-based inbound from the public site) ───────────── */
+
+// A visitor who asked for something on a hub (deadline list, reminders, check-up) and gave explicit consent.
+// Prospects belong to no customer yet; org_id is set when the lead becomes a customer (slice D).
+export const leads = pgTable(
+  "leads",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orgId: uuid("org_id").references(() => organizations.id),
+    email: text("email").notNull(),
+    // where the lead came from, e.g. hub "installers" in "IT" through hook "scadenzario"
+    industry: text("industry").notNull(),
+    country: text("country").notNull(),
+    locale: text("locale").notNull(),
+    hook: text("hook").notNull(),
+    answers: jsonb("answers").$type<Record<string, unknown>>().notNull().default({}),
+    tags: text("tags").array().notNull().default(sql`'{}'::text[]`),
+    // Italy (Codice privacy art. 130) needs prior consent even for B2B email: keep the exact text agreed to.
+    consentText: text("consent_text").notNull(),
+    consentAt: timestamp("consent_at", { withTimezone: true }).notNull(),
+    reminders: boolean("reminders").notNull().default(false),
+    // double opt-in: set when the visitor clicks the confirmation email (email sending arrives with step 4)
+    confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+    unsubscribedAt: timestamp("unsubscribed_at", { withTimezone: true }),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [uniqueIndex("leads_email_hub_idx").on(t.email, t.industry, t.country), index("leads_hub_idx").on(t.industry, t.country, t.createdAt)],
+);

@@ -26,7 +26,7 @@ describe("event dispatch and Telegram approvals", () => {
     expect(urls).toEqual(["https://api.telegram.org/botT/sendMessage", "https://n8n.test/hook"]);
     const sent = JSON.parse(String(f.mock.calls[0][1]!.body));
     expect(sent.reply_markup.inline_keyboard[0][0].callback_data).toBe(`apr:${r.approvalId}:a`);
-    const [a] = await db.select().from(approvals).where(eq(approvals.id, r.approvalId));
+    const [a] = await db.select().from(approvals).where(eq(approvals.id, r.approvalId!));
     expect(a.telegramMessageId).toBe("99");
     expect((await db.select().from(events))[0].dispatchedAt).not.toBeNull();
     expect(await dispatchBatch(db, { telegram: cfg, fetchImpl: f })).toBe(0);

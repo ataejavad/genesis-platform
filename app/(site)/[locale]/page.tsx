@@ -15,7 +15,7 @@ export default async function LocaleHome({ params, searchParams }: Props) {
   // Demo of logged-in personalisation (doc 15 §6و): ?as=glas-becker shows the site as that customer sees it.
   const { as } = await searchParams;
   const c = copyFor(locale);
-  const pages = await listPublished(getDb(), locale).catch(() => []);
+  const pages = (await listPublished(getDb(), locale).catch(() => [])).filter((p) => p.type !== "industry-hub");
   const checkup = `/${locale}/checkup`;
   // A known industry (saved choice, or the demo customer ?as=glas-becker) turns the home page specialist.
   const mine = as === "glas-becker" ? liveIndustries[0] : await visitorIndustry();

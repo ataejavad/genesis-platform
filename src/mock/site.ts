@@ -1,7 +1,8 @@
 // Sample public content for the prototype: industry hubs (NACE sub-industry, country as a filter), marketplace products,
 // directory companies, hub news, member posts and tenders. Real rows will come from Postgres and agents.
-export type L = { fa: string; en: string };
-export const pick = (l: L, locale: string) => (locale.startsWith("fa") ? l.fa : l.en);
+export type L = { fa: string; en: string; it?: string; de?: string };
+// Text in the visitor's language; Italian and German fall back to English until translated.
+export const pick = (l: L, locale: string) => l[locale.slice(0, 2) as keyof L] ?? l.en;
 
 // One hub per industry; the country is a filter inside it. Facts that differ by country (market numbers,
 // pains, rules, news, directory, posts, tenders) live per country; solutions are mostly shared.
@@ -17,7 +18,7 @@ export type Industry = { slug: string; icon: string; nace: string; live: boolean
 
 export const industries: Industry[] = [
   {
-    slug: "glass", icon: "🪟", nace: "C23.12 / F43.34", live: true,
+    slug: "glass", icon: "🪟", nace: "C23.12 / F43.34", live: false,
     name: { fa: "شیشه و پنجره", en: "Glass & windows" },
     countries: [
       {
@@ -45,10 +46,20 @@ export const industries: Industry[] = [
       },
     ],
   },
+  // Live hubs chosen by the market-selection agents (2026-10-23). Their pages come from the hub-builder agent
+  // (Postgres, after approval); the facts below are only the fallback shown until the first approval.
   {
-    slug: "installers", icon: "🔧", nace: "F43.22", live: false,
-    name: { fa: "نصاب‌های تأسیسات", en: "Heating & plumbing installers" },
+    slug: "installers", icon: "🔧", nace: "F43.21 / F43.22 / F43.29", live: true,
+    name: { fa: "نصاب‌ها و تأسیساتی‌ها", en: "Installers", it: "Impiantisti e installatori", de: "Installateure" },
     countries: [
+      {
+        country: "IT", flag: "🇮🇹",
+        overview: { fa: "برق‌کارها، لوله‌کش‌ها و تکنسین‌های گرمایش و سرمایش ایتالیا: کار زیاد، کاغذبازی مشوق‌ها و کمبود نیرو.", en: "Italy's electricians, plumbers, heating and cooling technicians: plenty of work, heavy incentive paperwork and staff shortages.", it: "Elettricisti, idraulici, termotecnici e frigoristi in Italia: tanto lavoro, molte pratiche per gli incentivi e poco personale." },
+        stats: { companies: 4968, employees: "≈ 1.03m", marketSize: "€138bn", aiAdoption: "10%" },
+        pains: [{ fa: "کاغذبازی مشوق‌ها", en: "Incentive paperwork", it: "Pratiche per gli incentivi" }, { fa: "کمبود تکنسین", en: "Shortage of technicians", it: "Mancano tecnici" }],
+        law: { fa: "بن بازسازی ۲۰۲۶، F-gas ۲۰۲۷، Conto Termico 3.0", en: "2026 home bonus, F-gas 2027, Conto Termico 3.0", it: "Bonus casa 2026, F-gas 2027, Conto Termico 3.0" },
+        sources: { stats: "Eurostat sbs_sc_ovw 2024 (F43, firms with 20–249 staff)", law: "EU DG Clima · MASE · press", updated: "2026-10-23", lawUpdated: "2026-10-23" },
+      },
       {
         country: "GB", flag: "🇬🇧",
         overview: { fa: "نامزد بعدی ایجنت انتخاب بازار. تا محتوای اولیه آماده نشود منتشر نمی‌شود.", en: "Next candidate from market selection. Not published until seed content is ready." },
@@ -56,6 +67,20 @@ export const industries: Industry[] = [
         pains: [{ fa: "زمان‌بندی بازدیدها", en: "Visit scheduling" }],
         law: { fa: "UK GDPR، MTD برای VAT", en: "UK GDPR, MTD for VAT" },
         sources: { stats: "ONS", law: "GOV.UK · ICO", updated: "2026-10-15", lawUpdated: "2026-10-15" },
+      },
+    ],
+  },
+  {
+    slug: "metal", icon: "⚙️", nace: "C25.11 / C25.12 / C25.62", live: true,
+    name: { fa: "ساخت قطعات و سازه‌های فلزی", en: "Metal fabrication", it: "Carpenteria metallica e lavorazioni meccaniche", de: "Metallbau und Metallbearbeitung" },
+    countries: [
+      {
+        country: "IT", flag: "🇮🇹",
+        overview: { fa: "کارگاه‌های فلزکاری ایتالیا: تخصص بالا، قیمت‌دهی دستی از روی نقشه، و قوانین تازه CBAM و CPR.", en: "Italy's metal workshops: deep specialisation, manual quoting from drawings, and new CBAM and CPR rules.", it: "Le officine metalmeccaniche italiane: grande specializzazione, preventivi a mano dai disegni e nuove regole CBAM e CPR." },
+        stats: { companies: 5997, employees: "≈ 617k", marketSize: "€114bn", aiAdoption: "15%" },
+        pains: [{ fa: "قیمت‌دهی دستی از روی نقشه", en: "Manual quoting from drawings", it: "Preventivi a mano dai disegni" }, { fa: "نوسان قیمت فولاد", en: "Volatile steel prices", it: "Prezzi dell'acciaio instabili" }],
+        law: { fa: "CBAM، CPR 2024/3110، مقررات ماشین‌آلات ۲۰۲۷، iperammortamento", en: "CBAM, CPR 2024/3110, Machinery Regulation 2027, iperammortamento", it: "CBAM, CPR 2024/3110, Regolamento Macchine 2027, iperammortamento" },
+        sources: { stats: "Eurostat sbs_sc_ovw 2024 (C25, firms with 20–249 staff)", law: "EUR-Lex · MIMIT · press", updated: "2026-10-23", lawUpdated: "2026-10-23" },
       },
     ],
   },
@@ -67,13 +92,16 @@ export type Sector = { code: string; name: L; subs: { nace: string; name: L; ind
 export const sectors: Sector[] = [
   { code: "C", name: { fa: "تولید", en: "Manufacturing" }, subs: [
     { nace: "C23.12", name: { fa: "شکل‌دهی و فرآوری شیشه تخت", en: "Shaping and processing of flat glass" }, industry: "glass" },
-    { nace: "C25.12", name: { fa: "ساخت در و پنجره فلزی", en: "Metal doors and windows" }, industry: "glass" },
+    { nace: "C25.11", name: { fa: "سازه‌ها و قطعات سازه‌ای فلزی", en: "Metal structures and parts of structures", it: "Strutture metalliche e parti di strutture" }, industry: "metal" },
+    { nace: "C25.12", name: { fa: "ساخت در و پنجره فلزی", en: "Metal doors and windows", it: "Porte e finestre in metallo" }, industry: "metal" },
+    { nace: "C25.62", name: { fa: "ماشین‌کاری", en: "Machining", it: "Lavori di meccanica generale" }, industry: "metal" },
     { nace: "C10.71", name: { fa: "نان و شیرینی", en: "Bread and fresh pastry" } },
   ] },
   { code: "F", name: { fa: "ساخت‌وساز", en: "Construction" }, subs: [
     { nace: "F43.34", name: { fa: "شیشه‌کاری و نصب پنجره", en: "Glazing and window fitting" }, industry: "glass" },
-    { nace: "F43.22", name: { fa: "لوله‌کشی، گرمایش و تهویه", en: "Plumbing, heat and air-conditioning" }, industry: "installers" },
-    { nace: "F43.21", name: { fa: "تأسیسات برق", en: "Electrical installation" } },
+    { nace: "F43.21", name: { fa: "تأسیسات برق", en: "Electrical installation", it: "Installazione di impianti elettrici" }, industry: "installers" },
+    { nace: "F43.22", name: { fa: "لوله‌کشی، گرمایش و تهویه", en: "Plumbing, heat and air-conditioning", it: "Impianti idraulici, di riscaldamento e condizionamento" }, industry: "installers" },
+    { nace: "F43.29", name: { fa: "سایر تأسیسات ساختمانی", en: "Other construction installation", it: "Altri lavori di costruzione e installazione" }, industry: "installers" },
     { nace: "F43.91", name: { fa: "بام‌سازی", en: "Roofing" } },
   ] },
   { code: "G", name: { fa: "تجارت و تعمیر خودرو", en: "Trade and vehicle repair" }, subs: [
@@ -136,7 +164,7 @@ export const products: Product[] = [
     ],
   },
   {
-    slug: "phone-agent", icon: "📞", industries: ["glass", "installers"], process: "APQC 5.2 · Service › Inquiries",
+    slug: "phone-agent", icon: "📞", industries: ["glass", "installers", "metal"], process: "APQC 5.2 · Service › Inquiries",
     kind: { fa: "ایجنت", en: "Agent" },
     name: { fa: "پاسخ‌گوی ۲۴ ساعته تلفن و چت", en: "24/7 phone & chat answering" },
     outcome: { fa: "۹۷٪ تماس‌ها پاسخ داده می‌شوند؛ نوبت و قیمت ثبت می‌شود", en: "97% of calls answered; bookings and quote requests captured" },
@@ -147,7 +175,7 @@ export const products: Product[] = [
     faq: [{ q: { fa: "شماره‌ام عوض می‌شود؟", en: "Do I change my number?" }, a: { fa: "نه، فقط هدایت تماس فعال می‌شود.", en: "No, we only set up call forwarding." } }],
   },
   {
-    slug: "incentive-docs", icon: "📑", industries: ["glass"], countries: ["IT"], process: "APQC 8.6 · Finance › Grants",
+    slug: "incentive-docs", icon: "📑", industries: ["glass", "installers"], countries: ["IT"], process: "APQC 8.6 · Finance › Grants",
     kind: { fa: "بسته خدمت", en: "Service package" },
     name: { fa: "پرونده‌ساز مشوق‌های Ecobonus", en: "Ecobonus paperwork assistant" },
     outcome: { fa: "پرونده مشوق در ۱ روز به جای ۱ هفته", en: "Incentive files in 1 day instead of 1 week" },
@@ -158,7 +186,7 @@ export const products: Product[] = [
     faq: [],
   },
   {
-    slug: "followup-agent", icon: "🔁", industries: ["glass", "installers"], countries: ["DE", "GB"], process: "APQC 3.5 · Sales › Follow-up",
+    slug: "followup-agent", icon: "🔁", industries: ["glass", "installers", "metal"], countries: ["DE", "GB", "IT"], process: "APQC 3.5 · Sales › Follow-up",
     kind: { fa: "ایجنت", en: "Agent" },
     name: { fa: "پیگیری خودکار پیشنهاد قیمت", en: "Automatic quote follow-up" },
     outcome: { fa: "۲۲٪ پیشنهادهای بی‌جواب دوباره زنده می‌شوند", en: "22% of silent quotes revived" },

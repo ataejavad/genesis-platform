@@ -87,7 +87,7 @@ We sell outcomes, not software. Every service has a monthly report in your dashb
 
 for (const { publish = true, ...page } of pages) {
   const { approvalId } = await createDraft(db, agent, page);
-  if (publish) await decideApproval(db, reviewer, approvalId, "approved");
+  if (publish && approvalId) await decideApproval(db, reviewer, approvalId, "approved");
   console.log(`${publish ? "published" : "waiting "}  /${page.locale}/${page.slug}`);
 }
 await db.$client.end();

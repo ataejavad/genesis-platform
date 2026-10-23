@@ -17,7 +17,11 @@ const detect: [Need, RegExp][] = [
   ["followup", /follow|nachfass|segui|پیگیری|جواب نمی/i],
 ];
 // Industry words route the visitor to that industry's hub (one hub per industry; country is picked inside).
-const industryWords: Record<string, RegExp> = { glass: /glass|glas|window|fenster|vetr|finestr|شیشه|پنجره/i };
+const industryWords: Record<string, RegExp> = {
+  glass: /glass|glas|window|fenster|vetr|finestr|شیشه|پنجره/i,
+  installers: /install|idraul|elettric|impiant|caldai|pompa di calore|plumb|heating|electrician|sanitär|heizung|elektro|klima|تأسیسات|لوله‌کش|برق‌کار|نصاب/i,
+  metal: /metal|metall|carpenter|acciaio|steel|stahl|schwei|sald|lamier|cnc|فلز|فولاد|جوش/i,
+};
 const productFor: Record<Need, string[]> = { calls: ["phone-agent"], quotes: ["quote-agent", "followup-agent"], paperwork: ["incentive-docs"], followup: ["followup-agent"] };
 type Lang = "fa" | "en" | "de" | "it";
 const replies: Record<Lang, Record<Need | "other", string>> = {

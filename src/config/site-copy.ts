@@ -39,6 +39,14 @@ const en = {
   explore: { title: "Explore all industries", sub: "The full standard tree (NACE): sector › sub-industry › country. Pick yours and the whole site adapts to it.", search: "Search an industry or NACE code", live: "Open hub", soon: "Coming soon", request: "Request this industry", requested: "Thanks, noted. We open industries by demand.", none: "Nothing found. Try the check-up and tell us your trade." },
   about: { title: "About us", vision: "Every company deserves a world-class tech team. We're building it, for every industry, in every country.", points: ["We are not a software vendor. We are measured by the problems we remove.", "We pick the best tool for each job, whoever makes it, and run it for you.", "One specialist team per industry, so you never explain your trade from scratch."] },
   personal: { welcome: "Welcome back", yourHub: "Your hub", all: "See all industries" },
+  hub: {
+    updated: "Updated", sources: "Sources", source: "Source", checked: "Every claim links to its source. Rules and deadlines need an official source or two independent ones.",
+    stats: { firms: "Firms with 20–249 staff", employment: "People employed", turnover: "Turnover, € bn", growth: "Turnover vs. year before", aiUse: "Firms using AI (sector)", vacancy: "Job vacancy rate (sector)" },
+    deadlines: "Deadlines and rules", inForce: "In force", daysLeft: "{n} days left", started: "Since {d}", forYou: "What we can do for you",
+    pains: "What costs firms time right now", news: "News that matters, with our take", ourTake: "Our take", readAt: "Read at",
+    solutions: "Solutions for this trade", checkup: "Book a free check-up", pending: "This hub is being prepared. The checked version is waiting for our editors' approval.",
+    hook: { cta: "Get my list", next: "Next", back: "Back", email: "Work email", consent: "I agree to receive emails from {brand} about deadlines and offers for my trade. I can unsubscribe with one click.", reminders: "Also remind me 30 days before each deadline", sent: "Done. Check your inbox to confirm; your list is below.", yours: "Your deadlines", none: "Nothing urgent for your answers right now. We will tell you when that changes.", privacy: "We use your email only for this. No sharing, EU servers.", calc: "Estimate", error: "Something went wrong. Please try again.", consentNeeded: "Please tick the consent box." },
+  },
 };
 
 export type SiteCopy = typeof en;
@@ -80,6 +88,14 @@ const fa: SiteCopy = {
   explore: { title: "کاوش همه صنایع", sub: "درخت کامل استاندارد (NACE): بخش › زیرصنعت › کشور. صنعت خودتان را انتخاب کنید تا کل سایت برای آن تنظیم شود.", search: "جستجوی صنعت یا کد NACE", live: "ورود به هاب", soon: "به‌زودی", request: "درخواست این صنعت", requested: "ممنون، ثبت شد. صنعت‌ها بر اساس تقاضا باز می‌شوند.", none: "چیزی پیدا نشد. چک‌آپ را بزنید و صنف خود را بگویید." },
   about: { title: "درباره ما", vision: "هر شرکتی لایق یک تیم فنی در سطح جهانی است. ما آن را می‌سازیم، برای هر صنعت و در هر کشور.", points: ["ما فروشنده نرم‌افزار نیستیم. با مشکلاتی که برطرف می‌کنیم سنجیده می‌شویم.", "برای هر کار بهترین ابزار را انتخاب می‌کنیم، هر کس که آن را ساخته باشد، و برایتان اداره‌اش می‌کنیم.", "برای هر صنعت یک تیم متخصص، تا هیچ‌وقت لازم نباشد کارتان را از صفر توضیح دهید."] },
   personal: { welcome: "خوش برگشتید", yourHub: "هاب شما", all: "دیدن همه صنعت‌ها" },
+  hub: {
+    updated: "به‌روزرسانی", sources: "منابع", source: "منبع", checked: "هر ادعا به منبعش لینک دارد. قوانین و مهلت‌ها یک منبع رسمی یا دو منبع مستقل لازم دارند.",
+    stats: { firms: "شرکت‌های ۲۰ تا ۲۴۹ نفره", employment: "شاغلان", turnover: "گردش مالی، میلیارد یورو", growth: "تغییر گردش مالی نسبت به سال قبل", aiUse: "شرکت‌های استفاده‌کننده از AI (بخش)", vacancy: "نرخ جای خالی شغلی (بخش)" },
+    deadlines: "مهلت‌ها و قوانین", inForce: "در حال اجرا", daysLeft: "{n} روز مانده", started: "از {d}", forYou: "کاری که ما برایتان می‌کنیم",
+    pains: "چیزی که الان وقت شرکت‌ها را می‌گیرد", news: "خبرهای مهم، با تحلیل ما", ourTake: "تحلیل ما", readAt: "خواندن در",
+    solutions: "راه‌حل‌های این صنف", checkup: "رزرو چک‌آپ رایگان", pending: "این هاب در حال آماده‌سازی است. نسخه بررسی‌شده منتظر تأیید ویراستاران ماست.",
+    hook: { cta: "فهرست من را بده", next: "بعدی", back: "قبلی", email: "ایمیل کاری", consent: "موافقم که {brand} درباره مهلت‌ها و پیشنهادهای صنف من ایمیل بفرستد. با یک کلیک لغو می‌کنم.", reminders: "۳۰ روز پیش از هر مهلت هم یادآوری کن", sent: "انجام شد. ایمیلتان را برای تأیید ببینید؛ فهرستتان پایین است.", yours: "مهلت‌های شما", none: "برای پاسخ‌های شما الان مورد فوری نیست. اگر تغییر کرد خبر می‌دهیم.", privacy: "ایمیل شما فقط برای همین استفاده می‌شود. بدون اشتراک‌گذاری، سرور در اتحادیه اروپا.", calc: "برآورد", error: "مشکلی پیش آمد. دوباره امتحان کنید.", consentNeeded: "لطفاً تیک رضایت را بزنید." },
+  },
 };
 
 const de: SiteCopy = {
@@ -104,6 +120,14 @@ const de: SiteCopy = {
   explore: { title: "Alle Branchen entdecken", sub: "Der vollständige Standardbaum (NACE): Abschnitt › Branche › Land. Wählen Sie Ihre, und die ganze Website passt sich an.", search: "Branche oder NACE-Code suchen", live: "Hub öffnen", soon: "Bald verfügbar", request: "Diese Branche anfragen", requested: "Danke, notiert. Wir öffnen Branchen nach Nachfrage.", none: "Nichts gefunden. Machen Sie den Check und nennen Sie Ihre Branche." },
   about: { title: "Über uns", vision: "Jedes Unternehmen verdient ein Technikteam von Weltklasse. Wir bauen es auf, für jede Branche, in jedem Land.", points: ["Wir sind kein Softwarehändler. Man misst uns an den Problemen, die wir beseitigen.", "Wir wählen für jede Aufgabe das beste Werkzeug, egal von wem, und betreiben es für Sie.", "Ein Spezialistenteam pro Branche: Sie müssen Ihr Handwerk nie von vorn erklären."] },
   personal: { welcome: "Willkommen zurück", yourHub: "Ihr Hub", all: "Alle Branchen anzeigen" },
+  hub: {
+    updated: "Aktualisiert", sources: "Quellen", source: "Quelle", checked: "Jede Aussage verlinkt ihre Quelle. Regeln und Fristen brauchen eine amtliche oder zwei unabhängige Quellen.",
+    stats: { firms: "Betriebe mit 20–249 Beschäftigten", employment: "Beschäftigte", turnover: "Umsatz, Mrd. €", growth: "Umsatz zum Vorjahr", aiUse: "Betriebe mit KI (Sektor)", vacancy: "Quote offener Stellen (Sektor)" },
+    deadlines: "Fristen und Regeln", inForce: "In Kraft", daysLeft: "noch {n} Tage", started: "Seit {d}", forYou: "Was wir für Sie tun können",
+    pains: "Was Betriebe gerade Zeit kostet", news: "Wichtige Nachrichten, mit unserer Einordnung", ourTake: "Unsere Einordnung", readAt: "Lesen bei",
+    solutions: "Lösungen für dieses Handwerk", checkup: "Gratis-Check buchen", pending: "Dieser Hub wird vorbereitet. Die geprüfte Fassung wartet auf die Freigabe der Redaktion.",
+    hook: { cta: "Meine Liste erhalten", next: "Weiter", back: "Zurück", email: "Geschäftliche E-Mail", consent: "Ich willige ein, E-Mails von {brand} zu Fristen und Angeboten für meine Branche zu erhalten. Abmeldung mit einem Klick.", reminders: "Auch 30 Tage vor jeder Frist erinnern", sent: "Erledigt. Bitte bestätigen Sie per E-Mail; Ihre Liste steht unten.", yours: "Ihre Fristen", none: "Für Ihre Antworten ist gerade nichts dringend. Wir melden uns, wenn sich das ändert.", privacy: "Ihre E-Mail nutzen wir nur dafür. Keine Weitergabe, Server in der EU.", calc: "Berechnen", error: "Etwas ist schiefgelaufen. Bitte erneut versuchen.", consentNeeded: "Bitte die Einwilligung ankreuzen." },
+  },
 };
 
 const it: SiteCopy = {
@@ -128,6 +152,14 @@ const it: SiteCopy = {
   explore: { title: "Esplora tutti i settori", sub: "L'albero standard completo (NACE): sezione › settore › paese. Scegli il tuo e tutto il sito si adatta.", search: "Cerca un settore o codice NACE", live: "Apri hub", soon: "Presto", request: "Richiedi questo settore", requested: "Grazie, registrato. Apriamo i settori in base alla domanda.", none: "Nessun risultato. Fai il check-up e dicci il tuo settore." },
   about: { title: "Chi siamo", vision: "Ogni azienda merita un team tecnico di livello mondiale. Lo stiamo costruendo, per ogni settore, in ogni paese.", points: ["Non vendiamo software. Ci misurano i problemi che eliminiamo.", "Scegliamo lo strumento migliore per ogni lavoro, chiunque lo produca, e lo gestiamo per voi.", "Un team specializzato per settore: non dovrete mai spiegare il vostro mestiere da zero."] },
   personal: { welcome: "Bentornato", yourHub: "Il tuo hub", all: "Vedi tutti i settori" },
+  hub: {
+    updated: "Aggiornato", sources: "Fonti", source: "Fonte", checked: "Ogni affermazione rimanda alla sua fonte. Regole e scadenze richiedono una fonte ufficiale o due indipendenti.",
+    stats: { firms: "Imprese con 20–249 addetti", employment: "Occupati", turnover: "Fatturato, mld €", growth: "Fatturato rispetto all'anno prima", aiUse: "Imprese che usano l'IA (settore)", vacancy: "Tasso di posti vacanti (settore)" },
+    deadlines: "Scadenze e regole", inForce: "In vigore", daysLeft: "mancano {n} giorni", started: "Dal {d}", forYou: "Cosa possiamo fare per te",
+    pains: "Cosa fa perdere tempo alle imprese adesso", news: "Le notizie che contano, con il nostro commento", ourTake: "Il nostro commento", readAt: "Leggi su",
+    solutions: "Soluzioni per il tuo mestiere", checkup: "Prenota un check-up gratuito", pending: "Questo hub è in preparazione. La versione verificata attende l'approvazione della redazione.",
+    hook: { cta: "Ricevi la mia lista", next: "Avanti", back: "Indietro", email: "Email di lavoro", consent: "Acconsento a ricevere email da {brand} su scadenze e offerte per il mio settore. Posso disiscrivermi con un clic.", reminders: "Avvisami anche 30 giorni prima di ogni scadenza", sent: "Fatto. Conferma dalla tua email; la tua lista è qui sotto.", yours: "Le tue scadenze", none: "Per le tue risposte non c'è nulla di urgente ora. Ti avviseremo se cambia.", privacy: "Usiamo la tua email solo per questo. Nessuna cessione, server nell'UE.", calc: "Calcola", error: "Qualcosa è andato storto. Riprova.", consentNeeded: "Spunta la casella del consenso." },
+  },
 };
 
 const dictionaries: Record<string, SiteCopy> = { "en-gb": en, "de-de": de, "it-it": it, "fa-ir": fa };

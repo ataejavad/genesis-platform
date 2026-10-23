@@ -1,0 +1,59 @@
+{
+ "agent": "industry",
+ "country": "IT",
+ "ranAt": "2026-10-23T11:52:45.912Z",
+ "period": "2024",
+ "note": "Snapshot of the market-selection run (PR #2) for the live hubs. The hub-builder reads data/market-selection/runs/ first when it exists.",
+ "rows": [
+  {
+   "id": "C25",
+   "name": "Manufacture of fabricated metal products, except machinery and equipment",
+   "facts": {
+    "turnoverMeur": 113933.49,
+    "targetFirms": 5997,
+    "marginPct": 14.9,
+    "personnelSharePct": 21.3,
+    "growthPct": -4.2,
+    "locationQuotient": 1.39,
+    "smallFirmTurnoverSharePct": 85.5,
+    "gosPerTargetFirmKeur": 1324,
+    "aiUsePct": 14.73,
+    "vacancyRatePct": 1.5,
+    "employment": 617410,
+    "obligations": "eu-vida"
+   },
+   "sources": {
+    "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+    "research": "Metal fabrication job shops: quoting from drawings by hand, many small owner-run firms, Italy specialised (LQ 1.39); automatic quoting tools exist (Radquote, Almaquote, Quotify) (https://hexagon.com/it/products/radan-radquote https://www.itismagazine.it/tecnologie/quanto-costa-una-lavorazioni-cnc-te-lo-dice-quotify)",
+    "ai_gap": "Eurostat isoc_eb_ain2, from C",
+    "regulation": "regulatory radar: eu-vida",
+    "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
+   }
+  },
+  {
+   "id": "F43",
+   "name": "Specialised construction activities",
+   "facts": {
+    "turnoverMeur": 138050.76,
+    "targetFirms": 4968,
+    "marginPct": 21,
+    "personnelSharePct": 18.7,
+    "growthPct": -13.6,
+    "locationQuotient": 0.96,
+    "smallFirmTurnoverSharePct": 89.1,
+    "gosPerTargetFirmKeur": 1007,
+    "aiUsePct": 10.39,
+    "vacancyRatePct": 2.5,
+    "employment": 1031047,
+    "obligations": "eu-vida"
+   },
+   "sources": {
+    "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+    "research": "Installers (electrical, plumbing, HVAC, solar): paper job reports, quotes, scheduling, bonus paperwork; ready field-service tools exist; reachable via CNA, Confartigianato, Assistal; same top rank in DE; artisans shrinking (https://www.teamsystem.com/magazine/construction/gestione-digitale-rapporti-intervento/ https://www.italiaoggi.it/diritto-e-fisco/lavoro-e-previdenza/trovare-un-idraulico-o-un-elettricista-sara-sempre-piu-difficile-crollano-gli-artigiani-in-italia-a130ja46)",
+    "ai_gap": "Eurostat isoc_eb_ain2, from F",
+    "regulation": "regulatory radar: eu-vida",
+    "labour_shortage": "Eurostat jvs_a_rate_r2, from F"
+   }
+  }
+ ]
+}

@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
+import { getDb } from "@/db";
 import { LOCALES, isLocale } from "@/config/locales";
 import { copyFor } from "@/config/site-copy";
 import { tx } from "@/config/tx";
 import { companies, factsFor, hubKey, industries, news, pick, posts, productsFor, tenders } from "@/mock/site";
+import { BRAND } from "@/mock/data";
+import { getHubDoc } from "@/server/hubs";
 import { visitorCountries } from "@/ui/site/country";
+import { HubView } from "@/ui/site/HubView";
 import { CountrySwitch } from "@/ui/site/CountrySwitch";
 import { RememberIndustry } from "@/ui/site/Remember";
 import { ActionButton, Newsletter } from "@/ui/site/SiteClient";
@@ -17,8 +21,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug, country } = await params;
   const industry = industries.find((i) => i.slug === slug);
   if (!industry) return {};
-  const cc = factsFor(industry, country?.[0] ?? industry.countries[0].country).country.toLowerCase();
-  return { title: pick(industry.name, locale), alternates: { canonical: `/${locale}/hub/${slug}/${cc}` } };
+  const cc = factsFor(industry, country?.[0] ?? industry.countries[0].country).country;
+  const hub = industry.live ? await getHubDoc(getDb(), locale, slug, cc).catch(() => null) : null;
+  return {
+    title: hub?.doc.name ?? pick(industry.name, locale),
+    description: hub?.doc.tagline,
+    alternates: { canonical: `/${locale}/hub/${slug}/${cc.toLowerCase()}` },
+  };
 }
 
 // One hub per industry (doc 15 §6ه.2); the country is a filter inside it, so visitors never pick from industry × country lists.
@@ -39,21 +48,37 @@ export default async function Hub({ params }: Props) {
   const t = (fa: string, en: string) => tx(locale, fa, en);
   const hubProducts = productsFor(industry.slug, hub.country);
   const lang = isLocale(locale) ? LOCALES[locale].lang : "en";
+  const countrySwitch = (
+    <CountrySwitch
+      lang={lang}
+      label={t("کشور", "Country")}
+      current={hub.country}
+      options={industry.countries.map((f) => ({ code: f.country, flag: f.flag, href: `/${locale}/hub/${industry.slug}/${f.country.toLowerCase()}` }))}
+    />
+  );
+  const crumbs = <div className="crumbs"><Link href={`/${locale}/explore`}>{c.nav.explore}</Link> › <span className="ltr">NACE {industry.nace}</span></div>;
+  // Live hubs show the approved hub-builder page; the sample layout below is only the fallback until then.
+  const approved = industry.live ? await getHubDoc(getDb(), locale, industry.slug, hub.country).catch(() => null) : null;
+  if (approved) {
+    return (
+      <main className="wrap-site section">
+        <RememberIndustry slug={industry.slug} />
+        {crumbs}
+        <HubView doc={approved.doc} c={c} locale={locale} brand={BRAND} country={countrySwitch} />
+      </main>
+    );
+  }
   return (
     <main className="wrap-site section">
       {industry.live && <RememberIndustry slug={industry.slug} />}
-      <div className="crumbs"><Link href={`/${locale}/explore`}>{c.nav.explore}</Link> › <span className="ltr">NACE {industry.nace}</span></div>
+      {crumbs}
+      {industry.live && <div className="card" role="status" style={{ marginBottom: 16, borderColor: "var(--warn)" }}>⏳ {c.hub.pending}</div>}
       <div className="row" style={{ alignItems: "flex-start" }}>
         <div style={{ flex: 1, minWidth: 280 }}>
           <h1>{industry.icon} {pick(industry.name, locale)}</h1>
           <p className="muted" style={{ maxWidth: 720 }}>{pick(hub.overview, locale)}</p>
         </div>
-        <CountrySwitch
-          lang={lang}
-          label={t("کشور", "Country")}
-          current={hub.country}
-          options={industry.countries.map((f) => ({ code: f.country, flag: f.flag, href: `/${locale}/hub/${industry.slug}/${f.country.toLowerCase()}` }))}
-        />
+        {countrySwitch}
         {!industry.live && <span className="badge warn">{t("پیش‌نمایش: هنوز منتشر نشده", "Preview: not published yet")}</span>}
       </div>
       <nav className="tabs" aria-label="hub">
