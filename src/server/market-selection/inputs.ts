@@ -42,3 +42,68 @@ export const UK_STATS: Record<"ai_gap" | "sme_count" | "momentum" | "labour_cost
   sme_count: { value: null, note: "ONS 'UK business: activity, size and location' tables by size band not parsed yet", source: "https://www.ons.gov.uk/businessindustryandtrade/business/activitysizeandlocation/datasets/ukbusinessactivitysizeandlocation", checked: "2026-10-23" },
   labour_cost: { value: null, note: "No Eurostat-comparable UK hourly labour cost since 2020", checked: "2026-10-23" },
 };
+
+/**
+ * Deep-research scores (0–10) for the top industries of a country, written by the research step
+ * (prompts/industry-research.md). "competition" is the level of competition: high = bad for us.
+ */
+export type IndustryResearch = {
+  manual_work: number;
+  solutions: number;
+  reachability: number;
+  competition: number;
+  replicability: number;
+  note: string;
+  sources: string[];
+  checked: string;
+};
+
+export const INDUSTRY_RESEARCH: Record<string, Record<string, IndustryResearch>> = {
+  IT: {
+    F43: {
+      manual_work: 8, solutions: 8, reachability: 7, competition: 6, replicability: 9,
+      note: "Installers (electrical, plumbing, HVAC, solar): paper job reports, quotes, scheduling, bonus paperwork; ready field-service tools exist; reachable via CNA, Confartigianato, Assistal; same top rank in DE; artisans shrinking",
+      sources: [
+        "https://www.teamsystem.com/magazine/construction/gestione-digitale-rapporti-intervento/",
+        "https://www.italiaoggi.it/diritto-e-fisco/lavoro-e-previdenza/trovare-un-idraulico-o-un-elettricista-sara-sempre-piu-difficile-crollano-gli-artigiani-in-italia-a130ja46",
+      ],
+      checked: "2026-10-23",
+    },
+    H49: {
+      manual_work: 8, solutions: 7, reachability: 6, competition: 6, replicability: 9,
+      note: "Road haulage: transport documents (DDT/CMR), planning, driver shortage (~22,000 missing in Italy); TMS, route optimisation and document AI exist; top 3 in DE too",
+      sources: ["https://quifinanza.it/lavoro/camionisti-crisi-aziende-italia/843883/"],
+      checked: "2026-10-23",
+    },
+    C25: {
+      manual_work: 8, solutions: 8, reachability: 7, competition: 5, replicability: 8,
+      note: "Metal fabrication job shops: quoting from drawings by hand, many small owner-run firms, Italy specialised (LQ 1.39); automatic quoting tools exist (Radquote, Almaquote, Quotify)",
+      sources: ["https://hexagon.com/it/products/radan-radquote", "https://www.itismagazine.it/tecnologie/quanto-costa-una-lavorazioni-cnc-te-lo-dice-quotify"],
+      checked: "2026-10-23",
+    },
+    F41: {
+      manual_work: 7, solutions: 6, reachability: 6, competition: 6, replicability: 7,
+      note: "Building contractors: site reports, subcontractor coordination, bonus paperwork; construction suites exist (TeamSystem, ACCA) but projects are lumpy",
+      sources: ["https://www.teamsystem.com/construction/bpm-service/funzionalita/"],
+      checked: "2026-10-23",
+    },
+    I56: {
+      manual_work: 6, solutions: 9, reachability: 6, competition: 9, replicability: 8,
+      note: "Restaurants with 20+ staff: rota, stock, reservations; very crowded vertical SaaS market (booking, POS, rota)",
+      sources: [],
+      checked: "2026-10-23",
+    },
+    I55: {
+      manual_work: 5, solutions: 9, reachability: 7, competition: 9, replicability: 7,
+      note: "Hotels: PMS, channel managers and chatbots are mature and crowded; AI use already 20%",
+      sources: [],
+      checked: "2026-10-23",
+    },
+    H52: {
+      manual_work: 7, solutions: 7, reachability: 6, competition: 6, replicability: 8,
+      note: "Warehousing/forwarding: document handling, customs paperwork; WMS and document AI exist",
+      sources: [],
+      checked: "2026-10-23",
+    },
+  },
+};

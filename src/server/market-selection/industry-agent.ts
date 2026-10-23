@@ -1,5 +1,6 @@
 import { INDUSTRY_CRITERIA, INDUSTRY_GATES } from "./criteria";
 import { type Fetcher, type JsonStat, codes, labels, observations } from "./eurostat";
+import { INDUSTRY_RESEARCH } from "./inputs";
 import { regulationPressure } from "./regulations";
 import { SBS_DIVISIONS, sectionOf, divisionNumber, spreadToDivisions } from "./nace";
 import { type Candidate, type Scored, gapIndex, round, scoreCandidates } from "./score";
@@ -115,6 +116,7 @@ export async function runIndustryAgent(fetcher: Fetcher, country: string, log: (
     const gosPerTargetFirm = gosTarget !== null && targetFirms ? (gosTarget * 1e6) / targetFirms : null;
 
     const reg = regulationPressure(country, d);
+    const research = INDUSTRY_RESEARCH[country]?.[d];
 
     const reasons: string[] = [];
     if ((INDUSTRY_GATES.excludedSections as readonly string[]).includes(section)) reasons.push(`section ${section} is outside our market`);
@@ -136,18 +138,19 @@ export async function runIndustryAgent(fetcher: Fetcher, country: string, log: (
         growth,
         personnel_share: personnelShare,
         labour_shortage: vacancy.get(d)?.value ?? null,
-        manual_work: null,
+        manual_work: research?.manual_work ?? null,
         regulation: reg.value,
         ai_gap: aiUse.has(d) ? 100 - aiUse.get(d)!.value : null,
-        solutions: null,
-        reachability: null,
+        solutions: research?.solutions ?? null,
+        reachability: research?.reachability ?? null,
         country_advantage: lq,
-        competition: null,
+        competition: research?.competition ?? null,
         fragmentation,
-        replicability: null,
+        replicability: research?.replicability ?? null,
       },
       sources: {
         turnover: `Eurostat sbs_sc_ovw ${latest}, million EUR`,
+        research: research ? `${research.note} (${research.sources.join(" ")})` : "not researched yet",
         ai_gap: aiUse.has(d) ? `Eurostat isoc_eb_ain2, from ${aiUse.get(d)!.from}` : "missing",
         regulation: reg.obligations.length ? `regulatory radar: ${reg.obligations.join(", ")}` : "regulatory radar: none found",
         labour_shortage: vacancy.has(d) ? `Eurostat jvs_a_rate_r2, from ${vacancy.get(d)!.from}` : "missing",
