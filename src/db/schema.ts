@@ -300,6 +300,8 @@ export const checkups = pgTable(
     // page the visitor started from, e.g. "hub" or "home"
     source: text("source"),
     answers: jsonb("answers").$type<Record<string, unknown>>().notNull(),
+    // what the visitor wrote in their own words (pains, context): the most valuable input for sales and product
+    transcript: jsonb("transcript").$type<{ role: "user" | "assistant"; text: string }[]>().notNull().default([]),
     report: jsonb("report").$type<Record<string, unknown>>().notNull(),
     totalEur: integer("total_eur").notNull(),
     // set when the visitor unlocks the full plan with email + consent

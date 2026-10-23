@@ -1,0 +1,1 @@
+ALTER TABLE "checkups" ADD COLUMN "transcript" jsonb DEFAULT '[]'::jsonb NOT NULL;

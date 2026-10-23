@@ -3,6 +3,7 @@ import { getDb } from "@/db";
 import { copyFor } from "@/config/site-copy";
 import { listPublished } from "@/server/content";
 import { checkupDefsFor } from "@/ui/site/checkup-defs";
+import { chatEnabled } from "@/agents/checkup-chat";
 import { factsFor, freeTools, hubKey, liveIndustries, news, pick, tenders } from "@/mock/site";
 import { visitorCountries, visitorIndustry } from "@/ui/site/country";
 import { Concierge } from "@/ui/site/Concierge";
@@ -46,7 +47,7 @@ export default async function LocaleHome({ params, searchParams }: Props) {
           <h1 style={{ margin: 0 }}>{c.hero.title[0]} <em>{c.hero.title[1]}</em></h1>
           <p className="lead" style={{ maxWidth: 760 }}>{c.hero.lead}</p>
         </div>
-        <Concierge locale={locale} c={c} brand={brand} checkups={checkupDefsFor(locale)} visitorIndustry={mine?.slug} />
+        <Concierge locale={locale} c={c} brand={brand} checkups={checkupDefsFor(locale)} visitorIndustry={mine?.slug} llm={chatEnabled()} />
         <div className="row small muted" style={{ marginTop: 18, gap: 18 }}>
           {c.hero.proof.map((p) => <span key={p}>✓ {p}</span>)}
         </div>

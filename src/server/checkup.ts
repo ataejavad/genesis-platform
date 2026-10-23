@@ -36,7 +36,8 @@ export const checkupDefSchema = z.object({
       // answers become tags that pick the matching hub deadlines
       tags: z.boolean().default(false),
       label: text,
-      options: z.array(z.object({ id: z.string(), value: z.number().optional(), label: text })).min(1),
+      // words: synonyms in any language that let the chat understand a typed answer
+      options: z.array(z.object({ id: z.string(), value: z.number().optional(), label: text, words: z.array(z.string()).default([]) })).min(1),
     }),
   ),
   leaks: z.array(z.object({ id: z.string(), solution: z.string(), title: text, why: text, factors: z.array(factor).min(1) })).min(1),
@@ -62,7 +63,7 @@ export function localizeDef(def: CheckupDef, lang: string) {
   return {
     industry: def.industry,
     minutes: def.minutes,
-    questions: def.questions.map((q) => ({ id: q.id, multi: q.multi, label: tr(q.label, lang), options: q.options.map((o) => ({ id: o.id, label: tr(o.label, lang) })) })),
+    questions: def.questions.map((q) => ({ id: q.id, multi: q.multi, label: tr(q.label, lang), options: q.options.map((o) => ({ id: o.id, label: tr(o.label, lang), words: o.words })) })),
   };
 }
 export type LocalizedCheckup = ReturnType<typeof localizeDef>;
@@ -167,9 +168,11 @@ export const checkupInput = z.object({
   industry: z.string(),
   country: z.string().length(2).transform((c) => c.toUpperCase()),
   locale: localeEnum,
-  entrance: z.enum(["form", "chat"]),
+  // both doors are the same conversation: the check-up page or the chat on the home page
+  entrance: z.enum(["page", "home"]),
   source: z.string().max(40).optional(),
   answers: answersSchema,
+  transcript: z.array(z.object({ role: z.enum(["user", "assistant"]), text: z.string().max(2000) })).max(80).default([]),
 });
 
 export async function startCheckup(db: Db, actor: Actor, raw: unknown) {

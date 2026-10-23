@@ -45,7 +45,7 @@ describe("check-up funnel", () => {
 
   it("keeps the plan locked until email and consent, then counts each step per entrance", async () => {
     const metal = { work: ["import"], team: "m", quotes: "mid", quoteHours: "mid", lost: "mid", followUp: "never", orderValue: "mid", docs: "mid", hourly: "mid" };
-    const { id, report } = await startCheckup(db, site, { industry: "metal", country: "it", locale: "it-it", entrance: "chat", answers: metal });
+    const { id, report } = await startCheckup(db, site, { industry: "metal", country: "it", locale: "it-it", entrance: "home", answers: metal, transcript: [{ role: "user", text: "Facciamo carpenteria e i preventivi ci uccidono" }] });
     expect(report.leaks[0]).not.toHaveProperty("solution");
     await expect(requestCall(db, site, id)).rejects.toMatchObject({ code: "conflict" });
     await expect(unlockCheckup(db, site, id, { ...lead, consent: false })).rejects.toMatchObject({ code: "invalid" });
@@ -55,6 +55,6 @@ describe("check-up funnel", () => {
     expect(await requestCall(db, site, id)).toEqual({ already: false });
     expect(await db.select().from(leads)).toMatchObject([{ email: "anna@officina.it", industry: "metal", hook: "checkup", tags: ["import"] }]);
     expect((await db.select().from(events)).map((e) => e.type)).toEqual(["checkup.completed", "lead.captured", "checkup.unlocked", "checkup.call_requested"]);
-    expect(await checkupFunnel(db)).toEqual([{ industry: "metal", entrance: "chat", completed: 1, unlocked: 1, calls: 1 }]);
+    expect(await checkupFunnel(db)).toEqual([{ industry: "metal", entrance: "home", completed: 1, unlocked: 1, calls: 1 }]);
   });
 });

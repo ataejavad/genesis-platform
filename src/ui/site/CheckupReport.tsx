@@ -7,13 +7,14 @@ const euro = (n: number, lang: string) => new Intl.NumberFormat(lang, { style: "
 const num = (n: number, lang: string) => n.toLocaleString(lang, { maximumFractionDigits: 2 });
 
 /** The check-up result, shared by the form, the chat and the report link. Solutions appear only when unlocked. */
-export function CheckupReport({ report, c, locale, compact }: { report: LockedReport | Report; c: SiteCopy["checkup"]; locale: string; compact?: boolean }) {
+export function CheckupReport({ report, c, locale, compact, only }: { report: LockedReport | Report; c: SiteCopy["checkup"]; locale: string; compact?: boolean; only?: "plan" }) {
   const lang = locale.slice(0, 2);
   const full = "solution" in (report.leaks[0] ?? {}) ? (report as Report) : null;
   const top = full?.leaks[0];
   const product = (slug: string) => products.find((p) => p.slug === slug);
   return (
     <div className="stack checkup-report" style={{ gap: 12 }}>
+      {only !== "plan" && <>
       <div className="card stat">
         <div className="label">{c.total}</div>
         <div className="value num">{euro(report.total, lang)}</div>
@@ -46,6 +47,7 @@ export function CheckupReport({ report, c, locale, compact }: { report: LockedRe
           <ul>{report.deadlines.map((d) => <li key={d.id}><Link href={d.url}>{d.date ? <b>{d.date} </b> : null}{d.title}</Link></li>)}</ul>
         </div>
       )}
+      </>}
       {full && top && (
         <div className="card hook">
           <h3 style={{ marginTop: 0 }}>✦ {c.plan}</h3>
