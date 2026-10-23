@@ -262,4 +262,5 @@ a.tile:hover { border-color: var(--brand); text-decoration: none; }
 .hook-result { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 4px; }
 .hook-form { display: grid; gap: 8px; max-width: 720px; }
 .check { display: flex; gap: 8px; align-items: flex-start; }
-.check input { margin-top: 3px; }
+.check input { margin-top: 3px; flex: none; width: auto; }
+.checkup-report details summary { cursor: pointer; color: var(--muted); }

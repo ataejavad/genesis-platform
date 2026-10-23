@@ -7,7 +7,10 @@ export type EventType =
   | "approval.decided"
   | "content.published"
   | "content.rejected"
-  | "lead.captured";
+  | "lead.captured"
+  | "checkup.completed"
+  | "checkup.unlocked"
+  | "checkup.call_requested";
 
 // Call inside the same transaction as the change it describes (transactional outbox).
 export async function emit(

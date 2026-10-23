@@ -6,5 +6,7 @@ export default defineConfig({
   test: {
     globalSetup: ["./tests/global-setup.ts"],
     fileParallelism: false,
+    // next build copies the repo into .next/standalone; never run those copies
+    exclude: ["**/node_modules/**", ".next/**"],
   },
 });

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getDb } from "@/db";
 import { demandSignals, hubFreshness, markets } from "@/mock/cockpit";
 import { hubStatus } from "@/server/hubs";
+import { checkupFunnel } from "@/server/checkup";
 import { PageHead } from "@/ui/Shell";
 
 const tone: Record<string, string> = { live: "ok", "seed ready": "warn", candidate: "", rejected: "gray" };
@@ -17,7 +18,8 @@ const steps = [
 export const dynamic = "force-dynamic";
 
 export default async function Markets() {
-  const hubs = await hubStatus(getDb()).catch(() => []);
+  const [hubs, funnel] = await Promise.all([hubStatus(getDb()).catch(() => []), checkupFunnel(getDb()).catch(() => [])]);
+  const pct = (a: number, b: number) => (b ? `${Math.round((a / b) * 100)}%` : "—");
   return (
     <main>
       <PageHead title="Markets & hubs" crumbs="Cockpit › Growth" sub="Genesis stage 0: the market-selection agent scores sub-industry × country filters. Only the ones we work on go live." actions={<button className="btn primary">Run selection now</button>} />
@@ -40,6 +42,20 @@ export default async function Markets() {
               <td><Link className="btn sm" href={`/it-it/hub/${h.industry}/${h.country.toLowerCase()}`}>Open</Link></td>
             </tr>
           ))}</tbody></table>
+      </div>
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div className="card-head"><h3>Free check-up · funnel this month</h3><span className="badge ok">live database</span><span className="more muted small">One engine, two entrances: the form page and the home chat. Completed → plan unlocked with email (lead) → call requested.</span></div>
+        <table className="table"><thead><tr><th>Industry</th><th>Entrance</th><th>Completed</th><th>Unlocked (lead)</th><th>Call requested</th></tr></thead>
+          <tbody>
+            {funnel.length === 0 && <tr><td colSpan={5} className="muted">No check-ups yet this month.</td></tr>}
+            {funnel.map((f) => (
+              <tr key={f.industry + f.entrance}>
+                <td><b>{f.industry}</b></td><td>{f.entrance}</td><td className="num">{f.completed}</td>
+                <td className="num">{f.unlocked} <span className="muted">({pct(f.unlocked, f.completed)})</span></td>
+                <td className="num">{f.calls} <span className="muted">({pct(f.calls, f.unlocked)})</span></td>
+              </tr>
+            ))}
+          </tbody></table>
       </div>
       <div className="card table-wrap">
         <table className="table"><thead><tr><th>Filter</th><th>NACE</th><th>Demand</th><th>Competition</th><th>Access</th><th>Law</th><th>Margin</th><th>Total</th><th>Status</th><th>Value KPI (30 d)</th><th /></tr></thead>

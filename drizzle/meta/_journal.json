@@ -15,6 +15,13 @@
       "when": 1792758123103,
       "tag": "0001_leads",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792779053469,
+      "tag": "0002_checkups",
+      "breakpoints": true
     }
   ]
 }

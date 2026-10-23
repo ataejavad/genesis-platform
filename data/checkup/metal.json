@@ -1,0 +1,105 @@
+{
+  "industry": "metal",
+  "version": 1,
+  "minutes": 2,
+  "questions": [
+    { "id": "work", "multi": true, "tags": true,
+      "label": { "it": "Cosa fai?", "en": "What do you do?", "fa": "چه کاری انجام می‌دهید؟" },
+      "options": [
+        { "id": "structural", "label": { "it": "Strutture e carpenteria per l'edilizia (EN 1090)", "en": "Structures and metalwork for buildings (EN 1090)", "fa": "سازه و قطعات فلزی ساختمان (EN 1090)" } },
+        { "id": "machines", "label": { "it": "Costruisco o modifico macchine", "en": "I build or modify machines", "fa": "ماشین می‌سازم یا تغییر می‌دهم" } },
+        { "id": "site", "label": { "it": "Monto in cantiere", "en": "I install on building sites", "fa": "در کارگاه ساختمانی نصب می‌کنم" } },
+        { "id": "import", "label": { "it": "Compro acciaio o alluminio da fuori UE", "en": "I buy steel or aluminium from outside the EU", "fa": "فولاد یا آلومینیوم از خارج اتحادیه می‌خرم" } },
+        { "id": "invest", "label": { "it": "Investirò in macchinari entro settembre 2028", "en": "I will invest in machinery by September 2028", "fa": "تا سپتامبر ۲۰۲۸ ماشین‌آلات می‌خرم" } }
+      ] },
+    { "id": "team",
+      "label": { "it": "Quante persone lavorano nella tua impresa?", "en": "How many people work in your firm?", "fa": "شرکت شما چند نفر است؟" },
+      "options": [
+        { "id": "s", "value": 3, "label": { "it": "1–5", "en": "1–5", "fa": "۱ تا ۵" } },
+        { "id": "m", "value": 12, "label": { "it": "6–19", "en": "6–19", "fa": "۶ تا ۱۹" } },
+        { "id": "l", "value": 30, "label": { "it": "20–49", "en": "20–49", "fa": "۲۰ تا ۴۹" } },
+        { "id": "xl", "value": 60, "label": { "it": "50 o più", "en": "50 or more", "fa": "۵۰ یا بیشتر" } }
+      ] },
+    { "id": "quotes",
+      "label": { "it": "Quanti preventivi fai a settimana?", "en": "How many quotes do you make a week?", "fa": "هفته‌ای چند پیش‌فاکتور می‌دهید؟" },
+      "options": [
+        { "id": "low", "value": 5, "label": { "it": "Meno di 10", "en": "Under 10", "fa": "کمتر از ۱۰" } },
+        { "id": "mid", "value": 20, "label": { "it": "10–30", "en": "10–30", "fa": "۱۰ تا ۳۰" } },
+        { "id": "high", "value": 40, "label": { "it": "Più di 30", "en": "Over 30", "fa": "بیشتر از ۳۰" } }
+      ] },
+    { "id": "quoteHours",
+      "label": { "it": "Quanto tempo richiede un preventivo da disegno?", "en": "How long does a quote from a drawing take?", "fa": "هر پیش‌فاکتور از روی نقشه چقدر طول می‌کشد؟" },
+      "options": [
+        { "id": "low", "value": 0.75, "label": { "it": "Meno di 1 ora", "en": "Under 1 hour", "fa": "کمتر از ۱ ساعت" } },
+        { "id": "mid", "value": 2, "label": { "it": "1–3 ore", "en": "1–3 hours", "fa": "۱ تا ۳ ساعت" } },
+        { "id": "high", "value": 4, "label": { "it": "Più di 3 ore", "en": "Over 3 hours", "fa": "بیشتر از ۳ ساعت" } }
+      ] },
+    { "id": "lost",
+      "label": { "it": "Quanti preventivi diventano ordini?", "en": "How many quotes turn into orders?", "fa": "چند درصد پیش‌فاکتورها سفارش می‌شوند؟" },
+      "options": [
+        { "id": "low", "value": 0.85, "label": { "it": "Meno del 20%", "en": "Under 20%", "fa": "کمتر از ۲۰٪" } },
+        { "id": "mid", "value": 0.7, "label": { "it": "20–40%", "en": "20–40%", "fa": "۲۰ تا ۴۰٪" } },
+        { "id": "high", "value": 0.5, "label": { "it": "Più del 40%", "en": "Over 40%", "fa": "بیشتر از ۴۰٪" } }
+      ] },
+    { "id": "followUp",
+      "label": { "it": "Richiami i clienti che non rispondono al preventivo?", "en": "Do you chase customers who don't answer a quote?", "fa": "مشتری‌هایی را که به پیش‌فاکتور جواب نمی‌دهند پیگیری می‌کنید؟" },
+      "options": [
+        { "id": "always", "value": 0, "label": { "it": "Sempre", "en": "Always", "fa": "همیشه" } },
+        { "id": "sometimes", "value": 0.04, "label": { "it": "A volte", "en": "Sometimes", "fa": "گاهی" } },
+        { "id": "never", "value": 0.08, "label": { "it": "Quasi mai", "en": "Hardly ever", "fa": "تقریباً هرگز" } }
+      ] },
+    { "id": "orderValue",
+      "label": { "it": "Valore medio di un ordine?", "en": "Average order value?", "fa": "میانگین ارزش هر سفارش؟" },
+      "options": [
+        { "id": "low", "value": 1500, "label": { "it": "Meno di €2.000", "en": "Under €2,000", "fa": "کمتر از ۲٬۰۰۰ یورو" } },
+        { "id": "mid", "value": 5000, "label": { "it": "€2.000–10.000", "en": "€2,000–10,000", "fa": "۲٬۰۰۰ تا ۱۰٬۰۰۰ یورو" } },
+        { "id": "high", "value": 20000, "label": { "it": "Più di €10.000", "en": "Over €10,000", "fa": "بیشتر از ۱۰٬۰۰۰ یورو" } }
+      ] },
+    { "id": "docs",
+      "label": { "it": "Ore a settimana su documenti di conformità (DoP, marcatura CE, CBAM)?", "en": "Hours a week on compliance documents (DoP, CE marking, CBAM)?", "fa": "هفته‌ای چند ساعت برای مدارک انطباق (DoP، نشان CE، CBAM)؟" },
+      "options": [
+        { "id": "low", "value": 1, "label": { "it": "Meno di 2", "en": "Under 2", "fa": "کمتر از ۲" } },
+        { "id": "mid", "value": 4, "label": { "it": "2–6", "en": "2–6", "fa": "۲ تا ۶" } },
+        { "id": "high", "value": 10, "label": { "it": "Più di 6", "en": "Over 6", "fa": "بیشتر از ۶" } }
+      ] },
+    { "id": "hourly",
+      "label": { "it": "Costo orario medio di un dipendente (contributi inclusi)?", "en": "Average hourly cost of an employee (all-in)?", "fa": "میانگین هزینه ساعتی هر کارمند (با بیمه و مالیات)؟" },
+      "options": [
+        { "id": "low", "value": 25, "label": { "it": "Circa €25", "en": "About €25", "fa": "حدود ۲۵ یورو" } },
+        { "id": "mid", "value": 35, "label": { "it": "Circa €35", "en": "About €35", "fa": "حدود ۳۵ یورو" } },
+        { "id": "high", "value": 45, "label": { "it": "Circa €45", "en": "About €45", "fa": "حدود ۴۵ یورو" } }
+      ] }
+  ],
+  "leaks": [
+    { "id": "quoting-time", "solution": "drawing-quote",
+      "title": { "it": "Ore spese a fare preventivi a mano", "en": "Hours spent quoting by hand", "fa": "ساعت‌هایی که صرف قیمت‌دهی دستی می‌شود" },
+      "why": { "it": "Ogni disegno viene misurato e calcolato da capo, spesso dal titolare.", "en": "Every drawing is measured and costed from scratch, often by the owner.", "fa": "هر نقشه از صفر اندازه‌گیری و قیمت‌گذاری می‌شود، اغلب توسط خود مدیر." },
+      "factors": [
+        { "q": "quotes", "label": { "it": "preventivi a settimana", "en": "quotes a week", "fa": "پیش‌فاکتور در هفته" } },
+        { "q": "quoteHours", "label": { "it": "ore per preventivo", "en": "hours per quote", "fa": "ساعت برای هر پیش‌فاکتور" } },
+        { "q": "hourly", "label": { "it": "costo orario (€)", "en": "hourly cost (€)", "fa": "هزینه ساعتی (یورو)" } },
+        { "const": 46, "label": { "it": "settimane lavorative", "en": "working weeks", "fa": "هفته کاری" } },
+        { "const": 0.6, "label": { "it": "tempo risparmiato con preventivo da disegno (ipotesi)", "en": "time saved quoting from the drawing file (assumption)", "fa": "وقت صرفه‌جویی‌شده با قیمت‌دهی از فایل نقشه (فرض)" } }
+      ] },
+    { "id": "silent-quotes", "solution": "followup-agent",
+      "title": { "it": "Ordini persi per preventivi non seguiti", "en": "Orders lost on quotes nobody chased", "fa": "سفارش‌های از دست رفته به خاطر پیش‌فاکتورهای پیگیری‌نشده" },
+      "why": { "it": "Molti clienti non dicono di no: semplicemente nessuno li richiama.", "en": "Many customers don't say no: nobody simply calls them back.", "fa": "خیلی از مشتری‌ها نه نمی‌گویند؛ فقط کسی دوباره سراغشان نمی‌رود." },
+      "factors": [
+        { "q": "quotes", "label": { "it": "preventivi a settimana", "en": "quotes a week", "fa": "پیش‌فاکتور در هفته" } },
+        { "q": "lost", "label": { "it": "quota di preventivi che non diventano ordini", "en": "share of quotes that don't become orders", "fa": "سهم پیش‌فاکتورهایی که سفارش نمی‌شوند" } },
+        { "q": "followUp", "label": { "it": "quota recuperabile con un richiamo automatico (ipotesi)", "en": "share won back by automatic follow-up (assumption)", "fa": "سهمی که با پیگیری خودکار برمی‌گردد (فرض)" } },
+        { "q": "orderValue", "label": { "it": "valore medio dell'ordine (€)", "en": "average order value (€)", "fa": "میانگین ارزش سفارش (یورو)" } },
+        { "fact": "marginPct", "label": { "it": "margine del settore (Eurostat)", "en": "sector margin (Eurostat)", "fa": "حاشیه سود بخش (Eurostat)" } },
+        { "const": 46, "label": { "it": "settimane lavorative", "en": "working weeks", "fa": "هفته کاری" } }
+      ] },
+    { "id": "compliance-docs", "solution": "compliance-pack",
+      "title": { "it": "Tempo su DoP, marcatura CE e CBAM", "en": "Time on DoP, CE marking and CBAM", "fa": "وقت صرف DoP، نشان CE و CBAM" },
+      "why": { "it": "Le regole cambiano (CPR 2024/3110, CBAM) e i documenti si rifanno a mano.", "en": "The rules keep changing (CPR 2024/3110, CBAM) and documents are redone by hand.", "fa": "قوانین عوض می‌شوند (CPR 2024/3110، CBAM) و مدارک دستی از نو ساخته می‌شوند." },
+      "factors": [
+        { "q": "docs", "label": { "it": "ore a settimana", "en": "hours a week", "fa": "ساعت در هفته" } },
+        { "q": "hourly", "label": { "it": "costo orario (€)", "en": "hourly cost (€)", "fa": "هزینه ساعتی (یورو)" } },
+        { "const": 46, "label": { "it": "settimane lavorative", "en": "working weeks", "fa": "هفته کاری" } },
+        { "const": 0.5, "label": { "it": "quota svolta da noi (ipotesi)", "en": "share we take over (assumption)", "fa": "سهمی که ما انجام می‌دهیم (فرض)" } }
+      ] }
+  ]
+}

@@ -1,6 +1,6 @@
 import { and, count, gte, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
-import type { Db } from "@/db";
+import type { Db, DbOrTx } from "@/db";
 import { leads } from "@/db/schema";
 import { LOCALES } from "@/config/locales";
 import type { Actor } from "./actor";
@@ -25,27 +25,30 @@ export const leadInput = z.object({
 
 /** Saves a hub sign-up. One row per email and hub: asking again updates the answers instead of duplicating. */
 export async function captureLead(db: Db, actor: Actor, raw: unknown) {
+  return db.transaction((tx) => insertLead(tx, actor, raw));
+}
+
+// Same as captureLead, inside a transaction the caller already holds (e.g. unlocking a check-up).
+export async function insertLead(tx: DbOrTx, actor: Actor, raw: unknown) {
   const parsed = leadInput.safeParse(raw);
   if (!parsed.success) throw new AppError(400, "invalid", parsed.error.issues[0]?.message ?? "invalid input");
   const { consent: _consent, website: _website, ...input } = parsed.data;
   const now = new Date();
-  return db.transaction(async (tx) => {
-    const [row] = await tx
-      .insert(leads)
-      .values({ ...input, consentAt: now })
-      .onConflictDoUpdate({
-        target: [leads.email, leads.industry, leads.country],
-        set: { locale: input.locale, hook: input.hook, answers: input.answers, tags: input.tags, consentText: input.consentText, consentAt: now, reminders: input.reminders, unsubscribedAt: null },
-      })
-      // xmax is 0 only for a freshly inserted row, so this tells a new lead from a returning one.
-      .returning({ id: leads.id, inserted: sql<boolean>`(xmax = 0)` });
-    const repeat = !row.inserted;
-    // No email address in events or audit: they are forwarded to automations; the lead row is the only copy.
-    const facts = { industry: input.industry, country: input.country, hook: input.hook, tags: input.tags, reminders: input.reminders, repeat };
-    await emit(tx, actor, "lead.captured", { type: "lead", id: row.id }, facts);
-    await audit(tx, actor, repeat ? "lead.updated" : "lead.captured", { type: "lead", id: row.id }, null, facts);
-    return { id: row.id, repeat };
-  });
+  const [row] = await tx
+    .insert(leads)
+    .values({ ...input, consentAt: now })
+    .onConflictDoUpdate({
+      target: [leads.email, leads.industry, leads.country],
+      set: { locale: input.locale, hook: input.hook, answers: input.answers, tags: input.tags, consentText: input.consentText, consentAt: now, reminders: input.reminders, unsubscribedAt: null },
+    })
+    // xmax is 0 only for a freshly inserted row, so this tells a new lead from a returning one.
+    .returning({ id: leads.id, inserted: sql<boolean>`(xmax = 0)` });
+  const repeat = !row.inserted;
+  // No email address in events or audit: they are forwarded to automations; the lead row is the only copy.
+  const facts = { industry: input.industry, country: input.country, hook: input.hook, tags: input.tags, reminders: input.reminders, repeat };
+  await emit(tx, actor, "lead.captured", { type: "lead", id: row.id }, facts);
+  await audit(tx, actor, repeat ? "lead.updated" : "lead.captured", { type: "lead", id: row.id }, null, facts);
+  return { id: row.id, repeat };
 }
 
 export const monthStart = (now = new Date()) => new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));

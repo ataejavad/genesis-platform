@@ -283,3 +283,30 @@ export const leads = pgTable(
   },
   (t) => [uniqueIndex("leads_email_hub_idx").on(t.email, t.industry, t.country), index("leads_hub_idx").on(t.industry, t.country, t.createdAt)],
 );
+
+/* ───────────── Free check-up (doc 15 §6ه.6) ───────────── */
+
+// One completed check-up. The id doubles as the private link to the report, so it is a random uuid.
+export const checkups = pgTable(
+  "checkups",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orgId: uuid("org_id").references(() => organizations.id),
+    industry: text("industry").notNull(),
+    country: text("country").notNull(),
+    locale: text("locale").notNull(),
+    // which door the visitor came through: the form page or the concierge chat (KPI per entrance)
+    entrance: text("entrance").notNull(),
+    // page the visitor started from, e.g. "hub" or "home"
+    source: text("source"),
+    answers: jsonb("answers").$type<Record<string, unknown>>().notNull(),
+    report: jsonb("report").$type<Record<string, unknown>>().notNull(),
+    totalEur: integer("total_eur").notNull(),
+    // set when the visitor unlocks the full plan with email + consent
+    leadId: uuid("lead_id").references(() => leads.id),
+    unlockedAt: timestamp("unlocked_at", { withTimezone: true }),
+    callRequestedAt: timestamp("call_requested_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("checkups_created_idx").on(t.createdAt)],
+);
