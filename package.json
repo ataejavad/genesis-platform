@@ -16,7 +16,8 @@
     "worker": "tsx src/worker/index.ts",
     "smoke": "tsx scripts/smoke.ts",
     "demo": "tsx scripts/demo.ts",
-    "local": "tsx scripts/local.ts"
+    "local": "tsx scripts/local.ts",
+    "agents:market": "tsx scripts/market-selection.ts"
   },
   "dependencies": {
     "better-auth": "^1.7.12",
