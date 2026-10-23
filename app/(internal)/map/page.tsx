@@ -17,6 +17,7 @@ const doors = [
       { href: "/fa-ir/company/fensterbau-mueller", t: "صفحه عمومی یک شرکت (دایرکتوری)" },
       { href: "/fa-ir/checkup", t: "چک‌آپ رایگان (ایجنت گفتگومحور)" },
       { href: "/fa-ir/tools", t: "ابزارهای رایگان" },
+      { href: "/fa-ir/about", t: "درباره ما (چشم‌انداز عمومی)" },
       { href: "/fa-ir/partners", t: "همکاری با ما" },
       { href: "/fa-ir/legal", t: "اطلاعات حقوقی و حریم خصوصی" },
     ],

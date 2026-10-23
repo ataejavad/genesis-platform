@@ -74,6 +74,7 @@ export default async function SiteLayout({ children, params }: { children: React
             </div>
             <div className="stack">
               <b style={{ color: "var(--fg)" }}>{c.footer.company}</b>
+              <Link href={`${home}/about`}>{c.about.title}</Link>
               <Link href={`${home}/partners`}>{c.nav.partners}</Link>
               <Link href="/portal">{c.nav.login}</Link>
               <Link href={`${home}/signup`}>{c.nav.signup}</Link>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Checkup } from "./checkup";
 
-export const metadata: Metadata = { title: "AI check-up" };
+export const metadata: Metadata = { title: "Free check-up" };
 
 export default async function CheckupPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

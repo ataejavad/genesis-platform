@@ -196,8 +196,8 @@ export const tenders = [
 ];
 
 export const freeTools = [
-  { slug: "roi", icon: "📈", name: { fa: "ماشین‌حساب صرفه‌جویی AI", en: "AI savings calculator" }, desc: { fa: "در ۳۰ ثانیه ببینید AI ماهانه چقدر برایتان صرفه‌جویی می‌کند.", en: "See your monthly AI savings in 30 seconds." } },
-  { slug: "checkup", icon: "🩺", name: { fa: "چک‌آپ رایگان AI", en: "Free AI check-up" }, desc: { fa: "گفتگو با ایجنت تشخیص؛ گزارش کامل.", en: "Talk to the diagnostic agent; get a full report." } },
+  { slug: "roi", icon: "📈", name: { fa: "ماشین‌حساب صرفه‌جویی", en: "Savings calculator" }, desc: { fa: "در ۳۰ ثانیه ببینید ماهانه چقدر وقت و پول برمی‌گردد.", en: "See in 30 seconds how much time and money you get back each month." } },
+  { slug: "checkup", icon: "🩺", name: { fa: "چک‌آپ رایگان", en: "Free check-up" }, desc: { fa: "گفتگو با ایجنت تشخیص؛ گزارش کامل.", en: "Talk to the diagnostic agent; get a full report." } },
   { slug: "tenders", icon: "📣", name: { fa: "هشدار مناقصه صنعت شما", en: "Tender alerts for your industry" }, desc: { fa: "مناقصه‌های تازه هر هفته در ایمیل.", en: "New tenders weekly by email." } },
   { slug: "gdpr", icon: "🛡️", name: { fa: "چک‌لیست AI Act و GDPR", en: "AI Act & GDPR checklist" }, desc: { fa: "آیا استفاده شما از AI قانونی است؟", en: "Is your AI use compliant?" } },
 ];

@@ -56,7 +56,7 @@ export function RoiCalc({ fa }: { fa: boolean }) {
   const saved = Math.round(staff * hours * 4.3 * 0.35);
   return (
     <div className="card stack">
-      <h3>📈 {fa ? "ماشین‌حساب صرفه‌جویی AI" : "AI savings calculator"}</h3>
+      <h3>📈 {fa ? "ماشین‌حساب صرفه‌جویی" : "Savings calculator"}</h3>
       <div className="grid g3">
         <label className="field">{fa ? "تعداد کارکنان" : "Employees"}<input type="number" min={1} value={staff} onChange={(e) => setStaff(+e.target.value)} /></label>
         <label className="field">{fa ? "ساعت کار تکراری هر نفر در هفته" : "Repetitive hours / person / week"}<input type="number" min={0} value={hours} onChange={(e) => setHours(+e.target.value)} /></label>
