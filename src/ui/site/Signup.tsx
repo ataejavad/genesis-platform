@@ -67,7 +67,7 @@ export function Signup({ locale, country }: { locale: string; country: string })
         <form className="stack" style={{ gap: 10 }} onSubmit={(e) => { e.preventDefault(); lookup(); }}>
           <label htmlFor="su-name"><b>{t("نام شرکت شما", "Your company name")}</b></label>
           <input id="su-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Glas Becker GmbH" autoComplete="organization" />
-          <div className="muted small">{t("لازم نیست صنعت را از فهرست پیدا کنید؛ ایجنت ما آن را از ثبت شرکت‌ها و وب‌سایت شما پیدا می‌کند.", "No need to find your industry in a list: our agent looks it up in company registers and on your website.")}</div>
+          <div className="muted small">{t("لازم نیست صنعت را از فهرست پیدا کنید؛ ما آن را از ثبت شرکت‌ها و وب‌سایت شما پیدا می‌کنیم.", "No need to find your industry in a list: we look it up in company registers and on your website.")}</div>
           <button className="btn primary">{t("پیدا کردن شرکت من", "Find my company")}</button>
         </form>
       )}
@@ -101,7 +101,7 @@ export function Signup({ locale, country }: { locale: string; country: string })
       {step === "done" && found && (
         <div className="stack" style={{ gap: 12 }} aria-live="polite">
           {hub ? (
-            <div className="callout ai">✓ {t("داشبورد شما برای این صنعت آماده شد:", "Your dashboard is set up for")} <b>{hub.icon} {pick(hub.name, locale)} · {countryName(found.country)}</b>. {t("محتوا، راه‌حل‌ها و مشاور AI شما تخصصی همین صنعت است.", "Content, solutions and your AI advisor are specialised for it.")}</div>
+            <div className="callout ai">✓ {t("داشبورد شما برای این صنعت آماده شد:", "Your dashboard is set up for")} <b>{hub.icon} {pick(hub.name, locale)} · {countryName(found.country)}</b>. {t("محتوا، راه‌حل‌ها و مشاور شما تخصصی همین صنعت است.", "Content, solutions and your advisor are specialised for it.")}</div>
           ) : (
             <div className="callout">✓ {t("هنوز هاب تخصصی برای این صنعت نداریم. همین حالا می‌توانید از همه چیز با محتوای عمومی استفاده کنید. صنعت شما به‌عنوان تقاضا ثبت شد و وقتی هابش باز شود اول به شما خبر می‌دهیم.", "We don't have a specialist hub for this industry yet. You can use everything now with general content. Your industry is logged as demand, and you'll be the first to know when its hub opens.")}</div>
           )}

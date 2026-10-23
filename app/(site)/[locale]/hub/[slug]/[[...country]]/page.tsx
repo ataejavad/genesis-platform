@@ -96,7 +96,7 @@ export default async function Hub({ params }: Props) {
       <p className="muted small" style={{ marginTop: -12, marginBottom: 20 }}>{t("منبع", "Source")}: {hub.sources.stats} · {t("به‌روزرسانی", "updated")} {hub.sources.updated} · ✓ {t("با دو منبع تطبیق داده شد", "cross-checked in 2 sources")}</p>
       <div className="grid g2" style={{ marginBottom: 20 }}>
         <div className="card"><h3>{t("دردهای رایج این صنف", "Typical pains in this trade")}</h3><ul>{hub.pains.map((p) => <li key={p.en}>{pick(p, locale)}</li>)}</ul></div>
-        <div className="card"><h3>{t("قوانین مهم", "Key rules")}</h3><p>{pick(hub.law, locale)}</p><p className="muted small">{t("منبع", "Source")}: {hub.sources.law} · {t("به‌روزرسانی", "updated")} {hub.sources.lawUpdated} · {t("ایجنت هاب‌ساز به‌روز نگه می‌دارد، با تأیید.", "Kept current by the hub-builder agent, with approval.")}</p></div>
+        <div className="card"><h3>{t("قوانین مهم", "Key rules")}</h3><p>{pick(hub.law, locale)}</p><p className="muted small">{t("منبع", "Source")}: {hub.sources.law} · {t("به‌روزرسانی", "updated")} {hub.sources.lawUpdated} · {t("هر هفته به‌روز و پیش از انتشار بازبینی می‌شود.", "Updated weekly and checked before it goes live.")}</p></div>
       </div>
 
       <section id="news" className="card" style={{ marginBottom: 20 }}>

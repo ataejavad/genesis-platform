@@ -63,7 +63,7 @@ export function RoiCalc({ fa }: { fa: boolean }) {
         <label className="field">{fa ? "هزینه هر ساعت (یورو)" : "Cost per hour (€)"}<input type="number" min={1} value={rate} onChange={(e) => setRate(+e.target.value)} /></label>
       </div>
       <div className="callout ai" role="status">
-        ✦ {fa ? `حدود ${saved} ساعت و €${(saved * rate).toLocaleString("en-US")} در ماه قابل صرفه‌جویی است (فرض: ۳۵٪ کارهای تکراری با AI).` : `About ${saved} hours and €${(saved * rate).toLocaleString("en-US")} a month can be saved (assumes 35% of repetitive work automated).`}
+        ✦ {fa ? `حدود ${saved} ساعت و €${(saved * rate).toLocaleString("en-US")} در ماه قابل صرفه‌جویی است (فرض: ۳۵٪ کارهای تکراری از دوش شما برداشته می‌شود).` : `About ${saved} hours and €${(saved * rate).toLocaleString("en-US")} a month can be saved (assumes 35% of repetitive work taken off your hands).`}
       </div>
     </div>
   );
