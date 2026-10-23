@@ -118,6 +118,7 @@ export async function runIndustryAgent(fetcher: Fetcher, country: string, log: (
 
     const reasons: string[] = [];
     if ((INDUSTRY_GATES.excludedSections as readonly string[]).includes(section)) reasons.push(`section ${section} is outside our market`);
+    if ((INDUSTRY_GATES.excludedDivisions as readonly string[]).includes(d)) reasons.push("IT services: our suppliers and competitors, not buyers");
     if ((INDUSTRY_GATES.licensedSections as readonly string[]).includes(section)) reasons.push(`section ${section} needs a licence: only through a licensed partner`);
     if (gosPerTargetFirm !== null && gosPerTargetFirm < INDUSTRY_GATES.minGrossSurplusPerFirmEur) {
       reasons.push(`gross operating surplus per 20–249 staff firm ${Math.round(gosPerTargetFirm / 1000)}k EUR < ${INDUSTRY_GATES.minGrossSurplusPerFirmEur / 1000}k: can't pay ≥ 500 EUR/month reliably`);

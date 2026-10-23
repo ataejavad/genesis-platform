@@ -75,6 +75,10 @@ export const INDUSTRY_GATES = {
   licensedSections: ["K", "Q"],
   // NACE sections outside our market (public administration, households, extraterritorial)
   excludedSections: ["O", "T", "U"],
+  // IT service firms are our suppliers and competitors, not buyers of a tech broker
+  excludedDivisions: ["J62", "J63"],
+  // below this share of weight resting on real data a candidate is shown but not ranked
+  minConfidence: 0.7,
 } as const;
 
 /** Value filter: KPI + budget cap per agent (§2.6 ه). */

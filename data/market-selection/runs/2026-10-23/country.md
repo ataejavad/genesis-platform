@@ -5,7 +5,7 @@ Score out of 100 · confidence = share of the weight resting on real data.
 | # | Country | Score | Confidence | ai_gap (20) | sme_count (20) | momentum (20) | subsidies (10) | labour_cost (10) | access (10) | legal (10) |
 |---|---|---|---|---|---|---|---|---|---|---|
 | 1 | Italy | **70.8** | 100% | 84.3 → 20 | 89,539 → 13.3 | 1 → 12.5 | 9 → 10 | 32 → 0 | 10 → 10 | 4 → 5 |
-| 2 | United Kingdom | **55** | 50% | – | – | 1.2 → 20 | 3 → 0 | – | 8 → 0 | 9 → 10 |
+| 2 | United Kingdom ⚠ data incomplete, not comparable | **55** | 50% | – | – | 1.2 → 20 | 3 → 0 | – | 8 → 0 | 9 → 10 |
 | 3 | Germany | **54.6** | 100% | 75.07 → 6.7 | 213,889 → 20 | 1 → 12.5 | 6 → 2.5 | 45 → 6.7 | 9 → 5 | 3 → 1.3 |
 | 4 | Austria | **35.4** | 100% | 71.27 → 0 | 20,328 → 6.7 | 0.8 → 5 | 8 → 7.5 | 46.3 → 10 | 9 → 5 | 3 → 1.3 |
 | 5 | Ireland | **34.2** | 100% | 81.66 → 13.3 | 14,814 → 0 | -0.4 → 0 | 7 → 5 | 44.2 → 3.3 | 9 → 5 | 6 → 7.5 |

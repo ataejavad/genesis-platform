@@ -1,5 +1,5 @@
 import type { CountryRun } from "./country-agent";
-import { COUNTRY_CRITERIA, INDUSTRY_CRITERIA } from "./criteria";
+import { COUNTRY_CRITERIA, INDUSTRY_CRITERIA, INDUSTRY_GATES } from "./criteria";
 import type { IndustryRun } from "./industry-agent";
 import { OBLIGATIONS, urgency } from "./regulations";
 
@@ -16,7 +16,8 @@ export function countryReport(run: CountryRun) {
     ...run.ranking.map((r, i) => {
       const cand = run.candidates.find((c) => c.id === r.id)!;
       const cells = r.breakdown.map((b) => (b.missing ? "–" : `${fmt(cand.values[b.id])} → ${b.points}`));
-      return `| ${i + 1} | ${r.name} | **${r.total}** | ${Math.round(r.confidence * 100)}% | ${cells.join(" | ")} |`;
+      const low = r.confidence < INDUSTRY_GATES.minConfidence ? " ⚠ data incomplete, not comparable" : "";
+      return `| ${i + 1} | ${r.name}${low} | **${r.total}** | ${Math.round(r.confidence * 100)}% | ${cells.join(" | ")} |`;
     }),
     "",
     "## Sources",

@@ -1,13 +1,13 @@
 {
   "agent": "industry",
   "country": "DE",
-  "ranAt": "2026-10-23T11:48:19.682Z",
+  "ranAt": "2026-10-23T11:49:05.063Z",
   "period": "2024",
   "ranking": [
     {
       "id": "N81",
       "name": "Services to buildings and landscape activities",
-      "total": 68.3,
+      "total": 68.2,
       "confidence": 0.71,
       "breakdown": [
         {
@@ -27,14 +27,14 @@
         {
           "id": "margin",
           "raw": 0.20285251653999822,
-          "score": 8.1,
-          "points": 6.5,
+          "score": 8,
+          "points": 6.4,
           "missing": false
         },
         {
           "id": "growth",
           "raw": 0.04454078143430351,
-          "score": 6.9,
+          "score": 7,
           "points": 2.8,
           "missing": false
         },
@@ -62,15 +62,15 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 77.92,
-          "score": 7,
-          "points": 5.6,
+          "score": 6.9,
+          "points": 5.5,
           "missing": false
         },
         {
@@ -105,7 +105,7 @@
           "id": "fragmentation",
           "raw": 0.6841570027953516,
           "score": 8.4,
-          "points": 3.4,
+          "points": 3.3,
           "missing": false
         },
         {
@@ -116,7 +116,7 @@
           "missing": true
         }
       ],
-      "gap": 11.5,
+      "gap": 11.4,
       "section": "N"
     },
     {
@@ -142,21 +142,21 @@
         {
           "id": "margin",
           "raw": 0.14216106975050882,
-          "score": 5.7,
+          "score": 5.8,
           "points": 4.6,
           "missing": false
         },
         {
           "id": "growth",
           "raw": -0.0057140518849775335,
-          "score": 4,
+          "score": 4.1,
           "points": 1.6,
           "missing": false
         },
         {
           "id": "personnel_share",
           "raw": 0.2938513076846017,
-          "score": 7.5,
+          "score": 7.6,
           "points": 5.3,
           "missing": false
         },
@@ -177,8 +177,8 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
@@ -205,7 +205,7 @@
         {
           "id": "country_advantage",
           "raw": 0.8889337609323074,
-          "score": 5.9,
+          "score": 5.8,
           "points": 3.5,
           "missing": false
         },
@@ -231,20 +231,20 @@
           "missing": true
         }
       ],
-      "gap": 13.4,
+      "gap": 13.6,
       "section": "F"
     },
     {
       "id": "H49",
       "name": "Land transport and transport via pipelines",
-      "total": 64.3,
+      "total": 64.4,
       "confidence": 0.71,
       "breakdown": [
         {
           "id": "turnover",
           "raw": 115160.18,
-          "score": 7.5,
-          "points": 6,
+          "score": 7.6,
+          "points": 6.1,
           "missing": false
         },
         {
@@ -264,22 +264,22 @@
         {
           "id": "growth",
           "raw": 0.13444312090764754,
-          "score": 9.1,
-          "points": 3.6,
+          "score": 9.2,
+          "points": 3.7,
           "missing": false
         },
         {
           "id": "personnel_share",
           "raw": 0.2529793718627394,
-          "score": 5.2,
-          "points": 3.7,
+          "score": 5.4,
+          "points": 3.8,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 2.8,
           "score": 7.2,
-          "points": 5.8,
+          "points": 5.7,
           "missing": false
         },
         {
@@ -292,8 +292,8 @@
         {
           "id": "regulation",
           "raw": 5.1,
-          "score": 7.6,
-          "points": 6.1,
+          "score": 7.5,
+          "points": 6,
           "missing": false
         },
         {
@@ -352,21 +352,21 @@
     {
       "id": "H52",
       "name": "Warehousing and support activities for transportation",
-      "total": 63.2,
+      "total": 63.4,
       "confidence": 0.71,
       "breakdown": [
         {
           "id": "turnover",
           "raw": 152356.97,
-          "score": 8.3,
-          "points": 6.6,
+          "score": 8.4,
+          "points": 6.7,
           "missing": false
         },
         {
           "id": "target_firms",
           "raw": 3575,
-          "score": 8,
-          "points": 8,
+          "score": 8.1,
+          "points": 8.1,
           "missing": false
         },
         {
@@ -386,15 +386,15 @@
         {
           "id": "personnel_share",
           "raw": 0.20862629389387305,
-          "score": 4.3,
-          "points": 3,
+          "score": 4.5,
+          "points": 3.1,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 2.8,
           "score": 7.2,
-          "points": 5.8,
+          "points": 5.7,
           "missing": false
         },
         {
@@ -407,7 +407,7 @@
         {
           "id": "regulation",
           "raw": 4.5,
-          "score": 6.2,
+          "score": 6.3,
           "points": 5,
           "missing": false
         },
@@ -436,7 +436,7 @@
           "id": "country_advantage",
           "raw": 1.0260922754510369,
           "score": 7.6,
-          "points": 4.6,
+          "points": 4.5,
           "missing": false
         },
         {
@@ -449,7 +449,7 @@
         {
           "id": "fragmentation",
           "raw": 0.46908612057590804,
-          "score": 4.8,
+          "score": 4.6,
           "points": 1.9,
           "missing": false
         },
@@ -461,20 +461,20 @@
           "missing": true
         }
       ],
-      "gap": 13.8,
+      "gap": 13.9,
       "section": "H"
     },
     {
       "id": "I56",
       "name": "Food and beverage service activities",
-      "total": 63.1,
+      "total": 63.3,
       "confidence": 0.71,
       "breakdown": [
         {
           "id": "turnover",
           "raw": 87648.86,
-          "score": 6.5,
-          "points": 5.2,
+          "score": 6.6,
+          "points": 5.3,
           "missing": false
         },
         {
@@ -487,29 +487,29 @@
         {
           "id": "margin",
           "raw": 0.16940653877300857,
-          "score": 7.4,
-          "points": 5.9,
+          "score": 7.3,
+          "points": 5.8,
           "missing": false
         },
         {
           "id": "growth",
           "raw": 0.020053595115968603,
-          "score": 4.9,
-          "points": 1.9,
+          "score": 5,
+          "points": 2,
           "missing": false
         },
         {
           "id": "personnel_share",
           "raw": 0.33181367105059895,
-          "score": 8.6,
-          "points": 6,
+          "score": 8.7,
+          "points": 6.1,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 2.6,
-          "score": 5.7,
-          "points": 4.6,
+          "score": 5.9,
+          "points": 4.7,
           "missing": false
         },
         {
@@ -522,14 +522,14 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 85.37,
-          "score": 8.7,
+          "score": 8.6,
           "points": 6.9,
           "missing": false
         },
@@ -550,8 +550,8 @@
         {
           "id": "country_advantage",
           "raw": 0.8002201483449388,
-          "score": 4.3,
-          "points": 2.6,
+          "score": 4.2,
+          "points": 2.5,
           "missing": false
         },
         {
@@ -576,13 +576,13 @@
           "missing": true
         }
       ],
-      "gap": 11.8,
+      "gap": 11.9,
       "section": "I"
     },
     {
       "id": "M69",
       "name": "Legal and accounting activities",
-      "total": 62.3,
+      "total": 62.1,
       "confidence": 0.71,
       "breakdown": [
         {
@@ -595,21 +595,21 @@
         {
           "id": "target_firms",
           "raw": 5513,
-          "score": 8.6,
-          "points": 8.6,
+          "score": 8.7,
+          "points": 8.7,
           "missing": false
         },
         {
           "id": "margin",
           "raw": 0.3073943194235843,
-          "score": 9.3,
+          "score": 9.2,
           "points": 7.4,
           "missing": false
         },
         {
           "id": "growth",
           "raw": 0.0659066181016923,
-          "score": 7.9,
+          "score": 8,
           "points": 3.2,
           "missing": false
         },
@@ -623,7 +623,7 @@
         {
           "id": "labour_shortage",
           "raw": 3.2,
-          "score": 8.3,
+          "score": 8.2,
           "points": 6.6,
           "missing": false
         },
@@ -637,15 +637,15 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 53.89,
-          "score": 1.8,
-          "points": 1.5,
+          "score": 1.6,
+          "points": 1.2,
           "missing": false
         },
         {
@@ -665,7 +665,7 @@
         {
           "id": "country_advantage",
           "raw": 0.9063099996182696,
-          "score": 6.2,
+          "score": 6.1,
           "points": 3.7,
           "missing": false
         },
@@ -679,7 +679,7 @@
         {
           "id": "fragmentation",
           "raw": 0.6895052208827553,
-          "score": 8.6,
+          "score": 8.5,
           "points": 3.4,
           "missing": false
         },
@@ -691,13 +691,13 @@
           "missing": true
         }
       ],
-      "gap": 2.8,
+      "gap": 2.5,
       "section": "M"
     },
     {
       "id": "F42",
       "name": "Civil engineering",
-      "total": 59.6,
+      "total": 59.7,
       "confidence": 0.71,
       "breakdown": [
         {
@@ -724,14 +724,14 @@
         {
           "id": "growth",
           "raw": 0.1332434457948064,
-          "score": 9,
+          "score": 9.1,
           "points": 3.6,
           "missing": false
         },
         {
           "id": "personnel_share",
           "raw": 0.2901157379723524,
-          "score": 7.2,
+          "score": 7.3,
           "points": 5.1,
           "missing": false
         },
@@ -752,8 +752,8 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
@@ -780,8 +780,8 @@
         {
           "id": "country_advantage",
           "raw": 0.7225028766012324,
-          "score": 2.7,
-          "points": 1.6,
+          "score": 2.6,
+          "points": 1.5,
           "missing": false
         },
         {
@@ -794,6 +794,121 @@
         {
           "id": "fragmentation",
           "raw": 0.533136884691272,
+          "score": 6,
+          "points": 2.4,
+          "missing": false
+        },
+        {
+          "id": "replicability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        }
+      ],
+      "gap": 13.4,
+      "section": "F"
+    },
+    {
+      "id": "G45",
+      "name": "Wholesale and retail trade and repair of motor vehicles and motorcycles",
+      "total": 59.1,
+      "confidence": 0.71,
+      "breakdown": [
+        {
+          "id": "turnover",
+          "raw": 353588.01,
+          "score": 9.3,
+          "points": 7.4,
+          "missing": false
+        },
+        {
+          "id": "target_firms",
+          "raw": 5604,
+          "score": 8.8,
+          "points": 8.8,
+          "missing": false
+        },
+        {
+          "id": "margin",
+          "raw": 0.0776478535004623,
+          "score": 2,
+          "points": 1.6,
+          "missing": false
+        },
+        {
+          "id": "growth",
+          "raw": 0.03838989485505295,
+          "score": 6.5,
+          "points": 2.6,
+          "missing": false
+        },
+        {
+          "id": "personnel_share",
+          "raw": 0.100804605902785,
+          "score": 0.9,
+          "points": 0.6,
+          "missing": false
+        },
+        {
+          "id": "labour_shortage",
+          "raw": 2.2,
+          "score": 5.5,
+          "points": 4.4,
+          "missing": false
+        },
+        {
+          "id": "manual_work",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "regulation",
+          "raw": 5.4,
+          "score": 8.5,
+          "points": 6.8,
+          "missing": false
+        },
+        {
+          "id": "ai_gap",
+          "raw": 81.72,
+          "score": 7.4,
+          "points": 5.9,
+          "missing": false
+        },
+        {
+          "id": "solutions",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "reachability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "country_advantage",
+          "raw": 0.9296148193830412,
+          "score": 6.6,
+          "points": 4,
+          "missing": false
+        },
+        {
+          "id": "competition",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "fragmentation",
+          "raw": 0.549964943664238,
           "score": 6.1,
           "points": 2.4,
           "missing": false
@@ -806,41 +921,41 @@
           "missing": true
         }
       ],
-      "gap": 13.3,
-      "section": "F"
+      "gap": 9.2,
+      "section": "G"
     },
     {
       "id": "M71",
       "name": "Architectural and engineering activities; technical testing and analysis",
-      "total": 59.2,
+      "total": 59,
       "confidence": 0.71,
       "breakdown": [
         {
           "id": "turnover",
           "raw": 114742.61,
-          "score": 7.4,
-          "points": 5.9,
-          "missing": false
-        },
-        {
-          "id": "target_firms",
-          "raw": 5093,
-          "score": 8.3,
-          "points": 8.3,
-          "missing": false
-        },
-        {
-          "id": "margin",
-          "raw": 0.1738837908602567,
           "score": 7.5,
           "points": 6,
           "missing": false
         },
         {
+          "id": "target_firms",
+          "raw": 5093,
+          "score": 8.4,
+          "points": 8.4,
+          "missing": false
+        },
+        {
+          "id": "margin",
+          "raw": 0.1738837908602567,
+          "score": 7.4,
+          "points": 5.9,
+          "missing": false
+        },
+        {
           "id": "growth",
           "raw": -0.063218801360449,
-          "score": 1.6,
-          "points": 0.6,
+          "score": 1.7,
+          "points": 0.7,
           "missing": false
         },
         {
@@ -853,7 +968,7 @@
         {
           "id": "labour_shortage",
           "raw": 3.2,
-          "score": 8.3,
+          "score": 8.2,
           "points": 6.6,
           "missing": false
         },
@@ -867,15 +982,15 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 53.89,
-          "score": 1.8,
-          "points": 1.5,
+          "score": 1.6,
+          "points": 1.2,
           "missing": false
         },
         {
@@ -909,7 +1024,7 @@
         {
           "id": "fragmentation",
           "raw": 0.6665040999154542,
-          "score": 8.3,
+          "score": 8.2,
           "points": 3.3,
           "missing": false
         },
@@ -921,149 +1036,34 @@
           "missing": true
         }
       ],
-      "gap": 2.8,
+      "gap": 2.5,
       "section": "M"
-    },
-    {
-      "id": "G45",
-      "name": "Wholesale and retail trade and repair of motor vehicles and motorcycles",
-      "total": 59,
-      "confidence": 0.71,
-      "breakdown": [
-        {
-          "id": "turnover",
-          "raw": 353588.01,
-          "score": 9.3,
-          "points": 7.4,
-          "missing": false
-        },
-        {
-          "id": "target_firms",
-          "raw": 5604,
-          "score": 8.7,
-          "points": 8.7,
-          "missing": false
-        },
-        {
-          "id": "margin",
-          "raw": 0.0776478535004623,
-          "score": 1.9,
-          "points": 1.5,
-          "missing": false
-        },
-        {
-          "id": "growth",
-          "raw": 0.03838989485505295,
-          "score": 6.5,
-          "points": 2.6,
-          "missing": false
-        },
-        {
-          "id": "personnel_share",
-          "raw": 0.100804605902785,
-          "score": 0.9,
-          "points": 0.6,
-          "missing": false
-        },
-        {
-          "id": "labour_shortage",
-          "raw": 2.2,
-          "score": 5.4,
-          "points": 4.3,
-          "missing": false
-        },
-        {
-          "id": "manual_work",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "regulation",
-          "raw": 5.4,
-          "score": 8.6,
-          "points": 6.8,
-          "missing": false
-        },
-        {
-          "id": "ai_gap",
-          "raw": 81.72,
-          "score": 7.5,
-          "points": 6,
-          "missing": false
-        },
-        {
-          "id": "solutions",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "reachability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "country_advantage",
-          "raw": 0.9296148193830412,
-          "score": 6.7,
-          "points": 4,
-          "missing": false
-        },
-        {
-          "id": "competition",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "fragmentation",
-          "raw": 0.549964943664238,
-          "score": 6.2,
-          "points": 2.5,
-          "missing": false
-        },
-        {
-          "id": "replicability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        }
-      ],
-      "gap": 9.3,
-      "section": "G"
     },
     {
       "id": "N82",
       "name": "Office administrative, office support and other business support activities",
-      "total": 58.7,
+      "total": 58.8,
       "confidence": 0.71,
       "breakdown": [
         {
           "id": "turnover",
           "raw": 65897.74,
           "score": 5.8,
-          "points": 4.6,
+          "points": 4.7,
           "missing": false
         },
         {
           "id": "target_firms",
           "raw": 2956,
-          "score": 7.5,
-          "points": 7.5,
+          "score": 7.6,
+          "points": 7.6,
           "missing": false
         },
         {
           "id": "margin",
           "raw": 0.15847280953792953,
           "score": 6.8,
-          "points": 5.4,
+          "points": 5.5,
           "missing": false
         },
         {
@@ -1076,7 +1076,7 @@
         {
           "id": "personnel_share",
           "raw": 0.2950170977031989,
-          "score": 7.7,
+          "score": 7.8,
           "points": 5.4,
           "missing": false
         },
@@ -1097,15 +1097,15 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 77.92,
-          "score": 7,
-          "points": 5.6,
+          "score": 6.9,
+          "points": 5.5,
           "missing": false
         },
         {
@@ -1125,8 +1125,8 @@
         {
           "id": "country_advantage",
           "raw": 0.8163718840860523,
-          "score": 4.9,
-          "points": 3,
+          "score": 4.8,
+          "points": 2.9,
           "missing": false
         },
         {
@@ -1139,8 +1139,8 @@
         {
           "id": "fragmentation",
           "raw": 0.6065358235350712,
-          "score": 7.4,
-          "points": 3,
+          "score": 7.3,
+          "points": 2.9,
           "missing": false
         },
         {
@@ -1151,13 +1151,13 @@
           "missing": true
         }
       ],
-      "gap": 10.8,
+      "gap": 10.7,
       "section": "N"
     },
     {
       "id": "I55",
       "name": "Accommodation",
-      "total": 58.4,
+      "total": 58.5,
       "confidence": 0.71,
       "breakdown": [
         {
@@ -1178,7 +1178,7 @@
           "id": "margin",
           "raw": 0.1612407836114013,
           "score": 7.1,
-          "points": 5.6,
+          "points": 5.7,
           "missing": false
         },
         {
@@ -1191,15 +1191,15 @@
         {
           "id": "personnel_share",
           "raw": 0.32602848128724593,
-          "score": 8.4,
-          "points": 5.9,
+          "score": 8.5,
+          "points": 6,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 2.6,
-          "score": 5.7,
-          "points": 4.6,
+          "score": 5.9,
+          "points": 4.7,
           "missing": false
         },
         {
@@ -1212,15 +1212,15 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 76.3,
-          "score": 5.3,
-          "points": 4.3,
+          "score": 5.2,
+          "points": 4.1,
           "missing": false
         },
         {
@@ -1240,8 +1240,8 @@
         {
           "id": "country_advantage",
           "raw": 0.8064217019510649,
-          "score": 4.6,
-          "points": 2.8,
+          "score": 4.5,
+          "points": 2.7,
           "missing": false
         },
         {
@@ -1272,7 +1272,7 @@
     {
       "id": "P85",
       "name": "Education",
-      "total": 57.4,
+      "total": 57.5,
       "confidence": 0.63,
       "breakdown": [
         {
@@ -1285,21 +1285,21 @@
         {
           "id": "target_firms",
           "raw": 2942,
-          "score": 7.4,
-          "points": 7.4,
+          "score": 7.5,
+          "points": 7.5,
           "missing": false
         },
         {
           "id": "margin",
           "raw": 0.14048037867980023,
-          "score": 5.4,
+          "score": 5.5,
           "points": 4.4,
           "missing": false
         },
         {
           "id": "growth",
           "raw": 0.02766628168813745,
-          "score": 5.4,
+          "score": 5.5,
           "points": 2.2,
           "missing": false
         },
@@ -1313,8 +1313,8 @@
         {
           "id": "labour_shortage",
           "raw": 1.8,
-          "score": 4.1,
-          "points": 3.3,
+          "score": 4.3,
+          "points": 3.4,
           "missing": false
         },
         {
@@ -1327,7 +1327,7 @@
         {
           "id": "regulation",
           "raw": 5.4,
-          "score": 8.6,
+          "score": 8.5,
           "points": 6.8,
           "missing": false
         },
@@ -1355,8 +1355,8 @@
         {
           "id": "country_advantage",
           "raw": 0.752402421155792,
-          "score": 3.3,
-          "points": 2,
+          "score": 3.2,
+          "points": 1.9,
           "missing": false
         },
         {
@@ -1369,7 +1369,7 @@
         {
           "id": "fragmentation",
           "raw": 0.6453046841499452,
-          "score": 8,
+          "score": 7.9,
           "points": 3.2,
           "missing": false
         },
@@ -1387,7 +1387,7 @@
     {
       "id": "H53",
       "name": "Postal and courier activities",
-      "total": 57,
+      "total": 57.1,
       "confidence": 0.71,
       "breakdown": [
         {
@@ -1407,14 +1407,14 @@
         {
           "id": "margin",
           "raw": 0.04674196586509184,
-          "score": 0.4,
+          "score": 0.5,
           "points": 0.4,
           "missing": false
         },
         {
           "id": "growth",
           "raw": 0.05330103189097901,
-          "score": 7.2,
+          "score": 7.3,
           "points": 2.9,
           "missing": false
         },
@@ -1429,7 +1429,7 @@
           "id": "labour_shortage",
           "raw": 2.8,
           "score": 7.2,
-          "points": 5.8,
+          "points": 5.7,
           "missing": false
         },
         {
@@ -1442,7 +1442,7 @@
         {
           "id": "regulation",
           "raw": 4.5,
-          "score": 6.2,
+          "score": 6.3,
           "points": 5,
           "missing": false
         },
@@ -1496,123 +1496,8 @@
           "missing": true
         }
       ],
-      "gap": 15,
+      "gap": 15.1,
       "section": "H"
-    },
-    {
-      "id": "N78",
-      "name": "Employment activities",
-      "total": 56.9,
-      "confidence": 0.71,
-      "breakdown": [
-        {
-          "id": "turnover",
-          "raw": 46910.26,
-          "score": 4.6,
-          "points": 3.7,
-          "missing": false
-        },
-        {
-          "id": "target_firms",
-          "raw": 3134,
-          "score": 7.7,
-          "points": 7.7,
-          "missing": false
-        },
-        {
-          "id": "margin",
-          "raw": 0.035189956312329115,
-          "score": 0,
-          "points": 0,
-          "missing": false
-        },
-        {
-          "id": "growth",
-          "raw": -0.048872785666059015,
-          "score": 2.4,
-          "points": 0.9,
-          "missing": false
-        },
-        {
-          "id": "personnel_share",
-          "raw": 0.6532605020735336,
-          "score": 10,
-          "points": 7,
-          "missing": false
-        },
-        {
-          "id": "labour_shortage",
-          "raw": 5.6,
-          "score": 9.6,
-          "points": 7.7,
-          "missing": false
-        },
-        {
-          "id": "manual_work",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "regulation",
-          "raw": 5.4,
-          "score": 8.6,
-          "points": 6.8,
-          "missing": false
-        },
-        {
-          "id": "ai_gap",
-          "raw": 77.92,
-          "score": 7,
-          "points": 5.6,
-          "missing": false
-        },
-        {
-          "id": "solutions",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "reachability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "country_advantage",
-          "raw": 0.727752978806918,
-          "score": 2.9,
-          "points": 1.7,
-          "missing": false
-        },
-        {
-          "id": "competition",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "fragmentation",
-          "raw": 0.3405521521304722,
-          "score": 2.9,
-          "points": 1.2,
-          "missing": false
-        },
-        {
-          "id": "replicability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        }
-      ],
-      "gap": 14.5,
-      "section": "N"
     },
     {
       "id": "N77",
@@ -1623,8 +1508,8 @@
         {
           "id": "turnover",
           "raw": 98130.22,
-          "score": 6.8,
-          "points": 5.4,
+          "score": 6.9,
+          "points": 5.5,
           "missing": false
         },
         {
@@ -1672,15 +1557,15 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 77.92,
-          "score": 7,
-          "points": 5.6,
+          "score": 6.9,
+          "points": 5.5,
           "missing": false
         },
         {
@@ -1726,47 +1611,162 @@
           "missing": true
         }
       ],
-      "gap": 7.7,
+      "gap": 7.6,
+      "section": "N"
+    },
+    {
+      "id": "N78",
+      "name": "Employment activities",
+      "total": 56.8,
+      "confidence": 0.71,
+      "breakdown": [
+        {
+          "id": "turnover",
+          "raw": 46910.26,
+          "score": 4.6,
+          "points": 3.7,
+          "missing": false
+        },
+        {
+          "id": "target_firms",
+          "raw": 3134,
+          "score": 7.8,
+          "points": 7.8,
+          "missing": false
+        },
+        {
+          "id": "margin",
+          "raw": 0.035189956312329115,
+          "score": 0,
+          "points": 0,
+          "missing": false
+        },
+        {
+          "id": "growth",
+          "raw": -0.048872785666059015,
+          "score": 2.4,
+          "points": 1,
+          "missing": false
+        },
+        {
+          "id": "personnel_share",
+          "raw": 0.6532605020735336,
+          "score": 10,
+          "points": 7,
+          "missing": false
+        },
+        {
+          "id": "labour_shortage",
+          "raw": 5.6,
+          "score": 9.6,
+          "points": 7.7,
+          "missing": false
+        },
+        {
+          "id": "manual_work",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "regulation",
+          "raw": 5.4,
+          "score": 8.5,
+          "points": 6.8,
+          "missing": false
+        },
+        {
+          "id": "ai_gap",
+          "raw": 77.92,
+          "score": 6.9,
+          "points": 5.5,
+          "missing": false
+        },
+        {
+          "id": "solutions",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "reachability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "country_advantage",
+          "raw": 0.727752978806918,
+          "score": 2.7,
+          "points": 1.6,
+          "missing": false
+        },
+        {
+          "id": "competition",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "fragmentation",
+          "raw": 0.3405521521304722,
+          "score": 3,
+          "points": 1.2,
+          "missing": false
+        },
+        {
+          "id": "replicability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        }
+      ],
+      "gap": 14.3,
       "section": "N"
     },
     {
       "id": "S96",
       "name": "Other personal service activities",
-      "total": 56.7,
+      "total": 56.8,
       "confidence": 0.63,
       "breakdown": [
         {
           "id": "turnover",
           "raw": 34031.02,
-          "score": 3.8,
+          "score": 3.7,
           "points": 3,
           "missing": false
         },
         {
           "id": "target_firms",
           "raw": 2531,
-          "score": 6.8,
-          "points": 6.8,
+          "score": 6.9,
+          "points": 6.9,
           "missing": false
         },
         {
           "id": "margin",
           "raw": 0.23951765183647156,
-          "score": 9,
+          "score": 8.9,
           "points": 7.2,
           "missing": false
         },
         {
           "id": "growth",
           "raw": -0.020073634810272134,
-          "score": 3.1,
-          "points": 1.2,
+          "score": 3.2,
+          "points": 1.3,
           "missing": false
         },
         {
           "id": "personnel_share",
           "raw": 0.31654561044599905,
-          "score": 8.1,
+          "score": 8.2,
           "points": 5.7,
           "missing": false
         },
@@ -1774,7 +1774,7 @@
           "id": "labour_shortage",
           "raw": 2.8,
           "score": 7.2,
-          "points": 5.8,
+          "points": 5.7,
           "missing": false
         },
         {
@@ -1787,8 +1787,8 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
@@ -1816,7 +1816,7 @@
           "id": "country_advantage",
           "raw": 0.8061983497618587,
           "score": 4.4,
-          "points": 2.7,
+          "points": 2.6,
           "missing": false
         },
         {
@@ -1841,170 +1841,55 @@
           "missing": true
         }
       ],
-      "gap": 7.1,
+      "gap": 7.2,
       "section": "S"
-    },
-    {
-      "id": "J62",
-      "name": "Computer programming, consultancy and related activities",
-      "total": 56.2,
-      "confidence": 0.65,
-      "breakdown": [
-        {
-          "id": "turnover",
-          "raw": 207793.43,
-          "score": 8.8,
-          "points": 7.1,
-          "missing": false
-        },
-        {
-          "id": "target_firms",
-          "raw": 5989,
-          "score": 8.8,
-          "points": 8.8,
-          "missing": false
-        },
-        {
-          "id": "margin",
-          "raw": 0.09187610022126301,
-          "score": 3.4,
-          "points": 2.7,
-          "missing": false
-        },
-        {
-          "id": "growth",
-          "raw": 0.021503123991000184,
-          "score": 5,
-          "points": 2,
-          "missing": false
-        },
-        {
-          "id": "personnel_share",
-          "raw": 0.36324348657221744,
-          "score": 8.8,
-          "points": 6.2,
-          "missing": false
-        },
-        {
-          "id": "labour_shortage",
-          "raw": 2.7,
-          "score": 6.3,
-          "points": 5,
-          "missing": false
-        },
-        {
-          "id": "manual_work",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "regulation",
-          "raw": 4.5,
-          "score": 6.2,
-          "points": 5,
-          "missing": false
-        },
-        {
-          "id": "ai_gap",
-          "raw": 24.620000000000005,
-          "score": 0.1,
-          "points": 0.1,
-          "missing": false
-        },
-        {
-          "id": "solutions",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "reachability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "country_advantage",
-          "raw": null,
-          "score": 5,
-          "points": 3,
-          "missing": true
-        },
-        {
-          "id": "competition",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "fragmentation",
-          "raw": 0.4375803412071305,
-          "score": 4.5,
-          "points": 1.8,
-          "missing": false
-        },
-        {
-          "id": "replicability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        }
-      ],
-      "gap": 0.2,
-      "section": "J"
     },
     {
       "id": "R93",
       "name": "Sports activities and amusement and recreation activities",
-      "total": 56.2,
+      "total": 56.5,
       "confidence": 0.63,
       "breakdown": [
         {
           "id": "turnover",
           "raw": 25580.16,
           "score": 2.8,
-          "points": 2.2,
+          "points": 2.3,
           "missing": false
         },
         {
           "id": "target_firms",
           "raw": 2796,
-          "score": 7.1,
-          "points": 7.1,
+          "score": 7.2,
+          "points": 7.2,
           "missing": false
         },
         {
           "id": "margin",
           "raw": 0.21828714128449547,
-          "score": 8.4,
+          "score": 8.3,
           "points": 6.7,
           "missing": false
         },
         {
           "id": "growth",
           "raw": 0.11859185995562394,
-          "score": 8.8,
-          "points": 3.5,
+          "score": 8.9,
+          "points": 3.6,
           "missing": false
         },
         {
           "id": "personnel_share",
           "raw": 0.3168576740724061,
-          "score": 8.3,
-          "points": 5.8,
+          "score": 8.4,
+          "points": 5.9,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 2,
-          "score": 4.9,
-          "points": 3.9,
+          "score": 5,
+          "points": 4,
           "missing": false
         },
         {
@@ -2017,8 +1902,8 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
@@ -2059,8 +1944,8 @@
         {
           "id": "fragmentation",
           "raw": 0.5717368460556931,
-          "score": 6.7,
-          "points": 2.7,
+          "score": 6.6,
+          "points": 2.6,
           "missing": false
         },
         {
@@ -2071,27 +1956,27 @@
           "missing": true
         }
       ],
-      "gap": 6.4,
+      "gap": 6.5,
       "section": "R"
     },
     {
       "id": "E37",
       "name": "Sewerage",
-      "total": 55.5,
+      "total": 55.7,
       "confidence": 0.71,
       "breakdown": [
         {
           "id": "turnover",
           "raw": 12715.15,
           "score": 1.3,
-          "points": 1,
+          "points": 1.1,
           "missing": false
         },
         {
           "id": "target_firms",
           "raw": 337,
-          "score": 2.3,
-          "points": 2.3,
+          "score": 2.4,
+          "points": 2.4,
           "missing": false
         },
         {
@@ -2104,7 +1989,7 @@
         {
           "id": "growth",
           "raw": 0.09918385588974932,
-          "score": 8.4,
+          "score": 8.5,
           "points": 3.4,
           "missing": false
         },
@@ -2118,8 +2003,8 @@
         {
           "id": "labour_shortage",
           "raw": 1.8,
-          "score": 4.1,
-          "points": 3.3,
+          "score": 4.3,
+          "points": 3.4,
           "missing": false
         },
         {
@@ -2132,14 +2017,14 @@
         {
           "id": "regulation",
           "raw": 4.5,
-          "score": 6.2,
+          "score": 6.3,
           "points": 5,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 83.12,
-          "score": 7.9,
+          "score": 7.8,
           "points": 6.3,
           "missing": false
         },
@@ -2174,8 +2059,8 @@
         {
           "id": "fragmentation",
           "raw": 0.5150706047510254,
-          "score": 5.7,
-          "points": 2.3,
+          "score": 5.5,
+          "points": 2.2,
           "missing": false
         },
         {
@@ -2190,124 +2075,9 @@
       "section": "E"
     },
     {
-      "id": "N80",
-      "name": "Security and investigation activities",
-      "total": 55.2,
-      "confidence": 0.71,
-      "breakdown": [
-        {
-          "id": "turnover",
-          "raw": 14549.86,
-          "score": 1.7,
-          "points": 1.4,
-          "missing": false
-        },
-        {
-          "id": "target_firms",
-          "raw": 1843,
-          "score": 6.4,
-          "points": 6.4,
-          "missing": false
-        },
-        {
-          "id": "margin",
-          "raw": 0.11277084453046282,
-          "score": 4,
-          "points": 3.2,
-          "missing": false
-        },
-        {
-          "id": "growth",
-          "raw": 0.06001413365777597,
-          "score": 7.6,
-          "points": 3.1,
-          "missing": false
-        },
-        {
-          "id": "personnel_share",
-          "raw": 0.5838118030001662,
-          "score": 9.9,
-          "points": 6.9,
-          "missing": false
-        },
-        {
-          "id": "labour_shortage",
-          "raw": 5.6,
-          "score": 9.6,
-          "points": 7.7,
-          "missing": false
-        },
-        {
-          "id": "manual_work",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "regulation",
-          "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
-          "missing": false
-        },
-        {
-          "id": "ai_gap",
-          "raw": 77.92,
-          "score": 7,
-          "points": 5.6,
-          "missing": false
-        },
-        {
-          "id": "solutions",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "reachability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "country_advantage",
-          "raw": 0.7831036490822233,
-          "score": 4.1,
-          "points": 2.5,
-          "missing": false
-        },
-        {
-          "id": "competition",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "fragmentation",
-          "raw": 0.4865668810559002,
-          "score": 5.2,
-          "points": 2.1,
-          "missing": false
-        },
-        {
-          "id": "replicability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        }
-      ],
-      "gap": 11.8,
-      "section": "N"
-    },
-    {
       "id": "C32",
       "name": "Other manufacturing",
-      "total": 55,
+      "total": 55.1,
       "confidence": 0.71,
       "breakdown": [
         {
@@ -2320,8 +2090,8 @@
         {
           "id": "target_firms",
           "raw": 1842,
-          "score": 6.2,
-          "points": 6.2,
+          "score": 6.3,
+          "points": 6.3,
           "missing": false
         },
         {
@@ -2334,22 +2104,22 @@
         {
           "id": "growth",
           "raw": 0.06278887809314493,
-          "score": 7.8,
-          "points": 3.1,
+          "score": 7.9,
+          "points": 3.2,
           "missing": false
         },
         {
           "id": "personnel_share",
           "raw": 0.28772579049446007,
-          "score": 6.8,
+          "score": 6.9,
           "points": 4.8,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
+          "score": 2.1,
+          "points": 1.7,
           "missing": false
         },
         {
@@ -2362,15 +2132,15 @@
         {
           "id": "regulation",
           "raw": 4.5,
-          "score": 6.2,
+          "score": 6.3,
           "points": 5,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 77.06,
-          "score": 5.8,
-          "points": 4.7,
+          "score": 5.7,
+          "points": 4.6,
           "missing": false
         },
         {
@@ -2404,8 +2174,8 @@
         {
           "id": "fragmentation",
           "raw": 0.3502012174025899,
-          "score": 3,
-          "points": 1.2,
+          "score": 3.1,
+          "points": 1.3,
           "missing": false
         },
         {
@@ -2420,9 +2190,124 @@
       "section": "C"
     },
     {
+      "id": "N80",
+      "name": "Security and investigation activities",
+      "total": 55.1,
+      "confidence": 0.71,
+      "breakdown": [
+        {
+          "id": "turnover",
+          "raw": 14549.86,
+          "score": 1.8,
+          "points": 1.4,
+          "missing": false
+        },
+        {
+          "id": "target_firms",
+          "raw": 1843,
+          "score": 6.4,
+          "points": 6.4,
+          "missing": false
+        },
+        {
+          "id": "margin",
+          "raw": 0.11277084453046282,
+          "score": 3.9,
+          "points": 3.2,
+          "missing": false
+        },
+        {
+          "id": "growth",
+          "raw": 0.06001413365777597,
+          "score": 7.7,
+          "points": 3.1,
+          "missing": false
+        },
+        {
+          "id": "personnel_share",
+          "raw": 0.5838118030001662,
+          "score": 9.9,
+          "points": 6.9,
+          "missing": false
+        },
+        {
+          "id": "labour_shortage",
+          "raw": 5.6,
+          "score": 9.6,
+          "points": 7.7,
+          "missing": false
+        },
+        {
+          "id": "manual_work",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "regulation",
+          "raw": 2.4,
+          "score": 2.5,
+          "points": 2,
+          "missing": false
+        },
+        {
+          "id": "ai_gap",
+          "raw": 77.92,
+          "score": 6.9,
+          "points": 5.5,
+          "missing": false
+        },
+        {
+          "id": "solutions",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "reachability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "country_advantage",
+          "raw": 0.7831036490822233,
+          "score": 4,
+          "points": 2.4,
+          "missing": false
+        },
+        {
+          "id": "competition",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "fragmentation",
+          "raw": 0.4865668810559002,
+          "score": 5.1,
+          "points": 2,
+          "missing": false
+        },
+        {
+          "id": "replicability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        }
+      ],
+      "gap": 11.6,
+      "section": "N"
+    },
+    {
       "id": "C10",
       "name": "Manufacture of food products",
-      "total": 54.8,
+      "total": 55,
       "confidence": 0.71,
       "breakdown": [
         {
@@ -2435,21 +2320,21 @@
         {
           "id": "target_firms",
           "raw": 5286,
-          "score": 8.4,
-          "points": 8.4,
+          "score": 8.5,
+          "points": 8.5,
           "missing": false
         },
         {
           "id": "margin",
           "raw": 0.07768617086132372,
           "score": 2.1,
-          "points": 1.6,
+          "points": 1.7,
           "missing": false
         },
         {
           "id": "growth",
           "raw": 0.011708394876434047,
-          "score": 4.4,
+          "score": 4.5,
           "points": 1.8,
           "missing": false
         },
@@ -2457,14 +2342,14 @@
           "id": "personnel_share",
           "raw": 0.14826528911807457,
           "score": 1.9,
-          "points": 1.3,
+          "points": 1.4,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
+          "score": 2.1,
+          "points": 1.7,
           "missing": false
         },
         {
@@ -2478,7 +2363,7 @@
           "id": "regulation",
           "raw": 7.5,
           "score": 9.6,
-          "points": 7.7,
+          "points": 7.6,
           "missing": false
         },
         {
@@ -2531,40 +2416,40 @@
           "missing": true
         }
       ],
-      "gap": 9.7,
+      "gap": 9.8,
       "section": "C"
     },
     {
       "id": "L68",
       "name": "Real estate activities",
-      "total": 54.8,
+      "total": 54.9,
       "confidence": 0.71,
       "breakdown": [
         {
           "id": "turnover",
           "raw": 155421.72,
-          "score": 8.4,
-          "points": 6.7,
+          "score": 8.5,
+          "points": 6.8,
           "missing": false
         },
         {
           "id": "target_firms",
           "raw": 2905,
-          "score": 7.2,
-          "points": 7.2,
+          "score": 7.3,
+          "points": 7.3,
           "missing": false
         },
         {
           "id": "margin",
           "raw": 0.4138651920722535,
-          "score": 9.9,
+          "score": 9.8,
           "points": 7.9,
           "missing": false
         },
         {
           "id": "growth",
           "raw": 0.17977080575511062,
-          "score": 9.6,
+          "score": 9.5,
           "points": 3.8,
           "missing": false
         },
@@ -2592,15 +2477,15 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 70.94,
-          "score": 3.8,
-          "points": 3.1,
+          "score": 3.6,
+          "points": 2.9,
           "missing": false
         },
         {
@@ -2620,8 +2505,8 @@
         {
           "id": "country_advantage",
           "raw": 1.047175030981257,
-          "score": 7.8,
-          "points": 4.7,
+          "score": 7.7,
+          "points": 4.6,
           "missing": false
         },
         {
@@ -2635,7 +2520,7 @@
           "id": "fragmentation",
           "raw": 0.8148779334059615,
           "score": 9.1,
-          "points": 3.7,
+          "points": 3.6,
           "missing": false
         },
         {
@@ -2646,13 +2531,13 @@
           "missing": true
         }
       ],
-      "gap": 2.2,
+      "gap": 2.1,
       "section": "L"
     },
     {
       "id": "G47",
       "name": "Retail trade, except of motor vehicles and motorcycles",
-      "total": 53.9,
+      "total": 54.1,
       "confidence": 0.71,
       "breakdown": [
         {
@@ -2673,28 +2558,28 @@
           "id": "margin",
           "raw": 0.05959014312502386,
           "score": 1.2,
-          "points": 0.9,
+          "points": 1,
           "missing": false
         },
         {
           "id": "growth",
           "raw": 0.023943026687214264,
-          "score": 5.1,
+          "score": 5.2,
           "points": 2.1,
           "missing": false
         },
         {
           "id": "personnel_share",
           "raw": 0.13402603941440755,
-          "score": 1.4,
+          "score": 1.5,
           "points": 1,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 2.2,
-          "score": 5.4,
-          "points": 4.3,
+          "score": 5.5,
+          "points": 4.4,
           "missing": false
         },
         {
@@ -2707,15 +2592,15 @@
         {
           "id": "regulation",
           "raw": 3,
-          "score": 5,
-          "points": 4,
+          "score": 5.1,
+          "points": 4.1,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 76.58,
-          "score": 5.5,
-          "points": 4.4,
+          "score": 5.3,
+          "points": 4.3,
           "missing": false
         },
         {
@@ -2735,7 +2620,7 @@
         {
           "id": "country_advantage",
           "raw": 0.8625807416813843,
-          "score": 5.4,
+          "score": 5.3,
           "points": 3.2,
           "missing": false
         },
@@ -2761,13 +2646,13 @@
           "missing": true
         }
       ],
-      "gap": 5.8,
+      "gap": 5.7,
       "section": "G"
     },
     {
       "id": "C28",
       "name": "Manufacture of machinery and equipment n.e.c.",
-      "total": 53.7,
+      "total": 53.8,
       "confidence": 0.71,
       "breakdown": [
         {
@@ -2780,36 +2665,36 @@
         {
           "id": "target_firms",
           "raw": 4349,
-          "score": 8.1,
-          "points": 8.1,
+          "score": 8.2,
+          "points": 8.2,
           "missing": false
         },
         {
           "id": "margin",
           "raw": 0.0841233749559096,
-          "score": 2.6,
-          "points": 2.1,
+          "score": 2.7,
+          "points": 2.2,
           "missing": false
         },
         {
           "id": "growth",
           "raw": -0.01202258369004272,
-          "score": 3.7,
+          "score": 3.8,
           "points": 1.5,
           "missing": false
         },
         {
           "id": "personnel_share",
           "raw": 0.2713190507492582,
-          "score": 5.9,
+          "score": 6,
           "points": 4.2,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
+          "score": 2.1,
+          "points": 1.7,
           "missing": false
         },
         {
@@ -2822,15 +2707,15 @@
         {
           "id": "regulation",
           "raw": 4.5,
-          "score": 6.2,
+          "score": 6.3,
           "points": 5,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 68.72,
-          "score": 3.2,
-          "points": 2.5,
+          "score": 2.9,
+          "points": 2.3,
           "missing": false
         },
         {
@@ -2865,7 +2750,7 @@
           "id": "fragmentation",
           "raw": 0.1845598689902035,
           "score": 1.6,
-          "points": 0.6,
+          "points": 0.7,
           "missing": false
         },
         {
@@ -2876,20 +2761,135 @@
           "missing": true
         }
       ],
-      "gap": 3.8,
+      "gap": 3.5,
       "section": "C"
     },
     {
-      "id": "C25",
-      "name": "Manufacture of fabricated metal products, except machinery and equipment",
+      "id": "E38",
+      "name": "Waste collection, treatment and disposal activities; materials recovery",
       "total": 53.2,
       "confidence": 0.71,
       "breakdown": [
         {
           "id": "turnover",
+          "raw": 58876.88,
+          "score": 5.1,
+          "points": 4.1,
+          "missing": false
+        },
+        {
+          "id": "target_firms",
+          "raw": 1137,
+          "score": 5.4,
+          "points": 5.4,
+          "missing": false
+        },
+        {
+          "id": "margin",
+          "raw": 0.15845387867020128,
+          "score": 6.7,
+          "points": 5.3,
+          "missing": false
+        },
+        {
+          "id": "growth",
+          "raw": 0.043374460320163566,
+          "score": 6.8,
+          "points": 2.7,
+          "missing": false
+        },
+        {
+          "id": "personnel_share",
+          "raw": 0.1982917573077921,
+          "score": 3.9,
+          "points": 2.7,
+          "missing": false
+        },
+        {
+          "id": "labour_shortage",
+          "raw": 1.8,
+          "score": 4.3,
+          "points": 3.4,
+          "missing": false
+        },
+        {
+          "id": "manual_work",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "regulation",
+          "raw": 4.5,
+          "score": 6.3,
+          "points": 5,
+          "missing": false
+        },
+        {
+          "id": "ai_gap",
+          "raw": 83.12,
+          "score": 7.8,
+          "points": 6.3,
+          "missing": false
+        },
+        {
+          "id": "solutions",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "reachability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "country_advantage",
+          "raw": 0.7624452585482521,
+          "score": 3.4,
+          "points": 2,
+          "missing": false
+        },
+        {
+          "id": "competition",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "fragmentation",
+          "raw": 0.4508389371175918,
+          "score": 4.5,
+          "points": 1.8,
+          "missing": false
+        },
+        {
+          "id": "replicability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        }
+      ],
+      "gap": 9.5,
+      "section": "E"
+    },
+    {
+      "id": "C25",
+      "name": "Manufacture of fabricated metal products, except machinery and equipment",
+      "total": 53.1,
+      "confidence": 0.71,
+      "breakdown": [
+        {
+          "id": "turnover",
           "raw": 168884.87,
-          "score": 8.6,
-          "points": 6.8,
+          "score": 8.7,
+          "points": 6.9,
           "missing": false
         },
         {
@@ -2909,22 +2909,22 @@
         {
           "id": "growth",
           "raw": -0.0597269935253425,
-          "score": 1.9,
+          "score": 2,
           "points": 0.8,
           "missing": false
         },
         {
           "id": "personnel_share",
           "raw": 0.2895672655578916,
-          "score": 7.1,
+          "score": 7.2,
           "points": 5,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
+          "score": 2.1,
+          "points": 1.7,
           "missing": false
         },
         {
@@ -2937,15 +2937,15 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 75.62,
-          "score": 5.1,
-          "points": 4.1,
+          "score": 4.9,
+          "points": 3.9,
           "missing": false
         },
         {
@@ -2979,7 +2979,7 @@
         {
           "id": "fragmentation",
           "raw": 0.5040746989354346,
-          "score": 5.4,
+          "score": 5.2,
           "points": 2.1,
           "missing": false
         },
@@ -2991,278 +2991,48 @@
           "missing": true
         }
       ],
-      "gap": 5.3,
+      "gap": 5.1,
       "section": "C"
-    },
-    {
-      "id": "E38",
-      "name": "Waste collection, treatment and disposal activities; materials recovery",
-      "total": 53.1,
-      "confidence": 0.71,
-      "breakdown": [
-        {
-          "id": "turnover",
-          "raw": 58876.88,
-          "score": 5.1,
-          "points": 4.1,
-          "missing": false
-        },
-        {
-          "id": "target_firms",
-          "raw": 1137,
-          "score": 5.4,
-          "points": 5.4,
-          "missing": false
-        },
-        {
-          "id": "margin",
-          "raw": 0.15845387867020128,
-          "score": 6.6,
-          "points": 5.3,
-          "missing": false
-        },
-        {
-          "id": "growth",
-          "raw": 0.043374460320163566,
-          "score": 6.8,
-          "points": 2.7,
-          "missing": false
-        },
-        {
-          "id": "personnel_share",
-          "raw": 0.1982917573077921,
-          "score": 3.8,
-          "points": 2.6,
-          "missing": false
-        },
-        {
-          "id": "labour_shortage",
-          "raw": 1.8,
-          "score": 4.1,
-          "points": 3.3,
-          "missing": false
-        },
-        {
-          "id": "manual_work",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "regulation",
-          "raw": 4.5,
-          "score": 6.2,
-          "points": 5,
-          "missing": false
-        },
-        {
-          "id": "ai_gap",
-          "raw": 83.12,
-          "score": 7.9,
-          "points": 6.3,
-          "missing": false
-        },
-        {
-          "id": "solutions",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "reachability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "country_advantage",
-          "raw": 0.7624452585482521,
-          "score": 3.5,
-          "points": 2.1,
-          "missing": false
-        },
-        {
-          "id": "competition",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "fragmentation",
-          "raw": 0.4508389371175918,
-          "score": 4.6,
-          "points": 1.9,
-          "missing": false
-        },
-        {
-          "id": "replicability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        }
-      ],
-      "gap": 9.4,
-      "section": "E"
-    },
-    {
-      "id": "G46",
-      "name": "Wholesale trade, except of motor vehicles and motorcycles",
-      "total": 52.5,
-      "confidence": 0.71,
-      "breakdown": [
-        {
-          "id": "turnover",
-          "raw": 1287881.6,
-          "score": 10,
-          "points": 8,
-          "missing": false
-        },
-        {
-          "id": "target_firms",
-          "raw": 13056,
-          "score": 9.6,
-          "points": 9.6,
-          "missing": false
-        },
-        {
-          "id": "margin",
-          "raw": 0.05117614849066871,
-          "score": 0.6,
-          "points": 0.5,
-          "missing": false
-        },
-        {
-          "id": "growth",
-          "raw": -0.05537232193145303,
-          "score": 2.1,
-          "points": 0.8,
-          "missing": false
-        },
-        {
-          "id": "personnel_share",
-          "raw": 0.08256656512524133,
-          "score": 0.4,
-          "points": 0.3,
-          "missing": false
-        },
-        {
-          "id": "labour_shortage",
-          "raw": 2.2,
-          "score": 5.4,
-          "points": 4.3,
-          "missing": false
-        },
-        {
-          "id": "manual_work",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "regulation",
-          "raw": 8.4,
-          "score": 10,
-          "points": 8,
-          "missing": false
-        },
-        {
-          "id": "ai_gap",
-          "raw": 67.64,
-          "score": 2.8,
-          "points": 2.3,
-          "missing": false
-        },
-        {
-          "id": "solutions",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "reachability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "country_advantage",
-          "raw": 0.7732776875410381,
-          "score": 3.8,
-          "points": 2.3,
-          "missing": false
-        },
-        {
-          "id": "competition",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "fragmentation",
-          "raw": 0.48570063428190924,
-          "score": 5.1,
-          "points": 2,
-          "missing": false
-        },
-        {
-          "id": "replicability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        }
-      ],
-      "gap": 3.6,
-      "section": "G"
     },
     {
       "id": "F41",
       "name": "Construction of buildings",
-      "total": 52.4,
+      "total": 52.7,
       "confidence": 0.71,
       "breakdown": [
         {
           "id": "turnover",
           "raw": 88547.24,
           "score": 6.7,
-          "points": 5.3,
+          "points": 5.4,
           "missing": false
         },
         {
           "id": "target_firms",
           "raw": 3157,
-          "score": 7.8,
-          "points": 7.8,
+          "score": 7.9,
+          "points": 7.9,
           "missing": false
         },
         {
           "id": "margin",
           "raw": 0.0909093270439598,
-          "score": 3.2,
-          "points": 2.6,
+          "score": 3.3,
+          "points": 2.7,
           "missing": false
         },
         {
           "id": "growth",
           "raw": -0.07888409909872407,
-          "score": 1,
+          "score": 1.1,
           "points": 0.4,
           "missing": false
         },
         {
           "id": "personnel_share",
           "raw": 0.1959194888513747,
-          "score": 3.5,
-          "points": 2.4,
+          "score": 3.6,
+          "points": 2.5,
           "missing": false
         },
         {
@@ -3282,8 +3052,8 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
@@ -3336,8 +3106,123 @@
           "missing": true
         }
       ],
-      "gap": 11.2,
+      "gap": 11.3,
       "section": "F"
+    },
+    {
+      "id": "G46",
+      "name": "Wholesale trade, except of motor vehicles and motorcycles",
+      "total": 52.4,
+      "confidence": 0.71,
+      "breakdown": [
+        {
+          "id": "turnover",
+          "raw": 1287881.6,
+          "score": 10,
+          "points": 8,
+          "missing": false
+        },
+        {
+          "id": "target_firms",
+          "raw": 13056,
+          "score": 9.6,
+          "points": 9.6,
+          "missing": false
+        },
+        {
+          "id": "margin",
+          "raw": 0.05117614849066871,
+          "score": 0.6,
+          "points": 0.5,
+          "missing": false
+        },
+        {
+          "id": "growth",
+          "raw": -0.05537232193145303,
+          "score": 2.1,
+          "points": 0.8,
+          "missing": false
+        },
+        {
+          "id": "personnel_share",
+          "raw": 0.08256656512524133,
+          "score": 0.4,
+          "points": 0.3,
+          "missing": false
+        },
+        {
+          "id": "labour_shortage",
+          "raw": 2.2,
+          "score": 5.5,
+          "points": 4.4,
+          "missing": false
+        },
+        {
+          "id": "manual_work",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "regulation",
+          "raw": 8.4,
+          "score": 10,
+          "points": 8,
+          "missing": false
+        },
+        {
+          "id": "ai_gap",
+          "raw": 67.64,
+          "score": 2.6,
+          "points": 2.1,
+          "missing": false
+        },
+        {
+          "id": "solutions",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "reachability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "country_advantage",
+          "raw": 0.7732776875410381,
+          "score": 3.7,
+          "points": 2.2,
+          "missing": false
+        },
+        {
+          "id": "competition",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "fragmentation",
+          "raw": 0.48570063428190924,
+          "score": 4.9,
+          "points": 2,
+          "missing": false
+        },
+        {
+          "id": "replicability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        }
+      ],
+      "gap": 3.4,
+      "section": "G"
     },
     {
       "id": "H51",
@@ -3349,7 +3234,7 @@
           "id": "turnover",
           "raw": 39359.24,
           "score": 4.2,
-          "points": 3.4,
+          "points": 3.3,
           "missing": false
         },
         {
@@ -3362,14 +3247,14 @@
         {
           "id": "margin",
           "raw": 0.15967508518965304,
-          "score": 6.9,
-          "points": 5.5,
+          "score": 7,
+          "points": 5.6,
           "missing": false
         },
         {
           "id": "growth",
           "raw": 0.03510319410190177,
-          "score": 6.3,
+          "score": 6.4,
           "points": 2.5,
           "missing": false
         },
@@ -3377,14 +3262,14 @@
           "id": "personnel_share",
           "raw": 0.16609543273701424,
           "score": 2.5,
-          "points": 1.7,
+          "points": 1.8,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 2.8,
           "score": 7.2,
-          "points": 5.8,
+          "points": 5.7,
           "missing": false
         },
         {
@@ -3397,8 +3282,8 @@
         {
           "id": "regulation",
           "raw": 5.1,
-          "score": 7.6,
-          "points": 6.1,
+          "score": 7.5,
+          "points": 6,
           "missing": false
         },
         {
@@ -3439,7 +3324,7 @@
         {
           "id": "fragmentation",
           "raw": 0.23302634908600872,
-          "score": 2,
+          "score": 2.1,
           "points": 0.8,
           "missing": false
         },
@@ -3463,8 +3348,8 @@
         {
           "id": "turnover",
           "raw": 105775.28,
-          "score": 7.2,
-          "points": 5.8,
+          "score": 7.3,
+          "points": 5.9,
           "missing": false
         },
         {
@@ -3477,28 +3362,28 @@
         {
           "id": "margin",
           "raw": 0.057472596621819395,
-          "score": 1,
+          "score": 1.1,
           "points": 0.8,
           "missing": false
         },
         {
           "id": "growth",
           "raw": 0.01684580505471245,
-          "score": 4.7,
+          "score": 4.8,
           "points": 1.9,
           "missing": false
         },
         {
           "id": "personnel_share",
           "raw": 0.35569085706981823,
-          "score": 8.7,
-          "points": 6.1,
+          "score": 8.8,
+          "points": 6.2,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 3.2,
-          "score": 8.3,
+          "score": 8.2,
           "points": 6.6,
           "missing": false
         },
@@ -3512,15 +3397,15 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 53.89,
-          "score": 1.8,
-          "points": 1.5,
+          "score": 1.6,
+          "points": 1.2,
           "missing": false
         },
         {
@@ -3554,8 +3439,8 @@
         {
           "id": "fragmentation",
           "raw": 0.5293674476683021,
-          "score": 5.9,
-          "points": 2.4,
+          "score": 5.8,
+          "points": 2.3,
           "missing": false
         },
         {
@@ -3566,41 +3451,41 @@
           "missing": true
         }
       ],
-      "gap": 2.7,
+      "gap": 2.5,
       "section": "M"
     },
     {
       "id": "C26",
       "name": "Manufacture of computer, electronic and optical products",
-      "total": 50.3,
+      "total": 50.4,
       "confidence": 0.71,
       "breakdown": [
         {
           "id": "turnover",
           "raw": 115763.82,
-          "score": 7.7,
-          "points": 6.1,
+          "score": 7.8,
+          "points": 6.2,
           "missing": false
         },
         {
           "id": "target_firms",
           "raw": 1637,
-          "score": 5.9,
-          "points": 5.9,
+          "score": 6,
+          "points": 6,
           "missing": false
         },
         {
           "id": "margin",
           "raw": 0.12127666485090074,
-          "score": 4.6,
+          "score": 4.5,
           "points": 3.6,
           "missing": false
         },
         {
           "id": "growth",
           "raw": -0.03139146951456284,
-          "score": 2.8,
-          "points": 1.1,
+          "score": 2.9,
+          "points": 1.2,
           "missing": false
         },
         {
@@ -3613,8 +3498,8 @@
         {
           "id": "labour_shortage",
           "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
+          "score": 2.1,
+          "points": 1.7,
           "missing": false
         },
         {
@@ -3627,15 +3512,15 @@
         {
           "id": "regulation",
           "raw": 4.5,
-          "score": 6.2,
+          "score": 6.3,
           "points": 5,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 57.51,
-          "score": 2.3,
-          "points": 1.9,
+          "score": 2.1,
+          "points": 1.7,
           "missing": false
         },
         {
@@ -3681,34 +3566,34 @@
           "missing": true
         }
       ],
-      "gap": 2.7,
+      "gap": 2.5,
       "section": "C"
     },
     {
       "id": "C22",
       "name": "Manufacture of rubber and plastic products",
-      "total": 50.1,
+      "total": 50.2,
       "confidence": 0.71,
       "breakdown": [
         {
           "id": "turnover",
           "raw": 101432.41,
-          "score": 7.1,
+          "score": 7.2,
           "points": 5.7,
           "missing": false
         },
         {
           "id": "target_firms",
           "raw": 2402,
-          "score": 6.5,
-          "points": 6.5,
+          "score": 6.6,
+          "points": 6.6,
           "missing": false
         },
         {
           "id": "margin",
           "raw": 0.08385741795940765,
-          "score": 2.5,
-          "points": 2,
+          "score": 2.6,
+          "points": 2.1,
           "missing": false
         },
         {
@@ -3721,15 +3606,15 @@
         {
           "id": "personnel_share",
           "raw": 0.24973871763472835,
-          "score": 4.8,
-          "points": 3.3,
+          "score": 4.9,
+          "points": 3.4,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
+          "score": 2.1,
+          "points": 1.7,
           "missing": false
         },
         {
@@ -3742,15 +3627,15 @@
         {
           "id": "regulation",
           "raw": 5.4,
-          "score": 8.6,
+          "score": 8.5,
           "points": 6.8,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 74.16,
-          "score": 4.7,
-          "points": 3.7,
+          "score": 4.5,
+          "points": 3.6,
           "missing": false
         },
         {
@@ -3771,7 +3656,7 @@
           "id": "country_advantage",
           "raw": 1.0697807405537945,
           "score": 7.9,
-          "points": 4.8,
+          "points": 4.7,
           "missing": false
         },
         {
@@ -3796,123 +3681,8 @@
           "missing": true
         }
       ],
-      "gap": 6,
+      "gap": 5.8,
       "section": "C"
-    },
-    {
-      "id": "M75",
-      "name": "Veterinary activities",
-      "total": 50,
-      "confidence": 0.71,
-      "breakdown": [
-        {
-          "id": "turnover",
-          "raw": 6526.17,
-          "score": 0.7,
-          "points": 0.6,
-          "missing": false
-        },
-        {
-          "id": "target_firms",
-          "raw": 326,
-          "score": 2,
-          "points": 2,
-          "missing": false
-        },
-        {
-          "id": "margin",
-          "raw": 0.3673915941509338,
-          "score": 9.6,
-          "points": 7.6,
-          "missing": false
-        },
-        {
-          "id": "growth",
-          "raw": 0.05751013569352126,
-          "score": 7.4,
-          "points": 2.9,
-          "missing": false
-        },
-        {
-          "id": "personnel_share",
-          "raw": 0.28418352571263084,
-          "score": 6.5,
-          "points": 4.6,
-          "missing": false
-        },
-        {
-          "id": "labour_shortage",
-          "raw": 3.2,
-          "score": 8.3,
-          "points": 6.6,
-          "missing": false
-        },
-        {
-          "id": "manual_work",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "regulation",
-          "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
-          "missing": false
-        },
-        {
-          "id": "ai_gap",
-          "raw": 42.76,
-          "score": 1.2,
-          "points": 0.9,
-          "missing": false
-        },
-        {
-          "id": "solutions",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "reachability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "country_advantage",
-          "raw": 0.9681884028628617,
-          "score": 7.5,
-          "points": 4.5,
-          "missing": false
-        },
-        {
-          "id": "competition",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "fragmentation",
-          "raw": 0.849751079116848,
-          "score": 9.6,
-          "points": 3.8,
-          "missing": false
-        },
-        {
-          "id": "replicability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        }
-      ],
-      "gap": 1.7,
-      "section": "M"
     },
     {
       "id": "C27",
@@ -3923,8 +3693,8 @@
         {
           "id": "turnover",
           "raw": 145764.69,
-          "score": 8.1,
-          "points": 6.5,
+          "score": 8.2,
+          "points": 6.6,
           "missing": false
         },
         {
@@ -3951,15 +3721,15 @@
         {
           "id": "personnel_share",
           "raw": 0.2755277015304598,
-          "score": 6.2,
+          "score": 6.3,
           "points": 4.4,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
+          "score": 2.1,
+          "points": 1.7,
           "missing": false
         },
         {
@@ -3973,14 +3743,14 @@
           "id": "regulation",
           "raw": 7.5,
           "score": 9.6,
-          "points": 7.7,
+          "points": 7.6,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 70.63,
-          "score": 3.3,
-          "points": 2.7,
+          "score": 3.1,
+          "points": 2.5,
           "missing": false
         },
         {
@@ -4014,7 +3784,7 @@
         {
           "id": "fragmentation",
           "raw": 0.1696417012926793,
-          "score": 1.4,
+          "score": 1.5,
           "points": 0.6,
           "missing": false
         },
@@ -4026,8 +3796,123 @@
           "missing": true
         }
       ],
-      "gap": 4.7,
+      "gap": 4.5,
       "section": "C"
+    },
+    {
+      "id": "M75",
+      "name": "Veterinary activities",
+      "total": 49.9,
+      "confidence": 0.71,
+      "breakdown": [
+        {
+          "id": "turnover",
+          "raw": 6526.17,
+          "score": 0.7,
+          "points": 0.6,
+          "missing": false
+        },
+        {
+          "id": "target_firms",
+          "raw": 326,
+          "score": 2.1,
+          "points": 2.1,
+          "missing": false
+        },
+        {
+          "id": "margin",
+          "raw": 0.3673915941509338,
+          "score": 9.5,
+          "points": 7.6,
+          "missing": false
+        },
+        {
+          "id": "growth",
+          "raw": 0.05751013569352126,
+          "score": 7.4,
+          "points": 3,
+          "missing": false
+        },
+        {
+          "id": "personnel_share",
+          "raw": 0.28418352571263084,
+          "score": 6.6,
+          "points": 4.6,
+          "missing": false
+        },
+        {
+          "id": "labour_shortage",
+          "raw": 3.2,
+          "score": 8.2,
+          "points": 6.6,
+          "missing": false
+        },
+        {
+          "id": "manual_work",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "regulation",
+          "raw": 2.4,
+          "score": 2.5,
+          "points": 2,
+          "missing": false
+        },
+        {
+          "id": "ai_gap",
+          "raw": 42.76,
+          "score": 0.9,
+          "points": 0.7,
+          "missing": false
+        },
+        {
+          "id": "solutions",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "reachability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "country_advantage",
+          "raw": 0.9681884028628617,
+          "score": 7.4,
+          "points": 4.5,
+          "missing": false
+        },
+        {
+          "id": "competition",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "fragmentation",
+          "raw": 0.849751079116848,
+          "score": 9.6,
+          "points": 3.8,
+          "missing": false
+        },
+        {
+          "id": "replicability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        }
+      ],
+      "gap": 1.3,
+      "section": "M"
     },
     {
       "id": "C33",
@@ -4052,7 +3937,7 @@
         {
           "id": "margin",
           "raw": 0.12203294288915548,
-          "score": 4.9,
+          "score": 4.8,
           "points": 3.9,
           "missing": false
         },
@@ -4073,8 +3958,8 @@
         {
           "id": "labour_shortage",
           "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
+          "score": 2.1,
+          "points": 1.7,
           "missing": false
         },
         {
@@ -4087,15 +3972,15 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 77.06,
-          "score": 5.8,
-          "points": 4.7,
+          "score": 5.7,
+          "points": 4.6,
           "missing": false
         },
         {
@@ -4115,8 +4000,8 @@
         {
           "id": "country_advantage",
           "raw": 0.808761403007518,
-          "score": 4.8,
-          "points": 2.9,
+          "score": 4.7,
+          "points": 2.8,
           "missing": false
         },
         {
@@ -4145,121 +4030,6 @@
       "section": "C"
     },
     {
-      "id": "C18",
-      "name": "Printing and reproduction of recorded media",
-      "total": 48.8,
-      "confidence": 0.71,
-      "breakdown": [
-        {
-          "id": "turnover",
-          "raw": 16385.1,
-          "score": 2,
-          "points": 1.6,
-          "missing": false
-        },
-        {
-          "id": "target_firms",
-          "raw": 992,
-          "score": 4.8,
-          "points": 4.8,
-          "missing": false
-        },
-        {
-          "id": "margin",
-          "raw": 0.11468773458813192,
-          "score": 4.1,
-          "points": 3.3,
-          "missing": false
-        },
-        {
-          "id": "growth",
-          "raw": -0.05988256206114262,
-          "score": 1.8,
-          "points": 0.7,
-          "missing": false
-        },
-        {
-          "id": "personnel_share",
-          "raw": 0.2925877779201836,
-          "score": 7.4,
-          "points": 5.2,
-          "missing": false
-        },
-        {
-          "id": "labour_shortage",
-          "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
-          "missing": false
-        },
-        {
-          "id": "manual_work",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "regulation",
-          "raw": 5.4,
-          "score": 8.6,
-          "points": 6.8,
-          "missing": false
-        },
-        {
-          "id": "ai_gap",
-          "raw": 72.62,
-          "score": 4.2,
-          "points": 3.3,
-          "missing": false
-        },
-        {
-          "id": "solutions",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "reachability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "country_advantage",
-          "raw": 0.9303444690867235,
-          "score": 6.8,
-          "points": 4.1,
-          "missing": false
-        },
-        {
-          "id": "competition",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "fragmentation",
-          "raw": 0.6012407614234884,
-          "score": 7.1,
-          "points": 2.8,
-          "missing": false
-        },
-        {
-          "id": "replicability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        }
-      ],
-      "gap": 6,
-      "section": "C"
-    },
-    {
       "id": "H50",
       "name": "Water transport",
       "total": 48.8,
@@ -4282,15 +4052,15 @@
         {
           "id": "margin",
           "raw": 0.18596725957358598,
-          "score": 7.8,
+          "score": 7.7,
           "points": 6.2,
           "missing": false
         },
         {
           "id": "growth",
           "raw": 0.013468397028362,
-          "score": 4.6,
-          "points": 1.8,
+          "score": 4.7,
+          "points": 1.9,
           "missing": false
         },
         {
@@ -4304,7 +4074,7 @@
           "id": "labour_shortage",
           "raw": 2.8,
           "score": 7.2,
-          "points": 5.8,
+          "points": 5.7,
           "missing": false
         },
         {
@@ -4317,8 +4087,8 @@
         {
           "id": "regulation",
           "raw": 5.1,
-          "score": 7.6,
-          "points": 6.1,
+          "score": 7.5,
+          "points": 6,
           "missing": false
         },
         {
@@ -4359,8 +4129,8 @@
         {
           "id": "fragmentation",
           "raw": 0.3963729392883697,
-          "score": 3.6,
-          "points": 1.4,
+          "score": 3.7,
+          "points": 1.5,
           "missing": false
         },
         {
@@ -4371,173 +4141,58 @@
           "missing": true
         }
       ],
-      "gap": 12.2,
+      "gap": 12.1,
       "section": "H"
     },
     {
-      "id": "M73",
-      "name": "Advertising and market research",
-      "total": 48.5,
+      "id": "C18",
+      "name": "Printing and reproduction of recorded media",
+      "total": 48.7,
       "confidence": 0.71,
       "breakdown": [
         {
           "id": "turnover",
-          "raw": 36878.48,
-          "score": 3.9,
-          "points": 3.1,
+          "raw": 16385.1,
+          "score": 2.1,
+          "points": 1.7,
           "missing": false
         },
         {
           "id": "target_firms",
-          "raw": 1217,
-          "score": 5.5,
-          "points": 5.5,
+          "raw": 992,
+          "score": 4.8,
+          "points": 4.8,
           "missing": false
         },
         {
           "id": "margin",
-          "raw": 0.1328663762714732,
-          "score": 5.3,
-          "points": 4.2,
-          "missing": false
-        },
-        {
-          "id": "growth",
-          "raw": 0.08625477612450272,
-          "score": 8.1,
-          "points": 3.2,
-          "missing": false
-        },
-        {
-          "id": "personnel_share",
-          "raw": 0.2529277237022784,
-          "score": 5.1,
-          "points": 3.6,
-          "missing": false
-        },
-        {
-          "id": "labour_shortage",
-          "raw": 3.2,
-          "score": 8.3,
-          "points": 6.6,
-          "missing": false
-        },
-        {
-          "id": "manual_work",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "regulation",
-          "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
-          "missing": false
-        },
-        {
-          "id": "ai_gap",
-          "raw": 42.76,
-          "score": 1.2,
-          "points": 0.9,
-          "missing": false
-        },
-        {
-          "id": "solutions",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "reachability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "country_advantage",
-          "raw": 0.7701594778912919,
-          "score": 3.7,
-          "points": 2.2,
-          "missing": false
-        },
-        {
-          "id": "competition",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "fragmentation",
-          "raw": 0.584612489451843,
-          "score": 6.8,
-          "points": 2.7,
-          "missing": false
-        },
-        {
-          "id": "replicability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        }
-      ],
-      "gap": 1.6,
-      "section": "M"
-    },
-    {
-      "id": "E39",
-      "name": "Remediation activities and other waste management services",
-      "total": 48.4,
-      "confidence": 0.71,
-      "breakdown": [
-        {
-          "id": "turnover",
-          "raw": 1481.99,
-          "score": 0.3,
-          "points": 0.2,
-          "missing": false
-        },
-        {
-          "id": "target_firms",
-          "raw": 56,
-          "score": 0.3,
-          "points": 0.3,
-          "missing": false
-        },
-        {
-          "id": "margin",
-          "raw": 0.2179839270170514,
-          "score": 8.2,
-          "points": 6.6,
-          "missing": false
-        },
-        {
-          "id": "growth",
-          "raw": 0.040781785493567035,
-          "score": 6.6,
-          "points": 2.6,
-          "missing": false
-        },
-        {
-          "id": "personnel_share",
-          "raw": 0.28705321898258424,
-          "score": 6.7,
-          "points": 4.7,
-          "missing": false
-        },
-        {
-          "id": "labour_shortage",
-          "raw": 1.8,
+          "raw": 0.11468773458813192,
           "score": 4.1,
           "points": 3.3,
           "missing": false
         },
         {
+          "id": "growth",
+          "raw": -0.05988256206114262,
+          "score": 1.8,
+          "points": 0.7,
+          "missing": false
+        },
+        {
+          "id": "personnel_share",
+          "raw": 0.2925877779201836,
+          "score": 7.5,
+          "points": 5.2,
+          "missing": false
+        },
+        {
+          "id": "labour_shortage",
+          "raw": 1.7,
+          "score": 2.1,
+          "points": 1.7,
+          "missing": false
+        },
+        {
           "id": "manual_work",
           "raw": null,
           "score": 5,
@@ -4546,16 +4201,16 @@
         },
         {
           "id": "regulation",
-          "raw": 4.5,
-          "score": 6.2,
-          "points": 5,
+          "raw": 5.4,
+          "score": 8.5,
+          "points": 6.8,
           "missing": false
         },
         {
           "id": "ai_gap",
-          "raw": 83.12,
-          "score": 7.9,
-          "points": 6.3,
+          "raw": 72.62,
+          "score": 4,
+          "points": 3.2,
           "missing": false
         },
         {
@@ -4574,9 +4229,9 @@
         },
         {
           "id": "country_advantage",
-          "raw": 0.7489577015258378,
-          "score": 3,
-          "points": 1.8,
+          "raw": 0.9303444690867235,
+          "score": 6.8,
+          "points": 4.1,
           "missing": false
         },
         {
@@ -4588,9 +4243,9 @@
         },
         {
           "id": "fragmentation",
-          "raw": 0.6075007253760147,
-          "score": 7.5,
-          "points": 3,
+          "raw": 0.6012407614234884,
+          "score": 7,
+          "points": 2.8,
           "missing": false
         },
         {
@@ -4601,19 +4256,19 @@
           "missing": true
         }
       ],
-      "gap": 10.9,
-      "section": "E"
+      "gap": 5.8,
+      "section": "C"
     },
     {
       "id": "R92",
       "name": "Gambling and betting activities",
-      "total": 48.3,
+      "total": 48.5,
       "confidence": 0.57,
       "breakdown": [
         {
           "id": "turnover",
           "raw": 16975.26,
-          "score": 2.3,
+          "score": 2.4,
           "points": 1.9,
           "missing": false
         },
@@ -4634,22 +4289,22 @@
         {
           "id": "growth",
           "raw": 0.05947776503858049,
-          "score": 7.5,
+          "score": 7.6,
           "points": 3,
           "missing": false
         },
         {
           "id": "personnel_share",
           "raw": 0.14849080367546655,
-          "score": 2,
-          "points": 1.4,
+          "score": 2.1,
+          "points": 1.5,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 2,
-          "score": 4.9,
-          "points": 3.9,
+          "score": 5,
+          "points": 4,
           "missing": false
         },
         {
@@ -4662,8 +4317,8 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
@@ -4704,8 +4359,8 @@
         {
           "id": "fragmentation",
           "raw": 0.6200747440687211,
-          "score": 7.7,
-          "points": 3.1,
+          "score": 7.6,
+          "points": 3,
           "missing": false
         },
         {
@@ -4716,8 +4371,238 @@
           "missing": true
         }
       ],
-      "gap": 4.5,
+      "gap": 4.6,
       "section": "R"
+    },
+    {
+      "id": "E39",
+      "name": "Remediation activities and other waste management services",
+      "total": 48.4,
+      "confidence": 0.71,
+      "breakdown": [
+        {
+          "id": "turnover",
+          "raw": 1481.99,
+          "score": 0.3,
+          "points": 0.2,
+          "missing": false
+        },
+        {
+          "id": "target_firms",
+          "raw": 56,
+          "score": 0.3,
+          "points": 0.3,
+          "missing": false
+        },
+        {
+          "id": "margin",
+          "raw": 0.2179839270170514,
+          "score": 8.2,
+          "points": 6.5,
+          "missing": false
+        },
+        {
+          "id": "growth",
+          "raw": 0.040781785493567035,
+          "score": 6.7,
+          "points": 2.7,
+          "missing": false
+        },
+        {
+          "id": "personnel_share",
+          "raw": 0.28705321898258424,
+          "score": 6.7,
+          "points": 4.7,
+          "missing": false
+        },
+        {
+          "id": "labour_shortage",
+          "raw": 1.8,
+          "score": 4.3,
+          "points": 3.4,
+          "missing": false
+        },
+        {
+          "id": "manual_work",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "regulation",
+          "raw": 4.5,
+          "score": 6.3,
+          "points": 5,
+          "missing": false
+        },
+        {
+          "id": "ai_gap",
+          "raw": 83.12,
+          "score": 7.8,
+          "points": 6.3,
+          "missing": false
+        },
+        {
+          "id": "solutions",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "reachability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "country_advantage",
+          "raw": 0.7489577015258378,
+          "score": 2.9,
+          "points": 1.7,
+          "missing": false
+        },
+        {
+          "id": "competition",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "fragmentation",
+          "raw": 0.6075007253760147,
+          "score": 7.5,
+          "points": 3,
+          "missing": false
+        },
+        {
+          "id": "replicability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        }
+      ],
+      "gap": 10.9,
+      "section": "E"
+    },
+    {
+      "id": "M73",
+      "name": "Advertising and market research",
+      "total": 48.3,
+      "confidence": 0.71,
+      "breakdown": [
+        {
+          "id": "turnover",
+          "raw": 36878.48,
+          "score": 3.9,
+          "points": 3.1,
+          "missing": false
+        },
+        {
+          "id": "target_firms",
+          "raw": 1217,
+          "score": 5.5,
+          "points": 5.5,
+          "missing": false
+        },
+        {
+          "id": "margin",
+          "raw": 0.1328663762714732,
+          "score": 5.3,
+          "points": 4.2,
+          "missing": false
+        },
+        {
+          "id": "growth",
+          "raw": 0.08625477612450272,
+          "score": 8.2,
+          "points": 3.3,
+          "missing": false
+        },
+        {
+          "id": "personnel_share",
+          "raw": 0.2529277237022784,
+          "score": 5.2,
+          "points": 3.7,
+          "missing": false
+        },
+        {
+          "id": "labour_shortage",
+          "raw": 3.2,
+          "score": 8.2,
+          "points": 6.6,
+          "missing": false
+        },
+        {
+          "id": "manual_work",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "regulation",
+          "raw": 2.4,
+          "score": 2.5,
+          "points": 2,
+          "missing": false
+        },
+        {
+          "id": "ai_gap",
+          "raw": 42.76,
+          "score": 0.9,
+          "points": 0.7,
+          "missing": false
+        },
+        {
+          "id": "solutions",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "reachability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "country_advantage",
+          "raw": 0.7701594778912919,
+          "score": 3.5,
+          "points": 2.1,
+          "missing": false
+        },
+        {
+          "id": "competition",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "fragmentation",
+          "raw": 0.584612489451843,
+          "score": 6.7,
+          "points": 2.7,
+          "missing": false
+        },
+        {
+          "id": "replicability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        }
+      ],
+      "gap": 1.2,
+      "section": "M"
     },
     {
       "id": "J58",
@@ -4728,35 +4613,35 @@
         {
           "id": "turnover",
           "raw": 30443.65,
-          "score": 3.2,
+          "score": 3.3,
           "points": 2.6,
           "missing": false
         },
         {
           "id": "target_firms",
           "raw": 717,
-          "score": 3.8,
-          "points": 3.8,
+          "score": 3.7,
+          "points": 3.7,
           "missing": false
         },
         {
           "id": "margin",
           "raw": 0.14866811305477495,
-          "score": 6.3,
+          "score": 6.4,
           "points": 5.1,
           "missing": false
         },
         {
           "id": "growth",
           "raw": -0.07354117728329967,
-          "score": 1.3,
+          "score": 1.4,
           "points": 0.5,
           "missing": false
         },
         {
           "id": "personnel_share",
           "raw": 0.314631458448642,
-          "score": 8,
+          "score": 8.1,
           "points": 5.6,
           "missing": false
         },
@@ -4764,7 +4649,7 @@
           "id": "labour_shortage",
           "raw": 2.7,
           "score": 6.3,
-          "points": 5,
+          "points": 5.1,
           "missing": false
         },
         {
@@ -4777,15 +4662,15 @@
         {
           "id": "regulation",
           "raw": 3,
-          "score": 5,
-          "points": 4,
+          "score": 5.1,
+          "points": 4.1,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 32.66,
-          "score": 0.5,
-          "points": 0.4,
+          "score": 0.2,
+          "points": 0.1,
           "missing": false
         },
         {
@@ -4819,7 +4704,7 @@
         {
           "id": "fragmentation",
           "raw": 0.36135713030467775,
-          "score": 3.2,
+          "score": 3.3,
           "points": 1.3,
           "missing": false
         },
@@ -4831,54 +4716,54 @@
           "missing": true
         }
       ],
-      "gap": 0.8,
+      "gap": 0.3,
       "section": "J"
     },
     {
       "id": "M74",
       "name": "Other professional, scientific and technical activities",
-      "total": 47.6,
+      "total": 47.5,
       "confidence": 0.71,
       "breakdown": [
         {
           "id": "turnover",
           "raw": 26401.96,
-          "score": 2.9,
-          "points": 2.3,
+          "score": 3,
+          "points": 2.4,
           "missing": false
         },
         {
           "id": "target_firms",
           "raw": 761,
-          "score": 4.1,
-          "points": 4.1,
+          "score": 4,
+          "points": 4,
           "missing": false
         },
         {
           "id": "margin",
           "raw": 0.2352238242918329,
-          "score": 8.7,
+          "score": 8.6,
           "points": 6.9,
           "missing": false
         },
         {
           "id": "growth",
           "raw": 0.10985113124949009,
-          "score": 8.7,
+          "score": 8.8,
           "points": 3.5,
           "missing": false
         },
         {
           "id": "personnel_share",
           "raw": 0.20008590271328341,
-          "score": 4.1,
-          "points": 2.8,
+          "score": 4.2,
+          "points": 2.9,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 3.2,
-          "score": 8.3,
+          "score": 8.2,
           "points": 6.6,
           "missing": false
         },
@@ -4892,15 +4777,15 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 42.76,
-          "score": 1.2,
-          "points": 0.9,
+          "score": 0.9,
+          "points": 0.7,
           "missing": false
         },
         {
@@ -4946,13 +4831,13 @@
           "missing": true
         }
       ],
-      "gap": 1.5,
+      "gap": 1.1,
       "section": "M"
     },
     {
       "id": "M72",
       "name": "Scientific research and development",
-      "total": 47.3,
+      "total": 47.1,
       "confidence": 0.71,
       "breakdown": [
         {
@@ -4993,7 +4878,7 @@
         {
           "id": "labour_shortage",
           "raw": 3.2,
-          "score": 8.3,
+          "score": 8.2,
           "points": 6.6,
           "missing": false
         },
@@ -5007,15 +4892,15 @@
         {
           "id": "regulation",
           "raw": 4.5,
-          "score": 6.2,
+          "score": 6.3,
           "points": 5,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 40.86,
-          "score": 0.8,
-          "points": 0.7,
+          "score": 0.5,
+          "points": 0.4,
           "missing": false
         },
         {
@@ -5036,7 +4921,7 @@
           "id": "country_advantage",
           "raw": 1.0857488776861821,
           "score": 8.1,
-          "points": 4.9,
+          "points": 4.8,
           "missing": false
         },
         {
@@ -5049,7 +4934,7 @@
         {
           "id": "fragmentation",
           "raw": 0.4230236101211311,
-          "score": 4.1,
+          "score": 4,
           "points": 1.6,
           "missing": false
         },
@@ -5061,20 +4946,20 @@
           "missing": true
         }
       ],
-      "gap": 1.5,
+      "gap": 0.9,
       "section": "M"
     },
     {
       "id": "C29",
       "name": "Manufacture of motor vehicles, trailers and semi-trailers",
-      "total": 47.1,
+      "total": 47,
       "confidence": 0.71,
       "breakdown": [
         {
           "id": "turnover",
           "raw": 626123.03,
           "score": 9.6,
-          "points": 7.7,
+          "points": 7.6,
           "missing": false
         },
         {
@@ -5094,7 +4979,7 @@
         {
           "id": "growth",
           "raw": -0.053785988529152506,
-          "score": 2.2,
+          "score": 2.3,
           "points": 0.9,
           "missing": false
         },
@@ -5108,8 +4993,8 @@
         {
           "id": "labour_shortage",
           "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
+          "score": 2.1,
+          "points": 1.7,
           "missing": false
         },
         {
@@ -5123,14 +5008,14 @@
           "id": "regulation",
           "raw": 7.5,
           "score": 9.6,
-          "points": 7.7,
+          "points": 7.6,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 70.91,
-          "score": 3.6,
-          "points": 2.9,
+          "score": 3.4,
+          "points": 2.7,
           "missing": false
         },
         {
@@ -5176,19 +5061,19 @@
           "missing": true
         }
       ],
-      "gap": 4,
+      "gap": 3.8,
       "section": "C"
     },
     {
       "id": "C31",
       "name": "Manufacture of furniture",
-      "total": 47.1,
+      "total": 47,
       "confidence": 0.71,
       "breakdown": [
         {
           "id": "turnover",
           "raw": 24505.03,
-          "score": 2.6,
+          "score": 2.7,
           "points": 2.1,
           "missing": false
         },
@@ -5203,13 +5088,13 @@
           "id": "margin",
           "raw": 0.10442509150162232,
           "score": 3.8,
-          "points": 3.1,
+          "points": 3,
           "missing": false
         },
         {
           "id": "growth",
           "raw": 0.03309526429373344,
-          "score": 6,
+          "score": 6.1,
           "points": 2.4,
           "missing": false
         },
@@ -5223,8 +5108,8 @@
         {
           "id": "labour_shortage",
           "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
+          "score": 2.1,
+          "points": 1.7,
           "missing": false
         },
         {
@@ -5237,15 +5122,15 @@
         {
           "id": "regulation",
           "raw": 5.4,
-          "score": 8.6,
+          "score": 8.5,
           "points": 6.8,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 77.06,
-          "score": 5.8,
-          "points": 4.7,
+          "score": 5.7,
+          "points": 4.6,
           "missing": false
         },
         {
@@ -5265,8 +5150,8 @@
         {
           "id": "country_advantage",
           "raw": 0.6084084094331279,
-          "score": 1.7,
-          "points": 1,
+          "score": 1.8,
+          "points": 1.1,
           "missing": false
         },
         {
@@ -5279,7 +5164,7 @@
         {
           "id": "fragmentation",
           "raw": 0.5235341478871889,
-          "score": 5.8,
+          "score": 5.7,
           "points": 2.3,
           "missing": false
         },
@@ -5291,123 +5176,8 @@
           "missing": true
         }
       ],
-      "gap": 7.8,
+      "gap": 7.6,
       "section": "C"
-    },
-    {
-      "id": "J63",
-      "name": "Information service activities",
-      "total": 46.6,
-      "confidence": 0.71,
-      "breakdown": [
-        {
-          "id": "turnover",
-          "raw": 30951.26,
-          "score": 3.3,
-          "points": 2.7,
-          "missing": false
-        },
-        {
-          "id": "target_firms",
-          "raw": 552,
-          "score": 3.2,
-          "points": 3.2,
-          "missing": false
-        },
-        {
-          "id": "margin",
-          "raw": 0.16314069281832144,
-          "score": 7.2,
-          "points": 5.8,
-          "missing": false
-        },
-        {
-          "id": "growth",
-          "raw": 0.14175943314966322,
-          "score": 9.3,
-          "points": 3.7,
-          "missing": false
-        },
-        {
-          "id": "personnel_share",
-          "raw": 0.2532501100116764,
-          "score": 5.4,
-          "points": 3.8,
-          "missing": false
-        },
-        {
-          "id": "labour_shortage",
-          "raw": 2.7,
-          "score": 6.3,
-          "points": 5,
-          "missing": false
-        },
-        {
-          "id": "manual_work",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "regulation",
-          "raw": 4.5,
-          "score": 6.2,
-          "points": 5,
-          "missing": false
-        },
-        {
-          "id": "ai_gap",
-          "raw": 24.620000000000005,
-          "score": 0.1,
-          "points": 0.1,
-          "missing": false
-        },
-        {
-          "id": "solutions",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "reachability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "country_advantage",
-          "raw": 0.7004367970822538,
-          "score": 2.2,
-          "points": 1.3,
-          "missing": false
-        },
-        {
-          "id": "competition",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "fragmentation",
-          "raw": 0.4142022004919993,
-          "score": 3.9,
-          "points": 1.6,
-          "missing": false
-        },
-        {
-          "id": "replicability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        }
-      ],
-      "gap": 0.1,
-      "section": "J"
     },
     {
       "id": "C30",
@@ -5418,7 +5188,7 @@
         {
           "id": "turnover",
           "raw": 70156.6,
-          "score": 5.9,
+          "score": 6,
           "points": 4.8,
           "missing": false
         },
@@ -5432,7 +5202,7 @@
         {
           "id": "margin",
           "raw": 0.09004370223186413,
-          "score": 3.1,
+          "score": 3.2,
           "points": 2.5,
           "missing": false
         },
@@ -5446,15 +5216,15 @@
         {
           "id": "personnel_share",
           "raw": 0.2252373974793533,
-          "score": 4.5,
-          "points": 3.1,
+          "score": 4.6,
+          "points": 3.2,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
+          "score": 2.1,
+          "points": 1.7,
           "missing": false
         },
         {
@@ -5468,14 +5238,14 @@
           "id": "regulation",
           "raw": 7.5,
           "score": 9.6,
-          "points": 7.7,
+          "points": 7.6,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 70.91,
-          "score": 3.6,
-          "points": 2.9,
+          "score": 3.4,
+          "points": 2.7,
           "missing": false
         },
         {
@@ -5495,7 +5265,7 @@
         {
           "id": "country_advantage",
           "raw": 0.8640359355014265,
-          "score": 5.6,
+          "score": 5.5,
           "points": 3.3,
           "missing": false
         },
@@ -5521,19 +5291,134 @@
           "missing": true
         }
       ],
-      "gap": 4.7,
+      "gap": 4.5,
+      "section": "C"
+    },
+    {
+      "id": "C11",
+      "name": "Manufacture of beverages",
+      "total": 45.4,
+      "confidence": 0.71,
+      "breakdown": [
+        {
+          "id": "turnover",
+          "raw": 29544.07,
+          "score": 3.1,
+          "points": 2.5,
+          "missing": false
+        },
+        {
+          "id": "target_firms",
+          "raw": 516,
+          "score": 3,
+          "points": 3,
+          "missing": false
+        },
+        {
+          "id": "margin",
+          "raw": 0.1258276195527563,
+          "score": 5.2,
+          "points": 4.1,
+          "missing": false
+        },
+        {
+          "id": "growth",
+          "raw": -0.1297903537265408,
+          "score": 0.9,
+          "points": 0.4,
+          "missing": false
+        },
+        {
+          "id": "personnel_share",
+          "raw": 0.1813697300338105,
+          "score": 3,
+          "points": 2.1,
+          "missing": false
+        },
+        {
+          "id": "labour_shortage",
+          "raw": 1.7,
+          "score": 2.1,
+          "points": 1.7,
+          "missing": false
+        },
+        {
+          "id": "manual_work",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "regulation",
+          "raw": 7.5,
+          "score": 9.6,
+          "points": 7.6,
+          "missing": false
+        },
+        {
+          "id": "ai_gap",
+          "raw": 84.9,
+          "score": 8.4,
+          "points": 6.7,
+          "missing": false
+        },
+        {
+          "id": "solutions",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "reachability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "country_advantage",
+          "raw": 0.7515831972415004,
+          "score": 3.1,
+          "points": 1.8,
+          "missing": false
+        },
+        {
+          "id": "competition",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "fragmentation",
+          "raw": 0.2935986815628313,
+          "score": 2.4,
+          "points": 1,
+          "missing": false
+        },
+        {
+          "id": "replicability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        }
+      ],
+      "gap": 10.3,
       "section": "C"
     },
     {
       "id": "C20",
       "name": "Manufacture of chemicals and chemical products",
-      "total": 45.3,
+      "total": 45.4,
       "confidence": 0.71,
       "breakdown": [
         {
           "id": "turnover",
           "raw": 192800.16,
-          "score": 8.7,
+          "score": 8.8,
           "points": 7,
           "missing": false
         },
@@ -5547,29 +5432,29 @@
         {
           "id": "margin",
           "raw": 0.07834101382488479,
-          "score": 2.2,
+          "score": 2.3,
           "points": 1.8,
           "missing": false
         },
         {
           "id": "growth",
           "raw": -0.023078385885642816,
-          "score": 2.9,
+          "score": 3,
           "points": 1.2,
           "missing": false
         },
         {
           "id": "personnel_share",
           "raw": 0.1778665536377148,
-          "score": 2.6,
-          "points": 1.8,
+          "score": 2.7,
+          "points": 1.9,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
+          "score": 2.1,
+          "points": 1.7,
           "missing": false
         },
         {
@@ -5582,15 +5467,15 @@
         {
           "id": "regulation",
           "raw": 4.5,
-          "score": 6.2,
+          "score": 6.3,
           "points": 5,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 65.86,
-          "score": 2.7,
-          "points": 2.1,
+          "score": 2.4,
+          "points": 1.9,
           "missing": false
         },
         {
@@ -5636,249 +5521,19 @@
           "missing": true
         }
       ],
-      "gap": 2.7,
-      "section": "C"
-    },
-    {
-      "id": "S95",
-      "name": "Repair of computers and personal and household goods",
-      "total": 45.3,
-      "confidence": 0.63,
-      "breakdown": [
-        {
-          "id": "turnover",
-          "raw": 3672.19,
-          "score": 0.4,
-          "points": 0.3,
-          "missing": false
-        },
-        {
-          "id": "target_firms",
-          "raw": 182,
-          "score": 1.4,
-          "points": 1.4,
-          "missing": false
-        },
-        {
-          "id": "margin",
-          "raw": 0.19560807038851474,
-          "score": 7.9,
-          "points": 6.4,
-          "missing": false
-        },
-        {
-          "id": "growth",
-          "raw": 0.03484240041707176,
-          "score": 6.2,
-          "points": 2.5,
-          "missing": false
-        },
-        {
-          "id": "personnel_share",
-          "raw": 0.2721019337234729,
-          "score": 6.1,
-          "points": 4.3,
-          "missing": false
-        },
-        {
-          "id": "labour_shortage",
-          "raw": 2.8,
-          "score": 7.2,
-          "points": 5.8,
-          "missing": false
-        },
-        {
-          "id": "manual_work",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "regulation",
-          "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
-          "missing": false
-        },
-        {
-          "id": "ai_gap",
-          "raw": null,
-          "score": 5,
-          "points": 4,
-          "missing": true
-        },
-        {
-          "id": "solutions",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "reachability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "country_advantage",
-          "raw": 0.4857330382925773,
-          "score": 0.5,
-          "points": 0.3,
-          "missing": false
-        },
-        {
-          "id": "competition",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "fragmentation",
-          "raw": 0.8753005699596154,
-          "score": 9.7,
-          "points": 3.9,
-          "missing": false
-        },
-        {
-          "id": "replicability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        }
-      ],
-      "gap": 6.5,
-      "section": "S"
-    },
-    {
-      "id": "C11",
-      "name": "Manufacture of beverages",
-      "total": 45.2,
-      "confidence": 0.71,
-      "breakdown": [
-        {
-          "id": "turnover",
-          "raw": 29544.07,
-          "score": 3,
-          "points": 2.4,
-          "missing": false
-        },
-        {
-          "id": "target_firms",
-          "raw": 516,
-          "score": 2.9,
-          "points": 2.9,
-          "missing": false
-        },
-        {
-          "id": "margin",
-          "raw": 0.1258276195527563,
-          "score": 5.1,
-          "points": 4.1,
-          "missing": false
-        },
-        {
-          "id": "growth",
-          "raw": -0.1297903537265408,
-          "score": 0.9,
-          "points": 0.4,
-          "missing": false
-        },
-        {
-          "id": "personnel_share",
-          "raw": 0.1813697300338105,
-          "score": 2.9,
-          "points": 2,
-          "missing": false
-        },
-        {
-          "id": "labour_shortage",
-          "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
-          "missing": false
-        },
-        {
-          "id": "manual_work",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "regulation",
-          "raw": 7.5,
-          "score": 9.6,
-          "points": 7.7,
-          "missing": false
-        },
-        {
-          "id": "ai_gap",
-          "raw": 84.9,
-          "score": 8.4,
-          "points": 6.7,
-          "missing": false
-        },
-        {
-          "id": "solutions",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "reachability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "country_advantage",
-          "raw": 0.7515831972415004,
-          "score": 3.2,
-          "points": 1.9,
-          "missing": false
-        },
-        {
-          "id": "competition",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "fragmentation",
-          "raw": 0.2935986815628313,
-          "score": 2.3,
-          "points": 0.9,
-          "missing": false
-        },
-        {
-          "id": "replicability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        }
-      ],
-      "gap": 10.2,
+      "gap": 2.4,
       "section": "C"
     },
     {
       "id": "R90",
       "name": "Creative, arts and entertainment activities",
-      "total": 45.1,
+      "total": 45.4,
       "confidence": 0.63,
       "breakdown": [
         {
           "id": "turnover",
           "raw": 13030.9,
-          "score": 1.4,
+          "score": 1.5,
           "points": 1.2,
           "missing": false
         },
@@ -5899,7 +5554,7 @@
         {
           "id": "growth",
           "raw": 0.19510070068601193,
-          "score": 9.9,
+          "score": 9.8,
           "points": 3.9,
           "missing": false
         },
@@ -5913,8 +5568,8 @@
         {
           "id": "labour_shortage",
           "raw": 2,
-          "score": 4.9,
-          "points": 3.9,
+          "score": 5,
+          "points": 4,
           "missing": false
         },
         {
@@ -5927,8 +5582,8 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
@@ -5985,16 +5640,131 @@
       "section": "R"
     },
     {
+      "id": "S95",
+      "name": "Repair of computers and personal and household goods",
+      "total": 45.3,
+      "confidence": 0.63,
+      "breakdown": [
+        {
+          "id": "turnover",
+          "raw": 3672.19,
+          "score": 0.4,
+          "points": 0.4,
+          "missing": false
+        },
+        {
+          "id": "target_firms",
+          "raw": 182,
+          "score": 1.5,
+          "points": 1.5,
+          "missing": false
+        },
+        {
+          "id": "margin",
+          "raw": 0.19560807038851474,
+          "score": 7.9,
+          "points": 6.3,
+          "missing": false
+        },
+        {
+          "id": "growth",
+          "raw": 0.03484240041707176,
+          "score": 6.2,
+          "points": 2.5,
+          "missing": false
+        },
+        {
+          "id": "personnel_share",
+          "raw": 0.2721019337234729,
+          "score": 6.1,
+          "points": 4.3,
+          "missing": false
+        },
+        {
+          "id": "labour_shortage",
+          "raw": 2.8,
+          "score": 7.2,
+          "points": 5.7,
+          "missing": false
+        },
+        {
+          "id": "manual_work",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "regulation",
+          "raw": 2.4,
+          "score": 2.5,
+          "points": 2,
+          "missing": false
+        },
+        {
+          "id": "ai_gap",
+          "raw": null,
+          "score": 5,
+          "points": 4,
+          "missing": true
+        },
+        {
+          "id": "solutions",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "reachability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "country_advantage",
+          "raw": 0.4857330382925773,
+          "score": 0.5,
+          "points": 0.3,
+          "missing": false
+        },
+        {
+          "id": "competition",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "fragmentation",
+          "raw": 0.8753005699596154,
+          "score": 9.7,
+          "points": 3.9,
+          "missing": false
+        },
+        {
+          "id": "replicability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        }
+      ],
+      "gap": 6.5,
+      "section": "S"
+    },
+    {
       "id": "E36",
       "name": "Water collection, treatment and supply",
-      "total": 44.5,
+      "total": 44.6,
       "confidence": 0.71,
       "breakdown": [
         {
           "id": "turnover",
           "raw": 14872.54,
           "score": 1.9,
-          "points": 1.5,
+          "points": 1.6,
           "missing": false
         },
         {
@@ -6008,13 +5778,13 @@
           "id": "margin",
           "raw": 0.2384347260118312,
           "score": 8.8,
-          "points": 7.1,
+          "points": 7,
           "missing": false
         },
         {
           "id": "growth",
           "raw": -0.13034168167989058,
-          "score": 0.7,
+          "score": 0.8,
           "points": 0.3,
           "missing": false
         },
@@ -6022,14 +5792,14 @@
           "id": "personnel_share",
           "raw": 0.17924577778913353,
           "score": 2.8,
-          "points": 1.9,
+          "points": 2,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 1.8,
-          "score": 4.1,
-          "points": 3.3,
+          "score": 4.3,
+          "points": 3.4,
           "missing": false
         },
         {
@@ -6042,14 +5812,14 @@
         {
           "id": "regulation",
           "raw": 4.5,
-          "score": 6.2,
+          "score": 6.3,
           "points": 5,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 83.12,
-          "score": 7.9,
+          "score": 7.8,
           "points": 6.3,
           "missing": false
         },
@@ -6084,8 +5854,8 @@
         {
           "id": "fragmentation",
           "raw": 0.5062248950078467,
-          "score": 5.5,
-          "points": 2.2,
+          "score": 5.4,
+          "points": 2.1,
           "missing": false
         },
         {
@@ -6096,13 +5866,13 @@
           "missing": true
         }
       ],
-      "gap": 8.9,
+      "gap": 9,
       "section": "E"
     },
     {
       "id": "D35",
       "name": "Electricity, gas, steam and air conditioning supply",
-      "total": 44.1,
+      "total": 44,
       "confidence": 0.71,
       "breakdown": [
         {
@@ -6122,14 +5892,14 @@
         {
           "id": "margin",
           "raw": 0.0636302819075272,
-          "score": 1.3,
+          "score": 1.4,
           "points": 1.1,
           "missing": false
         },
         {
           "id": "growth",
           "raw": -0.2565168830696214,
-          "score": 0.1,
+          "score": 0.2,
           "points": 0.1,
           "missing": false
         },
@@ -6143,8 +5913,8 @@
         {
           "id": "labour_shortage",
           "raw": 1.8,
-          "score": 4.1,
-          "points": 3.3,
+          "score": 4.3,
+          "points": 3.4,
           "missing": false
         },
         {
@@ -6157,15 +5927,15 @@
         {
           "id": "regulation",
           "raw": 4.5,
-          "score": 6.2,
+          "score": 6.3,
           "points": 5,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 62.62,
-          "score": 2.5,
-          "points": 2,
+          "score": 2.2,
+          "points": 1.8,
           "missing": false
         },
         {
@@ -6185,7 +5955,7 @@
         {
           "id": "country_advantage",
           "raw": 1.1734511506821357,
-          "score": 8.6,
+          "score": 8.5,
           "points": 5.1,
           "missing": false
         },
@@ -6211,20 +5981,20 @@
           "missing": true
         }
       ],
-      "gap": 2.4,
+      "gap": 2.2,
       "section": "D"
     },
     {
       "id": "C16",
       "name": "Manufacture of wood and of products of wood and cork, except furniture; manufacture of articles of straw and plaiting materials",
-      "total": 43.8,
+      "total": 43.7,
       "confidence": 0.71,
       "breakdown": [
         {
           "id": "turnover",
           "raw": 32298.25,
-          "score": 3.5,
-          "points": 2.8,
+          "score": 3.4,
+          "points": 2.7,
           "missing": false
         },
         {
@@ -6237,7 +6007,7 @@
         {
           "id": "margin",
           "raw": 0.10399386963689984,
-          "score": 3.7,
+          "score": 3.6,
           "points": 2.9,
           "missing": false
         },
@@ -6251,15 +6021,15 @@
         {
           "id": "personnel_share",
           "raw": 0.20070158599924146,
-          "score": 4.2,
-          "points": 2.9,
+          "score": 4.3,
+          "points": 3,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
+          "score": 2.1,
+          "points": 1.7,
           "missing": false
         },
         {
@@ -6272,15 +6042,15 @@
         {
           "id": "regulation",
           "raw": 5.4,
-          "score": 8.6,
+          "score": 8.5,
           "points": 6.8,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 72.62,
-          "score": 4.2,
-          "points": 3.3,
+          "score": 4,
+          "points": 3.2,
           "missing": false
         },
         {
@@ -6301,7 +6071,7 @@
           "id": "country_advantage",
           "raw": 0.6276045286259666,
           "score": 1.9,
-          "points": 1.1,
+          "points": 1.2,
           "missing": false
         },
         {
@@ -6314,126 +6084,11 @@
         {
           "id": "fragmentation",
           "raw": 0.4821273598414775,
-          "score": 4.9,
-          "points": 2,
-          "missing": false
-        },
-        {
-          "id": "replicability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        }
-      ],
-      "gap": 5.2,
-      "section": "C"
-    },
-    {
-      "id": "C23",
-      "name": "Manufacture of other non-metallic mineral products",
-      "total": 43.4,
-      "confidence": 0.71,
-      "breakdown": [
-        {
-          "id": "turnover",
-          "raw": 59943.63,
-          "score": 5.2,
-          "points": 4.2,
-          "missing": false
-        },
-        {
-          "id": "target_firms",
-          "raw": 1055,
-          "score": 5.1,
-          "points": 5.1,
-          "missing": false
-        },
-        {
-          "id": "margin",
-          "raw": 0.1236850354241143,
-          "score": 5,
-          "points": 4,
-          "missing": false
-        },
-        {
-          "id": "growth",
-          "raw": -0.04205390765281314,
-          "score": 2.5,
-          "points": 1,
-          "missing": false
-        },
-        {
-          "id": "personnel_share",
-          "raw": 0.23748978832279594,
-          "score": 4.6,
-          "points": 3.2,
-          "missing": false
-        },
-        {
-          "id": "labour_shortage",
-          "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
-          "missing": false
-        },
-        {
-          "id": "manual_work",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "regulation",
-          "raw": 2.4,
-          "score": 2.4,
+          "score": 4.8,
           "points": 1.9,
           "missing": false
         },
         {
-          "id": "ai_gap",
-          "raw": 74.16,
-          "score": 4.7,
-          "points": 3.7,
-          "missing": false
-        },
-        {
-          "id": "solutions",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "reachability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "country_advantage",
-          "raw": 0.8223840913639612,
-          "score": 5.1,
-          "points": 3,
-          "missing": false
-        },
-        {
-          "id": "competition",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "fragmentation",
-          "raw": 0.32903596262021506,
-          "score": 2.6,
-          "points": 1,
-          "missing": false
-        },
-        {
           "id": "replicability",
           "raw": null,
           "score": 5,
@@ -6441,128 +6096,13 @@
           "missing": true
         }
       ],
-      "gap": 4.1,
+      "gap": 5,
       "section": "C"
-    },
-    {
-      "id": "J61",
-      "name": "Telecommunications",
-      "total": 43.4,
-      "confidence": 0.71,
-      "breakdown": [
-        {
-          "id": "turnover",
-          "raw": 80683.03,
-          "score": 6.2,
-          "points": 5,
-          "missing": false
-        },
-        {
-          "id": "target_firms",
-          "raw": 296,
-          "score": 1.7,
-          "points": 1.7,
-          "missing": false
-        },
-        {
-          "id": "margin",
-          "raw": 0.1476322840131314,
-          "score": 6.2,
-          "points": 4.9,
-          "missing": false
-        },
-        {
-          "id": "growth",
-          "raw": -0.0025589065251807597,
-          "score": 4.1,
-          "points": 1.6,
-          "missing": false
-        },
-        {
-          "id": "personnel_share",
-          "raw": 0.15776303889430032,
-          "score": 2.2,
-          "points": 1.5,
-          "missing": false
-        },
-        {
-          "id": "labour_shortage",
-          "raw": 2.7,
-          "score": 6.3,
-          "points": 5,
-          "missing": false
-        },
-        {
-          "id": "manual_work",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "regulation",
-          "raw": 5.1,
-          "score": 7.6,
-          "points": 6.1,
-          "missing": false
-        },
-        {
-          "id": "ai_gap",
-          "raw": 52.41,
-          "score": 1.5,
-          "points": 1.2,
-          "missing": false
-        },
-        {
-          "id": "solutions",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "reachability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "country_advantage",
-          "raw": 0.7200230509704304,
-          "score": 2.5,
-          "points": 1.5,
-          "missing": false
-        },
-        {
-          "id": "competition",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "fragmentation",
-          "raw": 0.11386607567911122,
-          "score": 0.6,
-          "points": 0.2,
-          "missing": false
-        },
-        {
-          "id": "replicability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        }
-      ],
-      "gap": 2,
-      "section": "J"
     },
     {
       "id": "R91",
       "name": "Libraries, archives, museums and other cultural activities",
-      "total": 43.4,
+      "total": 43.6,
       "confidence": 0.63,
       "breakdown": [
         {
@@ -6582,14 +6122,14 @@
         {
           "id": "margin",
           "raw": 0.11496230013725246,
-          "score": 4.3,
+          "score": 4.2,
           "points": 3.4,
           "missing": false
         },
         {
           "id": "growth",
           "raw": 0.09109827488962807,
-          "score": 8.2,
+          "score": 8.3,
           "points": 3.3,
           "missing": false
         },
@@ -6603,8 +6143,8 @@
         {
           "id": "labour_shortage",
           "raw": 2,
-          "score": 4.9,
-          "points": 3.9,
+          "score": 5,
+          "points": 4,
           "missing": false
         },
         {
@@ -6617,8 +6157,8 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
@@ -6646,7 +6186,7 @@
           "id": "country_advantage",
           "raw": 0.6908349879712088,
           "score": 2.1,
-          "points": 1.2,
+          "points": 1.3,
           "missing": false
         },
         {
@@ -6675,9 +6215,239 @@
       "section": "R"
     },
     {
+      "id": "C23",
+      "name": "Manufacture of other non-metallic mineral products",
+      "total": 43.5,
+      "confidence": 0.71,
+      "breakdown": [
+        {
+          "id": "turnover",
+          "raw": 59943.63,
+          "score": 5.2,
+          "points": 4.2,
+          "missing": false
+        },
+        {
+          "id": "target_firms",
+          "raw": 1055,
+          "score": 5.1,
+          "points": 5.1,
+          "missing": false
+        },
+        {
+          "id": "margin",
+          "raw": 0.1236850354241143,
+          "score": 5,
+          "points": 4,
+          "missing": false
+        },
+        {
+          "id": "growth",
+          "raw": -0.04205390765281314,
+          "score": 2.6,
+          "points": 1,
+          "missing": false
+        },
+        {
+          "id": "personnel_share",
+          "raw": 0.23748978832279594,
+          "score": 4.8,
+          "points": 3.3,
+          "missing": false
+        },
+        {
+          "id": "labour_shortage",
+          "raw": 1.7,
+          "score": 2.1,
+          "points": 1.7,
+          "missing": false
+        },
+        {
+          "id": "manual_work",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "regulation",
+          "raw": 2.4,
+          "score": 2.5,
+          "points": 2,
+          "missing": false
+        },
+        {
+          "id": "ai_gap",
+          "raw": 74.16,
+          "score": 4.5,
+          "points": 3.6,
+          "missing": false
+        },
+        {
+          "id": "solutions",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "reachability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "country_advantage",
+          "raw": 0.8223840913639612,
+          "score": 5,
+          "points": 3,
+          "missing": false
+        },
+        {
+          "id": "competition",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "fragmentation",
+          "raw": 0.32903596262021506,
+          "score": 2.7,
+          "points": 1.1,
+          "missing": false
+        },
+        {
+          "id": "replicability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        }
+      ],
+      "gap": 4.1,
+      "section": "C"
+    },
+    {
+      "id": "J61",
+      "name": "Telecommunications",
+      "total": 43.3,
+      "confidence": 0.71,
+      "breakdown": [
+        {
+          "id": "turnover",
+          "raw": 80683.03,
+          "score": 6.3,
+          "points": 5,
+          "missing": false
+        },
+        {
+          "id": "target_firms",
+          "raw": 296,
+          "score": 1.8,
+          "points": 1.8,
+          "missing": false
+        },
+        {
+          "id": "margin",
+          "raw": 0.1476322840131314,
+          "score": 6.2,
+          "points": 5,
+          "missing": false
+        },
+        {
+          "id": "growth",
+          "raw": -0.0025589065251807597,
+          "score": 4.2,
+          "points": 1.7,
+          "missing": false
+        },
+        {
+          "id": "personnel_share",
+          "raw": 0.15776303889430032,
+          "score": 2.2,
+          "points": 1.6,
+          "missing": false
+        },
+        {
+          "id": "labour_shortage",
+          "raw": 2.7,
+          "score": 6.3,
+          "points": 5.1,
+          "missing": false
+        },
+        {
+          "id": "manual_work",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "regulation",
+          "raw": 5.1,
+          "score": 7.5,
+          "points": 6,
+          "missing": false
+        },
+        {
+          "id": "ai_gap",
+          "raw": 52.41,
+          "score": 1.2,
+          "points": 1,
+          "missing": false
+        },
+        {
+          "id": "solutions",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "reachability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "country_advantage",
+          "raw": 0.7200230509704304,
+          "score": 2.4,
+          "points": 1.5,
+          "missing": false
+        },
+        {
+          "id": "competition",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "fragmentation",
+          "raw": 0.11386607567911122,
+          "score": 0.6,
+          "points": 0.2,
+          "missing": false
+        },
+        {
+          "id": "replicability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        }
+      ],
+      "gap": 1.6,
+      "section": "J"
+    },
+    {
       "id": "C17",
       "name": "Manufacture of paper and paper products",
-      "total": 42.7,
+      "total": 42.8,
       "confidence": 0.71,
       "breakdown": [
         {
@@ -6690,36 +6460,36 @@
         {
           "id": "target_firms",
           "raw": 458,
-          "score": 2.6,
-          "points": 2.6,
+          "score": 2.7,
+          "points": 2.7,
           "missing": false
         },
         {
           "id": "margin",
           "raw": 0.08880632800058245,
-          "score": 2.8,
-          "points": 2.2,
+          "score": 2.9,
+          "points": 2.3,
           "missing": false
         },
         {
           "id": "growth",
           "raw": -0.015031988258950912,
-          "score": 3.4,
+          "score": 3.5,
           "points": 1.4,
           "missing": false
         },
         {
           "id": "personnel_share",
           "raw": 0.19005843793385963,
-          "score": 3.2,
-          "points": 2.2,
+          "score": 3.3,
+          "points": 2.3,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
+          "score": 2.1,
+          "points": 1.7,
           "missing": false
         },
         {
@@ -6732,15 +6502,15 @@
         {
           "id": "regulation",
           "raw": 5.4,
-          "score": 8.6,
+          "score": 8.5,
           "points": 6.8,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 72.62,
-          "score": 4.2,
-          "points": 3.3,
+          "score": 4,
+          "points": 3.2,
           "missing": false
         },
         {
@@ -6760,7 +6530,7 @@
         {
           "id": "country_advantage",
           "raw": 0.8875322813537516,
-          "score": 5.7,
+          "score": 5.6,
           "points": 3.4,
           "missing": false
         },
@@ -6774,7 +6544,7 @@
         {
           "id": "fragmentation",
           "raw": 0.20091523193993355,
-          "score": 1.7,
+          "score": 1.8,
           "points": 0.7,
           "missing": false
         },
@@ -6786,128 +6556,13 @@
           "missing": true
         }
       ],
-      "gap": 4.9,
+      "gap": 4.7,
       "section": "C"
-    },
-    {
-      "id": "J59",
-      "name": "Motion picture, video and television programme production, sound recording and music publishing activities",
-      "total": 42.5,
-      "confidence": 0.71,
-      "breakdown": [
-        {
-          "id": "turnover",
-          "raw": 16887.05,
-          "score": 2.2,
-          "points": 1.7,
-          "missing": false
-        },
-        {
-          "id": "target_firms",
-          "raw": 554,
-          "score": 3.3,
-          "points": 3.3,
-          "missing": false
-        },
-        {
-          "id": "margin",
-          "raw": 0.22530874249794963,
-          "score": 8.5,
-          "points": 6.8,
-          "missing": false
-        },
-        {
-          "id": "growth",
-          "raw": 0.031597820376547014,
-          "score": 5.6,
-          "points": 2.2,
-          "missing": false
-        },
-        {
-          "id": "personnel_share",
-          "raw": 0.1906591145285885,
-          "score": 3.3,
-          "points": 2.3,
-          "missing": false
-        },
-        {
-          "id": "labour_shortage",
-          "raw": 2.7,
-          "score": 6.3,
-          "points": 5,
-          "missing": false
-        },
-        {
-          "id": "manual_work",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "regulation",
-          "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
-          "missing": false
-        },
-        {
-          "id": "ai_gap",
-          "raw": 32.66,
-          "score": 0.5,
-          "points": 0.4,
-          "missing": false
-        },
-        {
-          "id": "solutions",
-          "raw": null,
-          "score": 5,
-          "points": 3.5,
-          "missing": true
-        },
-        {
-          "id": "reachability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "country_advantage",
-          "raw": 0.7059012602643907,
-          "score": 2.4,
-          "points": 1.4,
-          "missing": false
-        },
-        {
-          "id": "competition",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        },
-        {
-          "id": "fragmentation",
-          "raw": 0.5880393556008894,
-          "score": 7,
-          "points": 2.8,
-          "missing": false
-        },
-        {
-          "id": "replicability",
-          "raw": null,
-          "score": 5,
-          "points": 2.5,
-          "missing": true
-        }
-      ],
-      "gap": 0.5,
-      "section": "J"
     },
     {
       "id": "C15",
       "name": "Manufacture of leather and related products",
-      "total": 42.4,
+      "total": 42.5,
       "confidence": 0.65,
       "breakdown": [
         {
@@ -6934,22 +6589,22 @@
         {
           "id": "growth",
           "raw": -0.011747284149149162,
-          "score": 3.8,
-          "points": 1.5,
+          "score": 3.9,
+          "points": 1.6,
           "missing": false
         },
         {
           "id": "personnel_share",
           "raw": 0.18722664993397453,
-          "score": 3,
-          "points": 2.1,
+          "score": 3.1,
+          "points": 2.2,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
+          "score": 2.1,
+          "points": 1.7,
           "missing": false
         },
         {
@@ -6962,15 +6617,15 @@
         {
           "id": "regulation",
           "raw": 5.4,
-          "score": 8.6,
+          "score": 8.5,
           "points": 6.8,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 77.4,
-          "score": 6.3,
-          "points": 5.1,
+          "score": 6.2,
+          "points": 5,
           "missing": false
         },
         {
@@ -7004,8 +6659,8 @@
         {
           "id": "fragmentation",
           "raw": 0.36833072665461664,
-          "score": 3.3,
-          "points": 1.3,
+          "score": 3.4,
+          "points": 1.4,
           "missing": false
         },
         {
@@ -7016,19 +6671,134 @@
           "missing": true
         }
       ],
-      "gap": 7.3,
+      "gap": 7.2,
       "section": "C"
+    },
+    {
+      "id": "J59",
+      "name": "Motion picture, video and television programme production, sound recording and music publishing activities",
+      "total": 42.3,
+      "confidence": 0.71,
+      "breakdown": [
+        {
+          "id": "turnover",
+          "raw": 16887.05,
+          "score": 2.2,
+          "points": 1.8,
+          "missing": false
+        },
+        {
+          "id": "target_firms",
+          "raw": 554,
+          "score": 3.3,
+          "points": 3.3,
+          "missing": false
+        },
+        {
+          "id": "margin",
+          "raw": 0.22530874249794963,
+          "score": 8.5,
+          "points": 6.8,
+          "missing": false
+        },
+        {
+          "id": "growth",
+          "raw": 0.031597820376547014,
+          "score": 5.6,
+          "points": 2.2,
+          "missing": false
+        },
+        {
+          "id": "personnel_share",
+          "raw": 0.1906591145285885,
+          "score": 3.4,
+          "points": 2.4,
+          "missing": false
+        },
+        {
+          "id": "labour_shortage",
+          "raw": 2.7,
+          "score": 6.3,
+          "points": 5.1,
+          "missing": false
+        },
+        {
+          "id": "manual_work",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "regulation",
+          "raw": 2.4,
+          "score": 2.5,
+          "points": 2,
+          "missing": false
+        },
+        {
+          "id": "ai_gap",
+          "raw": 32.66,
+          "score": 0.2,
+          "points": 0.1,
+          "missing": false
+        },
+        {
+          "id": "solutions",
+          "raw": null,
+          "score": 5,
+          "points": 3.5,
+          "missing": true
+        },
+        {
+          "id": "reachability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "country_advantage",
+          "raw": 0.7059012602643907,
+          "score": 2.3,
+          "points": 1.4,
+          "missing": false
+        },
+        {
+          "id": "competition",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        },
+        {
+          "id": "fragmentation",
+          "raw": 0.5880393556008894,
+          "score": 6.9,
+          "points": 2.7,
+          "missing": false
+        },
+        {
+          "id": "replicability",
+          "raw": null,
+          "score": 5,
+          "points": 2.5,
+          "missing": true
+        }
+      ],
+      "gap": 0.2,
+      "section": "J"
     },
     {
       "id": "N79",
       "name": "Travel agency, tour operator and other reservation service and related activities",
-      "total": 42.2,
+      "total": 42.3,
       "confidence": 0.65,
       "breakdown": [
         {
           "id": "turnover",
           "raw": 37559.94,
-          "score": 4.1,
+          "score": 4,
           "points": 3.2,
           "missing": false
         },
@@ -7042,15 +6812,15 @@
         {
           "id": "margin",
           "raw": 0.0753182779312214,
-          "score": 1.6,
+          "score": 1.7,
           "points": 1.3,
           "missing": false
         },
         {
           "id": "growth",
           "raw": 0.10246319906801205,
-          "score": 8.5,
-          "points": 3.4,
+          "score": 8.6,
+          "points": 3.5,
           "missing": false
         },
         {
@@ -7077,15 +6847,15 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 67.68,
-          "score": 3,
-          "points": 2.4,
+          "score": 2.8,
+          "points": 2.2,
           "missing": false
         },
         {
@@ -7119,8 +6889,8 @@
         {
           "id": "fragmentation",
           "raw": 0.4040608158585983,
-          "score": 3.8,
-          "points": 1.5,
+          "score": 3.9,
+          "points": 1.6,
           "missing": false
         },
         {
@@ -7131,13 +6901,13 @@
           "missing": true
         }
       ],
-      "gap": 3.3,
+      "gap": 3.1,
       "section": "N"
     },
     {
       "id": "C21",
       "name": "Manufacture of basic pharmaceutical products and pharmaceutical preparations",
-      "total": 40.9,
+      "total": 41.1,
       "confidence": 0.71,
       "breakdown": [
         {
@@ -7164,22 +6934,22 @@
         {
           "id": "growth",
           "raw": 0.0004051036385928075,
-          "score": 4.3,
-          "points": 1.7,
+          "score": 4.4,
+          "points": 1.8,
           "missing": false
         },
         {
           "id": "personnel_share",
           "raw": 0.16542990143909692,
-          "score": 2.3,
-          "points": 1.6,
+          "score": 2.4,
+          "points": 1.7,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
+          "score": 2.1,
+          "points": 1.7,
           "missing": false
         },
         {
@@ -7192,15 +6962,15 @@
         {
           "id": "regulation",
           "raw": 4.5,
-          "score": 6.2,
+          "score": 6.3,
           "points": 5,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 74.16,
-          "score": 4.7,
-          "points": 3.7,
+          "score": 4.5,
+          "points": 3.6,
           "missing": false
         },
         {
@@ -7220,7 +6990,7 @@
         {
           "id": "country_advantage",
           "raw": 0.9472308055026707,
-          "score": 7,
+          "score": 6.9,
           "points": 4.2,
           "missing": false
         },
@@ -7246,7 +7016,7 @@
           "missing": true
         }
       ],
-      "gap": 4.6,
+      "gap": 4.4,
       "section": "C"
     },
     {
@@ -7286,8 +7056,8 @@
         {
           "id": "personnel_share",
           "raw": 0.19913712733268213,
-          "score": 3.9,
-          "points": 2.7,
+          "score": 4,
+          "points": 2.8,
           "missing": false
         },
         {
@@ -7307,8 +7077,8 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
@@ -7335,8 +7105,8 @@
         {
           "id": "country_advantage",
           "raw": 0.7788135009872382,
-          "score": 4,
-          "points": 2.4,
+          "score": 3.9,
+          "points": 2.3,
           "missing": false
         },
         {
@@ -7367,34 +7137,34 @@
     {
       "id": "C24",
       "name": "Manufacture of basic metals",
-      "total": 38.8,
+      "total": 38.9,
       "confidence": 0.71,
       "breakdown": [
         {
           "id": "turnover",
           "raw": 143249.42,
-          "score": 8,
+          "score": 8.1,
           "points": 6.4,
           "missing": false
         },
         {
           "id": "target_firms",
           "raw": 538,
-          "score": 3,
-          "points": 3,
+          "score": 3.1,
+          "points": 3.1,
           "missing": false
         },
         {
           "id": "margin",
           "raw": 0.0369579855890516,
-          "score": 0.1,
+          "score": 0.2,
           "points": 0.1,
           "missing": false
         },
         {
           "id": "growth",
           "raw": -0.03651044934711445,
-          "score": 2.6,
+          "score": 2.7,
           "points": 1.1,
           "missing": false
         },
@@ -7408,8 +7178,8 @@
         {
           "id": "labour_shortage",
           "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
+          "score": 2.1,
+          "points": 1.7,
           "missing": false
         },
         {
@@ -7422,15 +7192,15 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 75.62,
-          "score": 5.1,
-          "points": 4.1,
+          "score": 4.9,
+          "points": 3.9,
           "missing": false
         },
         {
@@ -7450,8 +7220,8 @@
         {
           "id": "country_advantage",
           "raw": 1.1289137867526786,
-          "score": 8.3,
-          "points": 5,
+          "score": 8.2,
+          "points": 4.9,
           "missing": false
         },
         {
@@ -7476,13 +7246,13 @@
           "missing": true
         }
       ],
-      "gap": 3.4,
+      "gap": 3.3,
       "section": "C"
     },
     {
       "id": "C13",
       "name": "Manufacture of textiles",
-      "total": 38.3,
+      "total": 38.4,
       "confidence": 0.71,
       "breakdown": [
         {
@@ -7495,36 +7265,36 @@
         {
           "id": "target_firms",
           "raw": 575,
-          "score": 3.5,
-          "points": 3.5,
+          "score": 3.4,
+          "points": 3.4,
           "missing": false
         },
         {
           "id": "margin",
           "raw": 0.08909227067458218,
-          "score": 2.9,
+          "score": 3,
           "points": 2.4,
           "missing": false
         },
         {
           "id": "growth",
           "raw": -0.013596891673913425,
-          "score": 3.5,
-          "points": 1.4,
+          "score": 3.6,
+          "points": 1.5,
           "missing": false
         },
         {
           "id": "personnel_share",
           "raw": 0.2500410881941756,
-          "score": 4.9,
-          "points": 3.4,
+          "score": 5.1,
+          "points": 3.6,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
+          "score": 2.1,
+          "points": 1.7,
           "missing": false
         },
         {
@@ -7537,15 +7307,15 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 77.4,
-          "score": 6.3,
-          "points": 5.1,
+          "score": 6.2,
+          "points": 5,
           "missing": false
         },
         {
@@ -7579,7 +7349,7 @@
         {
           "id": "fragmentation",
           "raw": 0.5699568625536295,
-          "score": 6.5,
+          "score": 6.4,
           "points": 2.6,
           "missing": false
         },
@@ -7591,13 +7361,13 @@
           "missing": true
         }
       ],
-      "gap": 5.6,
+      "gap": 5.7,
       "section": "C"
     },
     {
       "id": "B09",
       "name": "Mining support service activities",
-      "total": 37.5,
+      "total": 37.6,
       "confidence": 0.45,
       "breakdown": [
         {
@@ -7631,7 +7401,7 @@
         {
           "id": "personnel_share",
           "raw": 0.3125686018013141,
-          "score": 7.8,
+          "score": 7.9,
           "points": 5.5,
           "missing": false
         },
@@ -7652,8 +7422,8 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
@@ -7694,8 +7464,8 @@
         {
           "id": "fragmentation",
           "raw": 0.5567985324853024,
-          "score": 6.4,
-          "points": 2.6,
+          "score": 6.3,
+          "points": 2.5,
           "missing": false
         },
         {
@@ -7712,7 +7482,7 @@
     {
       "id": "C14",
       "name": "Manufacture of wearing apparel",
-      "total": 34,
+      "total": 34.2,
       "confidence": 0.71,
       "breakdown": [
         {
@@ -7732,29 +7502,29 @@
         {
           "id": "margin",
           "raw": 0.1456226441042439,
-          "score": 6,
+          "score": 6.1,
           "points": 4.8,
           "missing": false
         },
         {
           "id": "growth",
           "raw": -0.1754786183464525,
-          "score": 0.4,
+          "score": 0.5,
           "points": 0.2,
           "missing": false
         },
         {
           "id": "personnel_share",
           "raw": 0.1974820436204062,
-          "score": 3.6,
-          "points": 2.5,
+          "score": 3.7,
+          "points": 2.6,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
+          "score": 2.1,
+          "points": 1.7,
           "missing": false
         },
         {
@@ -7767,15 +7537,15 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 77.4,
-          "score": 6.3,
-          "points": 5.1,
+          "score": 6.2,
+          "points": 5,
           "missing": false
         },
         {
@@ -7809,7 +7579,7 @@
         {
           "id": "fragmentation",
           "raw": 0.3866913378049772,
-          "score": 3.5,
+          "score": 3.6,
           "points": 1.4,
           "missing": false
         },
@@ -7821,7 +7591,7 @@
           "missing": true
         }
       ],
-      "gap": 5.1,
+      "gap": 5.2,
       "section": "C"
     },
     {
@@ -7834,7 +7604,7 @@
           "id": "turnover",
           "raw": 10438.01,
           "score": 1.2,
-          "points": 0.9,
+          "points": 1,
           "missing": false
         },
         {
@@ -7848,28 +7618,28 @@
           "id": "margin",
           "raw": 0.07572707824575757,
           "score": 1.8,
-          "points": 1.4,
+          "points": 1.5,
           "missing": false
         },
         {
           "id": "growth",
           "raw": 0.032561567339509434,
-          "score": 5.7,
+          "score": 5.8,
           "points": 2.3,
           "missing": false
         },
         {
           "id": "personnel_share",
           "raw": 0.14450934613015318,
-          "score": 1.7,
-          "points": 1.2,
+          "score": 1.8,
+          "points": 1.3,
           "missing": false
         },
         {
           "id": "labour_shortage",
           "raw": 2.7,
           "score": 6.3,
-          "points": 5,
+          "points": 5.1,
           "missing": false
         },
         {
@@ -7882,15 +7652,15 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 32.66,
-          "score": 0.5,
-          "points": 0.4,
+          "score": 0.2,
+          "points": 0.1,
           "missing": false
         },
         {
@@ -7925,7 +7695,7 @@
           "id": "fragmentation",
           "raw": 0.1351397440699904,
           "score": 0.9,
-          "points": 0.3,
+          "points": 0.4,
           "missing": false
         },
         {
@@ -7936,7 +7706,7 @@
           "missing": true
         }
       ],
-      "gap": 0.5,
+      "gap": 0.2,
       "section": "J"
     },
     {
@@ -7948,7 +7718,7 @@
         {
           "id": "turnover",
           "raw": 125338.69,
-          "score": 7.8,
+          "score": 7.9,
           "points": 6.3,
           "missing": false
         },
@@ -7962,14 +7732,14 @@
         {
           "id": "margin",
           "raw": 0.055154796974501645,
-          "score": 0.7,
+          "score": 0.8,
           "points": 0.6,
           "missing": false
         },
         {
           "id": "growth",
           "raw": -0.019603366204419048,
-          "score": 3.2,
+          "score": 3.3,
           "points": 1.3,
           "missing": false
         },
@@ -7983,8 +7753,8 @@
         {
           "id": "labour_shortage",
           "raw": 1.7,
-          "score": 2,
-          "points": 1.6,
+          "score": 2.1,
+          "points": 1.7,
           "missing": false
         },
         {
@@ -7997,15 +7767,15 @@
         {
           "id": "regulation",
           "raw": 2.4,
-          "score": 2.4,
-          "points": 1.9,
+          "score": 2.5,
+          "points": 2,
           "missing": false
         },
         {
           "id": "ai_gap",
           "raw": 54.35,
-          "score": 2.2,
-          "points": 1.7,
+          "score": 1.9,
+          "points": 1.5,
           "missing": false
         },
         {
@@ -8025,7 +7795,7 @@
         {
           "id": "country_advantage",
           "raw": 0.5854507917715919,
-          "score": 1.4,
+          "score": 1.5,
           "points": 0.9,
           "missing": false
         },
@@ -8051,7 +7821,7 @@
           "missing": true
         }
       ],
-      "gap": 1.3,
+      "gap": 1.1,
       "section": "C"
     }
   ],
@@ -8082,6 +7852,20 @@
       "name": "Manufacture of tobacco products",
       "reasons": [
         "gross operating surplus per 20–249 staff firm 103k EUR < 150k: can't pay ≥ 500 EUR/month reliably"
+      ]
+    },
+    {
+      "id": "J62",
+      "name": "Computer programming, consultancy and related activities",
+      "reasons": [
+        "IT services: our suppliers and competitors, not buyers"
+      ]
+    },
+    {
+      "id": "J63",
+      "name": "Information service activities",
+      "reasons": [
+        "IT services: our suppliers and competitors, not buyers"
       ]
     },
     {
@@ -10489,8 +10273,10 @@
         "labour_shortage": "Eurostat jvs_a_rate_r2, from J"
       },
       "gate": {
-        "passed": true,
-        "reasons": []
+        "passed": false,
+        "reasons": [
+          "IT services: our suppliers and competitors, not buyers"
+        ]
       },
       "facts": {
         "turnoverMeur": 207793.43,
@@ -10535,8 +10321,10 @@
         "labour_shortage": "Eurostat jvs_a_rate_r2, from J"
       },
       "gate": {
-        "passed": true,
-        "reasons": []
+        "passed": false,
+        "reasons": [
+          "IT services: our suppliers and competitors, not buyers"
+        ]
       },
       "facts": {
         "turnoverMeur": 30951.26,
@@ -11743,8 +11531,8 @@
       ]
     },
     {
-      "id": "M71",
-      "name": "Architectural and engineering activities; technical testing and analysis",
+      "id": "G45",
+      "name": "Wholesale and retail trade and repair of motor vehicles and motorcycles",
       "missing": [
         "manual_work",
         "solutions",
@@ -11754,8 +11542,8 @@
       ]
     },
     {
-      "id": "G45",
-      "name": "Wholesale and retail trade and repair of motor vehicles and motorcycles",
+      "id": "M71",
+      "name": "Architectural and engineering activities; technical testing and analysis",
       "missing": [
         "manual_work",
         "solutions",
