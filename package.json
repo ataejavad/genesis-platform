@@ -17,7 +17,8 @@
     "smoke": "tsx scripts/smoke.ts",
     "demo": "tsx scripts/demo.ts",
     "local": "tsx scripts/local.ts",
-    "agents:hubs": "tsx scripts/hub-builder.ts"
+    "agents:hubs": "tsx scripts/hub-builder.ts",
+    "agents:market": "tsx scripts/market-selection.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.1.0",
