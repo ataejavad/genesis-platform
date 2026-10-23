@@ -1,0 +1,40 @@
+name: Market selection agents
+# Runs the Genesis stage-0 agents (doc 13 §2.6) on real Eurostat data and commits the reports.
+# Interim scheduler until n8n runs on the server: monthly (industry), the country part is cheap to repeat.
+on:
+  schedule:
+    - cron: "0 5 1 * *"
+  workflow_dispatch:
+  push:
+    branches: ["claude/**"]
+    paths:
+      - "src/server/market-selection/**"
+      - "scripts/market-selection.ts"
+      - ".github/workflows/market-selection.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: market-selection-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run agents:market -- all
+      - name: Commit reports
+        run: |
+          git config user.name "genesis-agents"
+          git config user.email "genesis-agents@users.noreply.github.com"
+          git add data/market-selection
+          if git diff --cached --quiet; then echo "no changes"; exit 0; fi
+          git commit -m "Market selection: agent run $(date -u +%Y-%m-%d) [skip ci]"
+          git push

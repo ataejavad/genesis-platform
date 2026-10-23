@@ -1,0 +1,25 @@
+# Local only: adds a Postgres and points the app at it.
+services:
+  app:
+    environment:
+      DATABASE_URL: postgres://genesis:${POSTGRES_PASSWORD:-genesis}@db:5432/genesis
+    depends_on:
+      db:
+        condition: service_healthy
+  worker:
+    environment:
+      DATABASE_URL: postgres://genesis:${POSTGRES_PASSWORD:-genesis}@db:5432/genesis
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: genesis
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-genesis}
+      POSTGRES_DB: genesis
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U genesis"]
+      interval: 5s
+      retries: 10
+volumes:
+  pgdata:

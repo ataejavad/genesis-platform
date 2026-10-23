@@ -1,0 +1,409 @@
+{
+  "agent": "country",
+  "ranAt": "2026-10-23T11:52:45.469Z",
+  "ranking": [
+    {
+      "id": "IT",
+      "name": "Italy",
+      "total": 70.8,
+      "confidence": 1,
+      "breakdown": [
+        {
+          "id": "ai_gap",
+          "raw": 84.3,
+          "score": 10,
+          "points": 20,
+          "missing": false
+        },
+        {
+          "id": "sme_count",
+          "raw": 89539,
+          "score": 6.7,
+          "points": 13.3,
+          "missing": false
+        },
+        {
+          "id": "momentum",
+          "raw": 1,
+          "score": 6.3,
+          "points": 12.5,
+          "missing": false
+        },
+        {
+          "id": "subsidies",
+          "raw": 9,
+          "score": 10,
+          "points": 10,
+          "missing": false
+        },
+        {
+          "id": "labour_cost",
+          "raw": 32,
+          "score": 0,
+          "points": 0,
+          "missing": false
+        },
+        {
+          "id": "access",
+          "raw": 10,
+          "score": 10,
+          "points": 10,
+          "missing": false
+        },
+        {
+          "id": "legal",
+          "raw": 4,
+          "score": 5,
+          "points": 5,
+          "missing": false
+        }
+      ]
+    },
+    {
+      "id": "UK",
+      "name": "United Kingdom",
+      "total": 55,
+      "confidence": 0.5,
+      "breakdown": [
+        {
+          "id": "ai_gap",
+          "raw": null,
+          "score": 5,
+          "points": 10,
+          "missing": true
+        },
+        {
+          "id": "sme_count",
+          "raw": null,
+          "score": 5,
+          "points": 10,
+          "missing": true
+        },
+        {
+          "id": "momentum",
+          "raw": 1.2,
+          "score": 10,
+          "points": 20,
+          "missing": false
+        },
+        {
+          "id": "subsidies",
+          "raw": 3,
+          "score": 0,
+          "points": 0,
+          "missing": false
+        },
+        {
+          "id": "labour_cost",
+          "raw": null,
+          "score": 5,
+          "points": 5,
+          "missing": true
+        },
+        {
+          "id": "access",
+          "raw": 8,
+          "score": 0,
+          "points": 0,
+          "missing": false
+        },
+        {
+          "id": "legal",
+          "raw": 9,
+          "score": 10,
+          "points": 10,
+          "missing": false
+        }
+      ]
+    },
+    {
+      "id": "DE",
+      "name": "Germany",
+      "total": 54.6,
+      "confidence": 1,
+      "breakdown": [
+        {
+          "id": "ai_gap",
+          "raw": 75.07,
+          "score": 3.3,
+          "points": 6.7,
+          "missing": false
+        },
+        {
+          "id": "sme_count",
+          "raw": 213889,
+          "score": 10,
+          "points": 20,
+          "missing": false
+        },
+        {
+          "id": "momentum",
+          "raw": 1,
+          "score": 6.3,
+          "points": 12.5,
+          "missing": false
+        },
+        {
+          "id": "subsidies",
+          "raw": 6,
+          "score": 2.5,
+          "points": 2.5,
+          "missing": false
+        },
+        {
+          "id": "labour_cost",
+          "raw": 45,
+          "score": 6.7,
+          "points": 6.7,
+          "missing": false
+        },
+        {
+          "id": "access",
+          "raw": 9,
+          "score": 5,
+          "points": 5,
+          "missing": false
+        },
+        {
+          "id": "legal",
+          "raw": 3,
+          "score": 1.3,
+          "points": 1.3,
+          "missing": false
+        }
+      ]
+    },
+    {
+      "id": "AT",
+      "name": "Austria",
+      "total": 35.4,
+      "confidence": 1,
+      "breakdown": [
+        {
+          "id": "ai_gap",
+          "raw": 71.27,
+          "score": 0,
+          "points": 0,
+          "missing": false
+        },
+        {
+          "id": "sme_count",
+          "raw": 20328,
+          "score": 3.3,
+          "points": 6.7,
+          "missing": false
+        },
+        {
+          "id": "momentum",
+          "raw": 0.8,
+          "score": 2.5,
+          "points": 5,
+          "missing": false
+        },
+        {
+          "id": "subsidies",
+          "raw": 8,
+          "score": 7.5,
+          "points": 7.5,
+          "missing": false
+        },
+        {
+          "id": "labour_cost",
+          "raw": 46.3,
+          "score": 10,
+          "points": 10,
+          "missing": false
+        },
+        {
+          "id": "access",
+          "raw": 9,
+          "score": 5,
+          "points": 5,
+          "missing": false
+        },
+        {
+          "id": "legal",
+          "raw": 3,
+          "score": 1.3,
+          "points": 1.3,
+          "missing": false
+        }
+      ]
+    },
+    {
+      "id": "IE",
+      "name": "Ireland",
+      "total": 34.2,
+      "confidence": 1,
+      "breakdown": [
+        {
+          "id": "ai_gap",
+          "raw": 81.66,
+          "score": 6.7,
+          "points": 13.3,
+          "missing": false
+        },
+        {
+          "id": "sme_count",
+          "raw": 14814,
+          "score": 0,
+          "points": 0,
+          "missing": false
+        },
+        {
+          "id": "momentum",
+          "raw": -0.4,
+          "score": 0,
+          "points": 0,
+          "missing": false
+        },
+        {
+          "id": "subsidies",
+          "raw": 7,
+          "score": 5,
+          "points": 5,
+          "missing": false
+        },
+        {
+          "id": "labour_cost",
+          "raw": 44.2,
+          "score": 3.3,
+          "points": 3.3,
+          "missing": false
+        },
+        {
+          "id": "access",
+          "raw": 9,
+          "score": 5,
+          "points": 5,
+          "missing": false
+        },
+        {
+          "id": "legal",
+          "raw": 6,
+          "score": 7.5,
+          "points": 7.5,
+          "missing": false
+        }
+      ]
+    }
+  ],
+  "candidates": [
+    {
+      "id": "DE",
+      "name": "Germany",
+      "values": {
+        "ai_gap": 75.07,
+        "sme_count": 213889,
+        "momentum": 1,
+        "labour_cost": 45,
+        "subsidies": 6,
+        "access": 9,
+        "legal": 3
+      },
+      "sources": {
+        "ai_gap": "Eurostat isoc_eb_ai 2025: 24.93% of 10–249 staff firms use AI",
+        "sme_count": "Eurostat sbs_sc_ovw 2024: 148708 (20–49) + 65181 (50–249)",
+        "momentum": "Eurostat namq_10_gdp 2026-Q2: real GDP 1% y/y",
+        "labour_cost": "Eurostat lc_lci_lev 2025: 45 EUR/hour",
+        "subsidies": "No federal SME digital grant since 'go-digital' ended; state programmes (Digitalbonus Bayern, Digitalisierungsprämie BW etc.) differ by Land",
+        "access": "German covered (AI + review); EU reverse-charge invoicing from Italy",
+        "legal": "Cold email effectively banned B2B (UWG §7(2) Nr. 3); phone only with presumed consent"
+      }
+    },
+    {
+      "id": "IT",
+      "name": "Italy",
+      "values": {
+        "ai_gap": 84.3,
+        "sme_count": 89539,
+        "momentum": 1,
+        "labour_cost": 32,
+        "subsidies": 9,
+        "access": 10,
+        "legal": 4
+      },
+      "sources": {
+        "ai_gap": "Eurostat isoc_eb_ai 2025: 15.7% of 10–249 staff firms use AI",
+        "sme_count": "Eurostat sbs_sc_ovw 2024: 62605 (20–49) + 26934 (50–249)",
+        "momentum": "Eurostat namq_10_gdp 2026-Q2: real GDP 1% y/y",
+        "labour_cost": "Eurostat lc_lci_lev 2025: 32 EUR/hour",
+        "subsidies": "Iperammortamento 2026 (Legge di bilancio 2026) covers 4.0 software; Transizione 5.0 credits; PNRR",
+        "access": "Italian spoken; Javad registers as Italian freelancer, so invoicing is domestic",
+        "legal": "Cold email needs prior consent even B2B (Codice privacy art. 130); phone after checking the Registro delle Opposizioni"
+      }
+    },
+    {
+      "id": "UK",
+      "name": "United Kingdom",
+      "values": {
+        "ai_gap": null,
+        "sme_count": null,
+        "momentum": 1.2,
+        "labour_cost": null,
+        "subsidies": 3,
+        "access": 8,
+        "legal": 9
+      },
+      "sources": {
+        "ai_gap": "ONS BICS measures AI use differently; not comparable with Eurostat, left neutral",
+        "sme_count": "ONS 'UK business: activity, size and location' tables by size band not parsed yet",
+        "momentum": "ONS: Real GDP Q2 2026 vs Q2 2025 (+1.2%)",
+        "labour_cost": "No Eurostat-comparable UK hourly labour cost since 2020",
+        "subsidies": "Help to Grow: Digital closed in 2023; no national SME software grant found",
+        "access": "English; non-EU: invoicing from Italy works (B2B services outside scope of IT VAT) but adds admin",
+        "legal": "PECR: B2B cold email to corporate subscribers allowed with identification + opt-out"
+      }
+    },
+    {
+      "id": "AT",
+      "name": "Austria",
+      "values": {
+        "ai_gap": 71.27,
+        "sme_count": 20328,
+        "momentum": 0.8,
+        "labour_cost": 46.3,
+        "subsidies": 8,
+        "access": 9,
+        "legal": 3
+      },
+      "sources": {
+        "ai_gap": "Eurostat isoc_eb_ai 2025: 28.73% of 10–249 staff firms use AI",
+        "sme_count": "Eurostat sbs_sc_ovw 2024: 13961 (20–49) + 6367 (50–249)",
+        "momentum": "Eurostat namq_10_gdp 2026-Q2: real GDP 0.8% y/y",
+        "labour_cost": "Eurostat lc_lci_lev 2025: 46.3 EUR/hour",
+        "subsidies": "KMU.DIGITAL federal programme funded again in 2026 (consulting + implementation)",
+        "access": "German covered; EU reverse-charge invoicing",
+        "legal": "TKG 2021 §174: email marketing needs prior consent, also B2B"
+      }
+    },
+    {
+      "id": "IE",
+      "name": "Ireland",
+      "values": {
+        "ai_gap": 81.66,
+        "sme_count": 14814,
+        "momentum": -0.4,
+        "labour_cost": 44.2,
+        "subsidies": 7,
+        "access": 9,
+        "legal": 6
+      },
+      "sources": {
+        "ai_gap": "Eurostat isoc_eb_ai 2025: 18.34% of 10–249 staff firms use AI",
+        "sme_count": "Eurostat sbs_sc_ovw 2024: 9979 (20–49) + 4835 (50–249)",
+        "momentum": "Eurostat namq_10_gdp 2026-Q2: real GDP -0.4% y/y",
+        "labour_cost": "Eurostat lc_lci_lev 2025: 44.2 EUR/hour",
+        "subsidies": "Grow Digital Voucher via Local Enterprise Offices (co-funds digital tools)",
+        "access": "English; EU reverse-charge invoicing",
+        "legal": "B2B email to corporate addresses possible with opt-out (S.I. 336/2011); to verify with a lawyer"
+      }
+    }
+  ],
+  "periods": {
+    "ai_gap": "2025",
+    "sme_count": "2024",
+    "momentum": "2026-Q2",
+    "labour_cost": "2025"
+  }
+}

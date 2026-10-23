@@ -1,0 +1,20 @@
+# Production (Coolify, Docker Compose build pack): app + worker.
+# Postgres runs as a separate Coolify database resource with scheduled backups; set DATABASE_URL to it.
+# Locally with a bundled database: docker compose -f docker-compose.yml -f docker-compose.db.yml up --build
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "3000:3000"
+
+  worker:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    command: ["npm", "run", "worker"]
+    healthcheck:
+      disable: true
+    depends_on:
+      - app
