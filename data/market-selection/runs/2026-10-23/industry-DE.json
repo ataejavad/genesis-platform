@@ -1,7 +1,7 @@
 {
   "agent": "industry",
   "country": "DE",
-  "ranAt": "2026-10-23T11:49:05.063Z",
+  "ranAt": "2026-10-23T11:52:24.919Z",
   "period": "2024",
   "ranking": [
     {
@@ -7914,6 +7914,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "missing",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from B"
@@ -7962,6 +7963,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "missing",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from B"
@@ -8010,6 +8012,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "missing",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from B"
@@ -8058,6 +8061,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "missing",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from B"
@@ -8104,6 +8108,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "missing",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from B"
@@ -8150,6 +8155,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C10-C12",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2, eu-eudr",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -8196,6 +8202,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C10-C12",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2, eu-eudr",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -8242,6 +8249,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C10-C12",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -8290,6 +8298,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C13-C15",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -8336,6 +8345,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C13-C15",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -8382,6 +8392,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C13-C15",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, eu-eudr",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -8428,6 +8439,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C16-C18",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, eu-eudr",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -8474,6 +8486,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C16-C18",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, eu-eudr",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -8520,6 +8533,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C16-C18",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, eu-eudr",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -8566,6 +8580,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C19",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -8612,6 +8627,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C20",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -8658,6 +8674,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C19-C23",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -8704,6 +8721,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C19-C23",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, eu-eudr",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -8750,6 +8768,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C19-C23",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -8796,6 +8815,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -8842,6 +8862,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -8888,6 +8909,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C26",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -8934,6 +8956,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C27",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2, eu-battery-passport",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -8980,6 +9003,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C28",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -9026,6 +9050,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C26-C33",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2, eu-battery-passport",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -9072,6 +9097,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C26-C33",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2, eu-battery-passport",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -9118,6 +9144,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C31-C33",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, eu-eudr",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -9164,6 +9191,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C31-C33",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -9210,6 +9238,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from C31-C33",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from C"
@@ -9256,6 +9285,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from D",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from D"
@@ -9302,6 +9332,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from E",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from E"
@@ -9348,6 +9379,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from E",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from E"
@@ -9394,6 +9426,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from E",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from E"
@@ -9440,6 +9473,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from E",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from E"
@@ -9486,6 +9520,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from F",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from F"
@@ -9532,6 +9567,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from F",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from F"
@@ -9578,6 +9614,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from F",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from F"
@@ -9624,6 +9661,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from G45",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, eu-battery-passport",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from G"
@@ -9670,6 +9708,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from G46",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, eu-eudr, eu-battery-passport",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from G"
@@ -9716,6 +9755,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from G47",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, eu-accessibility-act",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from G"
@@ -9762,6 +9802,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from H",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2, eu-accessibility-act",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from H"
@@ -9808,6 +9849,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from H",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2, eu-accessibility-act",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from H"
@@ -9854,6 +9896,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from H",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2, eu-accessibility-act",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from H"
@@ -9900,6 +9943,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from H",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from H"
@@ -9946,6 +9990,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from H",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from H"
@@ -9992,6 +10037,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from I55",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from I"
@@ -10038,6 +10084,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from I",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from I"
@@ -10084,6 +10131,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from J58-J60",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, eu-accessibility-act",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from J"
@@ -10130,6 +10178,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from J58-J60",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from J"
@@ -10176,6 +10225,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from J58-J60",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from J"
@@ -10222,6 +10272,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from J61",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2, eu-accessibility-act",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from J"
@@ -10268,6 +10319,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from J",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from J"
@@ -10316,6 +10368,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from J",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from J"
@@ -10364,6 +10417,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from L",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from L"
@@ -10410,6 +10464,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from M69-M71",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from M"
@@ -10456,6 +10511,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from M69-M71",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from M"
@@ -10502,6 +10558,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from M69-M71",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from M"
@@ -10548,6 +10605,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from M72",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from M"
@@ -10594,6 +10652,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from M73-M75",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from M"
@@ -10640,6 +10699,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from M73-M75",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from M"
@@ -10686,6 +10746,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from M73-M75",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from M"
@@ -10732,6 +10793,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from N",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from N"
@@ -10778,6 +10840,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from N",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, eu-ai-act-high-risk",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from N"
@@ -10824,6 +10887,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from N79",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from N"
@@ -10870,6 +10934,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from N",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from N"
@@ -10916,6 +10981,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from N",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from N"
@@ -10962,6 +11028,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "Eurostat isoc_eb_ain2, from N",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from N"
@@ -11008,6 +11075,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "missing",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, eu-ai-act-high-risk",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from P"
@@ -11054,6 +11122,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "missing",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida, de-nis2",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from Q"
@@ -11102,6 +11171,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "missing",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from Q"
@@ -11150,6 +11220,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "missing",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from Q"
@@ -11198,6 +11269,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "missing",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from R"
@@ -11244,6 +11316,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "missing",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from R"
@@ -11290,6 +11363,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "missing",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from R"
@@ -11336,6 +11410,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "missing",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from R"
@@ -11382,6 +11457,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "missing",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from S"
@@ -11428,6 +11504,7 @@
       },
       "sources": {
         "turnover": "Eurostat sbs_sc_ovw 2024, million EUR",
+        "research": "not researched yet",
         "ai_gap": "missing",
         "regulation": "regulatory radar: de-einvoice-issue, eu-vida",
         "labour_shortage": "Eurostat jvs_a_rate_r2, from S"
