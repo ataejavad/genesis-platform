@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
@@ -37,7 +38,10 @@ export function snapshotName(dataset: string, query: Query) {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([k, v]) => `${k}=${Array.isArray(v) ? v.join("+") : v}`)
     .join("&");
-  return `${dataset}__${key.replace(/[^A-Za-z0-9=+&_-]/g, "_")}.json`;
+  const safe = key.replace(/[^A-Za-z0-9=+&_-]/g, "_");
+  // long code lists would exceed file-name limits: keep a readable prefix plus a hash of the full query
+  if (safe.length <= 120) return `${dataset}__${safe}.json`;
+  return `${dataset}__${safe.slice(0, 80)}__${createHash("sha1").update(key).digest("hex").slice(0, 12)}.json`;
 }
 
 /**
