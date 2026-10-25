@@ -1,9 +1,11 @@
+import { moneyCopy } from "@/config/money-copy";
 import { partnerCopy } from "@/config/partner-copy";
 import { getDb } from "@/db";
 import { requirePartner } from "@/lib/partner-auth";
 import { skillLabel } from "@/server/partner-rules";
 import { DOC_KINDS, documentsFor } from "@/server/partners";
 import { saveDocument } from "@/ui/partner/actions";
+import { IbanForm } from "@/ui/partner/IbanForm";
 import { PageHead } from "@/ui/Shell";
 
 export default async function PartnerProfile() {
@@ -19,6 +21,7 @@ export default async function PartnerProfile() {
         <div>{p.country}: {partner.country} · {p.languages}: {partner.languages.join(", ") || "–"}</div>
         <div>{p.skills}: {partner.skills.map((s) => skillLabel(s, lang)).join(", ")}</div>
       </div>
+      <IbanForm t={moneyCopy(lang).iban} iban={partner.iban} name={partner.billingName ?? partner.name} />
       <div className="card list">
         {docs.map((d) => (
           <div className="item small" key={d.id}>

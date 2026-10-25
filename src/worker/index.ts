@@ -1,7 +1,10 @@
 import { getDb } from "@/db";
 import { telegramConfigFromEnv } from "@/server/telegram";
 import { planEnv } from "@/server/crm";
+import { ensurePartnerContracts } from "@/server/contracts";
+import { billSubscriptions, dunning } from "@/server/finance";
 import { mailerFromEnv } from "@/server/mailer";
+import { sendQueued } from "@/server/notify";
 import { sendDueEmails, startDueAiCalls } from "@/server/outreach";
 import { opsWatch } from "@/server/ops-watch";
 import { deliveryWatch } from "@/server/projects";
@@ -34,7 +37,13 @@ while (running) {
       lastWatch = Date.now();
       await deliveryWatch(db);
       await opsWatch(db);
+      // money: monthly fees of the month, reminders by due date (both idempotent)
+      await billSubscriptions(db);
+      await dunning(db);
+      await ensurePartnerContracts(db);
     }
+    // messages to customers, partners and leads (stay queued in Cockpit › Outbox without a mailer)
+    if (mailer) await sendQueued(db, mailer);
     const n = await dispatchBatch(db, deps);
     if (n === 0) await new Promise((r) => setTimeout(r, 2000));
   } catch (err) {

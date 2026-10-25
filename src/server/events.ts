@@ -47,7 +47,15 @@ export type EventType =
   | "change_request.quoted"
   | "change_request.decided"
   | "protocol.approved"
-  | "ops.flagged";
+  | "ops.flagged"
+  | "contract.sent"
+  | "contract.signed"
+  | "invoice.requested"
+  | "invoice.paid"
+  | "invoice.issued"
+  | "invoice.reminded"
+  | "lead.confirmed"
+  | "data.erased";
 
 // Call inside the same transaction as the change it describes (transactional outbox).
 export async function emit(

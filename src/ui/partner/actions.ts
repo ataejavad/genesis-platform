@@ -10,7 +10,7 @@ import { LANG_COOKIE } from "@/lib/portal-auth";
 import type { Actor } from "@/server/actor";
 import { AppError } from "@/server/errors";
 import { type PartnerCard, partnerReply } from "@/server/partner-chat";
-import { addDocument, addService, deliver, removeService, respondOffer, sendPartnerMessage, setCapacity, setPartnerLocale } from "@/server/partners";
+import { addDocument, addService, deliver, removeService, respondOffer, sendPartnerMessage, setCapacity, setPartnerIban, setPartnerLocale } from "@/server/partners";
 import { saveTurn, threadMessages } from "@/server/portal";
 
 // Partner portal actions. The partner id always comes from the session, never from the browser.
@@ -101,4 +101,17 @@ export async function setLanguage(lang: string) {
   (await cookies()).set(LANG_COOKIE, lang, { path: "/", maxAge: 365 * 864e2, sameSite: "lax" });
   if (!viewingAs) await setPartnerLocale(getDb(), { type: "user", id: partner.userId ?? partner.id }, partner.id, lang);
   refresh();
+}
+
+/** Payout account for the SEPA batch. Returns "bad" for an IBAN that does not look right. */
+export async function savePayoutAccount(_: string | null, f: FormData): Promise<string | null> {
+  const { user, partner, viewingAs } = await requirePartner();
+  if (viewingAs) return "bad";
+  try {
+    await setPartnerIban(getDb(), actorOf(user.id), partner.id, { iban: String(f.get("iban") ?? ""), billingName: String(f.get("name") ?? "") });
+  } catch {
+    return "bad";
+  }
+  refresh();
+  return "saved";
 }

@@ -29,12 +29,13 @@ export default async function Projects() {
       </section>
 
       <div className="card">
-        <h3>New orders ({orders.length})</h3>
+        <h3>Orders before start ({orders.length})</h3>
+        <p className="muted small">Send contract → customer signs with a code → deposit request → paid in Finance → the project starts by itself.</p>
         {orders.length === 0 && <p className="muted">None waiting. Orders arrive from the marketplace, the customer dashboard and the CRM.</p>}
         <div className="list">{orders.map(({ order: o, company }) => (
           <div key={o.id} className="item" style={{ flexWrap: "wrap", alignItems: "start" }}>
             <div className="grow"><b>{pkgTitle(o.packageSlug)}</b> <span className="muted small">· {company ?? o.company} · {o.source} · {o.country ?? ""} {o.vat ? `· VAT ${o.vat}` : ""} · {o.createdAt.toISOString().slice(0, 10)}</span>{o.note && <div className="small muted">“{o.note}”</div>}</div>
-            <OrderActions id={o.id} email={o.email ?? ""} />
+            {o.status === "new" ? <OrderActions id={o.id} email={o.email ?? ""} /> : o.status === "contract" ? <Link className="badge warn" href={`/cockpit/contracts/${o.contractId}`}>contract sent · waiting for signature</Link> : <Link className="badge warn" href="/cockpit/finance">signed · deposit €{o.depositEur} requested</Link>}
           </div>
         ))}</div>
       </div>

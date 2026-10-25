@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { createDb } from "../src/db";
 import { organizations, partners } from "../src/db/schema";
+import { demoSignPartner } from "./demo-sign";
 import { addDocument, addService, applyPartner, checkDocument, createJob, decideApplication, deliver, offerJob, offersFor, respondOffer, reviewDelivery, sendPartnerMessage } from "../src/server/partners";
 
 // A fictional demo partner so the partner portal can be tried: partner@local.test / local-demo-password.
@@ -11,6 +12,8 @@ const EMAIL = "partner@local.test";
 
 const [exists] = await db.select({ id: partners.id }).from(partners).where(eq(partners.email, EMAIL));
 if (exists) {
+  // partners need a signed framework agreement before offers (step 8); older demo databases get it here
+  await demoSignPartner(db, exists.id);
   console.log("demo partner exists");
 } else {
   const { id } = await applyPartner(db, {
@@ -18,6 +21,7 @@ if (exists) {
     links: ["https://example.com/portfolio"], pitch: "Five years of n8n and HubSpot integrations for small Italian companies; I document every flow.", locale: "it", consent: true,
   });
   await decideApplication(db, actor, id, true, "local-demo-password");
+  await demoSignPartner(db, id);
   for (const kind of ["dpa", "nda", "vat"] as const) await checkDocument(db, actor, (await addDocument(db, actor, id, kind, `https://example.com/docs/${kind}.pdf`)).id, true);
   await addDocument(db, actor, id, "insurance", "https://example.com/docs/insurance.pdf", new Date(Date.now() + 20 * 864e5));
   await addService(db, actor, id, { title: "Lead form → CRM automation", skills: ["automation", "crm"], priceModel: "fixed", priceEur: 450, deliveryDays: 5 });

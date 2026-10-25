@@ -6,7 +6,6 @@ import { addDocument, applyPartner, checkDocument, decideApplication, deliver, o
 import { decideCustomerApproval } from "@/server/portal";
 import {
   approveVersion,
-  convertOrder,
   createOrder,
   customerProjects,
   deliveryWatch,
@@ -19,7 +18,7 @@ import {
   quoteChange,
   seedDelivery,
 } from "@/server/projects";
-import { useTestDb } from "./helpers";
+import { signPartner, startOrder, useTestDb } from "./helpers";
 
 const db = useTestDb();
 const javad = { type: "user", id: "javad" } as const;
@@ -28,6 +27,7 @@ const sys = { type: "system", id: "test" } as const;
 async function partner(email: string) {
   const a = await applyPartner(db, { kind: "person", name: "Anna Neri", email, country: "IT", languages: ["it", "en"], skills: ["automation", "crm", "ai-setup"], consent: true });
   await decideApplication(db, javad, a.id, true, "a-long-test-password");
+  await signPartner(db, a.id);
   await checkDocument(db, javad, (await addDocument(db, javad, a.id, "dpa", "https://example.com/dpa.pdf")).id, true);
   return a.id;
 }
@@ -68,7 +68,7 @@ describe("order to closed project", () => {
     await seedDelivery(db); // idempotent
     const pid = await partner("anna@example.com");
     const order = await createOrder(db, sys, { packageSlug: "phone-agent", source: "market", company: "Bianchi Impianti", email: "info@bianchi.example", country: "IT", industry: "installers", locale: "it" });
-    const { projectId, password } = await convertOrder(db, javad, order.id);
+    const { projectId, password } = await startOrder(db, javad, order.id);
     expect(password.length).toBeGreaterThan(8);
     const d = await projectDetail(db, projectId);
     expect(d.project).toMatchObject({ code: "P-1001", risk: "low", priceEur: 490, monthlyEur: 390, budgetEur: 310, language: "it" });
@@ -113,7 +113,7 @@ describe("order to closed project", () => {
     await seedDelivery(db);
     const pid = await partner("luca@example.com");
     const order = await createOrder(db, sys, { packageSlug: "followup-agent", source: "portal", company: "Rossi Srl", email: "rossi@example.com", country: "IT", industry: "installers", locale: "it" });
-    const { projectId } = await convertOrder(db, javad, order.id);
+    const { projectId } = await startOrder(db, javad, order.id);
     await deliverAll(pid, projectId);
     const [p] = await db.select().from(projects).where(eq(projects.id, projectId));
     const [ask] = await db.select().from(customerApprovals).where(eq(customerApprovals.orgId, p.orgId!));
@@ -128,7 +128,7 @@ describe("order to closed project", () => {
     await seedDelivery(db);
     const pid = await partner("sara@example.com");
     const order = await createOrder(db, sys, { packageSlug: "lead-crm", source: "market", company: "Verdi Snc", email: "verdi@example.com", country: "IT", industry: "installers" });
-    const { projectId } = await convertOrder(db, javad, order.id);
+    const { projectId } = await startOrder(db, javad, order.id);
     for (const { offer } of await offersFor(db, pid)) await respondOffer(db, sys, pid, offer.id, true);
     const [j] = await db.select().from(jobs).where(eq(jobs.projectId, projectId));
     const dl = await deliver(db, sys, pid, j.id, { link: "https://example.com/w", selfCheck: j.checklist.map(() => true) });

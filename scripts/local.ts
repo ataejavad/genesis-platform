@@ -74,6 +74,8 @@ void (async () => {
       // Outbox every 10 minutes: due emails (once a provider key exists) and AI calls (once switched on).
       const outbox = () => fetch("http://localhost:3000/api/v1/outreach/run", { method: "POST", headers: { authorization: `Bearer ${outboxKey}` } }).catch(() => null);
       setInterval(outbox, 10 * 60_000);
+      // The worker's job in local mode: events → partner offers, QA routing, messages, billing; watchdogs hourly.
+      void localWorker();
       // The outbound agent finds this run's key on its own (local mode only).
       writeFileSync("./.localdb/outbound-agent.key", outboundKey, { mode: 0o600 });
       return;
@@ -81,6 +83,38 @@ void (async () => {
     await new Promise((r) => setTimeout(r, 2000));
   }
 })();
+async function localWorker() {
+  const { dispatchSimple } = await import("../src/worker/dispatch");
+  const { deliveryWatch } = await import("../src/server/projects");
+  const { opsWatch } = await import("../src/server/ops-watch");
+  const { billSubscriptions, dunning } = await import("../src/server/finance");
+  const { ensurePartnerContracts } = await import("../src/server/contracts");
+  const { sendQueued } = await import("../src/server/notify");
+  const { mailerFromEnv } = await import("../src/server/mailer");
+  const { telegramConfigFromEnv } = await import("../src/server/telegram");
+  const wdb = createDb(env.DATABASE_URL, 1);
+  const deps = { telegram: telegramConfigFromEnv(), n8nWebhookUrl: process.env.N8N_EVENTS_WEBHOOK_URL || undefined };
+  const mailer = mailerFromEnv();
+  let lastWatch = 0;
+  for (;;) {
+    try {
+      if (Date.now() - lastWatch > 60 * 60_000) {
+        lastWatch = Date.now();
+        await deliveryWatch(wdb);
+        await opsWatch(wdb);
+        await billSubscriptions(wdb);
+        await dunning(wdb);
+        await ensurePartnerContracts(wdb);
+      }
+      await dispatchSimple(wdb, deps);
+      if (mailer) await sendQueued(wdb, mailer);
+    } catch (err) {
+      console.error("local worker:", err instanceof Error ? err.message : err);
+    }
+    await new Promise((r) => setTimeout(r, 5000));
+  }
+}
+
 const stop = async () => {
   app.kill();
   await server.stop();

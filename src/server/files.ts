@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 /*
@@ -19,4 +19,9 @@ export async function putFile(bytes: Uint8Array) {
 export async function getFile(key: string) {
   if (!/^[0-9a-f-]{36}$/.test(key)) throw new Error("bad file key");
   return readFile(path.join(dir(), key));
+}
+
+export async function removeFile(key: string) {
+  if (!/^[0-9a-f-]{36}$/.test(key)) return;
+  await rm(path.join(dir(), key), { force: true });
 }

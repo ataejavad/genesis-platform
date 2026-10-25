@@ -29,7 +29,7 @@ const en = {
   missing: { accepted: "accepted jobs", quality: "average quality", onTime: "on-time share" } as Record<string, string>,
   today: {
     title: "Today", empty: "Nothing urgent today. New offers and deadlines will show up here.", open: "Open",
-    kinds: { overdue: "Late: deliver", changes: "Changes asked", dueToday: "Due today", offer: "Answer the offer", dueSoon: "Due soon", message: "New message from the team", doc: "Renew document", noDpa: "Add a signed DPA to get jobs with personal data", payout: "Payout coming" } as Record<string, string>,
+    kinds: { contract: "Sign the framework agreement", overdue: "Late: deliver", changes: "Changes asked", dueToday: "Due today", offer: "Answer the offer", dueSoon: "Due soon", message: "New message from the team", doc: "Renew document", noDpa: "Add a signed DPA to get jobs with personal data", payout: "Payout coming" } as Record<string, string>,
     reply: "Here is what matters today:", replyEmpty: "Nothing urgent today. Want to see your offers or your earnings?",
     job: "Here is the project:", jobNone: "You have no active project. Want to see the open offers?",
     messages: "Latest from the team:", messagesNone: "No messages from the team yet.",
@@ -92,7 +92,7 @@ const it: PartnerCopy = {
   missing: { accepted: "lavori accettati", quality: "qualità media", onTime: "quota puntuale" },
   today: {
     title: "Oggi", empty: "Niente di urgente oggi. Nuove offerte e scadenze appariranno qui.", open: "Apri",
-    kinds: { overdue: "In ritardo: consegna", changes: "Modifiche richieste", dueToday: "Scade oggi", offer: "Rispondi all'offerta", dueSoon: "Scade a breve", message: "Nuovo messaggio dal team", doc: "Rinnova documento", noDpa: "Aggiungi un DPA firmato per i lavori con dati personali", payout: "Pagamento in arrivo" },
+    kinds: { contract: "Firma il contratto quadro", overdue: "In ritardo: consegna", changes: "Modifiche richieste", dueToday: "Scade oggi", offer: "Rispondi all'offerta", dueSoon: "Scade a breve", message: "Nuovo messaggio dal team", doc: "Rinnova documento", noDpa: "Aggiungi un DPA firmato per i lavori con dati personali", payout: "Pagamento in arrivo" },
     reply: "Ecco cosa conta oggi:", replyEmpty: "Niente di urgente oggi. Vuoi vedere le offerte o i guadagni?",
     job: "Ecco il progetto:", jobNone: "Non hai progetti attivi. Vuoi vedere le offerte aperte?",
     messages: "Ultimi messaggi dal team:", messagesNone: "Ancora nessun messaggio dal team.",
@@ -154,7 +154,7 @@ const de: PartnerCopy = {
   missing: { accepted: "abgenommene Jobs", quality: "Durchschnittsqualität", onTime: "Pünktlichkeit" },
   today: {
     title: "Heute", empty: "Heute nichts Dringendes. Neue Angebote und Fristen erscheinen hier.", open: "Öffnen",
-    kinds: { overdue: "Verspätet: liefern", changes: "Änderungen erbeten", dueToday: "Heute fällig", offer: "Angebot beantworten", dueSoon: "Bald fällig", message: "Neue Nachricht vom Team", doc: "Dokument erneuern", noDpa: "Unterschriebenen AVV hinzufügen für Jobs mit personenbezogenen Daten", payout: "Zahlung kommt" },
+    kinds: { contract: "Rahmenvertrag unterschreiben", overdue: "Verspätet: liefern", changes: "Änderungen erbeten", dueToday: "Heute fällig", offer: "Angebot beantworten", dueSoon: "Bald fällig", message: "Neue Nachricht vom Team", doc: "Dokument erneuern", noDpa: "Unterschriebenen AVV hinzufügen für Jobs mit personenbezogenen Daten", payout: "Zahlung kommt" },
     reply: "Das zählt heute:", replyEmpty: "Heute nichts Dringendes. Angebote oder Einnahmen ansehen?",
     job: "Hier ist das Projekt:", jobNone: "Sie haben kein aktives Projekt. Offene Angebote ansehen?",
     messages: "Neueste Nachrichten vom Team:", messagesNone: "Noch keine Nachrichten vom Team.",
@@ -216,7 +216,7 @@ const fa: PartnerCopy = {
   missing: { accepted: "کار قبول‌شده", quality: "میانگین کیفیت", onTime: "سهم تحویل به‌موقع" },
   today: {
     title: "امروز", empty: "امروز کار فوری ندارید. پیشنهادها و مهلت‌های تازه همین‌جا می‌آیند.", open: "باز کن",
-    kinds: { overdue: "دیر شده: تحویل بده", changes: "اصلاح خواسته شد", dueToday: "مهلت امروز", offer: "به پیشنهاد جواب بده", dueSoon: "مهلت نزدیک", message: "پیام تازه از تیم", doc: "تمدید مدرک", noDpa: "برای کارهای دارای داده شخصی، قرارداد DPA امضاشده بگذارید", payout: "پرداخت در راه" },
+    kinds: { contract: "قرارداد چارچوب را امضا کن", overdue: "دیر شده: تحویل بده", changes: "اصلاح خواسته شد", dueToday: "مهلت امروز", offer: "به پیشنهاد جواب بده", dueSoon: "مهلت نزدیک", message: "پیام تازه از تیم", doc: "تمدید مدرک", noDpa: "برای کارهای دارای داده شخصی، قرارداد DPA امضاشده بگذارید", payout: "پرداخت در راه" },
     reply: "مهم‌ترین‌های امروز:", replyEmpty: "امروز کار فوری ندارید. پیشنهادها یا درآمدتان را ببینید؟",
     job: "این پروژه است:", jobNone: "پروژه فعالی ندارید. پیشنهادهای باز را ببینید؟",
     messages: "آخرین پیام‌های تیم:", messagesNone: "هنوز پیامی از تیم ندارید.",

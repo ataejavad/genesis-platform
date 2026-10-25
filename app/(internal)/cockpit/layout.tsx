@@ -35,6 +35,7 @@ export default async function CockpitLayout({ children }: { children: React.Reac
         { title: "Money & legal", items: [
           { href: "/cockpit/contracts", label: "Contracts", icon: "📝" },
           { href: "/cockpit/finance", label: "Finance", icon: "💶" },
+          { href: "/cockpit/outbox", label: "Outbox", icon: "📤" },
         ] },
         { title: "Machine", items: [
           { href: "/cockpit/agents", label: "Agent center", icon: "🤖" },

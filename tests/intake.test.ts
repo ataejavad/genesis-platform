@@ -6,9 +6,9 @@ import { describe, expect, it } from "vitest";
 import { deliveries, jobs, milestones, projects, servicePackages } from "@/db/schema";
 import { addDocument, applyPartner, checkDocument, decideApplication, deliver, offerJob, offersFor, respondOffer, workFor } from "@/server/partners";
 import { materialFile, materialTurn } from "@/server/portal-chat";
-import { addInput, afterDelivery, convertOrder, createOrder, customerNeeds, decideInput, humanReview, partnerMaterials, projectInputsFor, qaQueue, seedDelivery, setQaBy } from "@/server/projects";
+import { addInput, afterDelivery, createOrder, customerNeeds, decideInput, humanReview, partnerMaterials, projectInputsFor, qaQueue, seedDelivery, setQaBy } from "@/server/projects";
 import { redact } from "@/server/redact";
-import { useTestDb } from "./helpers";
+import { signPartner, startOrder, useTestDb } from "./helpers";
 
 process.env.FILES_DIR = mkdtempSync(path.join(tmpdir(), "genesis-files-"));
 const db = useTestDb();
@@ -18,6 +18,7 @@ const sys = { type: "system", id: "test" } as const;
 async function partner(email: string, skills = ["automation", "crm", "ai-setup"]) {
   const a = await applyPartner(db, { kind: "company", name: `P ${email}`, email, country: "IT", languages: ["it", "en"], skills, consent: true });
   await decideApplication(db, javad, a.id, true, "a-long-test-password");
+  await signPartner(db, a.id);
   await checkDocument(db, javad, (await addDocument(db, javad, a.id, "dpa", "https://example.com/dpa.pdf")).id, true);
   return a.id;
 }
@@ -25,7 +26,7 @@ async function partner(email: string, skills = ["automation", "crm", "ai-setup"]
 async function project(slug = "lead-crm") {
   await seedDelivery(db);
   const order = await createOrder(db, sys, { packageSlug: slug, source: "market", company: "Rossi Impianti Srl", email: "mario.rossi@rossi-impianti.it", country: "IT", industry: "installers", locale: "it" });
-  const { projectId } = await convertOrder(db, javad, order.id);
+  const { projectId } = await startOrder(db, javad, order.id);
   const [p] = await db.select().from(projects).where(eq(projects.id, projectId));
   return p;
 }

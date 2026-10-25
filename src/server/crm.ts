@@ -6,7 +6,7 @@ import { agentRuns, checkups, contacts, leads, prospects, touches } from "@/db/s
 import { FUNNEL_TARGETS } from "./market-selection/criteria";
 import { type FunnelCounts, diagnose } from "./market-selection/funnel";
 import type { Actor } from "./actor";
-import { notFound } from "./errors";
+import { AppError, notFound } from "./errors";
 import { researchedPage } from "./company-page-doc";
 import { createPage, pageUrl } from "./company-pages";
 import { audit, emit } from "./events";
@@ -406,3 +406,37 @@ export async function stageCounts(db: Db) {
   return Object.fromEntries(rows.map((r) => [r.stage, r.n])) as Record<string, number>;
 }
 
+
+/* ───────────── Step 8: confirmed hub leads join the CRM; a won deal becomes an order ───────────── */
+
+/** A hub lead who confirmed their email (double opt-in) becomes a prospect, so sales sees it (process gap "lead.to_crm"). */
+export async function prospectFromLead(tx: DbOrTx, actor: Actor, leadId: string) {
+  const [lead] = await tx.select().from(leads).where(eq(leads.id, leadId));
+  if (!lead?.confirmedAt) return null;
+  const key = `lead:${lead.id}`;
+  const [have] = await tx.select({ id: prospects.id }).from(prospects).where(and(eq(prospects.country, lead.country), eq(prospects.key, key)));
+  if (have) return have.id;
+  const domain = lead.email.split("@")[1] ?? "";
+  const company = typeof lead.answers.company === "string" && lead.answers.company.trim() ? lead.answers.company.trim().slice(0, 200) : null;
+  const [p] = await tx
+    .insert(prospects)
+    .values({ name: company ?? (FREE_MAIL.test(lead.email) ? lead.email : domain), key, website: FREE_MAIL.test(lead.email) ? null : domain, industry: lead.industry, country: lead.country, source: "hub", leadId: lead.id, signals: { hook: lead.hook } })
+    .returning();
+  await tx.insert(contacts).values({ prospectId: p.id, email: lead.email, emailConsent: true, source: "lead" });
+  await emit(tx, actor, "prospect.added", { type: "prospect", id: p.id }, { industry: lead.industry, country: lead.country, source: "hub" });
+  return p.id;
+}
+
+const LOCALE_OF: Record<string, string> = { IT: "it", DE: "de", AT: "de", CH: "de" };
+
+/** Javad marks a deal won and picks the package: the order (and from there the contract) is made, nothing re-typed. */
+export async function wonToOrder(db: Db, actor: Actor, prospectId: string, packageSlug: string) {
+  const [p] = await db.select().from(prospects).where(eq(prospects.id, prospectId));
+  if (!p) throw notFound("prospect");
+  const [c] = await db.select().from(contacts).where(and(eq(contacts.prospectId, prospectId), sql`${contacts.email} is not null`)).limit(1);
+  if (!c?.email) throw new AppError(400, "no_email", "add the contact's email first");
+  const { createOrder } = await import("./projects");
+  const order = await createOrder(db, actor, { packageSlug, source: "crm", company: p.name, email: c.email, country: p.country, industry: p.industry, locale: LOCALE_OF[p.country] ?? "en", note: `CRM ${p.id}` });
+  await db.transaction((tx) => moveStage(tx, actor, prospectId, "won", new Date(), `order ${order.id.slice(0, 8)}`));
+  return order;
+}

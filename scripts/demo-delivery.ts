@@ -1,8 +1,11 @@
 import { eq } from "drizzle-orm";
 import { createDb } from "../src/db";
-import { jobs, organizations, partners, projectInputs, projects } from "../src/db/schema";
+import { invoices, jobs, memberships, organizations, partners, projectInputs, projects, user } from "../src/db/schema";
+import { sendContract } from "../src/server/contracts";
+import { markInvoicePaid } from "../src/server/finance";
 import { deliver, offersFor, respondOffer } from "../src/server/partners";
-import { addInput, convertOrder, createOrder, createProject, humanReview, seedDelivery } from "../src/server/projects";
+import { demoSign } from "./demo-sign";
+import { addInput, createOrder, createProject, humanReview, seedDelivery } from "../src/server/projects";
 
 // Step 7 demo: first protocols and packages (always, idempotent), then once: a customer project waiting for
 // the demo customer's OK, an internal project with a delivery in the QA queue, and a new marketplace order.
@@ -22,7 +25,13 @@ if (any || !rossi || !giulia) {
   };
   // 1. Rossi ordered "every lead in the CRM" from the dashboard; done and checked, now waiting for Rossi's OK
   const order = await createOrder(db, actor, { packageSlug: "lead-crm", source: "portal", orgId: rossi.id, locale: "it" });
-  const { projectId } = await convertOrder(db, actor, order.id);
+  // step 8: contract signed by the demo customer and deposit paid before the project starts
+  const { contract } = await sendContract(db, actor, order.id);
+  const [owner] = await db.select({ email: user.email, name: user.name }).from(memberships).innerJoin(user, eq(user.id, memberships.userId)).where(eq(memberships.orgId, rossi.id)).limit(1);
+  await demoSign(db, contract.id, owner.email, owner.name);
+  const [deposit] = await db.select().from(invoices).where(eq(invoices.contractId, contract.id));
+  if (deposit) await markInvoicePaid(db, { type: "user", id: "demo-javad" }, deposit.id);
+  const [{ id: projectId }] = await db.select({ id: projects.id }).from(projects).where(eq(projects.orderId, order.id));
   for (const j of (await take(projectId)).filter((x) => x.status === "assigned")) {
     const d = await deliver(db, actor, giulia.id, j.id, { link: "https://example.com/handover/lead-crm", note: "Collegato con webhook nativo; guida nella pagina di consegna.", selfCheck: j.checklist.map(() => true) });
     await humanReview(db, { type: "user", id: "demo-javad" }, d.id, j.checklist.map((_, idx) => ({ idx, result: "pass" as const })), 5, "Ottimo lavoro, grazie.");

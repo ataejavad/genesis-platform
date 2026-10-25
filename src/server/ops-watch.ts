@@ -1,6 +1,6 @@
 import { and, eq, gte, inArray, isNotNull, isNull, lt } from "drizzle-orm";
 import type { Db } from "@/db";
-import { changeRequests, customerApprovals, customerRequests, deliveries, events, jobOffers, jobs, orders, partnerDocuments, partners, payouts, projectInputs } from "@/db/schema";
+import { changeRequests, contracts, customerApprovals, customerRequests, deliveries, events, jobOffers, jobs, orders, partnerDocuments, partners, payouts, projectInputs } from "@/db/schema";
 import { MAX_ATTEMPTS } from "@/worker/dispatch";
 import type { Actor } from "./actor";
 import { emit } from "./events";
@@ -21,6 +21,7 @@ export const WATCH = {
   approvalHours: 48, // change requests and other customer approvals (milestones have their own reminder)
   orderHours: 24, // a new order becomes a project within a day
   inputHours: 24, // a customer file waiting for our check blocks the partners
+  contractHours: 72, // a contract sent and not signed: nothing starts until it is (call them)
   payoutLeadHours: 24, // payout due tomorrow or overdue
   documentDays: 14, // partner document expires soon
   repeatHours: 24, // the same item is flagged at most once a day
@@ -75,6 +76,9 @@ export async function opsWatch(db: Db, now = new Date()) {
 
   const newOrders = await db.select({ id: orders.id, company: orders.company, at: orders.createdAt }).from(orders).where(and(eq(orders.status, "new"), lt(orders.createdAt, before(WATCH.orderHours))));
   for (const o of newOrders) items.push({ key: `order:${o.id}`, kind: "order", text: `Order ${o.company ?? ""} not started for ${age(now, o.at)}h`, link: "/cockpit/projects" });
+
+  const unsigned = await db.select({ id: contracts.id, title: contracts.title, kind: contracts.kind, at: contracts.createdAt }).from(contracts).where(and(eq(contracts.status, "sent"), lt(contracts.createdAt, before(WATCH.contractHours))));
+  for (const c of unsigned) items.push({ key: `contract:${c.id}`, kind: "contract", text: `${c.kind === "customer" ? "Customer" : "Partner"} contract "${c.title}" not signed for ${Math.round(age(now, c.at) / 24)} days: call them`, link: `/cockpit/contracts/${c.id}` });
 
   const files = await db.select({ id: projectInputs.id, label: projectInputs.label, at: projectInputs.createdAt }).from(projectInputs).where(and(eq(projectInputs.status, "check"), lt(projectInputs.createdAt, before(WATCH.inputHours))));
   for (const f of files) items.push({ key: `input:${f.id}`, kind: "input", text: `Customer file "${f.label}" waits for your check ${age(now, f.at)}h (partners blocked)`, link: "/cockpit/projects" });

@@ -637,6 +637,9 @@ export const partners = pgTable(
     pitch: text("pitch"),
     // jobs at the same time the partner says they can take (their own tool; we never track hours)
     capacity: integer("capacity").notNull().default(2),
+    // where we pay them (SEPA batch); given by the partner in their profile
+    iban: text("iban"),
+    billingName: text("billing_name"),
     // portal language
     locale: text("locale").notNull().default("en"),
     // screening result: score 0–100 and reasons, by rules or Claude
@@ -881,9 +884,12 @@ export const orders = pgTable(
     industry: text("industry"),
     locale: text("locale").notNull().default("en"),
     note: text("note"),
-    // new → converted | rejected
+    // new → contract (sent, waiting for signature) → signed (deposit requested) → converted (paid, project running) | rejected
     status: text("status").notNull().default("new"),
     projectId: uuid("project_id"),
+    // step 8: no partner work before a signed contract and the deposit
+    contractId: uuid("contract_id"),
+    depositEur: integer("deposit_eur"),
     createdAt: createdAt(),
   },
   (t) => [index("orders_status_idx").on(t.status)],
@@ -1024,3 +1030,153 @@ export const projectCosts = pgTable(
   },
   (t) => [index("project_costs_project_idx").on(t.projectId), uniqueIndex("project_costs_job_idx").on(t.jobId)],
 );
+
+/* ───────────── Contracts, money and messages (step 8, doc 15 §6ج) ───────────── */
+
+// Our own company data on contracts and invoices. One row ("main"); filled in the cockpit once the business is registered.
+export const companyProfile = pgTable("company_profile", {
+  id: text("id").primaryKey().default("main"),
+  legalName: text("legal_name"),
+  vatId: text("vat_id"),
+  taxCode: text("tax_code"),
+  address: text("address"),
+  country: text("country").notNull().default("IT"),
+  iban: text("iban"),
+  bic: text("bic"),
+  email: text("email"),
+  // invoices get legal numbers only when the business is registered; before that only payment requests exist
+  registered: boolean("registered").notNull().default(false),
+  updatedAt: updatedAt(),
+});
+
+// A contract built from the clause library of a country pack. The text is frozen at creation (what was signed).
+export const contracts = pgTable(
+  "contracts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    // customer (service + DPA), partner (framework: NDA, sub-processing, non-circumvention, white-label)
+    kind: text("kind").notNull(),
+    orgId: uuid("org_id").references(() => organizations.id, { onDelete: "cascade" }),
+    partnerId: uuid("partner_id").references(() => partners.id, { onDelete: "cascade" }),
+    orderId: uuid("order_id"),
+    jurisdiction: text("jurisdiction").notNull(),
+    language: text("language").notNull(),
+    templateVersion: text("template_version").notNull(),
+    // false until a lawyer of that country reviewed the template (shown in the cockpit)
+    reviewed: boolean("reviewed").notNull().default(false),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    // clauses that need their own approval (Italy: art. 1341-1342 c.c.; Cassazione 20945/2026 says a tick is not enough)
+    onerous: jsonb("onerous").$type<{ id: string; title: string }[]>().notNull().default([]),
+    // the one-page summary Javad approves: what we give, what we get, money, dates, risks
+    summary: jsonb("summary").$type<{ give: string[]; get: string[]; money: string[]; risks: string[] }>().notNull(),
+    amountEur: integer("amount_eur").notNull().default(0),
+    monthlyEur: integer("monthly_eur").notNull().default(0),
+    depositEur: integer("deposit_eur").notNull().default(0),
+    // sent → signed (both OTP steps done) | cancelled
+    status: text("status").notNull().default("sent"),
+    approvedBy: text("approved_by"),
+    signerName: text("signer_name"),
+    signerEmail: text("signer_email"),
+    // evidence of the simple electronic signature (eIDAS art. 3(10)): text hash, times of both codes, ip, browser
+    evidence: jsonb("evidence").$type<{ hash: string; signedAt?: string; clausesAt?: string; ip?: string | null; ua?: string | null; answers?: Record<string, boolean> }>(),
+    signedAt: timestamp("signed_at", { withTimezone: true }),
+    createdBy: text("created_by").notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index("contracts_org_idx").on(t.orgId), index("contracts_partner_idx").on(t.partnerId)],
+);
+
+// One-time codes for signing (hash only; 15 minutes; 5 tries).
+export const signatureCodes = pgTable("signature_codes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  contractId: uuid("contract_id").notNull().references(() => contracts.id, { onDelete: "cascade" }),
+  // sign (the contract) or clauses (the specific approval)
+  step: text("step").notNull(),
+  codeHash: text("code_hash").notNull(),
+  email: text("email").notNull(),
+  attempts: integer("attempts").notNull().default(0),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  usedAt: timestamp("used_at", { withTimezone: true }),
+  createdAt: createdAt(),
+});
+
+// Payment request first, legal invoice when paid (Italy: services are invoiced at payment). One row for both.
+export const invoices = pgTable(
+  "invoices",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orgId: uuid("org_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+    // deposit, milestone, subscription
+    kind: text("kind").notNull(),
+    contractId: uuid("contract_id"),
+    orderId: uuid("order_id"),
+    projectId: uuid("project_id"),
+    milestoneId: uuid("milestone_id"),
+    subscriptionId: uuid("subscription_id"),
+    // "2026-11" for a subscription month (one request per month)
+    period: text("period"),
+    title: text("title").notNull(),
+    netEur: numeric("net_eur", { precision: 12, scale: 2, mode: "number" }).notNull(),
+    vatRate: numeric("vat_rate", { precision: 5, scale: 2, mode: "number" }).notNull(),
+    vatEur: numeric("vat_eur", { precision: 12, scale: 2, mode: "number" }).notNull(),
+    totalEur: numeric("total_eur", { precision: 12, scale: 2, mode: "number" }).notNull(),
+    currency: text("currency").notNull().default("EUR"),
+    // reverse charge or other legal wording from the country pack
+    vatNote: text("vat_note"),
+    // what the customer writes in the transfer, so we can match it
+    reference: text("reference").notNull().unique(),
+    // requested → paid → issued (legal invoice number, e-invoice sent) | cancelled
+    status: text("status").notNull().default("requested"),
+    number: text("number").unique(),
+    dueAt: timestamp("due_at", { withTimezone: true }).notNull(),
+    paidAt: timestamp("paid_at", { withTimezone: true }),
+    issuedAt: timestamp("issued_at", { withTimezone: true }),
+    // 0 none, 1 before due, 2 one day late, 3 a week late (interest), 4 two weeks late (pause warning)
+    reminderLevel: integer("reminder_level").notNull().default(0),
+    // e-invoice adapter that issued it (manual, sdi provider later) and its id there
+    provider: text("provider"),
+    providerId: text("provider_id"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("invoices_org_idx").on(t.orgId, t.status), uniqueIndex("invoices_sub_period_idx").on(t.subscriptionId, t.period), uniqueIndex("invoices_milestone_idx").on(t.milestoneId)],
+);
+
+// Every message to someone outside: customer, partner, lead. Sent by the worker when a mailer is set; otherwise visible in the cockpit outbox.
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    // customer, partner, lead
+    audience: text("audience").notNull(),
+    orgId: uuid("org_id").references(() => organizations.id, { onDelete: "cascade" }),
+    partnerId: uuid("partner_id").references(() => partners.id, { onDelete: "cascade" }),
+    email: text("email").notNull(),
+    locale: text("locale").notNull(),
+    template: text("template").notNull(),
+    subject: text("subject").notNull(),
+    body: text("body").notNull(),
+    // transactional (always) or marketing (only with confirmed consent, with unsubscribe)
+    kind: text("kind").notNull().default("transactional"),
+    unsubscribeUrl: text("unsubscribe_url"),
+    // the event that caused it: one message per event and template
+    eventId: integer("event_id"),
+    // queued → sent | failed
+    status: text("status").notNull().default("queued"),
+    attempts: integer("attempts").notNull().default(0),
+    error: text("error"),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("notifications_status_idx").on(t.status, t.createdAt), uniqueIndex("notifications_event_idx").on(t.eventId, t.template, t.email)],
+);
+
+// "Set your password" links for new customers and partners (hash only; 7 days).
+export const inviteTokens = pgTable("invite_tokens", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  usedAt: timestamp("used_at", { withTimezone: true }),
+  createdAt: createdAt(),
+});

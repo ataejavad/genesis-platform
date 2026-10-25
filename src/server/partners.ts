@@ -9,6 +9,7 @@ import { createApiKey } from "./api-keys";
 import { AppError, notFound } from "./errors";
 import { customerCode as codeFor } from "./delivery-rules";
 import { audit, emit } from "./events";
+import { contractsFor, createPartnerContract, signedPartners } from "./contracts";
 import { onJobAccepted, partnerMaterials } from "./projects";
 import { maskContacts, match, SKILLS, type Stats, screen, tierOf } from "./partner-rules";
 
@@ -83,6 +84,8 @@ export async function decideApplication(db: Db, actor: Actor, id: string, accept
     await tx.update(partners).set({ status: "active", orgId: org.id, userId: u.id, decidedAt: new Date() }).where(eq(partners.id, id));
     await emit(tx, actor, "partner.activated", { type: "partner", id }, { name: p.name });
     await audit(tx, actor, "partner.activated", { type: "partner", id }, { status: p.status }, { status: "active" });
+    // no job offer before the framework agreement (NDA, sub-processing, white-label) is signed
+    await createPartnerContract(tx, actor, id);
     return { password: pw };
   });
 }
@@ -195,9 +198,10 @@ export async function matchesFor(db: DbOrTx, jobId: string) {
   const active = await db.select().from(partners).where(eq(partners.status, "active"));
   // whoever made the work never checks it
   const maker = job.reviewsDeliveryId ? (await db.select({ p: deliveries.partnerId }).from(deliveries).where(eq(deliveries.id, job.reviewsDeliveryId)))[0]?.p : null;
+  const signed = await signedPartners(db);
   const out = [];
   for (const p of active) {
-    if (p.id === maker) continue;
+    if (p.id === maker || !signed.has(p.id)) continue;
     const [load] = await db.select({ n: sql<number>`count(*)::int` }).from(jobs).where(and(eq(jobs.partnerId, p.id), inArray(jobs.status, ["assigned", "delivered"])));
     const [dpa] = await db.select({ n: sql<number>`count(*)::int` }).from(partnerDocuments).where(and(eq(partnerDocuments.partnerId, p.id), eq(partnerDocuments.kind, "dpa"), eq(partnerDocuments.status, "ok")));
     const m = match(job, { skills: p.skills, languages: p.languages, country: p.country, capacity: p.capacity, active: load.n, stats: await statsFor(db, p.id), dpaSigned: dpa.n > 0 });
@@ -356,7 +360,7 @@ export async function messagesFor(db: Db, partnerId: string) {
 /* ───────────── Today: what the partner should do now (Javad 2026-10-25) ───────────── */
 
 export type TodayItem = {
-  kind: "overdue" | "changes" | "dueToday" | "offer" | "dueSoon" | "message" | "doc" | "noDpa" | "payout";
+  kind: "contract" | "overdue" | "changes" | "dueToday" | "offer" | "dueSoon" | "message" | "doc" | "noDpa" | "payout";
   title: string;
   date: string | null;
   href: string;
@@ -364,7 +368,7 @@ export type TodayItem = {
 };
 
 // most urgent first: late work and asked changes, then today, offers, the next days, then the rest
-const ORDER: TodayItem["kind"][] = ["overdue", "changes", "dueToday", "offer", "dueSoon", "message", "doc", "noDpa", "payout"];
+const ORDER: TodayItem["kind"][] = ["contract", "overdue", "changes", "dueToday", "offer", "dueSoon", "message", "doc", "noDpa", "payout"];
 
 /** The short list above the partner's chat: priorities and what is due, all from the partner's own data. */
 export async function todayFor(db: Db, partnerId: string, now = new Date()): Promise<TodayItem[]> {
@@ -387,7 +391,10 @@ export async function todayFor(db: Db, partnerId: string, now = new Date()): Pro
   const lastTheirs = msgs.filter((m) => m.author === "partner").at(-1);
   if (lastOurs && (!lastTheirs || lastOurs.createdAt > lastTheirs.createdAt) && now.getTime() - lastOurs.createdAt.getTime() < 7 * 864e5) items.push({ kind: "message", title: lastOurs.shown.slice(0, 120), date: day(lastOurs.createdAt), href: "/partner/messages" });
   for (const d of docs.filter((x) => x.expiring && x.status !== "rejected")) items.push({ kind: "doc", title: d.kind, date: d.expiresAt ? day(d.expiresAt) : null, href: "/partner/profile" });
-  if (!docs.some((d) => d.kind === "dpa" && d.status !== "rejected")) items.push({ kind: "noDpa", title: "dpa", date: null, href: "/partner/profile" });
+  // the framework agreement (with the sub-processor terms) comes before any offer; it replaces the separate DPA upload
+  const [framework] = await contractsFor(db, { partnerId });
+  if (framework?.status === "sent") items.push({ kind: "contract", title: framework.title, date: null, href: `/partner/contract/${framework.id}` });
+  else if (framework?.status !== "signed" && !docs.some((d) => d.kind === "dpa" && d.status !== "rejected")) items.push({ kind: "noDpa", title: "dpa", date: null, href: "/partner/profile" });
   const nextPay = pay.rows.filter((r) => r.status === "due").sort((a, b) => a.dueAt.localeCompare(b.dueAt))[0];
   if (nextPay) items.push({ kind: "payout", title: nextPay.title, date: nextPay.dueAt, href: "/partner/earnings", amountEur: nextPay.amountEur });
   return items.sort((a, b) => ORDER.indexOf(a.kind) - ORDER.indexOf(b.kind) || (a.date ?? "").localeCompare(b.date ?? ""));
@@ -489,5 +496,15 @@ export async function setPartnerLocale(db: Db, actor: Actor, partnerId: string, 
     const p = await getPartner(tx, partnerId);
     await tx.update(partners).set({ locale }).where(eq(partners.id, partnerId));
     await audit(tx, actor, "partner.locale", { type: "partner", id: partnerId }, { locale: p.locale }, { locale });
+  });
+}
+
+/** Where we pay the partner (SEPA batch); set by the partner in their profile. */
+export async function setPartnerIban(db: Db, actor: Actor, partnerId: string, input: { iban: string; billingName: string }) {
+  const { partnerIbanInput } = await import("./finance");
+  const v = partnerIbanInput.parse(input);
+  await db.transaction(async (tx) => {
+    await tx.update(partners).set({ iban: v.iban, billingName: v.billingName }).where(eq(partners.id, partnerId));
+    await audit(tx, actor, "partner.iban_set", { type: "partner", id: partnerId }, null, { billingName: v.billingName, iban: `${v.iban.slice(0, 4)}…${v.iban.slice(-4)}` });
   });
 }

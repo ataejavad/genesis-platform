@@ -3,7 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { getDb } from "@/db";
 import { requireAdmin } from "@/lib/auth";
-import { addInput, approveVersion, convertOrder, createProject, decideInput, draftVersion, humanReview, quoteChange, rejectOrder, setQaBy } from "@/server/projects";
+import { sendContract } from "@/server/contracts";
+import { mailerFromEnv } from "@/server/mailer";
+import { addInput, approveVersion, createOrder, createProject, decideInput, draftVersion, humanReview, quoteChange, rejectOrder, setQaBy } from "@/server/projects";
 
 // Cockpit actions for step 7 (orders, projects, protocols, QA). Each acts as the signed-in admin; audited in the module.
 export type Result = { ok: boolean; message: string } | null;
@@ -23,11 +25,15 @@ async function act(fn: (actor: { type: "user"; id: string }) => Promise<string>,
   }
 }
 
-/** Order → customer account (if new; one-time password shown once) → project → offers to partners. */
+/**
+ * Step 8: order → customer account (if new) → contract built from the package, sent to sign. The project starts
+ * by itself once it is signed and the deposit is paid. Without a mailer the one-time password is shown once.
+ */
 export async function convert(_: Result, f: FormData): Promise<Result> {
   return act(async (a) => {
-    const r = await convertOrder(getDb(), a, str(f, "order"));
-    return r.password ? `Project started. New customer login: ${str(f, "email")} · one-time password: ${r.password} (shown once; copy it before reloading) · /portal/login` : "Project started; tasks offered to partners. Reload to see it.";
+    const r = await sendContract(getDb(), a, str(f, "order"));
+    const login = r.password && !mailerFromEnv() ? ` No email set up yet: give the customer this login yourself: ${str(f, "email")} · one-time password ${r.password} (shown once; copy it now) · /portal/login.` : r.password ? " The invite email with a set-password link is in Outbox." : "";
+    return `Contract sent to sign (deposit €${r.contract.depositEur}; the project starts when it is paid).${login}`;
     // no revalidation: the one-time password must stay on screen until Javad has copied it
   }, []);
 }
@@ -38,7 +44,10 @@ export async function reject(_: Result, f: FormData): Promise<Result> {
 
 export async function newProject(_: Result, f: FormData): Promise<Result> {
   return act(async (a) => {
-    const p = await createProject(getDb(), a, { orgId: str(f, "customer") || null, packageSlug: str(f, "package"), sensitiveData: f.get("sensitive") === "on" });
+    const orgId = str(f, "customer");
+    // a customer's project goes through the contract and deposit like every order (step 8 gate)
+    if (orgId) return (await createOrder(getDb(), a, { orgId, packageSlug: str(f, "package"), source: "cockpit" }), "Order created: send its contract from the list above.");
+    const p = await createProject(getDb(), a, { orgId: null, packageSlug: str(f, "package"), sensitiveData: f.get("sensitive") === "on" });
     return `${p.code} started; tasks offered to partners.`;
   }, ["/cockpit/projects"]);
 }

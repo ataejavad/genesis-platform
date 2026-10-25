@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getDb } from "@/db";
 import { requireAdmin } from "@/lib/auth";
 import { AppError } from "@/server/errors";
+import { eraseCustomer } from "@/server/privacy";
 import { addGoal, addOutcome, addSubscription, answerRequest, askCustomerApproval, createCustomer } from "@/server/portal";
 
 // Cockpit actions for customer accounts (step 5). Each acts as the signed-in admin and is audited in the module.
@@ -54,4 +55,17 @@ export async function reply(f: FormData) {
 }
 export async function goal(f: FormData) {
   await run((a) => addGoal(getDb(), a, { orgId: str(f, "org"), metric: str(f, "metric"), title: { [str(f, "lang") || "en"]: str(f, "title"), en: str(f, "title") }, baseline: num(f, "baseline"), target: num(f, "target"), unit: str(f, "unit") }));
+}
+
+/** GDPR erasure (irreversible): people, chats, material and files go; contracts and invoices stay (10 years, art. 2220 c.c.). */
+export async function erase(_: OpenState, f: FormData): Promise<OpenState> {
+  const user = await requireAdmin();
+  if (str(f, "confirm") !== str(f, "company")) return { ok: false, message: "Type the company name exactly to confirm." };
+  try {
+    await eraseCustomer(getDb(), { type: "user", id: user.id }, str(f, "org"), str(f, "request") || undefined);
+    revalidatePath("/cockpit/customers");
+    return { ok: true, message: "Erased. Contracts and invoices kept for the legal 10 years." };
+  } catch (err) {
+    return { ok: false, message: err instanceof Error ? err.message.slice(0, 200) : "failed" };
+  }
 }

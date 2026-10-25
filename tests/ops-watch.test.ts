@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { events, jobOffers, jobs, payouts } from "@/db/schema";
 import { opsWatch } from "@/server/ops-watch";
 import { addDocument, applyPartner, checkDocument, decideApplication, offersFor, respondOffer } from "@/server/partners";
-import { convertOrder, createOrder, seedDelivery } from "@/server/projects";
-import { useTestDb } from "./helpers";
+import { createOrder, seedDelivery } from "@/server/projects";
+import { signPartner, startOrder, useTestDb } from "./helpers";
 
 const db = useTestDb();
 const javad = { type: "user", id: "javad" } as const;
@@ -14,6 +14,7 @@ const HOUR = 36e5;
 async function partner(name: string, email: string) {
   const a = await applyPartner(db, { kind: "person", name, email, country: "IT", languages: ["it", "en"], skills: ["automation", "crm", "ai-setup"], consent: true });
   await decideApplication(db, javad, a.id, true, "a-long-test-password");
+  await signPartner(db, a.id);
   await checkDocument(db, javad, (await addDocument(db, javad, a.id, "dpa", "https://example.com/dpa.pdf")).id, true);
   return a.id;
 }
@@ -21,7 +22,7 @@ async function partner(name: string, email: string) {
 async function project() {
   await seedDelivery(db);
   const o = await createOrder(db, sys, { packageSlug: "followup-agent", source: "portal", company: "Rossi Srl", email: "rossi@example.com", country: "IT", industry: "installers", locale: "it" });
-  return (await convertOrder(db, javad, o.id)).projectId;
+  return (await startOrder(db, javad, o.id)).projectId;
 }
 
 const digests = async () => (await db.select().from(events).where(eq(events.type, "ops.flagged"))).map((e) => e.payload.items as { kind: string; key: string }[]);

@@ -5,6 +5,7 @@ import { ASSEMBLY_CHECKS, FIXED_RULES, inputText, PACKAGE_SEEDS, PROTOCOL_SEEDS 
 import type { Db, DbOrTx, Tx } from "@/db";
 import {
   changeRequests,
+  contracts,
   type Criterion,
   customerApprovals,
   deliveries,
@@ -59,7 +60,8 @@ export async function seedDelivery(db: Db, actor: Actor = { type: "system", id: 
       [p] = await tx.insert(protocols).values({ code: s.code, title: s.title, nace: s.nace ?? null, apqc: s.apqc }).returning();
       await tx.insert(protocolVersions).values({ protocolId: p.id, version: 1, status: "approved", goal: s.goal, inputs: s.inputs, deliverables: s.deliverables, rules: FIXED_RULES, criteria: s.criteria, guidance: s.guidance, standardDays: s.standardDays, createdBy: by(actor), approvedBy: by(actor), approvedAt: new Date(), changeNote: "first version" });
     }
-    for (const s of PACKAGE_SEEDS) await tx.insert(servicePackages).values(s).onConflictDoNothing();
+    // package texts live in Git: names and milestone titles follow the seeds (prices too, until the catalogue is editable)
+    for (const s of PACKAGE_SEEDS) await tx.insert(servicePackages).values(s).onConflictDoUpdate({ target: servicePackages.slug, set: { titles: s.titles, milestones: s.milestones } });
   });
 }
 
@@ -172,16 +174,21 @@ export async function createOrder(db: Db, actor: Actor, input: z.input<typeof or
   });
 }
 
-export async function listOrders(db: Db, status = "new") {
-  return db.select({ order: orders, company: organizations.name }).from(orders).leftJoin(organizations, eq(organizations.id, orders.orgId)).where(eq(orders.status, status)).orderBy(desc(orders.createdAt));
+/** Orders before their project starts: new, contract sent, signed (deposit requested). */
+export async function listOrders(db: Db, statuses = ["new", "contract", "signed"]) {
+  return db.select({ order: orders, company: organizations.name }).from(orders).leftJoin(organizations, eq(organizations.id, orders.orgId)).where(inArray(orders.status, statuses)).orderBy(desc(orders.createdAt));
 }
 
 /** One click: the customer account (if new) and the project from the package; tasks go out as offers. */
+/**
+ * Signed contract and paid deposit (step 8 gate): the project starts and its tasks go to partners. Called by
+ * finance when the deposit is paid, or by the contract module when there is nothing to pay first.
+ */
 export async function convertOrder(db: Db, actor: Actor, orderId: string, now = new Date()) {
   const { projectId, password } = await db.transaction(async (tx) => {
     const [o] = await tx.select().from(orders).where(eq(orders.id, orderId)).for("update");
     if (!o) throw notFound("order");
-    if (o.status !== "new") throw new AppError(409, "already_decided", "order already handled");
+    if (o.status !== "signed") throw new AppError(409, "not_signed", o.status === "new" || o.status === "contract" ? "the contract is not signed yet" : "order already handled");
     let orgId = o.orgId;
     let password = "";
     if (!orgId) {
@@ -191,7 +198,7 @@ export async function convertOrder(db: Db, actor: Actor, orderId: string, now = 
     }
     const p = await insertProject(tx, actor, { orgId, packageSlug: o.packageSlug, orderId, now });
     await tx.update(orders).set({ status: "converted", projectId: p.id, orgId }).where(eq(orders.id, orderId));
-    await audit(tx, actor, "order.converted", { type: "order", id: orderId }, { status: "new" }, { status: "converted", projectId: p.id });
+    await audit(tx, actor, "order.converted", { type: "order", id: orderId }, { status: "signed" }, { status: "converted", projectId: p.id });
     return { projectId: p.id, password };
   });
   await offerTasks(db, actor, projectId);
@@ -200,8 +207,9 @@ export async function convertOrder(db: Db, actor: Actor, orderId: string, now = 
 
 export async function rejectOrder(db: Db, actor: Actor, orderId: string, note: string) {
   await db.transaction(async (tx) => {
-    const [o] = await tx.update(orders).set({ status: "rejected", note: note.slice(0, 2000) }).where(and(eq(orders.id, orderId), eq(orders.status, "new"))).returning();
+    const [o] = await tx.update(orders).set({ status: "rejected", note: note.slice(0, 2000) }).where(and(eq(orders.id, orderId), inArray(orders.status, ["new", "contract"]))).returning();
     if (!o) throw notFound("order");
+    if (o.contractId) await tx.update(contracts).set({ status: "cancelled" }).where(and(eq(contracts.id, o.contractId), eq(contracts.status, "sent")));
     await audit(tx, actor, "order.rejected", { type: "order", id: orderId }, { status: "new" }, { status: "rejected", note });
   });
 }

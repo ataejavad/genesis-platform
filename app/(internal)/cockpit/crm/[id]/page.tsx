@@ -5,9 +5,11 @@ import { getPageFor, pageUrl } from "@/server/company-pages";
 import { pageDocSchema } from "@/server/company-page-doc";
 import { STAGES, planEnv, priority, prospectDetail } from "@/server/crm";
 import { LEGAL_BASES } from "@/server/outreach-rules";
+import { listPackages } from "@/server/projects";
 import { conversation } from "@/server/whatsapp";
 import { PageHead } from "@/ui/Shell";
 import { basis, stage } from "../../outreach/actions";
+import { WonForm } from "../WonForm";
 
 export const dynamic = "force-dynamic";
 
@@ -18,13 +20,13 @@ export default async function Company({ params }: { params: Promise<{ id: string
   const d = await prospectDetail(db, id);
   if (!d) notFound();
   const { prospect: p, contacts, touches } = d;
-  const [page, messages] = await Promise.all([getPageFor(db, id), conversation(db, id)]);
+  const [page, messages, packages] = await Promise.all([getPageFor(db, id), conversation(db, id), listPackages(db)]);
   const doc = page ? pageDocSchema.safeParse(page.doc).data : undefined;
   const pr = priority(p);
   return (
     <main>
       <PageHead title={p.name} crumbs="Cockpit › CRM" sub={`${p.industry} · ${p.country} · ${p.source} · stage ${p.stage.replace(/_/g, " ")} · tier ${pr.tier} (score ${pr.score})`}
-        actions={<form action={stage} className="row" style={{ gap: 6 }}><input type="hidden" name="prospect" value={p.id} /><select name="stage" defaultValue={p.stage}>{STAGES.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}</select><button className="btn">Set stage</button></form>} />
+        actions={<div className="row">{p.stage !== "won" && <WonForm prospect={p.id} packages={packages} />}<form action={stage} className="row" style={{ gap: 6 }}><input type="hidden" name="prospect" value={p.id} /><select name="stage" defaultValue={p.stage}>{STAGES.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}</select><button className="btn">Set stage</button></form></div>} />
 
       <section className="grid g3" style={{ marginBottom: 18 }}>
         <div className="card">

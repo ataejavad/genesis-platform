@@ -4,6 +4,7 @@ import { listCustomers, listServices, openRequests } from "@/server/portal";
 import { METRICS } from "@/server/portal-metrics";
 import { PageHead } from "@/ui/Shell";
 import { askApproval, goal, recordResult, reply } from "./actions";
+import { EraseForm } from "./EraseForm";
 import { OpenAccount } from "./OpenAccount";
 
 const eur = (n: number) => `€${n.toLocaleString("en-GB")}`;
@@ -24,13 +25,16 @@ export default async function CockpitCustomers() {
         {requests.length === 0 && <p className="muted">None.</p>}
         <div className="list">
           {requests.map(({ request: r, company }) => (
-            <form key={r.id} action={reply} className="item" style={{ alignItems: "start", flexWrap: "wrap" }}>
+            <div key={r.id} className="item" style={{ display: "block" }}>
+            <form action={reply} className="row" style={{ alignItems: "start" }}>
               <input type="hidden" name="id" value={r.id} />
               <div className="grow"><b>{company}</b> <span className="badge">{r.kind}</span> <span className="muted small">{r.createdAt.toISOString().slice(0, 16).replace("T", " ")} · {r.status}</span><div>{r.text}</div></div>
               <textarea name="reply" defaultValue={r.reply ?? ""} placeholder="Answer the customer sees" style={{ minHeight: 48, flexBasis: "100%" }} />
               <button className="btn sm" name="status" value="in_progress">Save · in progress</button>
               <button className="btn sm primary" name="status" value="done">Answer · done</button>
             </form>
+            {r.kind === "data_delete" && <EraseForm org={r.orgId} request={r.id} company={company} />}
+            </div>
           ))}
         </div>
       </div>

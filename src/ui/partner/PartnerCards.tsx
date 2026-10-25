@@ -80,7 +80,7 @@ export function EarningsCard({ data: e, t, lang }: P & { data: Extract<PartnerCa
   );
 }
 
-const TODAY_ICON: Record<string, string> = { overdue: "⏰", changes: "✏️", dueToday: "📌", offer: "📥", dueSoon: "🗓️", message: "💬", doc: "📄", noDpa: "🔒", payout: "💶" };
+const TODAY_ICON: Record<string, string> = { contract: "✍️", overdue: "⏰", changes: "✏️", dueToday: "📌", offer: "📥", dueSoon: "🗓️", message: "💬", doc: "📄", noDpa: "🔒", payout: "💶" };
 
 /** Today's priorities (Javad 2026-10-25): what to do now, most urgent first; each line opens its page. */
 export function TodayList({ items, t, lang }: P & { items: TodayItem[] }) {
@@ -91,7 +91,7 @@ export function TodayList({ items, t, lang }: P & { items: TodayItem[] }) {
         <li key={n} className={`today-item ${i.kind}`}>
           <Link href={i.href}>
             <span aria-hidden="true">{TODAY_ICON[i.kind]}</span>
-            <span className="grow"><b>{t.today.kinds[i.kind]}</b>{i.kind !== "noDpa" && <> · {i.kind === "doc" ? (d[i.title] ?? i.title) : i.title}</>}</span>
+            <span className="grow"><b>{t.today.kinds[i.kind]}</b>{i.kind !== "noDpa" && i.kind !== "contract" && <> · {i.kind === "doc" ? (d[i.title] ?? i.title) : i.title}</>}</span>
             {i.amountEur !== undefined && <b className="num">{fmtEur(i.amountEur, lang)}</b>}
             {i.date && <span className="muted small">{i.date}</span>}
           </Link>

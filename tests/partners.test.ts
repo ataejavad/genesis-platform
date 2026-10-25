@@ -23,7 +23,7 @@ import {
 } from "@/server/partners";
 import { authenticateAgent } from "@/server/api-keys";
 import { detectPartnerIntent, partnerReply } from "@/server/partner-chat";
-import { useTestDb } from "./helpers";
+import { signPartner, startOrder, useTestDb } from "./helpers";
 
 const db = useTestDb();
 const javad = { type: "user", id: "javad" } as const;
@@ -32,6 +32,7 @@ const sys = { type: "system", id: "test" } as const;
 async function activePartner(name: string, email: string, over: Record<string, unknown> = {}) {
   const a = await applyPartner(db, { kind: "person", name, email, country: "IT", languages: ["it", "en"], skills: ["automation", "crm"], links: ["https://example.com/cv"], consent: true, ...over });
   const d = await decideApplication(db, javad, a.id, true, "a-long-test-password");
+  await signPartner(db, a.id);
   return { id: a.id, password: d.password };
 }
 const job = (over: Record<string, unknown> = {}) => createJob(db, javad, { title: "Connect web form to CRM", brief: "Every form lead lands in the CRM with source.", skills: ["automation", "crm"], language: "it", country: "IT", payEur: 300, dueAt: new Date(Date.now() + 5 * 864e5), checklist: ["Test lead arrives in CRM", "Source field filled"], ...over });
@@ -73,6 +74,7 @@ describe("partner flow", () => {
     expect(row.screening?.score).toBeGreaterThan(0);
     await expect(applyPartner(db, { kind: "person", name: "X", email: "x@x.test", country: "IT", skills: ["content"], consent: false as true })).rejects.toThrow();
     const d = await decideApplication(db, javad, a.id, true, "a-long-test-password");
+  await signPartner(db, a.id);
     expect(d.password).toBe("a-long-test-password");
     const [after] = await db.select().from(partners).where(eq(partners.id, a.id));
     expect(after.status).toBe("active");
@@ -150,7 +152,7 @@ describe("partner flow", () => {
     await offerJob(db, javad, late.id, 1, 0);
     await sendPartnerMessage(db, javad, p.id, "us", "Welcome aboard");
     const today = await todayFor(db, p.id);
-    expect(today.map((i) => i.kind)).toEqual(["offer", "dueSoon", "message", "noDpa"]);
+    expect(today.map((i) => i.kind)).toEqual(["offer", "dueSoon", "message"]); // the signed framework carries the sub-processor terms: no separate DPA asked
 
     expect(detectPartnerIntent("Cosa devo fare oggi?")).toBe("today");
     expect(detectPartnerIntent("What do I need for the next level?")).toBe("level");

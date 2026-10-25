@@ -1,6 +1,9 @@
-import { sql } from "drizzle-orm";
+import { and, asc, eq, isNull, lt, sql } from "drizzle-orm";
 import type { Db } from "@/db";
 import { events } from "@/db/schema";
+import { prospectFromLead } from "@/server/crm";
+import { billMilestone } from "@/server/finance";
+import { notifyEvent } from "@/server/notify";
 import { offerJob } from "@/server/partners";
 import { afterDelivery } from "@/server/projects";
 import { sendAlert, sendApprovalRequest, type TelegramConfig } from "@/server/telegram";
@@ -84,6 +87,21 @@ async function handle(db: Db, deps: DispatchDeps, event: Event) {
     const items = (event.payload.items as { text: string }[] | undefined) ?? [];
     await sendAlert(deps.telegram, [`🚨 ${items.length} stuck item(s)`, ...items.slice(0, 15).map((i) => `• ${i.text}`), items.length > 15 ? `… +${items.length - 15}` : ""].filter(Boolean), "/cockpit", fetchImpl);
   }
+  // Step 8: everyone outside hears about what concerns them, in their language (queued; sent when a mailer is set).
+  await notifyEvent(db, event);
+  // Accepted milestone → payment request for what the deposit does not cover; confirmed hub lead → CRM.
+  if (event.type === "milestone.accepted") await billMilestone(db, event.subjectId!);
+  if (event.type === "lead.confirmed") await db.transaction((tx) => prospectFromLead(tx, { type: "system", id: "double-opt-in" }, event.subjectId!));
+  if (deps.telegram && (event.type === "contract.signed" || event.type === "invoice.paid" || (event.type === "invoice.reminded" && Number(event.payload.level) >= 3))) {
+    const p = event.payload as { kind?: string; totalEur?: number; title?: string; level?: number; daysLate?: number; independenceFlags?: string[] };
+    const line =
+      event.type === "contract.signed"
+        ? `✍️ ${p.kind === "partner" ? "Partner" : "Customer"} contract signed${p.independenceFlags?.length ? ` · ⚠️ dependent-work signs: ${p.independenceFlags.join(", ")}` : ""}`
+        : event.type === "invoice.paid"
+          ? `💶 Paid: €${p.totalEur} (${p.kind})`
+          : `⏰ ${p.title}: €${p.totalEur} is ${p.daysLate} days late${p.level === 4 ? " (pause warning sent)" : ""}`;
+    await sendAlert(deps.telegram, [line], event.type === "contract.signed" ? "/cockpit/contracts" : "/cockpit/finance", fetchImpl);
+  }
   // Every event also goes to n8n, where Genesis workflows subscribe to what they need.
   if (deps.n8nWebhookUrl) {
     const res = await fetchImpl(deps.n8nWebhookUrl, {
@@ -138,4 +156,21 @@ export async function dispatchBatch(db: Db, deps: DispatchDeps, limit = 25): Pro
     }
     return batch.length;
   });
+}
+
+/**
+ * Local mode (`npm run local`, one embedded database): the same handlers, one event at a time and without the
+ * long batch transaction, so the single local database session is never held while a handler writes.
+ */
+export async function dispatchSimple(db: Db, deps: DispatchDeps, limit = 25): Promise<number> {
+  const batch = await db.select().from(events).where(and(isNull(events.dispatchedAt), lt(events.attempts, MAX_ATTEMPTS))).orderBy(asc(events.id)).limit(limit);
+  for (const event of batch) {
+    try {
+      await handle(db, deps, event);
+      await db.update(events).set({ dispatchedAt: new Date(), attempts: event.attempts + 1, lastError: null }).where(eq(events.id, event.id));
+    } catch (err) {
+      await db.update(events).set({ attempts: event.attempts + 1, lastError: err instanceof Error ? err.message : String(err) }).where(eq(events.id, event.id));
+    }
+  }
+  return batch.length;
 }
