@@ -28,22 +28,22 @@ if (exists) {
     createJob(db, actor, { title, brief, kind: customer ? "customer" : "internal", customerOrgId: customer?.id, skills, language: "it", country: "IT", personalData: true, payEur: pay, dueAt: due(days), checklist });
 
   // finished: delivered, accepted, payout due
-  const done = await job("Collegare il modulo contatti al CRM", "Website form leads must reach the CRM with source and phone filled, plus an alert to the office.", ["automation", "crm"], 380, 3, ["Test lead arrives in the CRM", "Source field filled", "Office gets the alert"]);
+  const done = await job("Collegare il modulo contatti al CRM", "I contatti dal modulo del sito devono arrivare nel CRM con fonte e telefono compilati, più un avviso all'ufficio.", ["automation", "crm"], 380, 3, ["Il contatto di prova arriva nel CRM", "Campo fonte compilato", "L'ufficio riceve l'avviso"]);
   await offerJob(db, actor, done.id, 1, 0);
   const [o1] = await offersFor(db, id);
   await respondOffer(db, actor, id, o1.offer.id, true);
-  const d = await deliver(db, actor, id, done.id, { link: "https://example.com/handover/crm-flow", note: "Flow documented in the handover page.", selfCheck: [true, true, true] });
-  await reviewDelivery(db, actor, d.id, true, 5, "Clean work, documented. Thank you.");
+  const d = await deliver(db, actor, id, done.id, { link: "https://example.com/handover/crm-flow", note: "Flusso documentato nella pagina di consegna.", selfCheck: [true, true, true] });
+  await reviewDelivery(db, actor, d.id, true, 5, "Lavoro pulito e documentato. Grazie.");
 
   // two offers waiting for an answer
   for (const [t, b, s, pay, days, cl] of [
-    ["Assistente telefonico: messaggio fuori orario", "Set up the after-hours greeting and the callback list for the phone assistant; test with three calls.", ["ai-setup"], 220, 6, ["Greeting matches the approved text", "Three test calls logged", "Callback list reaches the office"]],
-    ["Promemoria automatici per i preventivi", "Send a friendly reminder 3 and 7 days after a quote, stop when the customer answers.", ["automation", "crm"], 300, 9, ["Reminders at day 3 and 7", "Stops when the customer replies", "Test run documented"]],
+    ["Assistente telefonico: messaggio fuori orario", "Imposta il messaggio fuori orario e la lista richiami dell'assistente telefonico; prova con tre chiamate.", ["ai-setup"], 220, 6, ["Il messaggio corrisponde al testo approvato", "Tre chiamate di prova registrate", "La lista richiami arriva all'ufficio"]],
+    ["Promemoria automatici per i preventivi", "Invia un promemoria cortese 3 e 7 giorni dopo un preventivo; si ferma quando il cliente risponde.", ["automation", "crm"], 300, 9, ["Promemoria al giorno 3 e 7", "Si ferma quando il cliente risponde", "Prova documentata"]],
   ] as const) {
     const j = await job(t, b, [...s], pay, days, [...cl]);
     await offerJob(db, actor, j.id, 1, 0);
   }
-  await sendPartnerMessage(db, actor, id, "us", "Benvenuta Giulia! Two new offers are waiting for you; payment for the CRM job is on its way.");
+  await sendPartnerMessage(db, actor, id, "us", "Benvenuta Giulia! Ti aspettano due nuove offerte; il pagamento per il lavoro sul CRM è in arrivo.");
   console.log(`demo partner created: ${EMAIL} / local-demo-password (${id})`);
 }
 await db.$client.end();
