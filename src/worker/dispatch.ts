@@ -79,6 +79,11 @@ async function handle(db: Db, deps: DispatchDeps, event: Event) {
     const p = event.payload as { code?: string; label?: string; file?: string };
     await sendAlert(deps.telegram, [`📎 ${p.code}: the customer sent "${p.file}" (${p.label}). Check it before partners see it`], `/cockpit/projects`, fetchImpl);
   }
+  // Ops watchdog digest: work that stopped moving (no partner, late, money due, people waiting on us).
+  if (deps.telegram && event.type === "ops.flagged") {
+    const items = (event.payload.items as { text: string }[] | undefined) ?? [];
+    await sendAlert(deps.telegram, [`🚨 ${items.length} stuck item(s)`, ...items.slice(0, 15).map((i) => `• ${i.text}`), items.length > 15 ? `… +${items.length - 15}` : ""].filter(Boolean), "/cockpit", fetchImpl);
+  }
   // Every event also goes to n8n, where Genesis workflows subscribe to what they need.
   if (deps.n8nWebhookUrl) {
     const res = await fetchImpl(deps.n8nWebhookUrl, {

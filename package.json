@@ -22,7 +22,8 @@
     "agents:outbound": "tsx scripts/outbound.ts",
     "demo:portal": "tsx scripts/demo-portal.ts",
     "demo:partner": "tsx scripts/demo-partner.ts",
-    "demo:delivery": "tsx scripts/demo-delivery.ts"
+    "demo:delivery": "tsx scripts/demo-delivery.ts",
+    "audit:process": "tsx scripts/process-audit.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.1.0",

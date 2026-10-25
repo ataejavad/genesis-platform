@@ -46,7 +46,8 @@ export type EventType =
   | "milestone.reminded"
   | "change_request.quoted"
   | "change_request.decided"
-  | "protocol.approved";
+  | "protocol.approved"
+  | "ops.flagged";
 
 // Call inside the same transaction as the change it describes (transactional outbox).
 export async function emit(

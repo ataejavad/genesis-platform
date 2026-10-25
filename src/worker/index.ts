@@ -3,6 +3,7 @@ import { telegramConfigFromEnv } from "@/server/telegram";
 import { planEnv } from "@/server/crm";
 import { mailerFromEnv } from "@/server/mailer";
 import { sendDueEmails, startDueAiCalls } from "@/server/outreach";
+import { opsWatch } from "@/server/ops-watch";
 import { deliveryWatch } from "@/server/projects";
 import { voiceFromEnv } from "@/server/voice";
 import { dispatchBatch } from "./dispatch";
@@ -28,10 +29,11 @@ while (running) {
       if (mailer) await sendDueEmails(db, mailer);
       if (voice) await startDueAiCalls(db, voice, planEnv());
     }
-    // Delivery watchdog every hour: milestones waiting on the customer, late tasks.
+    // Watchdogs every hour: milestones waiting on the customer; stalled jobs, money due, people waiting on us.
     if (Date.now() - lastWatch > 60 * 60_000) {
       lastWatch = Date.now();
       await deliveryWatch(db);
+      await opsWatch(db);
     }
     const n = await dispatchBatch(db, deps);
     if (n === 0) await new Promise((r) => setTimeout(r, 2000));
