@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { meter } from "./meter";
 import { z } from "zod";
 import type { Criterion } from "@/db/schema";
 
@@ -14,14 +15,14 @@ const schema = z.object({
   results: z.array(z.object({ idx: z.number().int().min(0), result: z.enum(["pass", "fail", "unsure"]), note: z.string().max(400).optional() })),
 });
 
-export type JudgeInput = { goal: string; rules: string[]; criteria: Criterion[]; selfCheck: boolean[]; link: string; note: string | null };
+export type JudgeInput = { goal: string; rules: string[]; criteria: Criterion[]; selfCheck: boolean[]; link: string; note: string | null; lessons?: string[] };
 
 export async function judge(input: JudgeInput) {
   const client = new Anthropic({ timeout: 60_000, maxRetries: 1 });
   const list = input.criteria.map((c, i) => `${i}. [${c.mandatory ? "mandatory" : "optional"}, ${c.method}] ${c.text} (partner ticked: ${input.selfCheck[i] ? "yes" : "no"})`).join("\n");
   const system = `You check a delivered piece of work against its acceptance criteria. Judge each criterion separately with "pass", "fail" or "unsure", from the evidence given only.
 Say "unsure" whenever the evidence does not show the criterion is met; never assume. Criteria marked "human" are always "unsure" (a person checks them).
-A partner's own tick is a claim, not evidence. Fixed rules every delivery must respect: ${input.rules.join(" | ")}. A visible break of a fixed rule fails the closest criterion.
+A partner's own tick is a claim, not evidence. Fixed rules every delivery must respect: ${input.rules.join(" | ")}. A visible break of a fixed rule fails the closest criterion.${input.lessons?.length ? `\nWhat earlier projects taught us (look for these): ${input.lessons.join(" | ")}` : ""}
 Reply with one JSON object only: {"results": [{"idx": number, "result": "pass"|"fail"|"unsure", "note": string}]}`;
   const message = await client.messages.create({
     model: "claude-opus-5-5",
@@ -30,6 +31,7 @@ Reply with one JSON object only: {"results": [{"idx": number, "result": "pass"|"
     system,
     messages: [{ role: "user", content: `Goal: ${input.goal}\nDelivery link: ${input.link}\nPartner's note: ${input.note ?? "(none)"}\nCriteria:\n${list}` }],
   });
+  meter(message.usage);
   if (message.stop_reason === "refusal") throw new Error("refused");
   const text = message.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
   const parsed = schema.parse(JSON.parse(text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1)));

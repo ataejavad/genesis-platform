@@ -22,9 +22,17 @@ if (values.research) {
   if (!researchEnabled()) {
     console.log("research step skipped: no ANTHROPIC_API_KEY yet; using the newest research files");
   } else {
+    // budget and switch live in the cockpit (agent registry); the run stops when the agent may not spend more
+    const gate = (init?: RequestInit) => fetch(`${appUrl}/api/v1/agents/runs${init ? "" : "?agent=hub-research"}`, { ...init, headers: { authorization: `Bearer ${key}`, "content-type": "application/json" } }).then((r) => r.json() as Promise<{ allowed?: boolean; lessons?: string[] }>).catch(() => ({ allowed: true }) as { allowed?: boolean; lessons?: string[] });
     for (const prev of hubs) {
+      const g = values.dry ? { allowed: true } : await gate();
+      if (g.allowed === false) {
+        console.log("research paused: hub-research is switched off or over its monthly budget");
+        break;
+      }
       try {
-        const { research, usage } = await researchHub(prev, now);
+        const { research, usage } = await researchHub(prev, now, g.lessons ?? []);
+        if (!values.dry) await gate({ method: "POST", body: JSON.stringify({ agent: "hub-research", action: "research", input: usage.input, output: usage.output, searches: usage.searches, meta: { hub: `${prev.industry}-${prev.country}` } }) });
         mkdirSync(`data/hubs/research/${today}`, { recursive: true });
         writeFileSync(`data/hubs/research/${today}/${research.industry}-${research.country.toLowerCase()}.json`, `${JSON.stringify(research, null, 2)}\n`);
         console.log(`researched ${prev.industry}-${prev.country}: ${usage.input} in / ${usage.output} out tokens, ${usage.searches} searches`);

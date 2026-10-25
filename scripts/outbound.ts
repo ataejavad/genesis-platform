@@ -78,9 +78,11 @@ for (const t of targets) {
     }
     if (!contacts.length) contacts.push({ role: t.decisionMakerTitles[0], phone: c.phone, source: "maps" } as never);
     let research: Awaited<ReturnType<typeof researchCompany>> | null = null;
-    if (researchEnabled()) {
+    // company research spends Claude money: only while the agent is on and under its monthly budget (cockpit)
+    const gate = values.dry ? { allowed: true } : await fetch(`${appUrl}/api/v1/agents/runs?agent=company-research`, { headers: { authorization: `Bearer ${key}` } }).then((r) => r.json() as Promise<{ allowed?: boolean; lessons?: string[] }>).catch(() => ({ allowed: true }) as { allowed?: boolean; lessons?: string[] });
+    if (researchEnabled() && gate.allowed !== false) {
       try {
-        research = await researchCompany({ name: c.name, website: c.website, city: c.city, industry: t.industry, country: t.country, signals: c as unknown as Record<string, unknown> });
+        research = await researchCompany({ name: c.name, website: c.website, city: c.city, industry: t.industry, country: t.country, signals: c as unknown as Record<string, unknown> }, gate.lessons ?? []);
         cost += research.costEur;
       } catch (err) {
         console.error(`   ${c.name}: research ${(err as Error).message}`);

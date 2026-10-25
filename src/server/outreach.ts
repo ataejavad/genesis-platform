@@ -9,6 +9,7 @@ import { setPageStatus } from "./company-pages";
 import { moveStage, planEnv, unsubscribeLead } from "./crm";
 import { conflict, notFound } from "./errors";
 import { audit, emit } from "./events";
+import { recordOutcome, variantFor } from "./improve";
 import type { Mailer } from "./mailer";
 import { type Channel, PERMANENT, SWITCHES, type Switch, type Switches, channelCheck, rulesFor } from "./outreach-rules";
 import type { VoiceCaller } from "./voice";
@@ -201,8 +202,11 @@ export async function planTouches(tx: DbOrTx, p: ProspectRow, list: ContactRow[]
   if (!steps) throw new Error(`unknown sequence ${o.sequence}`);
   const lang = LANG_OF[p.country] ?? "en";
   const locale = `${lang}-${p.country.toLowerCase()}`;
-  // the agent's own line when it wrote one, else the line for the strongest signal
-  const personal = { local: o.personal?.local ?? signalLine(p.industry, lang, p.signals), fa: o.personal?.fa ?? signalLine(p.industry, "fa", p.signals) };
+  // the agent's own line when it wrote one, else the line for the strongest signal; while the opening experiment
+  // runs, half the researched companies still get the signal line so we learn which one gets more replies
+  const own = o.personal?.local && !o.keepSequence ? (await variantFor(tx, "outreach.opening", p.id)) !== "signal" : true;
+  const mine = own ? o.personal : undefined;
+  const personal = { local: mine?.local ?? signalLine(p.industry, lang, p.signals), fa: mine?.fa ?? signalLine(p.industry, "fa", p.signals) };
   const rows = [];
   for (const [position, s] of steps.entries()) {
     const c = contactFor(s.channel, list);

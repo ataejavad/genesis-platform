@@ -6,6 +6,7 @@ import { LOCALES } from "@/config/locales";
 import { type Actor, actorRef } from "./actor";
 import { conflict, forbidden, notFound } from "./errors";
 import { audit, emit } from "./events";
+import { addLesson } from "./improve";
 
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*$/;
 
@@ -161,7 +162,9 @@ export async function decideApproval(
       });
     } else if (item.status !== "published") {
       [updated] = await tx.update(contentItems).set({ status: "rejected" }).where(eq(contentItems.id, item.id)).returning();
-      await emit(tx, actor, "content.rejected", { type: "content", id: item.id }, { locale: item.locale, slug: item.slug });
+      await emit(tx, actor, "content.rejected", { type: "content", id: item.id }, { locale: item.locale, slug: item.slug, note: note ?? null });
+      // Javad's reason is a lesson the writing agents read next time (improvement loop)
+      if (note?.trim()) await addLesson(tx, { area: "content", text: `Rejected ${item.slug} (${item.locale}): ${note.trim()}`, source: `rejection:${item.id}` });
     }
 
     await emit(tx, actor, "approval.decided", { type: "approval", id: approvalId }, { decision, note: note ?? null });

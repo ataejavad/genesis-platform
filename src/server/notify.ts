@@ -31,11 +31,11 @@ export async function ourName(db: DbOrTx) {
 type Recipient = { audience: "customer" | "partner" | "lead"; email: string; locale: string; name: string; orgId?: string | null; partnerId?: string | null };
 
 /** Queues one message (in the caller's transaction when given one). One per event, template and address. */
-export async function queue(db: DbOrTx, to: Recipient, template: Template, vars: Record<string, string | number | null | undefined>, eventId?: number, kind: "transactional" | "marketing" = "transactional") {
+export async function queue(db: DbOrTx, to: Recipient, template: Template, vars: Record<string, string | number | null | undefined>, eventId?: number, kind: "transactional" | "marketing" = "transactional", unsubscribeUrl?: string) {
   const { subject, body } = render(template, to.locale, { company: await ourName(db), name: to.name, ...vars });
   await db
     .insert(notifications)
-    .values({ audience: to.audience, orgId: to.orgId ?? null, partnerId: to.partnerId ?? null, email: to.email, locale: to.locale.slice(0, 2), template, subject, body, kind, eventId: eventId ?? null })
+    .values({ audience: to.audience, orgId: to.orgId ?? null, partnerId: to.partnerId ?? null, email: to.email, locale: to.locale.slice(0, 2), template, subject, body, kind, eventId: eventId ?? null, unsubscribeUrl: unsubscribeUrl ?? null })
     .onConflictDoNothing();
 }
 
@@ -87,6 +87,8 @@ export async function redeemInvite(db: Db, token: string, password: string, now 
 
 export const leadToken = (id: string) => createHmac("sha256", secret()).update(`lead:${id}`).digest("base64url").slice(0, 32);
 export const leadConfirmUrl = (id: string) => `${appUrl()}/api/v1/leads/confirm?id=${id}&t=${leadToken(id)}`;
+const unsubToken = (id: string) => createHmac("sha256", secret()).update(`unsub:${id}`).digest("base64url").slice(0, 32);
+export const leadUnsubscribeUrl = (id: string) => `${appUrl()}/api/v1/leads/unsubscribe?id=${id}&t=${unsubToken(id)}`;
 
 /* ───────────── Event → message ───────────── */
 
@@ -148,6 +150,24 @@ export async function notifyEvent(db: Db, e: Event) {
       if (r) await queue(db, r, "payout", { amount: money(Number(p.amountEur ?? 0), r.locale), title: po?.title ?? "", link: `${appUrl()}/partner/earnings` }, e.id);
       return;
     }
+    case "results.reported": {
+      const [y, m] = String(p.month).split("-").map(Number);
+      for (const r of await customerPeople(db, id!)) {
+        const month = new Intl.DateTimeFormat({ it: "it-IT", de: "de-DE", fa: "fa-IR" }[r.locale.slice(0, 2)] ?? "en-GB", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(y, m - 1, 15)));
+        await queue(db, r, "monthlyReport", { month, eur: money(Number(p.eur ?? 0), r.locale), fee: money(Number(p.feeEur ?? 0), r.locale), total: money(Number(p.sinceStartEur ?? 0), r.locale), link: `${appUrl()}/portal` }, e.id);
+      }
+      return;
+    }
+    case "lead.reminder_due": {
+      // marketing: only while consent stands (confirmed, not unsubscribed), always with a one-click unsubscribe
+      const [l] = await db.select().from(leads).where(eq(leads.id, id!));
+      if (!l?.confirmedAt || l.unsubscribedAt) return;
+      const lang = l.locale.slice(0, 2);
+      const t = (v: unknown) => (v && typeof v === "object" ? ((v as Record<string, string>)[lang] ?? (v as Record<string, string>).en ?? "") : String(v ?? ""));
+      const unsub = leadUnsubscribeUrl(l.id);
+      await queue(db, { audience: "lead", email: l.email, locale: l.locale, name: "" }, "deadlineReminder", { title: t(p.title), date: day(new Date(`${p.date}T12:00:00Z`), lang), days: Number(p.days ?? 30), what: t(p.what), offer: t(p.offer), link: `${appUrl()}/${lang}/hub/${l.industry}/${l.country.toLowerCase()}`, unsubscribe: unsub }, e.id, "marketing", unsub);
+      return;
+    }
     case "lead.captured": {
       const [l] = await db.select().from(leads).where(eq(leads.id, id!));
       if (!l || l.confirmedAt || l.unsubscribedAt) return;
@@ -182,6 +202,16 @@ export async function sendQueued(db: Db, mailer: Mailer, limit = 20, now = new D
 
 export async function outbox(db: Db, limit = 100) {
   return db.select().from(notifications).orderBy(sql`${notifications.createdAt} desc`).limit(limit);
+}
+
+/** The unsubscribe link in every marketing email (and the mail client's one-click button). */
+export async function unsubscribeLeadLink(db: Db, id: string, token: string, now = new Date()) {
+  if (token !== unsubToken(id)) throw new AppError(400, "invalid_link", "invalid link");
+  return db.transaction(async (tx) => {
+    const [l] = await tx.update(leads).set({ unsubscribedAt: now }).where(and(eq(leads.id, id), isNull(leads.unsubscribedAt))).returning();
+    if (l) await audit(tx, { type: "system", id: "unsubscribe" }, "lead.unsubscribed", { type: "lead", id }, null, { at: now.toISOString() });
+    return l ?? (await tx.select().from(leads).where(eq(leads.id, id)))[0];
+  });
 }
 
 /** Lead clicked the confirmation link: consent confirmed (double opt-in), and the lead joins the CRM. */

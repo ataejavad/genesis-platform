@@ -1,5 +1,6 @@
 import type { Db } from "@/db";
 import { partnerAdvisorEnabled, partnerAdvisorTurn } from "@/agents/partner-advisor";
+import { runAgent } from "./agents";
 import { partnerCopy } from "@/config/partner-copy";
 import { fmtEur } from "@/config/portal-copy";
 import { normalize } from "@/lib/chat-match";
@@ -133,7 +134,8 @@ export async function partnerReply(db: Db, partnerId: string, lang: string, text
   if (lastBotText === t.r.help && text.trim().length > 3) return { intent: "help", text: t.r.confirmHelp, cards: [{ type: "confirm", text }] };
   if (partnerAdvisorEnabled()) {
     try {
-      const turn = await partnerAdvisorTurn({ lang, context: await context(db, partnerId), transcript: [...transcript, { role: "user", text }] });
+      const ctx = await context(db, partnerId);
+      const turn = await runAgent(db, "partner-advisor", "chat", () => partnerAdvisorTurn({ lang, context: ctx, transcript: [...transcript, { role: "user", text }] }), { partnerId });
       const base = await answer(db, partnerId, lang, turn.intent, turn.request ?? text);
       return { ...base, text: turn.reply, cards: turn.intent === "help" && turn.request ? [{ type: "confirm", text: turn.request }] : base.cards };
     } catch (err) {

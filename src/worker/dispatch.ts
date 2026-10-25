@@ -3,6 +3,7 @@ import type { Db } from "@/db";
 import { events } from "@/db/schema";
 import { prospectFromLead } from "@/server/crm";
 import { billMilestone } from "@/server/finance";
+import { askForStory } from "@/server/health";
 import { notifyEvent } from "@/server/notify";
 import { offerJob } from "@/server/partners";
 import { afterDelivery } from "@/server/projects";
@@ -102,6 +103,19 @@ async function handle(db: Db, deps: DispatchDeps, event: Event) {
           : `⏰ ${p.title}: €${p.totalEur} is ${p.daysLate} days late${p.level === 4 ? " (pause warning sent)" : ""}`;
     await sendAlert(deps.telegram, [line], event.type === "contract.signed" ? "/cockpit/contracts" : "/cockpit/finance", fetchImpl);
   }
+  // Step 9: agents over budget, finished experiments and customers at risk reach Javad at once (and the brief).
+  if (deps.telegram && ["agent.paused", "experiment.ready", "customer.at_risk"].includes(event.type)) {
+    const p = event.payload as { name?: string; spentEur?: number; budgetEur?: number; until?: string; key?: string; recommended?: string; why?: string; company?: string; score?: number; reasons?: string[] };
+    const [line, link] =
+      event.type === "agent.paused"
+        ? [`⏸️ ${p.name} paused until ${p.until}: €${p.spentEur} of €${p.budgetEur} budget spent`, "/cockpit/agents"]
+        : event.type === "experiment.ready"
+          ? [`🧪 Test "${p.key}" finished: ${p.why}. Recommended: ${p.recommended}`, "/cockpit/experiments"]
+          : [`🚩 ${p.company} at risk (${p.score}/100): ${(p.reasons ?? []).join("; ")}`, "/cockpit/customers"];
+    await sendAlert(deps.telegram, [line], link, fetchImpl);
+  }
+  // A finished project: ask the customer for a success story and a referral (customer success).
+  if (event.type === "project.closed") await askForStory(db, event.subjectId!);
   // Every event also goes to n8n, where Genesis workflows subscribe to what they need.
   if (deps.n8nWebhookUrl) {
     const res = await fetchImpl(deps.n8nWebhookUrl, {

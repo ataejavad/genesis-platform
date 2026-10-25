@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { meter } from "./meter";
 import { z } from "zod";
 import { INTENTS, type Intent } from "@/server/portal-chat";
 
@@ -34,6 +35,7 @@ Reply with one JSON object only: {"reply": string, "intent": string, "request": 
     system,
     messages: [{ role: "user", content: input.transcript.slice(-20).map((m) => `${m.role}: ${m.text}`).join("\n") }],
   });
+  meter(message.usage);
   if (message.stop_reason === "refusal") throw new Error("refused");
   const text = message.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
   const t = turnSchema.parse(JSON.parse(text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1)));

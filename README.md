@@ -23,6 +23,11 @@ Design: `business-plan/15-web-app-design.md` (project files). This repository is
 | `src/server/api-keys.ts` | Scoped agent keys (only the SHA-256 hash is stored) |
 | `src/server/telegram.ts` | Approval messages and button handling |
 | `src/worker/` | Outbox dispatcher (Telegram + n8n), retries with backoff |
+| `src/server/orchestrator.ts` | Step 9: every recurring job in one list (Rome time), `job_runs` log, retry, run-now; used by the worker and local mode |
+| `src/server/daily-report.ts` | Javad's 08:00 brief: verdict, 5 numbers, decisions, stuck items (from ops-watch); Telegram + Cockpit › Today |
+| `src/config/agents.ts`, `src/server/agents.ts` | Agent registry: one KPI, target and €/month budget per agent; `runAgent()` gates and meters every Claude call |
+| `src/server/improve.ts`, `src/config/experiments.ts` | Improvement loop: experiments, outcomes, z-test, Javad adopts, lessons read by agents |
+| `src/server/health.ts`, `retention.ts`, `lead-reminders.ts` | Weekly customer health, monthly results email, story/referral ask, GDPR retention, hub deadline reminders |
 | `app/(site)/[locale]/…` | Public pages rendered from published content, with schema.org JSON-LD |
 | `app/(internal)/cockpit` | Approval queue for admins |
 | `app/api/v1/drafts` | Agent API |

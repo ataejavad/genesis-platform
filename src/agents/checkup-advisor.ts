@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { meter } from "./meter";
 import type { Report } from "@/server/checkup";
 
 /*
@@ -24,6 +25,7 @@ export async function writeAdvice(report: Report): Promise<string | null> {
       },
     ],
   });
+  meter(message.usage);
   if (message.stop_reason === "refusal") return null;
   const text = message.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("").trim();
   return text || null;

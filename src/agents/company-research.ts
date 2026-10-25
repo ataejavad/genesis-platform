@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { meter } from "./meter";
 import { z } from "zod";
 import { researchedPage } from "@/server/company-page-doc";
 
@@ -47,7 +48,7 @@ export const SOURCES: Record<string, string[]> = {
 };
 export const sourcesFor = (country: string) => [...SOURCES.ALL, ...(SOURCES[country.toUpperCase()] ?? [])];
 
-export async function researchCompany(c: { name: string; website?: string; city?: string; industry: string; country: string; signals: Record<string, unknown> }): Promise<CompanyResearch> {
+export async function researchCompany(c: { name: string; website?: string; city?: string; industry: string; country: string; signals: Record<string, unknown> }, lessons: string[] = []): Promise<CompanyResearch> {
   const client = new Anthropic({ timeout: 300_000, maxRetries: 1 });
   const lang = LANG[c.country] ?? "English";
   const prompt = `Research this small company from public sources before we contact it: ${JSON.stringify({ name: c.name, website: c.website, city: c.city, trade: c.industry, country: c.country })}.
@@ -57,13 +58,14 @@ Find: what they do and for whom, services, size and revenue band, founding year,
 Then write:
 - persona: how this company would describe itself (summary ≤ 3 sentences in ${lang}), offers (≤ 6), customers (one line or null), 3 likely pains with the evidence that suggests each, 3 questions we should ask them. In ${lang}.
 - personal: one opening sentence for a first message that refers to a real fact you found (no flattery, no invented numbers), in ${lang} ("local") and in Persian ("fa").
-Reply with one JSON object only: {"facts":[{"text":string,"source":{"name":string,"url":string}}],"persona":{"summary":string,"offers":[string],"customers":string|null,"pains":[{"text":string,"why":string}],"questions":[string]},"personal":{"local":string,"fa":string}}`;
+${lessons.length ? `What we learned about first messages (follow it):${lessons.map((l) => `\n- ${l}`).join("")}\n` : ""}Reply with one JSON object only: {"facts":[{"text":string,"source":{"name":string,"url":string}}],"persona":{"summary":string,"offers":[string],"customers":string|null,"pains":[{"text":string,"why":string}],"questions":[string]},"personal":{"local":string,"fa":string}}`;
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: prompt }];
   let cost = 0;
   for (let turn = 0; turn < 5; turn++) {
     const m = await client.messages
       .stream({ model: MODEL, max_tokens: 16000, thinking: { type: "adaptive" }, output_config: { effort: "medium" }, tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 15 }], messages })
       .finalMessage();
+    meter(m.usage);
     cost += (m.usage.input_tokens * PRICE.in + m.usage.output_tokens * PRICE.out) / 1e6 + (m.usage.server_tool_use?.web_search_requests ?? 0) * PRICE.search;
     if (m.stop_reason === "pause_turn") {
       messages.push({ role: "assistant", content: m.content });

@@ -71,6 +71,13 @@
       "when": 1792945598964,
       "tag": "0009_contracts_finance",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792951020503,
+      "tag": "0010_orchestrator",
+      "breakpoints": true
     }
   ]
 }

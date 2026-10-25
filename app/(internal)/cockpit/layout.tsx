@@ -39,6 +39,7 @@ export default async function CockpitLayout({ children }: { children: React.Reac
         ] },
         { title: "Machine", items: [
           { href: "/cockpit/agents", label: "Agent center", icon: "🤖" },
+          { href: "/cockpit/experiments", label: "Experiments", icon: "🧪" },
           { href: "/cockpit/api", label: "API & connections", icon: "🔌" },
         ] },
       ]}

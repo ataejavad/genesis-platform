@@ -25,10 +25,12 @@ import {
   user,
 } from "@/db/schema";
 import type { Actor } from "./actor";
+import { runAgent } from "./agents";
 import { customerCode, health, lessonsFrom, qaRoute, riskOf } from "./delivery-rules";
 import { AppError, notFound } from "./errors";
 import { putFile } from "./files";
 import { audit, emit } from "./events";
+import { addLesson, lessonsFor } from "./improve";
 import { SKILLS } from "./partner-rules";
 import { ALLOWED_FILES, MAX_FILE_BYTES, nameFromEmail, redact, TEXT_FILES } from "./redact";
 import { levelFor, offerJob, reviewDelivery } from "./partners";
@@ -437,7 +439,10 @@ async function closeProject(tx: Tx, actor: Actor, p: typeof projects.$inferSelec
   });
   const late = dels.filter((d) => d.status === "accepted" && d.onTime === false).length;
   const [{ cost }] = await tx.select({ cost: sql<number>`coalesce(sum(${projectCosts.amountEur}), 0)::int` }).from(projectCosts).where(eq(projectCosts.projectId, p.id));
-  await tx.update(projects).set({ status: "closed", closedAt: now, lessons: lessonsFrom(failures, late) }).where(eq(projects.id, p.id));
+  const learned = lessonsFrom(failures, late);
+  await tx.update(projects).set({ status: "closed", closedAt: now, lessons: learned }).where(eq(projects.id, p.id));
+  // the same lessons go to the shared store that estimates, protocols and the QA judge read (improvement loop)
+  for (const text of learned) await addLesson(tx, { area: "delivery", text: `${p.code}: ${text}`, source: `project:${p.id}` });
   if (p.orgId && p.monthlyEur > 0 && p.packageSlug) {
     const [pkg] = await tx.select({ plan: servicePackages.plan }).from(servicePackages).where(eq(servicePackages.slug, p.packageSlug));
     await addSubscription(tx, actor, p.orgId, p.packageSlug, pkg?.plan ?? "Standard", p.monthlyEur, now);
@@ -496,7 +501,9 @@ export async function afterDelivery(db: Db, deliveryId: string, sample = Math.ra
   let judged: { verdict: "accept" | "changes" | "review" } | null = null;
   if (qaBy === "judge" && ctx.version && qaJudgeEnabled()) {
     try {
-      const results = await judge({ goal: ctx.version.goal, rules: ctx.version.rules, criteria: ctx.version.criteria, selfCheck: ctx.delivery.selfCheck, link: ctx.delivery.link, note: ctx.delivery.note });
+      const v = ctx.version;
+      const learned = (await lessonsFor(db, "delivery", 5)).map((l) => l.text);
+      const results = await runAgent(db, "qa-judge", "judge", () => judge({ lessons: learned, goal: v.goal, rules: v.rules, criteria: v.criteria, selfCheck: ctx.delivery.selfCheck, link: ctx.delivery.link, note: ctx.delivery.note }), { deliveryId });
       const verdict = verdictOf(ctx.version.criteria, results);
       await db.transaction(async (tx) => {
         await tx.insert(qaReviews).values({ deliveryId, by: "judge", results, verdict });

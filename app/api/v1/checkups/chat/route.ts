@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { chatEnabled, chatTurn } from "@/agents/checkup-chat";
 import { LOCALES, isLocale } from "@/config/locales";
+import { getDb } from "@/db";
+import { runAgent } from "@/server/agents";
 import { AppError } from "@/server/errors";
 import { errorResponse } from "@/server/http";
 import { checkupDefsFor } from "@/ui/site/checkup-defs";
@@ -18,7 +20,7 @@ export async function POST(req: Request) {
     if (!chatEnabled()) throw new AppError(404, "not_found", "AI conversation is off");
     const body = input.parse(await req.json());
     const locale = isLocale(body.locale) ? body.locale : "en-gb";
-    return Response.json(await chatTurn({ ...body, lang: LOCALES[locale].lang, defs: checkupDefsFor(locale) }));
+    return Response.json(await runAgent(getDb(), "checkup-chat", "turn", () => chatTurn({ ...body, lang: LOCALES[locale].lang, defs: checkupDefsFor(locale) })));
   } catch (err) {
     return errorResponse(err);
   }

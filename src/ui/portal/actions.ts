@@ -7,6 +7,7 @@ import { PORTAL_LANGS, portalCopy } from "@/config/portal-copy";
 import { getDb } from "@/db";
 import { LANG_COOKIE, requireCustomer } from "@/lib/portal-auth";
 import type { Actor } from "@/server/actor";
+import { runAgent } from "@/server/agents";
 import { createRequest, decideCustomerApproval, listGoals, nextStep, pendingApprovals, REQUEST_KINDS, type RequestKind, results, saveTurn, setOrgLocale, threadMessages } from "@/server/portal";
 import { createOrder } from "@/server/projects";
 import { type Card, materialFile, materialTurn, replyFor, scriptedReply } from "@/server/portal-chat";
@@ -28,7 +29,7 @@ export async function sendMessage(threadId: string | null, text: string) {
     try {
       const r = await results(db, org.id);
       const context = { company: org.name, monthEur: r.month.eur, lastMonthEur: r.lastMonth.eur, feeEur: r.feeEur, baselineEur: r.baselineEur, sinceStartEur: r.sinceStart.eur, goals: await listGoals(db, org.id, lang), waitingForYou: (await pendingApprovals(db, org.id)).map((a) => a.title), next: await nextStep(db, org.id, lang) };
-      const t = await advisorTurn({ lang, company: org.name, context, transcript: [...past, { role: "user", text: msg }] });
+      const t = await runAgent(db, "portal-advisor", "chat", () => advisorTurn({ lang, company: org.name, context, transcript: [...past, { role: "user", text: msg }] }), { orgId: org.id });
       const built = await replyFor(db, org.id, lang, t.intent, t.request ?? msg);
       // Claude's sentence, the server's cards (a request card only when Claude extracted a clear request)
       reply = { text: t.reply, cards: (t.intent === "problem" || t.intent === "support") && !t.request ? [] : built.cards };

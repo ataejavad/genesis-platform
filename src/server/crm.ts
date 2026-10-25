@@ -11,6 +11,7 @@ import { researchedPage } from "./company-page-doc";
 import { createPage, pageUrl } from "./company-pages";
 import { audit, emit } from "./events";
 import { loadResearch } from "./hubs";
+import { recordOutcome } from "./improve";
 import { cancelOpen, getSwitches, planTouches, planWarmCall, reachOf } from "./outreach";
 import { LEGAL_BASES, LINKEDIN_DAILY, channelCheck } from "./outreach-rules";
 
@@ -183,6 +184,9 @@ export async function moveStage(tx: DbOrTx, actor: Actor, id: string, stage: str
   if (terminal || RANK[stage] >= RANK.replied) await cancelOpen(tx, id, `stopped: ${stage}`);
   // they answered on LinkedIn or email: a person may call at once (only when Javad switched warm calls on)
   if (stage === "replied" && p.source !== "checkup") await planWarmCall(tx, id, now);
+  // improvement loop: an answer is the success of the opening line, an opt-out its guardrail
+  if (stage === "do_not_contact") await recordOutcome(tx, "outreach.opening", id, { guardrailHit: true }, now);
+  else if (!terminal && RANK[stage] >= RANK.replied) await recordOutcome(tx, "outreach.opening", id, { success: true }, now);
   await emit(tx, actor, "prospect.stage_changed", { type: "prospect", id }, { from: p.stage, to: stage, why, industry: p.industry });
   await audit(tx, actor, "prospect.stage_changed", { type: "prospect", id }, { stage: p.stage }, { stage, why });
   return stage;

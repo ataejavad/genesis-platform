@@ -1,5 +1,6 @@
 import { claudeReply, whatsappAgentEnabled } from "@/agents/whatsapp-agent";
 import { getDb } from "@/db";
+import { runAgent } from "@/server/agents";
 import { errorResponse } from "@/server/http";
 import { handleWhatsApp, validSignature, whatsappFromEnv } from "@/server/whatsapp";
 
@@ -18,7 +19,8 @@ export async function POST(req: Request) {
     if (!cfg) return new Response("not configured", { status: 404 });
     const raw = await req.text();
     if (!validSignature(raw, req.headers.get("x-hub-signature-256"), cfg.appSecret)) return new Response("bad signature", { status: 401 });
-    return Response.json(await handleWhatsApp(getDb(), cfg, JSON.parse(raw), whatsappAgentEnabled() ? claudeReply : null));
+    const db = getDb();
+    return Response.json(await handleWhatsApp(db, cfg, JSON.parse(raw), whatsappAgentEnabled() ? (x) => runAgent(db, "whatsapp-agent", "reply", () => claudeReply(x)) : null));
   } catch (err) {
     return errorResponse(err);
   }

@@ -1,5 +1,6 @@
 import { getDb } from "@/db";
 import { products } from "@/mock/site";
+import { latestHealth } from "@/server/health";
 import { listCustomers, listServices, openRequests } from "@/server/portal";
 import { METRICS } from "@/server/portal-metrics";
 import { PageHead } from "@/ui/Shell";
@@ -13,7 +14,8 @@ const eur = (n: number) => `€${n.toLocaleString("en-GB")}`;
 // /api/v1/customer-approvals (scope portal:write); until they run, results are recorded here by hand.
 export default async function CockpitCustomers() {
   const db = getDb();
-  const [customers, requests] = await Promise.all([listCustomers(db), openRequests(db)]);
+  const [customers, requests, health] = await Promise.all([listCustomers(db), openRequests(db), latestHealth(db)]);
+  const healthOf = new Map(health.map((h) => [h.h.orgId, h.h]));
   const services = Object.fromEntries(await Promise.all(customers.map(async (c) => [c.org.id, await listServices(db, c.org.id, "en")] as const)));
   const industries = [...new Set(products.flatMap((p) => p.industries))];
   return (
@@ -42,9 +44,9 @@ export default async function CockpitCustomers() {
       <div className="card table-wrap">
         <h3>Accounts ({customers.length})</h3>
         <table>
-          <thead><tr><th>Company</th><th>Trade</th><th>Fee / month</th><th>Back this month</th><th>ROI</th><th>Open requests</th><th>Waiting on customer</th></tr></thead>
+          <thead><tr><th>Company</th><th>Trade</th><th>Fee / month</th><th>Back this month</th><th>ROI</th><th>Open requests</th><th>Waiting on customer</th><th>Health</th></tr></thead>
           <tbody>
-            {customers.map((c) => <tr key={c.org.id}><td>{c.org.name} <span className="muted small">{c.org.country}</span></td><td>{c.org.industry}</td><td>{eur(c.feeEur)}</td><td>{eur(c.monthEur)}</td><td>{c.roi ?? "–"}×</td><td>{c.openRequests}</td><td>{c.waitingOnCustomer}</td></tr>)}
+            {customers.map((c) => <tr key={c.org.id}><td>{c.org.name} <span className="muted small">{c.org.country}</span></td><td>{c.org.industry}</td><td>{eur(c.feeEur)}</td><td>{eur(c.monthEur)}</td><td>{c.roi ?? "–"}×</td><td>{c.openRequests}</td><td>{c.waitingOnCustomer}</td><td>{(() => { const h = healthOf.get(c.org.id); return h ? <span className={`badge ${h.band === "red" ? "bad" : h.band === "watch" ? "warn" : "ok"}`} title={((h.signals as { reasons?: string[] }).reasons ?? []).join("; ")}>{h.score}</span> : <span className="muted small">Monday</span>; })()}</td></tr>)}
           </tbody>
         </table>
       </div>

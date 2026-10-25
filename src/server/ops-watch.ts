@@ -104,7 +104,7 @@ export async function opsWatch(db: Db, now = new Date()) {
   if (fresh.length) {
     await db.transaction((tx) => emit(tx, actor, "ops.flagged", { type: "ops", id: now.toISOString() }, { items: fresh, counts: countBy(items) }));
   }
-  return { reoffered, open: items.length, flagged: fresh.length, counts: countBy(items) };
+  return { reoffered, open: items.length, flagged: fresh.length, counts: countBy(items), items };
 }
 
 const countBy = (items: OpsItem[]) => items.reduce<Record<string, number>>((m, i) => ((m[i.kind] = (m[i.kind] ?? 0) + 1), m), {});

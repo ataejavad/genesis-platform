@@ -87,29 +87,24 @@ void (async () => {
 })();
 async function localWorker() {
   const { dispatchSimple } = await import("../src/worker/dispatch");
-  const { deliveryWatch } = await import("../src/server/projects");
-  const { opsWatch } = await import("../src/server/ops-watch");
-  const { billSubscriptions, dunning } = await import("../src/server/finance");
-  const { ensurePartnerContracts } = await import("../src/server/contracts");
+  const { runDue } = await import("../src/server/orchestrator");
   const { sendQueued } = await import("../src/server/notify");
   const { mailerFromEnv } = await import("../src/server/mailer");
   const { telegramConfigFromEnv } = await import("../src/server/telegram");
+  const { voiceFromEnv } = await import("../src/server/voice");
   const wdb = createDb(env.DATABASE_URL, 1);
   const deps = { telegram: telegramConfigFromEnv(), n8nWebhookUrl: process.env.N8N_EVENTS_WEBHOOK_URL || undefined };
-  const mailer = mailerFromEnv();
-  let lastWatch = 0;
+  const jobDeps = { mailer: mailerFromEnv(), voice: voiceFromEnv(), telegram: deps.telegram };
+  let lastJobs = 0;
   for (;;) {
     try {
-      if (Date.now() - lastWatch > 60 * 60_000) {
-        lastWatch = Date.now();
-        await deliveryWatch(wdb);
-        await opsWatch(wdb);
-        await billSubscriptions(wdb);
-        await dunning(wdb);
-        await ensurePartnerContracts(wdb);
+      // the same job list as the server worker (src/server/orchestrator.ts)
+      if (Date.now() - lastJobs > 60_000) {
+        lastJobs = Date.now();
+        await runDue(wdb, jobDeps);
       }
       await dispatchSimple(wdb, deps);
-      if (mailer) await sendQueued(wdb, mailer);
+      if (jobDeps.mailer) await sendQueued(wdb, jobDeps.mailer);
     } catch (err) {
       console.error("local worker:", err instanceof Error ? err.message : err);
     }

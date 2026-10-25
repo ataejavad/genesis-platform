@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { meter } from "./meter";
 import { type HubResearch, researchSchema } from "@/server/hubs";
 
 /*
@@ -11,7 +12,9 @@ export const researchEnabled = () => Boolean(process.env.ANTHROPIC_API_KEY);
 
 const MODEL = "claude-opus-5-5";
 
-const instructions = (prev: HubResearch, today: string) => `You keep the industry hub "${prev.industry}" (NACE ${prev.nace.join(", ")}) for country ${prev.country} up to date.
+const learned = (lessons: string[]) => (lessons.length ? `\nWhat we learned from earlier rounds (follow it):${lessons.map((l) => `\n- ${l}`).join("")}\n` : "");
+
+const instructions = (prev: HubResearch, today: string, lessons: string[] = []) => `You keep the industry hub "${prev.industry}" (NACE ${prev.nace.join(", ")}) for country ${prev.country} up to date.
 Today is ${today}. Below is the current research file. Using web search:
 1. Re-check every deadline and rule. Keep only items you can confirm from an official source (EU, ministry, agency, official gazette) or from two independent publishers. Correct dates, rates and thresholds that changed. Drop items whose date passed more than 30 days ago.
 2. Add new rules, incentives or deadlines from the last 60 days that matter to small firms of this trade in this country.
@@ -19,7 +22,7 @@ Today is ${today}. Below is the current research file. Using web search:
 4. Keep pains, solutions, hook and kpi unless the evidence changed. Every hook option tag must still match deadline tags.
 5. Every text needs "it", "en" and "fa"; write it for a busy business owner, short and concrete, no hype.
 Sources: {name, url, date (YYYY-MM-DD, the day you read it), kind: "official" | "press" | "association"}.
-Reply with the complete updated file as one JSON object in a \`\`\`json block, same fields as the input, and nothing after it.
+${learned(lessons)}Reply with the complete updated file as one JSON object in a \`\`\`json block, same fields as the input, and nothing after it.
 
 \`\`\`json
 ${JSON.stringify(prev, null, 1)}
@@ -32,10 +35,10 @@ function extractJson(text: string): unknown {
 
 export type ResearchResult = { research: HubResearch; usage: { input: number; output: number; searches: number } };
 
-export async function researchHub(prev: HubResearch, now = new Date()): Promise<ResearchResult> {
+export async function researchHub(prev: HubResearch, now = new Date(), lessons: string[] = []): Promise<ResearchResult> {
   const client = new Anthropic();
   const today = now.toISOString().slice(0, 10);
-  const messages: Anthropic.MessageParam[] = [{ role: "user", content: instructions(prev, today) }];
+  const messages: Anthropic.MessageParam[] = [{ role: "user", content: instructions(prev, today, lessons) }];
   const usage = { input: 0, output: 0, searches: 0 };
 
   // Server-side web search can pause a long turn; resume it a few times before giving up.
@@ -50,6 +53,7 @@ export async function researchHub(prev: HubResearch, now = new Date()): Promise<
         messages,
       })
       .finalMessage();
+    meter(message.usage);
     usage.input += message.usage.input_tokens;
     usage.output += message.usage.output_tokens;
     usage.searches += message.usage.server_tool_use?.web_search_requests ?? 0;

@@ -241,9 +241,11 @@ export const agentRuns = pgTable("agent_runs", {
   inputTokens: integer("input_tokens"),
   outputTokens: integer("output_tokens"),
   costEur: numeric("cost_eur", { precision: 10, scale: 4 }),
+  // false when the call failed (counts against the agent's success rate)
+  ok: boolean("ok").notNull().default(true),
   meta: jsonb("meta").$type<Record<string, unknown>>().notNull().default({}),
   createdAt: createdAt(),
-});
+}, (t) => [index("agent_runs_agent_idx").on(t.agent, t.createdAt)]);
 
 export const auditLog = pgTable(
   "audit_log",
@@ -1180,3 +1182,118 @@ export const inviteTokens = pgTable("invite_tokens", {
   usedAt: timestamp("used_at", { withTimezone: true }),
   createdAt: createdAt(),
 });
+
+/* ───────────── Step 9: orchestrator, agents, daily brief, improvement loop ───────────── */
+
+// Every scheduled job run (orchestrator): status, duration and error, for the cockpit and the daily brief.
+export const jobRuns = pgTable(
+  "job_runs",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    job: text("job").notNull(),
+    startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
+    finishedAt: timestamp("finished_at", { withTimezone: true }),
+    ok: boolean("ok"),
+    result: jsonb("result").$type<unknown>(),
+    error: text("error"),
+  },
+  (t) => [index("job_runs_job_idx").on(t.job, t.startedAt)],
+);
+
+// Javad's switches per agent (the agents themselves, KPIs and default budgets live in Git: src/config/agents.ts).
+export const agentSettings = pgTable("agent_settings", {
+  agent: text("agent").primaryKey(),
+  enabled: boolean("enabled").notNull().default(true),
+  // € per month; null = the default from the registry
+  budgetEur: integer("budget_eur"),
+  // set when the budget is used up: the agent rests until then
+  pausedUntil: timestamp("paused_until", { withTimezone: true }),
+  note: text("note"),
+  updatedAt: updatedAt(),
+});
+
+// The daily brief (and later weekly ones): stored, so there is a history and the cockpit can show it.
+export const reports = pgTable(
+  "reports",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    kind: text("kind").notNull(),
+    day: text("day").notNull(),
+    verdict: text("verdict").notNull(),
+    body: jsonb("body").$type<Record<string, unknown>>().notNull(),
+    text: text("text").notNull(),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex("reports_kind_day_idx").on(t.kind, t.day)],
+);
+
+// Improvement loop (principle 2): goal metric → experiment → measure → adopt + lesson.
+export const experiments = pgTable("experiments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  key: text("key").notNull().unique(),
+  // agent id or area (outreach, checkup, hub, …)
+  area: text("area").notNull(),
+  hypothesis: text("hypothesis").notNull(),
+  // what counts as success for one subject, e.g. "prospect replies within 14 days"
+  metric: text("metric").notNull(),
+  // what must not get worse, e.g. "opt-outs"
+  guardrail: text("guardrail"),
+  variants: jsonb("variants").$type<{ id: string; description: string }[]>().notNull(),
+  minSample: integer("min_sample").notNull().default(30),
+  // a subject without success after this many days counts as a failure
+  windowDays: integer("window_days").notNull().default(21),
+  // running → ready (enough data) → adopted | rejected | stopped
+  status: text("status").notNull().default("running"),
+  winner: text("winner"),
+  result: jsonb("result").$type<Record<string, unknown>>(),
+  createdBy: text("created_by").notNull(),
+  decidedBy: text("decided_by"),
+  decidedAt: timestamp("decided_at", { withTimezone: true }),
+  createdAt: createdAt(),
+});
+
+export const experimentSubjects = pgTable(
+  "experiment_subjects",
+  {
+    experimentId: uuid("experiment_id").notNull().references(() => experiments.id, { onDelete: "cascade" }),
+    subjectId: text("subject_id").notNull(),
+    variant: text("variant").notNull(),
+    success: boolean("success"),
+    guardrailHit: boolean("guardrail_hit").notNull().default(false),
+    assignedAt: timestamp("assigned_at", { withTimezone: true }).notNull().defaultNow(),
+    outcomeAt: timestamp("outcome_at", { withTimezone: true }),
+  },
+  (t) => [primaryKey({ columns: [t.experimentId, t.subjectId] })],
+);
+
+// What the company learned: from experiments, rejected drafts, closed projects. Agents read the active ones.
+export const lessons = pgTable(
+  "lessons",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    area: text("area").notNull(),
+    text: text("text").notNull(),
+    // experiment:<id> | rejection:<content id> | manual
+    source: text("source").notNull(),
+    evidence: jsonb("evidence").$type<Record<string, unknown>>().notNull().default({}),
+    active: boolean("active").notNull().default(true),
+    createdAt: createdAt(),
+  },
+  (t) => [index("lessons_area_idx").on(t.area, t.active)],
+);
+
+// Weekly customer health (churn early warning): 0-100, red < 40, watch < 70.
+export const customerHealth = pgTable(
+  "customer_health",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orgId: uuid("org_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+    week: text("week").notNull(),
+    score: integer("score").notNull(),
+    band: text("band").notNull(),
+    signals: jsonb("signals").$type<Record<string, unknown>>().notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex("customer_health_org_week_idx").on(t.orgId, t.week)],
+);

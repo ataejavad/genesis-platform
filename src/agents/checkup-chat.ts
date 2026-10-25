@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { meter } from "./meter";
 import { z } from "zod";
 import type { LocalizedCheckup } from "@/server/checkup";
 
@@ -41,6 +42,7 @@ Reply with one JSON object only: {"reply": string, "industry": trade slug or nul
       { role: "user", content: `State so far: ${JSON.stringify({ industry: input.industry, answers: input.answers })}\n\nConversation:\n${input.transcript.map((m) => `${m.role}: ${m.text}`).join("\n")}` },
     ],
   });
+  meter(message.usage);
   if (message.stop_reason === "refusal") throw new Error("refused");
   const text = message.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
   const turn = chatTurnSchema.parse(JSON.parse(text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1)));

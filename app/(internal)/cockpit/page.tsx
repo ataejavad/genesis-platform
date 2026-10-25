@@ -1,34 +1,46 @@
 import Link from "next/link";
-import { alerts, approvals, brief, eur, kpis, projects } from "@/mock/cockpit";
+import { getDb } from "@/db";
+import { type Brief, buildBrief, latestReport } from "@/server/daily-report";
+import { jobBoard } from "@/server/orchestrator";
 import { PageHead } from "@/ui/Shell";
-import { Progress, Stat } from "@/ui/bits";
+import { Stat } from "@/ui/bits";
+import { RefreshBrief } from "./agents/Forms";
 
-// "Simple window": what happened, what needs Javad, how far from the goal.
-export default function Today() {
+const TONE = { green: "", yellow: "warn", red: "warn" } as const;
+
+// Today: the morning brief (built 08:00 Rome, also sent to Telegram): verdict, five numbers, decisions, stuck items.
+export default async function Today() {
+  const db = getDb();
+  const now = new Date();
+  const report = await latestReport(db);
+  // before the first 08:00 run there is no stored brief: show a live one
+  const brief = (report?.body as Brief | undefined) ?? (await buildBrief(db, now));
+  const jobs = await jobBoard(db, now);
+  const failed = jobs.filter((j) => j.ok === false);
   return (
     <main>
-      <PageHead title="Today" crumbs="Cockpit" sub="One screen: the brief, what needs you, and the numbers." actions={<Link className="btn primary" href="/cockpit/approvals">Approvals ({kpis.approvalsWaiting})</Link>} />
-      <div className="callout ai" style={{ marginBottom: 18 }}>✦ <b>Daily brief (Reports agent, 07:30):</b> {brief}</div>
+      <PageHead title="Today" crumbs="Cockpit" sub={report ? `Brief of ${report.day}${report.sentAt ? " · sent to Telegram" : ""}` : "Live brief (the stored one is built at 08:00)"} actions={<RefreshBrief />} />
+      <div className={`callout ${TONE[brief.level]}`} style={{ marginBottom: 18, fontSize: 18 }}>{brief.level === "green" ? "🟢" : brief.level === "yellow" ? "🟡" : "🔴"} <b>{brief.verdict}</b></div>
       <section className="grid g4" style={{ marginBottom: 18 }}>
-        <Stat label="MRR" value={eur(kpis.mrr)} delta={`Goal ${eur(kpis.mrrGoal)}`} />
-        <Stat label="Pipeline" value={eur(kpis.pipeline)} delta="3 proposals" up />
-        <Stat label="Gross margin" value={`${kpis.margin}%`} delta="floor 35%" up />
-        <Stat label="AI spend (month)" value={`€${kpis.aiSpend}`} delta={`of €${kpis.aiBudget} budget`} />
+        {brief.numbers.map((n) => <Stat key={n.label} label={n.label} value={n.value} />)}
       </section>
-      <section className="grid g-2-1" style={{ marginBottom: 18 }}>
+      <section className="grid g2" style={{ marginBottom: 18 }}>
         <div className="card">
-          <div className="card-head"><h3>✋ Needs you</h3><Link className="more" href="/cockpit/approvals">All</Link></div>
-          <div className="list">{approvals.map((a) => <div key={a.t} className="item"><span className={`badge ${a.risk === "high" ? "bad" : a.risk === "medium" ? "warn" : "gray"}`}>{a.kind}</span><div className="grow small"><b>{a.t}</b><div className="muted">{a.by} · {a.why}</div></div><button className="btn sm ok">Approve</button></div>)}</div>
+          <div className="card-head"><h3>✋ Your decisions</h3></div>
+          <div className="list">{brief.decisions.map((d) => <div key={d.text} className="item"><div className="grow small">{d.text}</div><Link className="btn sm" href={d.link}>Open</Link></div>)}
+            {!brief.decisions.length && <div className="muted small">Nothing waits for you.</div>}
+            {brief.decisionsMore > 0 && <div className="muted small">… and {brief.decisionsMore} more</div>}</div>
         </div>
-        <div className="stack">
-          <div className="card"><h3>Alerts</h3><div className="stack">{alerts.map((a) => <div key={a.t} className={`callout small ${a.tone === "warn" || a.tone === "bad" ? "warn" : ""}`}>{a.t}</div>)}</div></div>
-          <div className="card"><h3>Goal: €10k MRR</h3><Progress value={Math.round((kpis.mrr / kpis.mrrGoal) * 100)} /><div className="muted small" style={{ marginTop: 6 }}>Your approval time this week: {kpis.javadHoursWeek} h (target &lt; 5 h)</div></div>
+        <div className="card">
+          <div className="card-head"><h3>⏳ Stuck</h3></div>
+          <div className="list">{brief.stuck.map((s) => <div key={s.text} className="item"><div className="grow small">{s.text}</div><Link className="btn sm" href={s.link}>Open</Link></div>)}
+            {!brief.stuck.length && <div className="muted small">Nothing stuck.</div>}
+            {brief.stuckMore > 0 && <div className="muted small">… and {brief.stuckMore} more</div>}</div>
         </div>
       </section>
       <div className="card">
-        <div className="card-head"><h3>Projects</h3><Link className="more" href="/cockpit/projects">All</Link></div>
-        <table className="table"><thead><tr><th>Project</th><th>Owner</th><th>Status</th><th>Progress</th><th>Margin</th></tr></thead>
-          <tbody>{projects.map((p) => <tr key={p.id}><td><Link href={`/cockpit/projects/${p.id}`}>{p.id}</Link> {p.title}</td><td>{p.owner}</td><td><span className="badge gray">{p.status}</span></td><td style={{ width: 140 }}><Progress value={p.progress} /></td><td className="num">{p.sell ? `${Math.round(((p.sell - p.cost) / p.sell) * 100)}%` : "internal"}</td></tr>)}</tbody></table>
+        <div className="card-head"><h3>Machine</h3><Link className="more" href="/cockpit/agents#jobs">Jobs & agents</Link></div>
+        <div className="small">{failed.length ? <span className="badge bad">{failed.length} job(s) failed: {failed.map((j) => j.id).join(", ")}</span> : <span className="badge ok">All {jobs.length} jobs ran fine</span>}</div>
       </div>
     </main>
   );

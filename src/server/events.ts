@@ -55,7 +55,13 @@ export type EventType =
   | "invoice.issued"
   | "invoice.reminded"
   | "lead.confirmed"
-  | "data.erased";
+  | "data.erased"
+  | "agent.paused"
+  | "experiment.ready"
+  | "experiment.decided"
+  | "customer.at_risk"
+  | "results.reported"
+  | "lead.reminder_due";
 
 // Call inside the same transaction as the change it describes (transactional outbox).
 export async function emit(

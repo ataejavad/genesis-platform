@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { meter } from "./meter";
 import { pick, productsFor } from "@/mock/site";
 import { planEnv } from "@/server/crm";
 import type { Reply } from "@/server/whatsapp";
@@ -25,6 +26,7 @@ Company: ${company ?? "unknown"}; trade: ${industry ?? "unknown, ask for it"}. C
 Goal: understand their problem, answer from the catalogue only, and offer the free 2-minute check-up (${env.appUrl}/${lang}-it/checkup) or a call with ${env.sender}. Never invent prices, results, dates or legal claims. If they ask to stop, confirm they will not be contacted again.`,
     messages: history.length ? history.map((h) => ({ role: h.role, content: h.text })) : [{ role: "user", content: "Ciao" }],
   });
+  meter(m.usage);
   if (m.stop_reason === "refusal") throw new Error("refused");
   return m.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("").trim().slice(0, 1500);
 };

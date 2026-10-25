@@ -20,7 +20,9 @@ export type Template =
   | "changes"
   | "partnerContract"
   | "payout"
-  | "leadConfirm";
+  | "leadConfirm"
+  | "monthlyReport"
+  | "deadlineReminder";
 
 type T = Record<Template, { subject: string; body: string }>;
 
@@ -44,6 +46,8 @@ const it: T = {
   partnerContract: { subject: "Benvenuto in {company}: accordo da firmare", body: "Ciao {name},\n\nbenvenuto! Prima del primo lavoro firma l'accordo quadro (con riservatezza) qui:\n{link}\n\nScegli prima la tua password: {invite}" + sign },
   payout: { subject: "Pagamento inviato: {amount}", body: "Ciao {name},\n\nabbiamo inviato {amount} per «{title}».\n{link}" + sign },
   leadConfirm: { subject: "Confermate la vostra iscrizione", body: "Buongiorno,\n\nper ricevere {what}, confermate con un clic:\n{link}\n\nSe non siete stati voi, ignorate questa email." + sign },
+  deadlineReminder: { subject: "Tra {days} giorni: {title}", body: "Buongiorno,\n\ncome richiesto, vi ricordiamo la scadenza del {date}: {title}.\n{what}\n\nCosa possiamo fare noi: {offer}\nTutte le scadenze del vostro settore: {link}\n\nNon volete più questi promemoria? {unsubscribe}" + sign },
+  monthlyReport: { subject: "I vostri risultati di {month}: {eur}", body: "Buongiorno {name},\n\na {month} il servizio vi ha portato {eur} (canone {fee}). Dall'inizio: {total}.\n\nIl dettaglio, mese per mese, è nella vostra area:\n{link}\n\nC'è qualcosa da migliorare? Rispondete pure a questa email." + sign },
 };
 
 const en: T = {
@@ -64,6 +68,8 @@ const en: T = {
   partnerContract: { subject: "Welcome to {company}: agreement to sign", body: "Hi {name},\n\nwelcome! Before your first job, sign the framework agreement (with NDA) here:\n{link}\n\nFirst choose your password: {invite}" + sign },
   payout: { subject: "Payment sent: {amount}", body: "Hi {name},\n\nwe sent {amount} for \"{title}\".\n{link}" + sign },
   leadConfirm: { subject: "Please confirm your subscription", body: "Hello,\n\nto receive {what}, confirm with one click:\n{link}\n\nIf this was not you, ignore this email." + sign },
+  deadlineReminder: { subject: "In {days} days: {title}", body: "Hello,\n\nas you asked, a reminder of the deadline on {date}: {title}.\n{what}\n\nHow we can help: {offer}\nAll deadlines for your trade: {link}\n\nNo more reminders? {unsubscribe}" + sign },
+  monthlyReport: { subject: "Your results for {month}: {eur}", body: "Hello {name},\n\nin {month} the service brought you {eur} (fee {fee}). Since the start: {total}.\n\nThe details, month by month, are in your area:\n{link}\n\nAnything we should improve? Just reply to this email." + sign },
 };
 
 const de: T = {
@@ -84,6 +90,8 @@ const de: T = {
   partnerContract: { subject: "Willkommen bei {company}: Vertrag zur Unterschrift", body: "Hallo {name},\n\nwillkommen! Vor dem ersten Auftrag unterschreiben Sie hier den Rahmenvertrag (mit Geheimhaltung):\n{link}\n\nWählen Sie zuerst Ihr Passwort: {invite}" + sign },
   payout: { subject: "Zahlung gesendet: {amount}", body: "Hallo {name},\n\nwir haben {amount} für „{title}“ überwiesen.\n{link}" + sign },
   leadConfirm: { subject: "Bitte bestätigen Sie Ihre Anmeldung", body: "Guten Tag,\n\num {what} zu erhalten, bestätigen Sie mit einem Klick:\n{link}\n\nFalls Sie das nicht waren, ignorieren Sie diese E-Mail." + sign },
+  deadlineReminder: { subject: "In {days} Tagen: {title}", body: "Guten Tag,\n\nwie gewünscht erinnern wir Sie an die Frist am {date}: {title}.\n{what}\n\nWie wir helfen können: {offer}\nAlle Fristen Ihrer Branche: {link}\n\nKeine Erinnerungen mehr? {unsubscribe}" + sign },
+  monthlyReport: { subject: "Ihre Ergebnisse im {month}: {eur}", body: "Guten Tag {name},\n\nim {month} hat Ihnen der Service {eur} gebracht (Gebühr {fee}). Seit Beginn: {total}.\n\nDie Details, Monat für Monat, finden Sie in Ihrem Bereich:\n{link}\n\nGibt es etwas zu verbessern? Antworten Sie einfach auf diese E-Mail." + sign },
 };
 
 const fa: T = {
@@ -104,6 +112,8 @@ const fa: T = {
   partnerContract: { subject: "به {company} خوش آمدید: قرارداد برای امضا", body: "سلام {name}،\n\nخوش آمدید! پیش از اولین کار، قرارداد چارچوب (با محرمانگی) را اینجا امضا کنید:\n{link}\n\nاول رمز عبورتان را انتخاب کنید: {invite}" + sign },
   payout: { subject: "پرداخت شد: {amount}", body: "سلام {name}،\n\n{amount} برای «{title}» واریز شد.\n{link}" + sign },
   leadConfirm: { subject: "لطفاً عضویت را تأیید کنید", body: "سلام،\n\nبرای دریافت {what}، با یک کلیک تأیید کنید:\n{link}\n\nاگر شما نبودید، این ایمیل را نادیده بگیرید." + sign },
+  deadlineReminder: { subject: "{days} روز دیگر: {title}", body: "سلام،\n\nهمان‌طور که خواستید، یادآوری مهلت {date}: {title}.\n{what}\n\nکاری که ما می‌توانیم بکنیم: {offer}\nهمه مهلت‌های صنف شما: {link}\n\nدیگر یادآوری نمی‌خواهید؟ {unsubscribe}" + sign },
+  monthlyReport: { subject: "نتیجه‌های {month}: {eur}", body: "سلام {name}،\n\nدر {month} این سرویس {eur} برایتان آورد (هزینه ماهانه {fee}). از ابتدا: {total}.\n\nجزئیات ماه به ماه در پنل شماست:\n{link}\n\nچیزی هست که بهتر کنیم؟ همین ایمیل را جواب دهید." + sign },
 };
 
 const ALL: Record<string, T> = { it, en, de, fa };
