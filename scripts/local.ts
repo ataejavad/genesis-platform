@@ -6,12 +6,14 @@ import { and, count, eq, isNull } from "drizzle-orm";
 import { createDb } from "../src/db";
 import { apiKeys, contentItems } from "../src/db/schema";
 import { createApiKey } from "../src/server/api-keys";
+import { keepExtendedQueriesTogether } from "./lib/pglite-queue";
 
 // `npm run local`: the whole app on this computer with no database to install.
 // Data is kept in ./.localdb between runs. For trying things out only; production uses real Postgres.
 const port = 5444;
 const pg = await PGlite.create("./.localdb");
 const server = new PGLiteSocketServer({ db: pg, port, maxConnections: 10 });
+keepExtendedQueriesTogether(server);
 await server.start();
 
 // every process (server, worker, agents) talks to the same single PGlite session: no named prepared statements
@@ -39,13 +41,12 @@ const [{ n }] = await db.select({ n: count() }).from(contentItems);
 const agentName = "hub-builder (local)";
 await db.update(apiKeys).set({ revokedAt: new Date() }).where(and(eq(apiKeys.name, agentName), isNull(apiKeys.revokedAt)));
 const { key: hubKey } = await createApiKey(db, { name: agentName, scopes: ["content:draft"] });
-// Outbound: the company agent adds companies (crm:write); the outbox sends due emails / AI calls (outreach:run).
+// Outbound: the company agent adds companies (crm:write); due emails and AI calls go out from the orchestrator (outreach.send).
 const fresh = async (name: string, scopes: Parameters<typeof createApiKey>[1]["scopes"]) => {
   await db.update(apiKeys).set({ revokedAt: new Date() }).where(and(eq(apiKeys.name, name), isNull(apiKeys.revokedAt)));
   return (await createApiKey(db, { name, scopes })).key;
 };
 const outboundKey = await fresh("company-finder (local)", ["crm:write"]);
-const outboxKey = await fresh("outbox (local)", ["outreach:run"]);
 await db.$client.end();
 if (n === 0) {
   await run("npm run seed");
@@ -73,9 +74,6 @@ void (async () => {
     if (up) {
       const agent = spawn("npm", ["run", "agents:hubs"], { stdio: "inherit", env: { ...env, APP_URL: "http://localhost:3000", HUB_AGENT_KEY: hubKey }, shell: true });
       agent.on("exit", (code) => code && console.log("hub-builder finished with warnings; see above"));
-      // Outbox every 10 minutes: due emails (once a provider key exists) and AI calls (once switched on).
-      const outbox = () => fetch("http://localhost:3000/api/v1/outreach/run", { method: "POST", headers: { authorization: `Bearer ${outboxKey}` } }).catch(() => null);
-      setInterval(outbox, 10 * 60_000);
       // The worker's job in local mode: events → partner offers, QA routing, messages, billing; watchdogs hourly.
       void localWorker();
       // The outbound agent finds this run's key on its own (local mode only).
