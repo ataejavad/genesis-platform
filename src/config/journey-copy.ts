@@ -26,6 +26,10 @@ const en = {
   complaint: { title: "If you are not satisfied", ladder: ["We fix it free (3 days)", "Someone new redoes it, at our cost (7 days)", "Our founder takes over (1 working day)"], go: { fix: "Fix it", swap: "Have someone new redo it", founder: "Pass to the founder", support: "Send to the team" } as Record<string, string> },
   approval: { autoOn: "Counts as accepted on {d} if we hear nothing", rate: "How happy are you with this step?", note: "One sentence (optional)", stars: "{n} of 5" },
   ms: { planned: "Starts after the previous step", unpaid: "Starts when paid" } as Record<string, string>,
+  cancelAsk: "I'm sorry to hear that. You can cancel with 30 days' notice: the service runs until {d}, then stops. Before you go, what is the main reason? If it is something we can fix, we fix it first.",
+  cancelNone: "You have no running monthly service to cancel.",
+  cancelGiven: "Your notice is in: the service ends on {d}. Changed your mind? Just tell me.",
+  cancel: { title: "Cancel the monthly service", reasons: { price: "Too expensive", timing: "Not the right time", fit: "Not what we need", competitor: "We chose someone else", quality: "Quality not good enough", other: "Other" } as Record<string, string>, note: "Anything we should know (optional)", confirm: "Give notice", keep: "Keep it", kept: "Good, everything stays as it is.", done: "Notice received. The service runs until {d}, then stops with no further charges." },
   priceBy: "Price by {d}",
   due: "due {d}",
 };
@@ -57,6 +61,10 @@ const it: JourneyCopy = {
   complaint: { title: "Se non siete soddisfatti", ladder: ["Lo correggiamo gratis (3 giorni)", "Una persona nuova lo rifà, a nostre spese (7 giorni)", "Se ne occupa il nostro fondatore (1 giorno lavorativo)"], go: { fix: "Correggete", swap: "Fatelo rifare da un altro", founder: "Passate al fondatore", support: "Invia al team" } },
   approval: { autoOn: "Vale come accettata il {d} se non riceviamo risposta", rate: "Quanto siete soddisfatti di questa fase?", note: "Una frase (facoltativa)", stars: "{n} su 5" },
   ms: { planned: "Parte dopo la fase precedente", unpaid: "Parte al pagamento" },
+  cancelAsk: "Mi dispiace. Potete disdire con 30 giorni di preavviso: il servizio continua fino al {d}, poi si ferma. Prima di andare: qual è il motivo principale? Se è qualcosa che possiamo sistemare, lo sistemiamo prima.",
+  cancelNone: "Non avete servizi mensili attivi da disdire.",
+  cancelGiven: "La disdetta è registrata: il servizio finisce il {d}. Avete cambiato idea? Ditemelo.",
+  cancel: { title: "Disdire il servizio mensile", reasons: { price: "Troppo caro", timing: "Non è il momento", fit: "Non è quello che ci serve", competitor: "Abbiamo scelto un altro", quality: "Qualità non sufficiente", other: "Altro" }, note: "Qualcosa che dovremmo sapere (facoltativo)", confirm: "Disdico", keep: "Lo tengo", kept: "Bene, resta tutto com'è.", done: "Disdetta ricevuta. Il servizio continua fino al {d}, poi si ferma senza altri addebiti." },
   priceBy: "Prezzo entro il {d}",
   due: "entro il {d}",
 };
@@ -86,6 +94,10 @@ const de: JourneyCopy = {
   complaint: { title: "Wenn Sie nicht zufrieden sind", ladder: ["Wir bessern kostenlos nach (3 Tage)", "Jemand Neues macht es noch einmal, auf unsere Kosten (7 Tage)", "Unser Gründer übernimmt (1 Arbeitstag)"], go: { fix: "Nachbessern", swap: "Von jemand Neuem machen lassen", founder: "An den Gründer", support: "An das Team senden" } },
   approval: { autoOn: "Gilt am {d} als abgenommen, wenn wir nichts hören", rate: "Wie zufrieden sind Sie mit dieser Phase?", note: "Ein Satz (optional)", stars: "{n} von 5" },
   ms: { planned: "Startet nach der vorherigen Phase", unpaid: "Startet nach Zahlung" },
+  cancelAsk: "Das tut mir leid. Sie können mit 30 Tagen Frist kündigen: Der Service läuft bis {d} und endet dann. Bevor Sie gehen: Was ist der Hauptgrund? Wenn wir es beheben können, tun wir das zuerst.",
+  cancelNone: "Sie haben keinen laufenden Monatsservice zum Kündigen.",
+  cancelGiven: "Ihre Kündigung ist eingegangen: Der Service endet am {d}. Doch anders entschieden? Sagen Sie es mir.",
+  cancel: { title: "Monatsservice kündigen", reasons: { price: "Zu teuer", timing: "Nicht der richtige Zeitpunkt", fit: "Nicht das, was wir brauchen", competitor: "Wir haben jemand anderen gewählt", quality: "Qualität nicht gut genug", other: "Anderes" }, note: "Was wir wissen sollten (optional)", confirm: "Kündigen", keep: "Behalten", kept: "Gut, alles bleibt wie es ist.", done: "Kündigung erhalten. Der Service läuft bis {d} und endet dann ohne weitere Kosten." },
   priceBy: "Preis bis {d}",
   due: "bis {d}",
 };
@@ -115,6 +127,10 @@ const fa: JourneyCopy = {
   complaint: { title: "اگر راضی نیستید", ladder: ["رایگان اصلاحش می‌کنیم (۳ روز)", "یک نفر تازه از نو انجامش می‌دهد، با هزینه ما (۷ روز)", "بنیان‌گذار ما خودش پیگیری می‌کند (۱ روز کاری)"], go: { fix: "اصلاح کنید", swap: "یک نفر دیگر انجام دهد", founder: "به بنیان‌گذار بسپار", support: "برای تیم بفرست" } },
   approval: { autoOn: "اگر جوابی نرسد، {d} تأییدشده حساب می‌شود", rate: "از این مرحله چقدر راضی هستید؟", note: "یک جمله (اختیاری)", stars: "{n} از ۵" },
   ms: { planned: "بعد از مرحله قبل شروع می‌شود", unpaid: "بعد از پرداخت شروع می‌شود" },
+  cancelAsk: "متأسفم. می‌توانید با ۳۰ روز اطلاع قبلی لغو کنید: سرویس تا {d} ادامه دارد و بعد متوقف می‌شود. قبل از رفتن، دلیل اصلی چیست؟ اگر چیزی است که می‌توانیم درستش کنیم، اول آن را درست می‌کنیم.",
+  cancelNone: "سرویس ماهانه فعالی برای لغو ندارید.",
+  cancelGiven: "درخواست لغو ثبت شده: سرویس در {d} تمام می‌شود. نظرتان عوض شد؟ فقط بگویید.",
+  cancel: { title: "لغو سرویس ماهانه", reasons: { price: "خیلی گران است", timing: "الان وقتش نیست", fit: "چیزی که لازم داریم نیست", competitor: "کس دیگری را انتخاب کردیم", quality: "کیفیت کافی نیست", other: "دیگر" }, note: "چیزی که باید بدانیم (اختیاری)", confirm: "لغو می‌کنم", keep: "نگهش می‌دارم", kept: "خوب، همه چیز همان‌طور می‌ماند.", done: "لغو دریافت شد. سرویس تا {d} ادامه دارد و بعد بدون هزینه دیگری متوقف می‌شود." },
   priceBy: "قیمت تا {d}",
   due: "تا {d}",
 };

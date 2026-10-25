@@ -1,4 +1,4 @@
-import type { Criterion, MilestoneTemplate, TaskTemplate } from "@/db/schema";
+import type { Criterion, MilestoneTemplate, MonthlyPlan, TaskTemplate } from "@/db/schema";
 
 /*
  * The first protocols and catalogue packages (doc 15 §6د: "no product is sold without a protocol").
@@ -73,7 +73,7 @@ export const PROTOCOL_SEEDS: Seed[] = [
   },
 ];
 
-type PackageSeed = { slug: string; title: string; titles: Record<string, string>; setupEur: number; monthlyEur: number; tasks: TaskTemplate[]; milestones: MilestoneTemplate[] };
+type PackageSeed = { slug: string; title: string; titles: Record<string, string>; setupEur: number; monthlyEur: number; tasks: TaskTemplate[]; milestones: MilestoneTemplate[]; monthly: MonthlyPlan };
 
 export const PACKAGE_SEEDS: PackageSeed[] = [
   {
@@ -84,18 +84,31 @@ export const PACKAGE_SEEDS: PackageSeed[] = [
       { title: "Set up the phone assistant", brief: "Configure the phone assistant with the customer's hours, questions and transfer rules; test it.", protocol: "PR-02", skills: ["ai-setup"], payEur: 220, days: 5, milestone: 0 },
       { title: "First-week review and tuning", brief: "Review the first live week of calls and tune what failed.", protocol: "PR-08", skills: ["ai-setup"], payEur: 90, days: 10, milestone: 1 },
     ],
+    // what the €390 a month buys after go-live; voice minutes are the cost to watch (actual bill replaces the estimate)
+    monthly: {
+      tasks: [{ title: "Monthly check and tune-up", titles: { it: "Controllo e messa a punto mensile", de: "Monatliche Prüfung und Feinabstimmung", fa: "بررسی و تنظیم ماهانه" }, brief: "Review last month's calls: unanswered questions, failed transfers, complaints. Fix the answers and transfer rules, and write three lines for the customer's monthly report.", protocol: "PR-08", skills: ["ai-setup"], payEur: 60, day: 3 }],
+      costs: [{ label: "Voice minutes (estimate)", kind: "usage", eur: 70 }, { label: "Phone number", kind: "tool", eur: 5 }],
+    },
   },
   {
     slug: "followup-agent", title: "Quote follow-up", titles: { en: "Quote follow-up", it: "Follow-up dei preventivi", de: "Angebots-Nachfassen", fa: "پیگیری پیش‌فاکتور" },
     setupEur: 290, monthlyEur: 190,
     milestones: [{ title: "Follow-up running", titles: { it: "Follow-up attivo", de: "Nachfassen läuft", fa: "پیگیری فعال شد" }, sharePct: 100 }],
     tasks: [{ title: "Set up quote reminders", brief: "Send a friendly reminder 3 and 7 days after each quote; stop when the customer answers.", protocol: "PR-07", skills: ["automation", "crm"], payEur: 160, days: 4, milestone: 0 }],
+    monthly: {
+      tasks: [{ title: "Monthly follow-up check", titles: { it: "Controllo mensile dei follow-up", de: "Monatliche Prüfung des Nachfassens", fa: "بررسی ماهانه پیگیری‌ها" }, brief: "Check last month's reminders: sent, bounced, answered. Fix bounces and texts that got no answers; write three lines for the customer's monthly report.", protocol: "PR-07", skills: ["automation", "crm"], payEur: 30, day: 3 }],
+      costs: [{ label: "Automation runs", kind: "tool", eur: 10 }],
+    },
   },
   {
     slug: "lead-crm", title: "Every lead in the CRM", titles: { en: "Every lead in the CRM", it: "Ogni contatto nel CRM", de: "Jeder Lead im CRM", fa: "هر سرنخ در CRM" },
     setupEur: 450, monthlyEur: 90,
     milestones: [{ title: "Leads flowing into the CRM", titles: { it: "I contatti arrivano nel CRM", de: "Leads fließen ins CRM", fa: "سرنخ‌ها به CRM می‌رسند" }, sharePct: 100 }],
     tasks: [{ title: "Connect the website form to the CRM", brief: "Website form leads must reach the CRM with source and phone filled, plus an alert to the office.", protocol: "PR-03", skills: ["automation", "crm"], payEur: 200, days: 3, milestone: 0 }],
+    monthly: {
+      tasks: [{ title: "Monthly lead flow check", titles: { it: "Controllo mensile del flusso contatti", de: "Monatliche Prüfung des Lead-Flusses", fa: "بررسی ماهانه جریان سرنخ‌ها" }, brief: "Send a test lead, check last month's leads arrived with source and phone, fix what broke; write three lines for the customer's monthly report.", protocol: "PR-03", skills: ["automation", "crm"], payEur: 25, day: 3 }],
+      costs: [{ label: "Automation runs", kind: "tool", eur: 5 }],
+    },
   },
 ];
 

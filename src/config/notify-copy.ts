@@ -23,7 +23,10 @@ export type Template =
   | "leadConfirm"
   | "monthlyReport"
   | "deadlineReminder"
-  | "autoAccepted";
+  | "autoAccepted"
+  | "serviceChecked"
+  | "cancelConfirm"
+  | "recruitInvite";
 
 type T = Record<Template, { subject: string; body: string }>;
 
@@ -50,6 +53,9 @@ const it: T = {
   deadlineReminder: { subject: "Tra {days} giorni: {title}", body: "Buongiorno,\n\ncome richiesto, vi ricordiamo la scadenza del {date}: {title}.\n{what}\n\nCosa possiamo fare noi: {offer}\nTutte le scadenze del vostro settore: {link}\n\nNon volete più questi promemoria? {unsubscribe}" + sign },
   monthlyReport: { subject: "I vostri risultati di {month}: {eur}", body: "Buongiorno {name},\n\na {month} il servizio vi ha portato {eur} (canone {fee}). Dall'inizio: {total}.\n\nIl dettaglio, mese per mese, è nella vostra area:\n{link}\n\nC'è qualcosa da migliorare? Rispondete pure a questa email." + sign },
   autoAccepted: { subject: "Fase accettata: {title}", body: "Buongiorno {name},\n\n{title} è stata consegnata 7 giorni fa e, senza risposta, ora vale come accettata (come da contratto). Se qualcosa non va, scriveteci nella vostra area: lo correggiamo.\n{link}" + sign },
+  serviceChecked: { subject: "Controllo mensile fatto: {product}", body: "Buongiorno {name},\n\nabbiamo fatto il controllo di {month} ({title}): tutto verificato e regolato. I risultati del mese arrivano a inizio mese prossimo; qualcosa da cambiare? Scriveteci nella vostra area.\n{link}" + sign },
+  cancelConfirm: { subject: "Disdetta ricevuta: {product}", body: "Buongiorno {name},\n\nabbiamo ricevuto la disdetta di {product}. Il servizio continua fino al {ends}, poi si ferma senza altri addebiti. Ci dispiace vedervi andare: se cambiate idea o possiamo rimediare a qualcosa, scriveteci nella vostra area.\n{link}" + sign },
+  recruitInvite: { subject: "Abbiamo lavoro per voi: {skill}", body: "Buongiorno {name},\n\nqualche tempo fa vi siete candidati come partner. Ora cerchiamo proprio {skill}: compiti chiari, pagati a risultato accettato, pagamenti rapidi. Se vi interessa, ricandidatevi in due minuti:\n{link}" + sign },
 };
 
 const en: T = {
@@ -73,6 +79,9 @@ const en: T = {
   deadlineReminder: { subject: "In {days} days: {title}", body: "Hello,\n\nas you asked, a reminder of the deadline on {date}: {title}.\n{what}\n\nHow we can help: {offer}\nAll deadlines for your trade: {link}\n\nNo more reminders? {unsubscribe}" + sign },
   monthlyReport: { subject: "Your results for {month}: {eur}", body: "Hello {name},\n\nin {month} the service brought you {eur} (fee {fee}). Since the start: {total}.\n\nThe details, month by month, are in your area:\n{link}\n\nAnything we should improve? Just reply to this email." + sign },
   autoAccepted: { subject: "Step accepted: {title}", body: "Hello {name},\n\n{title} was delivered 7 days ago and, without an answer, now counts as accepted (as in the contract). If anything is wrong, tell us in your area and we fix it.\n{link}" + sign },
+  serviceChecked: { subject: "Monthly check done: {product}", body: "Hello {name},\n\nwe did the {month} check ({title}): everything checked and tuned. Your monthly results follow early next month; anything to change? Tell us in your area.\n{link}" + sign },
+  cancelConfirm: { subject: "Notice received: {product}", body: "Hello {name},\n\nwe received your notice for {product}. The service runs until {ends}, then stops with no further charges. We are sorry to see you go: if you change your mind or we can put something right, tell us in your area.\n{link}" + sign },
+  recruitInvite: { subject: "We have work for you: {skill}", body: "Hello {name},\n\nyou applied as a partner a while ago. We now need exactly {skill}: clear tasks, paid per accepted result, fast payouts. If you are interested, apply again in two minutes:\n{link}" + sign },
 };
 
 const de: T = {
@@ -96,6 +105,9 @@ const de: T = {
   deadlineReminder: { subject: "In {days} Tagen: {title}", body: "Guten Tag,\n\nwie gewünscht erinnern wir Sie an die Frist am {date}: {title}.\n{what}\n\nWie wir helfen können: {offer}\nAlle Fristen Ihrer Branche: {link}\n\nKeine Erinnerungen mehr? {unsubscribe}" + sign },
   monthlyReport: { subject: "Ihre Ergebnisse im {month}: {eur}", body: "Guten Tag {name},\n\nim {month} hat Ihnen der Service {eur} gebracht (Gebühr {fee}). Seit Beginn: {total}.\n\nDie Details, Monat für Monat, finden Sie in Ihrem Bereich:\n{link}\n\nGibt es etwas zu verbessern? Antworten Sie einfach auf diese E-Mail." + sign },
   autoAccepted: { subject: "Phase abgenommen: {title}", body: "Guten Tag {name},\n\n{title} wurde vor 7 Tagen geliefert und gilt ohne Antwort nun als abgenommen (laut Vertrag). Wenn etwas nicht passt, schreiben Sie uns in Ihrem Bereich; wir bessern nach.\n{link}" + sign },
+  serviceChecked: { subject: "Monatliche Prüfung erledigt: {product}", body: "Guten Tag {name},\n\nwir haben die Prüfung für {month} gemacht ({title}): alles geprüft und eingestellt. Ihre Monatsergebnisse kommen Anfang nächsten Monats; etwas zu ändern? Schreiben Sie uns in Ihrem Bereich.\n{link}" + sign },
+  cancelConfirm: { subject: "Kündigung erhalten: {product}", body: "Guten Tag {name},\n\nwir haben Ihre Kündigung für {product} erhalten. Der Service läuft bis {ends} und endet dann ohne weitere Kosten. Schade, dass Sie gehen: Wenn Sie es sich anders überlegen oder wir etwas gutmachen können, schreiben Sie uns in Ihrem Bereich.\n{link}" + sign },
+  recruitInvite: { subject: "Wir haben Arbeit für Sie: {skill}", body: "Guten Tag {name},\n\nSie hatten sich vor einiger Zeit als Partner beworben. Jetzt suchen wir genau {skill}: klare Aufgaben, bezahlt pro abgenommenem Ergebnis, schnelle Auszahlung. Wenn Sie Interesse haben, bewerben Sie sich in zwei Minuten erneut:\n{link}" + sign },
 };
 
 const fa: T = {
@@ -119,6 +131,9 @@ const fa: T = {
   deadlineReminder: { subject: "{days} روز دیگر: {title}", body: "سلام،\n\nهمان‌طور که خواستید، یادآوری مهلت {date}: {title}.\n{what}\n\nکاری که ما می‌توانیم بکنیم: {offer}\nهمه مهلت‌های صنف شما: {link}\n\nدیگر یادآوری نمی‌خواهید؟ {unsubscribe}" + sign },
   monthlyReport: { subject: "نتیجه‌های {month}: {eur}", body: "سلام {name}،\n\nدر {month} این سرویس {eur} برایتان آورد (هزینه ماهانه {fee}). از ابتدا: {total}.\n\nجزئیات ماه به ماه در پنل شماست:\n{link}\n\nچیزی هست که بهتر کنیم؟ همین ایمیل را جواب دهید." + sign },
   autoAccepted: { subject: "مرحله تأیید شد: {title}", body: "سلام {name}،\n\n{title} ۷ روز پیش تحویل شد و چون جوابی نرسید، حالا تأییدشده حساب می‌شود (طبق قرارداد). اگر چیزی درست نیست، در پنل‌تان بنویسید تا اصلاحش کنیم.\n{link}" + sign },
+  serviceChecked: { subject: "بررسی ماهانه انجام شد: {product}", body: "سلام {name}،\n\nبررسی {month} ({title}) را انجام دادیم: همه چیز چک و تنظیم شد. نتیجه‌های ماه اول ماه بعد می‌رسد؛ چیزی باید عوض شود؟ در پنل‌تان بنویسید.\n{link}" + sign },
+  cancelConfirm: { subject: "لغو دریافت شد: {product}", body: "سلام {name}،\n\nدرخواست لغو {product} را گرفتیم. سرویس تا {ends} ادامه دارد و بعد بدون هزینه دیگری متوقف می‌شود. از رفتن‌تان متأسفیم: اگر نظرتان عوض شد یا می‌توانیم چیزی را درست کنیم، در پنل‌تان بنویسید.\n{link}" + sign },
+  recruitInvite: { subject: "برای شما کار داریم: {skill}", body: "سلام {name}،\n\nمدتی پیش برای همکاری درخواست داده بودید. حالا دقیقاً {skill} لازم داریم: کارهای روشن، پرداخت برای هر نتیجه تأییدشده، پرداخت سریع. اگر علاقه دارید، در دو دقیقه دوباره درخواست دهید:\n{link}" + sign },
 };
 
 const ALL: Record<string, T> = { it, en, de, fa };

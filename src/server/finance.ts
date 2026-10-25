@@ -167,9 +167,11 @@ export async function billNext(db: Db, projectId: string, now = new Date()) {
 export async function billSubscriptions(db: Db, now = new Date()) {
   const period = now.toISOString().slice(0, 7);
   const subs = await db.select().from(subscriptions).where(and(eq(subscriptions.status, "active"), lte(subscriptions.startedAt, now)));
+  const start = new Date(`${period}-01T00:00:00Z`);
   let n = 0;
   for (const s of subs) {
-    if (s.monthlyEur <= 0) continue;
+    // notice given: the months of the notice are billed, nothing after it ends
+    if (s.monthlyEur <= 0 || (s.endsAt && s.endsAt <= start)) continue;
     const row = await db.transaction((tx) => requestInvoice(tx, { type: "system", id: "billing" }, { orgId: s.orgId, kind: "subscription", title: `${s.product} · ${period}`, netEur: s.monthlyEur, subscriptionId: s.id, period }, now));
     if (row) n++;
   }

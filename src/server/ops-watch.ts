@@ -6,6 +6,8 @@ import type { Actor } from "./actor";
 import { emit } from "./events";
 import { overdueComplaints } from "./complaints";
 import { offerJob } from "./partners";
+import { lowMargins, notices } from "./service";
+import { recruitFor } from "./supply";
 
 /*
  * Ops watchdog (process auditor at run time). Every hour it looks for work that stopped moving: jobs nobody
@@ -42,7 +44,7 @@ export async function opsWatch(db: Db, now = new Date()) {
   // 1. Jobs: offers nobody answered expire; declined or expired jobs go to the next matches; no match = supply gap.
   const stuck = await db.select().from(jobs).where(inArray(jobs.status, ["open", "offered"]));
   for (const j of stuck) {
-    if (j.status === "open" && !j.projectId) continue; // ad-hoc jobs wait for Javad's "offer" button
+    if (j.status === "open" && !j.projectId && !j.subscriptionId) continue; // ad-hoc jobs wait for Javad's "offer" button
     const offers = await db.select().from(jobOffers).where(eq(jobOffers.jobId, j.id));
     const pending = offers.filter((o) => o.status === "offered");
     const stale = pending.filter((o) => o.createdAt < before(WATCH.offerStaleHours));
@@ -53,7 +55,9 @@ export async function opsWatch(db: Db, now = new Date()) {
     if (picks.length) reoffered++;
     else {
       if (j.status === "offered") await db.update(jobs).set({ status: "open" }).where(and(eq(jobs.id, j.id), eq(jobs.status, "offered")));
-      items.push({ key: `no_match:${j.id}`, kind: "no_match", text: `No partner for "${j.title}" (${j.skills.join(", ") || "no skills"}${j.language ? `, ${j.language}` : ""}): recruit or do it ourselves`, link: "/cockpit/partners" });
+      // the recruiting action starts by itself: a post to publish and earlier applicants to decide or invite back
+      const gaps = await recruitFor(db, j);
+      items.push({ key: `no_match:${j.id}`, kind: "no_match", text: `No partner for "${j.title}" (${j.skills.join(", ") || "no skills"}${j.language ? `, ${j.language}` : ""}): ${gaps.length ? "recruiting post ready" : "recruiting open"}, or do it ourselves`, link: "/cockpit/partners#gaps" });
     }
   }
 
@@ -92,6 +96,10 @@ export async function opsWatch(db: Db, now = new Date()) {
   for (const w of waiting) items.push({ key: `approval:${w.id}`, kind: "approval", text: `Customer has not decided "${w.title}" for ${age(now, w.at)}h`, link: "/cockpit/customers" });
   const quoted = await db.select({ id: changeRequests.id }).from(changeRequests).where(and(eq(changeRequests.status, "quoted"), lt(changeRequests.createdAt, before(WATCH.approvalHours * 2))));
   for (const q of quoted) items.push({ key: `change:${q.id}`, kind: "approval", text: "Change request quoted, no answer for 4 days: call the customer", link: "/cockpit/projects" });
+
+  // Monthly service: customers who cost more than the margin floor allows; notices to answer with a call.
+  for (const m of await lowMargins(db, now)) items.push({ key: `margin:${m.orgId}:${now.toISOString().slice(0, 7)}`, kind: "margin", text: `Margin ${m.marginPct}% on a €${m.feeEur}/month customer (cost €${Math.round(m.costEur)}${m.estimated ? ", partly estimated" : ""}): reprice or cut cost`, link: "/cockpit/customers" });
+  for (const n of await notices(db, now)) items.push({ key: `notice:${n.s.id}`, kind: "churn", text: `${n.company} gave notice (${n.s.cancelReason ?? "no reason"}), ends ${n.s.endsAt!.toISOString().slice(0, 10)}: call them`, link: "/cockpit/customers#notices" });
 
   // 6. Partner documents about to expire (a lapsed DPA blocks personal-data jobs).
   const docs = await db.select({ id: partnerDocuments.id, kind: partnerDocuments.kind, name: partners.name, exp: partnerDocuments.expiresAt }).from(partnerDocuments).innerJoin(partners, eq(partners.id, partnerDocuments.partnerId)).where(and(isNotNull(partnerDocuments.expiresAt), lt(partnerDocuments.expiresAt, new Date(now.getTime() + WATCH.documentDays * 24 * HOUR)), eq(partners.status, "active")));

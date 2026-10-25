@@ -136,6 +136,18 @@ export async function notifyEvent(db: Db, e: Event) {
       for (const r of await customerPeople(db, String(p.orgId))) await queue(db, r, "autoAccepted", { title: String(p.title ?? ""), link: `${appUrl()}/portal` }, e.id);
       return;
     }
+    case "service.checked": {
+      const [y, m] = String(p.period).split("-").map(Number);
+      for (const r of await customerPeople(db, String(p.orgId))) {
+        const month = new Intl.DateTimeFormat({ it: "it-IT", de: "de-DE", fa: "fa-IR" }[r.locale.slice(0, 2)] ?? "en-GB", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(y, m - 1, 15)));
+        await queue(db, r, "serviceChecked", { product: String(p.product ?? ""), title: String(p.title ?? ""), month, link: `${appUrl()}/portal` }, e.id);
+      }
+      return;
+    }
+    case "subscription.cancelled": {
+      for (const r of await customerPeople(db, String(p.orgId))) await queue(db, r, "cancelConfirm", { product: String(p.product ?? ""), ends: day(new Date(String(p.endsAt)), r.locale), link: `${appUrl()}/portal` }, e.id);
+      return;
+    }
     case "job.rework": {
       // the partner who made it fixes it (included in the job): same message as changes asked on a delivery
       const r = await partnerPerson(db, String(p.partnerId));

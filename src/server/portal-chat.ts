@@ -10,6 +10,9 @@ import { milestones } from "@/db/schema";
 import { journeyCopy } from "@/config/journey-copy";
 import { type Brief, draftBrief } from "./brief";
 import { openComplaintFor, type Step } from "./complaints";
+import { NOTICE_DAYS } from "./service";
+
+const fmtDay = (iso: string, lang: string) => new Intl.DateTimeFormat({ it: "it-IT", de: "de-DE", fa: "fa-IR" }[lang] ?? "en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${iso.slice(0, 10)}T12:00:00Z`));
 
 /*
  * The dashboard home is a conversation (Javad 2026-10-25: "like Claude: the customer talks, and sees results
@@ -19,7 +22,7 @@ import { openComplaintFor, type Step } from "./complaints";
  * comes from the multilingual word rules below; with a key Claude picks the intent and cards (portal-advisor.ts).
  */
 
-export const INTENTS = ["complaint", "results", "goals", "approvals", "materials", "projects", "services", "next", "problem", "support", "billing", "data", "requests", "help"] as const;
+export const INTENTS = ["complaint", "cancel", "results", "goals", "approvals", "materials", "projects", "services", "next", "problem", "support", "billing", "data", "requests", "help"] as const;
 export type Intent = (typeof INTENTS)[number];
 
 export type Card =
@@ -28,6 +31,7 @@ export type Card =
   | { type: "approvals"; data: { id: string; title: string; detail: string | null; link: string | null; milestone?: boolean; autoOn?: string | null }[] }
   | { type: "brief"; data: Brief }
   | { type: "complaint"; data: { text: string; step: Step | "support"; open: boolean } }
+  | { type: "cancel"; data: { subs: { id: string; name: string; monthlyEur: number }[]; endsOn: string; text: string } }
   | { type: "services"; data: Awaited<ReturnType<typeof listServices>> }
   | { type: "projects"; data: Awaited<ReturnType<typeof customerProjects>> }
   | { type: "needs"; data: Awaited<ReturnType<typeof customerNeeds>> }
@@ -41,6 +45,8 @@ export type Reply = { text: string; cards: Card[] };
 // Order matters: the first rule that matches wins.
 const RULES: [Intent, RegExp][] = [
   ["complaint", /non (sono|siamo) soddisf|insoddisf|delus|not (happy|satisfied)|unhappy|disappointed|dissatisf|nicht zufrieden|unzufrieden|enttausch|راضی نیستم|راضی نیستیم|ناراضی/],
+  // leaving: the reason is asked on the card (complaints first: "not satisfied" goes to the fix ladder)
+  ["cancel", /disdi(re|co|ciamo)|disdett|annullare (l.?)?abbonament|cancel(l?ing)? (my |our |the )?(subscription|service|plan|contract)|(end|stop) (my |our |the )?(subscription|service)|kundig|abo beenden|vertrag beenden|abonnement beenden|لغو (اشتراک|سرویس|قرارداد)|اشتراک.{0,20}لغو|(می.?خواهم|میخوام) لغو/],
   ["support", /non funziona|non va|errore|guasto|broken|not working|doesn.?t work|error|bug|funktioniert nicht|fehler|kaputt|کار نمی.?کن|خراب|خطا/],
   ["approvals", /approv|conferm|aspett|in attesa|waiting|pending|sign.?off|freigab|bestatig|wartet|تا\u0654?یید|منتظر/],
   ["materials", /material|document|allegat|allego|file|cosa vi serve|cosa serve|what do you need|send you|unterlagen|dokument|was brauchen sie|مدارک|فایل|سند|چه چیزی لازم|چی لازم/],
@@ -99,6 +105,14 @@ export async function replyFor(db: Db, orgId: string, lang: string, intent: Inte
       const open = await openComplaintFor(db, orgId);
       const step: Step | "support" = open ? (open.step === "fix" ? "swap" : "founder") : (await customerProjects(db, orgId)).length ? "fix" : "support";
       return { text: j.complaintAsk[step], cards: [{ type: "complaint", data: { text: userText, step, open: Boolean(open) } }] };
+    }
+    case "cancel": {
+      const subs = (await listServices(db, orgId, lang)).filter((s) => s.status === "active");
+      const open = subs.filter((s) => !s.endsAt);
+      if (!subs.length) return { text: j.cancelNone, cards: [] };
+      if (!open.length) return { text: j.cancelGiven.replace("{d}", fmtDay(subs[0].endsAt!, lang)), cards: [] };
+      const endsOn = new Date(Date.now() + NOTICE_DAYS * 864e5).toISOString().slice(0, 10);
+      return { text: j.cancelAsk.replace("{d}", fmtDay(endsOn, lang)), cards: [{ type: "cancel", data: { subs: open.map((s) => ({ id: s.id, name: s.name, monthlyEur: s.monthlyEur })), endsOn, text: userText } }] };
     }
     case "projects": {
       const pr = await customerProjects(db, orgId);

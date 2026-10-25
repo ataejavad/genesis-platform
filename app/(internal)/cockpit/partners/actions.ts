@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getDb } from "@/db";
 import { requireAdmin } from "@/lib/auth";
 import { AppError } from "@/server/errors";
+import { closeGap, inviteCandidates } from "@/server/supply";
 import { checkDocument, createJob, decideApplication, issuePartnerKey, markPaid, offerJob, sendPartnerMessage } from "@/server/partners";
 
 // Cockpit actions for partners (step 6). Each acts as the signed-in admin and is audited in the module.
@@ -51,6 +52,12 @@ export async function newJob(_: Result, f: FormData): Promise<Result> {
 
 export async function offer(f: FormData) {
   await run((a) => offerJob(getDb(), a, str(f, "job"), Number(str(f, "n") || 3)));
+}
+export async function invite(f: FormData) {
+  await run((a) => inviteCandidates(getDb(), a, str(f, "id")));
+}
+export async function closeGapNow(f: FormData) {
+  await run((a) => closeGap(getDb(), a, str(f, "id")));
 }
 export async function paid(f: FormData) {
   await run((a) => markPaid(getDb(), a, str(f, "payout")));

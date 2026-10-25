@@ -5,7 +5,8 @@ import { organizations, partnerDocuments, partners } from "@/db/schema";
 import { SKILLS, skillLabel } from "@/server/partner-rules";
 import { duePayouts, listJobs, listPartners, matchesFor, partnerInbox, pendingDeliveries } from "@/server/partners";
 import { PageHead } from "@/ui/Shell";
-import { doc, offer, paid, reply } from "./actions";
+import { openGaps } from "@/server/supply";
+import { closeGapNow, doc, invite, offer, paid, reply } from "./actions";
 import { DecideForm, JobForm, KeyForm } from "./Forms";
 
 const eur = (n: number) => `€${n.toLocaleString("en-GB")}`;
@@ -15,10 +16,11 @@ const day = (d: Date) => d.toISOString().slice(0, 10);
 // payouts and messages. Agent partners use /api/v1/partner/* with a partner:work key.
 export default async function CockpitPartners() {
   const db = getDb();
-  const [all, jobRows, toReview, payoutsDue, inbox, docs, customers] = await Promise.all([
+  const [all, jobRows, toReview, payoutsDue, inbox, docs, customers, gaps] = await Promise.all([
     listPartners(db), listJobs(db), pendingDeliveries(db), duePayouts(db), partnerInbox(db),
     db.select({ doc: partnerDocuments, partner: partners.name }).from(partnerDocuments).innerJoin(partners, eq(partners.id, partnerDocuments.partnerId)).where(eq(partnerDocuments.status, "pending")),
     db.select({ id: organizations.id, name: organizations.name }).from(organizations).where(eq(organizations.kind, "customer")),
+    openGaps(db),
   ]);
   const applied = all.filter((x) => x.partner.status === "applied");
   const open = jobRows.filter((j) => ["open", "offered"].includes(j.job.status));
@@ -26,6 +28,26 @@ export default async function CockpitPartners() {
   return (
     <main className="stack">
       <PageHead title="Partners" crumbs="Cockpit › Delivery" sub="Everyone who works for or through us. Every automated match shows its reasons; partners can ask for a human review." />
+
+      <div className="card" id="gaps">
+        <h3>Skills we lack ({gaps.length})</h3>
+        <p className="muted small">Opened by the watchdog when a job finds no partner. Post the text (LinkedIn, job boards, communities), decide pending applicants, invite earlier ones back. A partner with the skill starting closes it.</p>
+        {gaps.length === 0 && <p className="muted">None.</p>}
+        <div className="list">
+          {gaps.map(({ gap: g, candidates }) => (
+            <div key={g.id} className="item" style={{ alignItems: "start", flexWrap: "wrap" }}>
+              <div className="grow"><b>{skillLabel(g.skill, "en")}</b> <span className="muted small">{[g.language, g.country].filter(Boolean).join(" · ")} · since {g.createdAt.toISOString().slice(0, 10)}</span>
+                <pre className="small" style={{ whiteSpace: "pre-wrap", margin: "4px 0" }}>{g.post}</pre>
+                <div className="small">{candidates.length ? <>Earlier applicants: {candidates.map((c) => `${c.name} (${c.status})`).join(", ")}</> : <span className="muted">No earlier applicants with this skill.</span>}</div>
+              </div>
+              <div className="row" style={{ gap: 6 }}>
+                {candidates.some((c) => c.status === "rejected") && <form action={invite}><input type="hidden" name="id" value={g.id} /><button className="btn sm primary" disabled={Boolean(g.invitedAt)}>{g.invitedAt ? "Invited" : "Invite back"}</button></form>}
+                <form action={closeGapNow}><input type="hidden" name="id" value={g.id} /><button className="btn sm">Close</button></form>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       <div className="card">
         <h3>Applications ({applied.length})</h3>

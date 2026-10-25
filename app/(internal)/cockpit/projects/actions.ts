@@ -39,7 +39,7 @@ export async function convert(_: Result, f: FormData): Promise<Result> {
 }
 
 export async function reject(_: Result, f: FormData): Promise<Result> {
-  return act(async (a) => (await rejectOrder(getDb(), a, str(f, "order"), str(f, "note") || "rejected"), "Rejected."), ["/cockpit/projects"]);
+  return act(async (a) => (await rejectOrder(getDb(), a, str(f, "order"), str(f, "note") || "rejected", str(f, "reason") || "other"), "Rejected."), ["/cockpit/projects"]);
 }
 
 export async function newProject(_: Result, f: FormData): Promise<Result> {

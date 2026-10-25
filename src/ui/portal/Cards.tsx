@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { complainNow, confirmBrief, decide, orderPackage, sendRequest } from "./actions";
+import { cancelNow, complainNow, confirmBrief, decide, orderPackage, sendRequest } from "./actions";
 import { journeyCopy } from "@/config/journey-copy";
 import { fmtEur, fmtNum, NUM_LOCALE, type PortalCopy } from "@/config/portal-copy";
 import { metricHow, metricLabel } from "@/server/portal-metrics";
@@ -241,6 +241,34 @@ function ComplaintCard({ data, lang, onDone }: P & { data: Extract<Card, { type:
   );
 }
 
+/** Leaving: which service, why (one press), and the date it ends. Nothing changes until "Give notice". */
+function CancelCard({ data, lang, onDone }: P & { data: Extract<Card, { type: "cancel" }>["data"]; onDone?: (text: string) => void }) {
+  const j = journeyCopy(lang).cancel;
+  const [sub, setSub] = useState(data.subs[0]?.id ?? "");
+  const [reason, setReason] = useState<string | null>(null);
+  const [note, setNote] = useState("");
+  const [state, setState] = useState<string | null>(null);
+  const [pending, start] = useTransition();
+  return (
+    <div className="card pcard stack">
+      <b>{j.title}</b>
+      {state ? <span className="badge ok" role="status">✓ {state}</span> : (
+        <>
+          {data.subs.length > 1 && <select aria-label={j.title} value={sub} onChange={(e) => setSub(e.target.value)}>{data.subs.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select>}
+          <div className="row" role="radiogroup" style={{ flexWrap: "wrap", gap: 6 }}>
+            {Object.entries(j.reasons).map(([id, label]) => <button key={id} type="button" role="radio" aria-checked={reason === id} className={`btn sm${reason === id ? " primary" : ""}`} onClick={() => setReason(id)}>{label}</button>)}
+          </div>
+          <textarea aria-label={j.note} placeholder={j.note} value={note} onChange={(e) => setNote(e.target.value)} style={{ minHeight: 48 }} />
+          <div className="row" style={{ gap: 6 }}>
+            <button className="btn sm" disabled={pending || !reason || !sub} onClick={() => start(async () => { const r = await cancelNow(sub, reason!, note); if (r.ok) { setState(r.text); onDone?.(r.text); } })}>{j.confirm}</button>
+            <button className="btn sm primary" onClick={() => { setState(j.kept); onDone?.(j.kept); }}>{j.keep}</button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 /** What we still need for each project; pressing one asks for it in the conversation. */
 export function NeedsCard({ data, t, onSend }: P & { data: Extract<Card, { type: "needs" }>["data"]; onSend?: (text: string) => void }) {
   return (
@@ -268,6 +296,7 @@ export function CardView({ card, t, lang, onDone, onSend }: P & { card: Card; on
     case "confirm": return <ConfirmCard card={card} t={t} lang={lang} onDone={onDone} />;
     case "brief": return <BriefCard data={card.data} t={t} lang={lang} onDone={onDone} />;
     case "complaint": return <ComplaintCard data={card.data} t={t} lang={lang} onDone={onDone} />;
+    case "cancel": return <CancelCard data={card.data} t={t} lang={lang} onDone={onDone} />;
     case "link": return <Link className="btn sm" href={card.href}>{card.label} →</Link>;
   }
 }

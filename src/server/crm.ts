@@ -14,6 +14,7 @@ import { loadResearch } from "./hubs";
 import { recordOutcome } from "./improve";
 import { cancelOpen, getSwitches, planTouches, planWarmCall, reachOf } from "./outreach";
 import { LEGAL_BASES, LINKEDIN_DAILY, channelCheck } from "./outreach-rules";
+import { LOSS_REASONS, type LossReason, recordLoss } from "./service";
 
 /*
  * CRM (doc 15 §6ب گام ۴). One row per company, whether the company agent found it (outbound) or it came to us
@@ -169,7 +170,7 @@ export async function prospectFromCheckup(tx: DbOrTx, actor: Actor, checkupId: s
 }
 
 /** Moves a company forward (never back), stamps every step it passed, and stops the sequence once it answers. */
-export async function moveStage(tx: DbOrTx, actor: Actor, id: string, stage: string, now: Date, why: string) {
+export async function moveStage(tx: DbOrTx, actor: Actor, id: string, stage: string, now: Date, why: string, reason?: LossReason) {
   const [p] = await tx.select().from(prospects).where(eq(prospects.id, id)).for("update");
   if (!p) throw notFound("company");
   if (p.stage === "do_not_contact" || p.stage === stage) return p.stage;
@@ -180,7 +181,10 @@ export async function moveStage(tx: DbOrTx, actor: Actor, id: string, stage: str
     const reached = terminal ? s === stage : RANK[s] !== undefined && RANK[s] <= RANK[stage];
     if (reached && !p[col]) set[col] = now;
   }
+  // a lost deal keeps its reason (three of the same in 30 days become a sales lesson)
+  if (stage === "lost") set.lostReason = reason ?? "other";
   await tx.update(prospects).set(set).where(eq(prospects.id, id));
+  if (stage === "lost") await recordLoss(tx, actor, "deal", reason ?? "other", now);
   if (terminal || RANK[stage] >= RANK.replied) await cancelOpen(tx, id, `stopped: ${stage}`);
   // they answered on LinkedIn or email: a person may call at once (only when Javad switched warm calls on)
   if (stage === "replied" && p.source !== "checkup") await planWarmCall(tx, id, now);
@@ -192,9 +196,10 @@ export async function moveStage(tx: DbOrTx, actor: Actor, id: string, stage: str
   return stage;
 }
 
-export async function setStage(db: Db, actor: Actor, id: string, stage: string, note?: string) {
+export async function setStage(db: Db, actor: Actor, id: string, stage: string, note?: string, reason?: string) {
   const s = z.enum(STAGES).parse(stage);
-  return db.transaction((tx) => moveStage(tx, actor, id, s, new Date(), note || "set by hand"));
+  const r = reason ? z.enum(LOSS_REASONS).parse(reason) : undefined;
+  return db.transaction((tx) => moveStage(tx, actor, id, s, new Date(), note || "set by hand", r));
 }
 
 export async function unsubscribeLead(tx: DbOrTx, prospectId: string) {

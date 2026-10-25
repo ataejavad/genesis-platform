@@ -7,6 +7,7 @@ import { AppError } from "@/server/errors";
 import { eraseCustomer } from "@/server/privacy";
 import { quoteRequest } from "@/server/brief";
 import { escalate, resolveComplaint } from "@/server/complaints";
+import { cancelSubscription, keepSubscription, recordCost } from "@/server/service";
 import { addGoal, addOutcome, addSubscription, answerRequest, askCustomerApproval, createCustomer } from "@/server/portal";
 
 // Cockpit actions for customer accounts (step 5). Each acts as the signed-in admin and is audited in the module.
@@ -60,6 +61,16 @@ export async function quote(f: FormData) {
 }
 export async function complaint(f: FormData) {
   await run((a) => (str(f, "do") === "escalate" ? escalate(getDb(), a, str(f, "id"), str(f, "note")) : resolveComplaint(getDb(), a, str(f, "id"), str(f, "note"))));
+}
+export async function cost(f: FormData) {
+  await run((a) => recordCost(getDb(), a, { subscriptionId: str(f, "sub"), period: str(f, "period"), label: str(f, "label"), kind: str(f, "kind") as "usage", amountEur: num(f, "eur") }));
+}
+export async function cancelFor(f: FormData) {
+  const [org, sub] = str(f, "sub").split(":");
+  await run((a) => cancelSubscription(getDb(), a, org, sub, str(f, "reason"), str(f, "note") || undefined));
+}
+export async function keep(f: FormData) {
+  await run((a) => keepSubscription(getDb(), a, str(f, "id")));
 }
 export async function goal(f: FormData) {
   await run((a) => addGoal(getDb(), a, { orgId: str(f, "org"), metric: str(f, "metric"), title: { [str(f, "lang") || "en"]: str(f, "title"), en: str(f, "title") }, baseline: num(f, "baseline"), target: num(f, "target"), unit: str(f, "unit") }));

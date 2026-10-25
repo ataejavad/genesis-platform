@@ -168,6 +168,7 @@ export async function listServices(db: Db, orgId: string, lang: string, now = ne
       monthlyEur: s.monthlyEur,
       status: s.status,
       since: s.startedAt.toISOString().slice(0, 10),
+      endsAt: s.endsAt ? s.endsAt.toISOString().slice(0, 10) : null,
       month: { eur: mine.reduce((a, m) => a + m.eur, 0), metrics: mine.map((m) => ({ metric: m.metric, value: Math.round(m.value) })) },
     };
   });
