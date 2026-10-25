@@ -1,0 +1,290 @@
+{
+  "industry": "installers",
+  "country": "IT",
+  "nace": ["F43.21", "F43.22", "F43.29"],
+  "researchedAt": "2026-10-23",
+  "researcher": "hub-builder research step, run in a Claude session (no API key yet)",
+  "name": {
+    "it": "Impiantisti e installatori",
+    "en": "Installers: electrical, plumbing, heating and cooling",
+    "fa": "نصاب‌ها و تأسیساتی‌ها (برق، لوله‌کشی، گرمایش، سرمایش)"
+  },
+  "tagline": {
+    "it": "Scadenze, incentivi e strumenti per chi installa impianti in Italia. Aggiornato ogni settimana, con le fonti.",
+    "en": "Deadlines, incentives and tools for installers in Italy. Updated weekly, with sources.",
+    "fa": "مهلت‌ها، مشوق‌ها و ابزارها برای نصاب‌های تأسیسات در ایتالیا. هر هفته به‌روز، با منبع."
+  },
+  "overview": {
+    "text": {
+      "it": "Elettricisti, idraulici, termotecnici e frigoristi sono il cuore dei lavori specializzati: in Italia il settore conta oltre un milione di occupati. Il lavoro c'è (pompe di calore, fotovoltaico, ristrutturazioni), ma le imprese sono schiacciate tra pratiche per gli incentivi, nuove regole sui gas refrigeranti e mancanza di personale.",
+      "en": "Electricians, plumbers, heating and cooling technicians are the core of specialised construction: in Italy the sector employs over one million people. Demand is there (heat pumps, solar, renovations), but firms are squeezed between incentive paperwork, new refrigerant rules and a shortage of staff.",
+      "fa": "برق‌کارها، لوله‌کش‌ها و تکنسین‌های گرمایش و سرمایش هسته اصلی کارهای تخصصی ساختمانی‌اند: این بخش در ایتالیا بیش از یک میلیون نفر شاغل دارد. کار هست (پمپ حرارتی، خورشیدی، بازسازی)، اما شرکت‌ها بین کاغذبازی مشوق‌ها، قوانین تازه گازهای مبرد و کمبود نیرو گیر افتاده‌اند."
+    },
+    "sources": [
+      { "name": "Eurostat sbs_sc_ovw 2024 (via market-selection run 2026-10-23)", "url": "https://ec.europa.eu/eurostat/databrowser/view/sbs_sc_ovw/default/table", "date": "2026-10-23", "kind": "official" }
+    ]
+  },
+  "pains": [
+    {
+      "text": {
+        "it": "Pratiche per incentivi e nuove piattaforme (Conto Termico, bonus casa, Modello Unico per le rinnovabili) assorbono ore di ufficio.",
+        "en": "Incentive paperwork and new platforms (Conto Termico, home bonuses, the single form for renewables) eat office hours.",
+        "fa": "کاغذبازی مشوق‌ها و سامانه‌های تازه (Conto Termico، بن‌های بازسازی، فرم واحد انرژی‌های تجدیدپذیر) ساعت‌ها وقت دفتری می‌گیرد."
+      },
+      "sources": [
+        { "name": "Confartigianato", "url": "https://www.confartigianato.it/2026/10/rinnovabili-gli-installatori-al-ministero-dellambiente-servono-chiarimenti-urgenti-sul-nuovo-modello-unico/", "date": "2026-10-08", "kind": "association" }
+      ]
+    },
+    {
+      "text": {
+        "it": "Trovare tecnici è sempre più difficile: le imprese artigiane del settore diminuiscono e i posti vacanti nelle costruzioni sono al 2,5%.",
+        "en": "Finding technicians keeps getting harder: artisan firms are shrinking and construction job vacancies are at 2.5%.",
+        "fa": "پیدا کردن تکنسین هر روز سخت‌تر است: شرکت‌های پیشه‌وری کم می‌شوند و نرخ جای خالی شغلی در ساختمان ۲٫۵٪ است."
+      },
+      "sources": [
+        { "name": "ItaliaOggi", "url": "https://www.italiaoggi.it/diritto-e-fisco/lavoro-e-previdenza/trovare-un-idraulico-o-un-elettricista-sara-sempre-piu-difficile-crollano-gli-artigiani-in-italia-a130ja46", "date": "2026-10-23", "kind": "press" },
+        { "name": "Eurostat jvs_a_rate_r2", "url": "https://ec.europa.eu/eurostat/databrowser/view/jvs_a_rate_r2/default/table", "date": "2026-10-23", "kind": "official" }
+      ]
+    },
+    {
+      "text": {
+        "it": "Rapportini di intervento, preventivi e agenda spesso ancora su carta o WhatsApp: si fattura tardi e si perdono ore.",
+        "en": "Job reports, quotes and scheduling often still on paper or WhatsApp: invoices go out late and hours are lost.",
+        "fa": "گزارش کار، پیش‌فاکتور و برنامه‌ریزی اغلب هنوز روی کاغذ یا واتس‌اپ است: فاکتور دیر صادر می‌شود و ساعت‌ها هدر می‌رود."
+      },
+      "sources": [
+        { "name": "TeamSystem Magazine", "url": "https://www.teamsystem.com/magazine/construction/gestione-digitale-rapporti-intervento/", "date": "2026-10-23", "kind": "press" }
+      ]
+    },
+    {
+      "text": {
+        "it": "I costi dell'energia sono saliti molto in pochi mesi e i clienti chiedono come risparmiare.",
+        "en": "Energy costs rose sharply within a few months, and customers ask how to save.",
+        "fa": "هزینه انرژی در چند ماه به‌شدت بالا رفته و مشتری‌ها می‌پرسند چطور صرفه‌جویی کنند."
+      },
+      "sources": [
+        { "name": "Nordest24 (CNA Padova e Rovigo)", "url": "https://www.nordest24.it/padova-giornata-impiantista-2026-costi-energia-aumenti-70-percento", "date": "2026-10-03", "kind": "press" }
+      ]
+    }
+  ],
+  "deadlines": [
+    {
+      "id": "bonus-casa-2026",
+      "tags": ["heatpump", "clima", "solar", "boiler", "electric"],
+      "date": "2026-12-31",
+      "title": {
+        "it": "Ultimo anno del bonus casa al 50% sulla prima casa",
+        "en": "Last year of the 50% home-renovation bonus on main homes",
+        "fa": "آخرین سال بن بازسازی ۵۰٪ برای خانه اصلی"
+      },
+      "what": {
+        "it": "Nel 2026 bonus ristrutturazioni ed ecobonus restano al 50% per l'abitazione principale e al 36% per gli altri immobili. Dal 2027 il bonus ristrutturazioni scende al 36% (prima casa) e al 30% (altri immobili). Le caldaie solo a gas sono escluse.",
+        "en": "In 2026 the renovation bonus and ecobonus stay at 50% for main homes and 36% for other properties. From 2027 the renovation bonus drops to 36% (main home) and 30% (others). Gas-only boilers are excluded.",
+        "fa": "در ۲۰۲۶ بن بازسازی و اکوبونوس برای خانه اصلی ۵۰٪ و برای بقیه ملک‌ها ۳۶٪ می‌ماند. از ۲۰۲۷ بن بازسازی به ۳۶٪ (خانه اصلی) و ۳۰٪ (بقیه) می‌رسد. دیگ‌های فقط گازی مشمول نیستند."
+      },
+      "offer": {
+        "it": "Campagna \"ultimi mesi al 50%\" ai tuoi clienti e preventivi pronti in giornata.",
+        "en": "A \"last months at 50%\" campaign to your customers and same-day quotes.",
+        "fa": "کمپین «آخرین ماه‌های ۵۰٪» برای مشتری‌هایتان و پیش‌فاکتور همان روز."
+      },
+      "sources": [
+        { "name": "Ediltecnico", "url": "https://ediltecnico.it/bonus-edilizi-2026-legge-di-bilancio/", "date": "2026-10-23", "kind": "press" },
+        { "name": "QuiFinanza", "url": "https://quifinanza.it/fisco-tasse/bonus-fiscali/bonus-casa-2026-manovra/933215/", "date": "2026-10-23", "kind": "press" }
+      ]
+    },
+    {
+      "id": "fgas-2027",
+      "tags": ["heatpump", "clima"],
+      "date": "2027-01-01",
+      "title": {
+        "it": "F-gas: stop ai nuovi split aria-acqua fino a 12 kW con GWP ≥ 150",
+        "en": "F-gas: ban on new split air-to-water units up to 12 kW with GWP ≥ 150",
+        "fa": "F-gas: ممنوعیت فروش اسپلیت‌های هوا-آب تا ۱۲ کیلووات با GWP ≥ ۱۵۰"
+      },
+      "what": {
+        "it": "Dal 1° gennaio 2027 il Regolamento (UE) 2024/573 vieta di immettere sul mercato pompe di calore split aria-acqua fino a 12 kW con gas a GWP pari o superiore a 150 (ad esempio R32), salvo esigenze di sicurezza. Gli split aria-aria seguono nel 2029.",
+        "en": "From 1 January 2027 Regulation (EU) 2024/573 bans placing on the market split air-to-water heat pumps up to 12 kW with gases of GWP 150 or more (for example R32), unless safety requires it. Split air-to-air units follow in 2029.",
+        "fa": "از ۱ ژانویه ۲۰۲۷، مقررات (EU) 2024/573 عرضه پمپ‌های حرارتی اسپلیت هوا-آب تا ۱۲ کیلووات با گاز GWP ۱۵۰ یا بیشتر (مثلاً R32) را ممنوع می‌کند، مگر به دلیل ایمنی. اسپلیت‌های هوا-هوا در ۲۰۲۹."
+      },
+      "offer": {
+        "it": "Piano scorte e listino: quali modelli vendere entro fine 2026 e preventivi con le alternative a basso GWP.",
+        "en": "Stock and price-list plan: which models to sell by end of 2026, and quotes with low-GWP alternatives.",
+        "fa": "برنامه انبار و لیست قیمت: کدام مدل‌ها را تا پایان ۲۰۲۶ بفروشید، و پیش‌فاکتور با جایگزین‌های کم‌GWP."
+      },
+      "sources": [
+        { "name": "European Commission, DG Climate Action", "url": "https://climate.ec.europa.eu/eu-action/fluorinated-greenhouse-gases/climate-friendly-alternatives-f-gases/air-conditioning_en", "date": "2026-10-23", "kind": "official" },
+        { "name": "Castel (summary of Reg. 2024/573)", "url": "https://castel.it/wp-content/uploads/2024/03/2024_NEW_F_GAS_Regulation_Castel.pdf", "date": "2026-10-23", "kind": "press" }
+      ]
+    },
+    {
+      "id": "conto-termico-3",
+      "tags": ["heatpump", "solar", "boiler"],
+      "date": null,
+      "title": {
+        "it": "Conto Termico 3.0: fino al 65% per le pompe di calore",
+        "en": "Conto Termico 3.0: up to 65% for heat pumps",
+        "fa": "Conto Termico 3.0: تا ۶۵٪ برای پمپ حرارتی"
+      },
+      "what": {
+        "it": "Il decreto MASE del 7 agosto 2025 (Gazzetta Ufficiale del 26 settembre 2025) è in vigore dal 25 dicembre 2025. I privati ottengono fino al 65% per pompe di calore e altri impianti da rinnovabili; la domanda al GSE si presenta dopo la fine dei lavori tramite Portaltermico.",
+        "en": "The MASE decree of 7 August 2025 (Official Gazette, 26 September 2025) applies since 25 December 2025. Private owners get up to 65% for heat pumps and other renewable heating; the GSE application is filed after the works are finished, through Portaltermico.",
+        "fa": "فرمان وزارت محیط‌زیست ایتالیا (۷ اوت ۲۰۲۵، روزنامه رسمی ۲۶ سپتامبر ۲۰۲۵) از ۲۵ دسامبر ۲۰۲۵ اجرا می‌شود. اشخاص تا ۶۵٪ برای پمپ حرارتی و گرمایش تجدیدپذیر می‌گیرند؛ درخواست پس از پایان کار از طریق Portaltermico به GSE داده می‌شود."
+      },
+      "offer": {
+        "it": "Pratica Conto Termico completa per i tuoi clienti: documenti, foto, invio al GSE e controllo dei tempi.",
+        "en": "A complete Conto Termico file for your customers: documents, photos, GSE filing and deadline tracking.",
+        "fa": "پرونده کامل Conto Termico برای مشتری‌ها: مدارک، عکس، ارسال به GSE و پیگیری مهلت‌ها."
+      },
+      "sources": [
+        { "name": "Informazione Fiscale", "url": "https://www.informazionefiscale.it/Conto-Termico-3-0-decreto-Gazzetta-Ufficiale-bonus-65-per-cento-privati", "date": "2026-10-23", "kind": "press" },
+        { "name": "Ediltecnico", "url": "https://ediltecnico.it/conto-termico-3-0/", "date": "2026-10-23", "kind": "press" }
+      ]
+    },
+    {
+      "id": "inps-5c",
+      "tags": ["all"],
+      "date": "2026-10-23",
+      "title": {
+        "it": "INPS: dal 23 ottobre la dichiarazione per tornare ai codici 4X/5C",
+        "en": "INPS: from 23 October, the declaration to move back to codes 4X/5C",
+        "fa": "INPS: از ۲۳ اکتبر، اظهارنامه برای بازگشت به کدهای 4X/5C"
+      },
+      "what": {
+        "it": "Con il messaggio n. 3145 del 5 ottobre 2026, l'INPS consente alle imprese artigiane di installazione impianti la cui attività principale non è la costruzione di edifici di presentare, dal 23 ottobre 2026, una dichiarazione per l'attribuzione dei codici di autorizzazione 4X e 5C (al posto del 5G).",
+        "en": "With message no. 3145 of 5 October 2026, INPS lets artisan installation firms whose main activity is not building construction file, from 23 October 2026, a declaration to be assigned authorisation codes 4X and 5C (instead of 5G).",
+        "fa": "INPS با پیام شماره ۳۱۴۵ (۵ اکتبر ۲۰۲۶) به شرکت‌های پیشه‌وری نصب تأسیسات که کار اصلی‌شان ساخت ساختمان نیست اجازه می‌دهد از ۲۳ اکتبر ۲۰۲۶ اظهارنامه بدهند تا کدهای 4X و 5C (به‌جای 5G) بگیرند."
+      },
+      "offer": {
+        "it": "Verifica con il tuo consulente del lavoro: ti prepariamo la lista dei dati necessari.",
+        "en": "Check with your payroll consultant: we prepare the list of data needed.",
+        "fa": "با مشاور حقوق و دستمزد خود چک کنید: ما فهرست اطلاعات لازم را آماده می‌کنیم."
+      },
+      "sources": [
+        { "name": "Fiscal Focus", "url": "https://www.fiscal-focus.it/quotidiano/il-quotidiano/articoli-lavoro/installatori-artigiani-inps-interviene-sul-codice-5g-dal-23-ottobre-le-domande-per-tornare-a-5c,3,188682", "date": "2026-10-06", "kind": "press" },
+        { "name": "Fisco e Prassi", "url": "https://fiscoeprassi.it/banca_dati/impiantisti-artigiani-dal-23-ottobre-dichiarazione-inps-per-i-codici-4x-e-5c/", "date": "2026-10-23", "kind": "press" }
+      ]
+    },
+    {
+      "id": "patente-crediti",
+      "tags": ["site"],
+      "date": null,
+      "title": {
+        "it": "Patente a crediti obbligatoria nei cantieri",
+        "en": "Credit-based licence required on construction sites",
+        "fa": "گواهی امتیازی (Patente a crediti) در کارگاه‌های ساختمانی الزامی است"
+      },
+      "what": {
+        "it": "Dal 1° ottobre 2024 imprese e lavoratori autonomi che operano fisicamente in cantieri temporanei o mobili devono avere la patente a crediti (D.L. 19/2024, art. 27 D.Lgs. 81/2008): si parte da 30 crediti e servono almeno 15 per lavorare. Esenti le imprese con SOA dalla III classifica. Senza patente la sanzione è di almeno 6.000 euro.",
+        "en": "Since 1 October 2024, firms and self-employed people working physically on temporary or mobile sites need the credit-based licence (Decree-Law 19/2024, art. 27 Legislative Decree 81/2008): you start with 30 credits and need at least 15 to work. Firms with SOA class III or higher are exempt. Working without it costs at least €6,000.",
+        "fa": "از ۱ اکتبر ۲۰۲۴ شرکت‌ها و کارکنان مستقلی که در کارگاه‌های موقت یا سیار کار می‌کنند باید گواهی امتیازی داشته باشند (D.L. 19/2024): شروع با ۳۰ امتیاز و حداقل ۱۵ امتیاز برای کار. شرکت‌های دارای SOA رده III به بالا معاف‌اند. کار بدون گواهی دست‌کم ۶٬۰۰۰ یورو جریمه دارد."
+      },
+      "offer": {
+        "it": "Controllo crediti e documenti di sicurezza in un'unica scheda per ogni cantiere.",
+        "en": "Credits and safety documents checked in one sheet per site.",
+        "fa": "کنترل امتیازها و مدارک ایمنی در یک برگه برای هر کارگاه."
+      },
+      "sources": [
+        { "name": "Euroconference News (circolare INL n. 4/2024)", "url": "https://www.ecnews.it/lavoro/news-del-giorno/patente-crediti-nei-cantieri-le-prime-istruzioni-inl/", "date": "2026-10-23", "kind": "press" },
+        { "name": "LentePubblica", "url": "https://lentepubblica.it/cittadini-e-imprese/patente-crediti-cantiere-edilizio/", "date": "2026-10-23", "kind": "press" }
+      ]
+    }
+  ],
+  "news": [
+    {
+      "date": "2026-10-08",
+      "publisher": "Confartigianato",
+      "url": "https://www.confartigianato.it/2026/10/rinnovabili-gli-installatori-al-ministero-dellambiente-servono-chiarimenti-urgenti-sul-nuovo-modello-unico/",
+      "title": {
+        "it": "Rinnovabili, gli installatori chiedono al MASE chiarimenti urgenti sul nuovo Modello Unico",
+        "en": "Renewables: installers ask the Environment Ministry for urgent clarity on the new single form",
+        "fa": "انرژی تجدیدپذیر: نصاب‌ها از وزارت محیط‌زیست توضیح فوری درباره فرم واحد تازه می‌خواهند"
+      },
+      "takeaway": {
+        "it": "Responsabilità dell'installatore e tempi di invio non sono ancora chiari: conviene tenere traccia di ogni pratica inviata.",
+        "en": "Installer liability and filing deadlines are still unclear: keep a record of every form you submit.",
+        "fa": "مسئولیت نصاب و مهلت‌های ارسال هنوز روشن نیست: از هر فرم ارسالی سابقه نگه دارید."
+      }
+    },
+    {
+      "date": "2026-10-06",
+      "publisher": "Fiscal Focus",
+      "url": "https://www.fiscal-focus.it/quotidiano/il-quotidiano/articoli-lavoro/installatori-artigiani-inps-interviene-sul-codice-5g-dal-23-ottobre-le-domande-per-tornare-a-5c,3,188682",
+      "title": {
+        "it": "Installatori artigiani: l'INPS interviene sul codice 5G, dal 23 ottobre le domande per tornare al 5C",
+        "en": "Artisan installers: INPS acts on code 5G; applications to return to 5C from 23 October",
+        "fa": "نصاب‌های پیشه‌ور: INPS درباره کد 5G اقدام کرد؛ درخواست بازگشت به 5C از ۲۳ اکتبر"
+      },
+      "takeaway": {
+        "it": "Riguarda il tuo inquadramento previdenziale: parlane subito con il consulente del lavoro.",
+        "en": "It affects your social-security classification: talk to your payroll consultant now.",
+        "fa": "به طبقه‌بندی بیمه‌ای شما مربوط است: همین حالا با مشاور حقوق صحبت کنید."
+      }
+    },
+    {
+      "date": "2026-10-03",
+      "publisher": "Nordest24",
+      "url": "https://www.nordest24.it/padova-giornata-impiantista-2026-costi-energia-aumenti-70-percento",
+      "title": {
+        "it": "Padova, energia elettrica +70% in tre mesi: oltre 200 impiantisti a confronto",
+        "en": "Padua: electricity costs +70% in three months; over 200 installers meet",
+        "fa": "پادووا: هزینه برق در سه ماه ۷۰٪ بالا رفت؛ نشست بیش از ۲۰۰ نصاب"
+      },
+      "takeaway": {
+        "it": "Clienti più attenti ai consumi: buon momento per proporre pompe di calore ed efficienza, con gli incentivi ancora alti.",
+        "en": "Customers care more about consumption: a good moment to offer heat pumps and efficiency while incentives are still high.",
+        "fa": "مشتری‌ها به مصرف حساس‌ترند: زمان خوبی برای پیشنهاد پمپ حرارتی و بهینه‌سازی، تا وقتی مشوق‌ها هنوز بالاست."
+      }
+    }
+  ],
+  "solutions": [
+    {
+      "title": { "it": "Rapportini e agenda digitali", "en": "Digital job reports and scheduling", "fa": "گزارش کار و برنامه‌ریزی دیجیتال" },
+      "outcome": { "it": "Rapportino firmato sul telefono e fattura lo stesso giorno.", "en": "Job report signed on the phone and invoiced the same day.", "fa": "گزارش کار روی گوشی امضا می‌شود و همان روز فاکتور می‌رود." }
+    },
+    {
+      "title": { "it": "Pratiche incentivi senza carta", "en": "Paperless incentive files", "fa": "پرونده مشوق‌ها بدون کاغذ" },
+      "outcome": { "it": "Conto Termico, bonus casa e Modello Unico pronti con tutti i documenti e le scadenze sotto controllo.", "en": "Conto Termico, home bonuses and the single form ready with every document, deadlines tracked.", "fa": "Conto Termico، بن‌های بازسازی و فرم واحد با همه مدارک آماده و مهلت‌ها زیر کنترل." }
+    },
+    {
+      "title": { "it": "Nessuna chiamata persa", "en": "No missed calls", "fa": "هیچ تماسی از دست نمی‌رود" },
+      "outcome": { "it": "Le richieste di intervento e preventivo arrivano in agenda anche quando sei in cantiere.", "en": "Service and quote requests land in your calendar even while you are on site.", "fa": "درخواست‌های سرویس و پیش‌فاکتور حتی وقتی سر کار هستید وارد تقویم می‌شوند." }
+    },
+    {
+      "title": { "it": "Preventivi rapidi e conformi", "en": "Fast, compliant quotes", "fa": "پیش‌فاکتور سریع و مطابق قوانین" },
+      "outcome": { "it": "Preventivo in giornata con listini aggiornati, incentivo applicabile e alternative a basso GWP.", "en": "Same-day quote with current price lists, the applicable incentive and low-GWP alternatives.", "fa": "پیش‌فاکتور همان روز با قیمت‌های به‌روز، مشوق قابل‌اعمال و جایگزین‌های کم‌GWP." }
+    }
+  ],
+  "hook": {
+    "id": "scadenzario",
+    "title": { "it": "Quali scadenze e incentivi valgono per te?", "en": "Which deadlines and incentives apply to you?", "fa": "کدام مهلت‌ها و مشوق‌ها شامل شما می‌شود؟" },
+    "promise": { "it": "30 secondi, gratis. Ricevi l'elenco personale e, se vuoi, un promemoria prima di ogni scadenza.", "en": "30 seconds, free. Get your personal list and, if you like, a reminder before each deadline.", "fa": "۳۰ ثانیه، رایگان. فهرست شخصی‌تان را بگیرید و اگر بخواهید پیش از هر مهلت یادآوری." },
+    "questions": [
+      {
+        "id": "work",
+        "multi": true,
+        "label": { "it": "Cosa installi?", "en": "What do you install?", "fa": "چه چیزی نصب می‌کنید؟" },
+        "options": [
+          { "tag": "heatpump", "label": { "it": "Pompe di calore", "en": "Heat pumps", "fa": "پمپ حرارتی" } },
+          { "tag": "clima", "label": { "it": "Climatizzatori", "en": "Air conditioners", "fa": "کولر گازی" } },
+          { "tag": "solar", "label": { "it": "Fotovoltaico e solare termico", "en": "Solar PV and solar thermal", "fa": "خورشیدی" } },
+          { "tag": "boiler", "label": { "it": "Caldaie", "en": "Boilers", "fa": "دیگ و پکیج" } },
+          { "tag": "electric", "label": { "it": "Impianti elettrici", "en": "Electrical systems", "fa": "تأسیسات برق" } }
+        ]
+      },
+      {
+        "id": "site",
+        "multi": false,
+        "label": { "it": "Lavori anche in cantieri edili?", "en": "Do you also work on building sites?", "fa": "در کارگاه‌های ساختمانی هم کار می‌کنید؟" },
+        "options": [
+          { "tag": "site", "label": { "it": "Sì", "en": "Yes", "fa": "بله" } },
+          { "tag": "", "label": { "it": "No", "en": "No", "fa": "نه" } }
+        ]
+      }
+    ]
+  },
+  "kpi": {
+    "name": "Opt-in qualificati al mese dallo scadenzario",
+    "target": 40,
+    "northStar": "Check-up prenotati da questo hub"
+  }
+}

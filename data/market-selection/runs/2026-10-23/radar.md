@@ -1,0 +1,12 @@
+# Regulatory opportunity radar (2026-10-23)
+
+| Obligation | Countries | Who (NACE, size) | Deadline | Severity | Urgency now | Our offer | Source |
+|---|---|---|---|---|---|---|---|
+| EU: deforestation-free supply chains (EUDR) | EU | C10 C11 C15 C16 C17 C18 C22 C31 G46, ≥50 staff | 2026-12-30 (then 2027-06-30: micro and small operators) | 3 | 1 | EUDR set-up: supplier data collection, platform, filing routine | [link](https://www.stibbe.com/publications-and-insights/the-amended-eudr-what-has-changed-and-what-has-remained) |
+| EU: battery passport | EU | C27 C29 C30 G45 G46, ≥0 staff | 2027-02-18 | 3 | 1 | Battery passport set-up with a DPP platform and data from suppliers | [link](https://circulareconomy.europa.eu/node/10371) |
+| EU: AI Act high-risk duties (Annex III, e.g. AI in hiring) | EU | N78 P85, ≥0 staff | 2027-12-02 (then 2028-08-02: AI in products under Annex I (machinery, medical devices…)) | 3 | 1 | AI compliance check of tools in use + governance routine | [link](https://www.orrick.com/en/Insights/2026/05/EUs-Digital-Omnibus-on-AI-7-Key-Changes-You-Need-to-Know) |
+| Germany: NIS2 cybersecurity duties | DE | D35 E36-E39 H49-H53 J61 J62 J63 C10-C11 C20 C21 C26-C30 C32 M72 Q86, ≥50 staff | 2025-12-06 | 3 | 0.7 | NIS2 readiness package: gap check, ISMS tool, managed security partner, monthly report | [link](https://www.ihk.de/darmstadt/produktmarken/digitalisierung/datenschutz-und-it-sicherheit2/nis-2-pflichten-fuer-unternehmen-6218248) |
+| Germany: B2B e-invoices (issuing) | DE | ALL, ≥0 staff, > 800k € turnover | 2027-01-01 (then 2028-01-01: all other firms (Kleinunternehmer exempt from issuing)) | 2 | 1 | E-invoice switch-over: connect existing ERP/accounting, automate inbound invoice capture with AI | [link](https://www.advisori.de/en/blog/e-invoicing-mandate-germany) |
+| Italy: NIS2 cybersecurity duties | IT | D35 E36-E39 H49-H53 J61 J62 J63 C10-C11 C20 C21 C26-C30 C32 M72 Q86, ≥50 staff | 2024-10-16 | 3 | 0.3 | NIS2 readiness package (Italian) | D.Lgs. 138/2024 (Gazzetta Ufficiale 2024-10-01, in force 2024-10-16); ACN NIS portal |
+| EU: European Accessibility Act | EU | G47 H49-H51 J58 J61, ≥10 staff | 2025-06-28 | 2 | 0.3 | Accessibility audit and fix of shop/booking site | [link](https://eur-lex.europa.eu/eli/dir/2019/882/oj) |
+| EU: e-invoicing for cross-border B2B (ViDA) | EU | ALL, ≥0 staff | 2030-07-01 | 2 | 0.2 | Same e-invoicing stack, extended to cross-border reporting | [link](https://www.truecommerce.com/blog/vida-e-invoicing-requirements/) |
