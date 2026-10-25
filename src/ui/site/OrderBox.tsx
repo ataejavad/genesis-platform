@@ -40,8 +40,8 @@ export function OrderBox({ locale, plans }: { locale: string; plans: { name: str
       {step === "done" && (
         <div className="stack">
           <span className="badge ok" style={{ justifySelf: "start" }}>✓ {fa ? "سفارش ثبت شد" : "Order placed"}</span>
-          <p>{fa ? "فاکتور با اطلاعات SEPA به ایمیل شما رفت. پس از پرداخت، این محصول خودکار در «اپ‌های من» فعال می‌شود." : "The invoice with SEPA details is in your inbox. After payment the product activates automatically in My Apps."}</p>
-          <Link className="btn primary" href="/portal/apps">{fa ? "دیدن «اپ‌های من»" : "Go to My Apps"}</Link>
+          <p>{fa ? "فاکتور با اطلاعات SEPA به ایمیل شما رفت. پس از پرداخت، این محصول خودکار در «خدمات من» فعال می‌شود." : "The invoice with SEPA details is in your inbox. After payment the product starts automatically under My services."}</p>
+          <Link className="btn primary" href="/portal/services">{fa ? "دیدن «خدمات من»" : "Go to My services"}</Link>
         </div>
       )}
     </aside>

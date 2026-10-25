@@ -36,6 +36,13 @@
       "when": 1792782863785,
       "tag": "0004_outbound-crm",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792923683013,
+      "tag": "0005_customer-portal",
+      "breakpoints": true
     }
   ]
 }

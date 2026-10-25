@@ -39,7 +39,8 @@ npm run local
 ```
 
 Opens on http://localhost:3000 with sample pages; the cockpit is http://localhost:3000/cockpit
-(`admin@local.test` / `local-demo-password`). Data lives in `./.localdb` (PGlite). Telegram and the worker are off in this mode.
+(`admin@local.test` / `local-demo-password`) and the customer dashboard http://localhost:3000/portal
+(demo customer `customer@local.test` / `local-demo-password`). Data lives in `./.localdb` (PGlite). Telegram and the worker are off in this mode.
 
 ## Run locally with Postgres
 

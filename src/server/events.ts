@@ -17,7 +17,13 @@ export type EventType =
   | "outreach.approved"
   | "outreach.switch_changed"
   | "company_page.viewed"
-  | "whatsapp.received";
+  | "whatsapp.received"
+  | "customer.created"
+  | "subscription.started"
+  | "outcome.recorded"
+  | "customer_approval.requested"
+  | "customer_approval.decided"
+  | "customer_request.created";
 
 // Call inside the same transaction as the change it describes (transactional outbox).
 export async function emit(

@@ -269,3 +269,47 @@ a.tile:hover { border-color: var(--brand); text-decoration: none; }
 .concierge .conversation .chatlog { max-height: 460px; }
 .conversation .msg.them .checkup-report { margin-top: 8px; color: var(--fg); }
 .conversation .chips { flex-wrap: wrap; }
+
+/* ── Customer dashboard: home conversation (doc 15 §6و, 2026-10-25) ── */
+.pchat { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 18px; align-items: start; }
+.pthreads { position: sticky; top: 80px; display: grid; gap: 4px; }
+.pthreads nav { display: grid; gap: 2px; margin-top: 4px; }
+.pthread { text-align: start; font: inherit; font-size: 13.5px; background: none; border: 0; border-radius: 8px; padding: 6px 10px; color: var(--fg); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pthread:hover, .pthread.on { background: var(--brand-soft); }
+.pconv { max-width: 860px; width: 100%; }
+.plog { display: grid; gap: 14px; min-height: 52vh; max-height: calc(100vh - 330px); overflow-y: auto; align-content: start; padding: 4px 2px; }
+.pturn { display: grid; gap: 8px; }
+.pturn .msg { max-width: 86%; font-size: 15px; }
+.pturn.user .msg { justify-self: end; background: var(--brand); color: #fff; }
+.pturn.assistant .msg { justify-self: start; background: var(--panel); border: 1px solid var(--line); }
+.pcardwrap { max-width: 100%; }
+.pcard { padding: 14px 16px; }
+.pcard .big { font-size: 30px; font-weight: 800; }
+.pcard .mid { font-size: 20px; font-weight: 700; }
+.plist { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 6px; font-size: 14px; }
+.plist li { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; border-top: 1px solid var(--line); padding-top: 6px; }
+.plist li > div { flex-basis: 100%; }
+.bars { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; height: 90px; align-items: end; margin-top: 4px; }
+.bars > div { display: grid; grid-template-rows: 1fr auto; height: 100%; align-items: end; text-align: center; }
+.bars span { display: block; background: linear-gradient(180deg, var(--brand), var(--brand-2)); border-radius: 6px 6px 2px 2px; min-height: 3px; }
+.bars small { color: var(--muted); font-size: 11px; }
+.pinput { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: end; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 8px; box-shadow: var(--shadow); }
+.pinput textarea { border: 0; min-height: 44px; resize: none; background: transparent; }
+.pinput textarea:focus-visible { outline: none; }
+.pinput:focus-within { border-color: var(--brand); }
+@media (max-width: 1000px) {
+  .pchat { grid-template-columns: 1fr; }
+  .pthreads { position: static; grid-auto-flow: column; grid-auto-columns: max-content; overflow-x: auto; }
+  .pthreads nav { grid-auto-flow: column; }
+  .plog { max-height: none; min-height: 40vh; }
+}
+/* Phones: the side menu becomes one scrolling row so the page starts on the first screen. */
+@media (max-width: 640px) {
+  .sidebar { padding: 10px 12px 6px; }
+  .sidebar .brand { padding: 2px 6px 8px; }
+  .sidebar .door { display: none; }
+  .sidebar nav { display: flex; overflow-x: auto; gap: 4px; padding-bottom: 4px; }
+  .sidebar nav a { white-space: nowrap; padding: 6px 10px; flex: none; }
+  .sidebar .switch { margin-top: 6px; padding-top: 6px; }
+  .pchat .plog { min-height: 30vh; }
+}

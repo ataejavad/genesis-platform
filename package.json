@@ -19,7 +19,8 @@
     "local": "tsx scripts/local.ts",
     "agents:hubs": "tsx scripts/hub-builder.ts",
     "agents:market": "tsx scripts/market-selection.ts",
-    "agents:outbound": "tsx scripts/outbound.ts"
+    "agents:outbound": "tsx scripts/outbound.ts",
+    "demo:portal": "tsx scripts/demo-portal.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.1.0",

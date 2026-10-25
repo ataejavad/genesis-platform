@@ -23,18 +23,15 @@ const doors = [
     ],
   },
   {
-    icon: "🏢", title: "داشبورد مشتری (۱۰ بخش)", who: "شرکت مشتری (نمونه: Glas Becker GmbH)", pages: [
-      { href: "/portal", t: "خانه: ROI، تأییدها، بینش‌ها، شروع کار، مقایسه با هم‌صنف‌ها" },
-      { href: "/portal/advisor", t: "مشاور AI" },
-      { href: "/portal/projects", t: "پروژه‌ها" },
-      { href: "/portal/apps", t: "اپ‌های من" },
-      { href: "/portal/apps/quote", t: "یک اپ بومی: ایجنت قیمت‌دهی" },
-      { href: "/portal/services", t: "نردبان رشد" },
-      { href: "/portal/reports", t: "گزارش‌ها" },
-      { href: "/portal/inbox", t: "پیام و پشتیبانی" },
-      { href: "/portal/billing", t: "قرارداد و فاکتور" },
-      { href: "/portal/data", t: "داده من" },
-      { href: "/portal/settings", t: "تنظیمات، تیم و گزارش فعالیت" },
+    icon: "🏢", title: "داشبورد مشتری (واقعی، گام ۵)", who: "شرکت مشتری نمونه: Rossi Impianti Srl (customer@local.test)", pages: [
+      { href: "/portal", t: "خانه = گفتگو: نتیجه‌ها، تأییدها و قدم بعد داخل گفتگو" },
+      { href: "/portal/results", t: "نتیجه‌ها در برابر نقطه شروع و هزینه، هدف‌های مشترک" },
+      { href: "/portal/services", t: "خدمات من (هر کدام با نتیجه این ماه) + قدم بعد" },
+      { href: "/portal/requests", t: "درخواست و پشتیبانی" },
+      { href: "/portal/billing", t: "قرارداد و فاکتور (هزینه ثابت؛ فاکتور با گام ۸)" },
+      { href: "/portal/data", t: "داده من: دانلود همه داده‌ها، درخواست حذف" },
+      { href: "/portal/settings", t: "تنظیمات و تیم، زبان" },
+      { href: "/portal/login", t: "ورود مشتری (چندزبانه)" },
     ],
   },
   {

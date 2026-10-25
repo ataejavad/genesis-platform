@@ -38,6 +38,12 @@ async function handle(db: Db, deps: DispatchDeps, event: Event) {
     const head = event.type === "checkup.call_requested" ? `📞 درخواست تماس (${p.industry}, €${p.totalEur ?? "?"}): تا ۵ دقیقه زنگ بزن` : `💬 ${p.industry}: ${p.to} (${p.why ?? ""})`;
     await sendAlert(deps.telegram, [head], "/cockpit/outreach", fetchImpl);
   }
+  // Customer dashboard: a customer asked for something or answered an approval (target: reply within a working day).
+  if (deps.telegram && (event.type === "customer_request.created" || event.type === "customer_approval.decided")) {
+    const p = event.payload as { company?: string; kind?: string; text?: string; title?: string; decision?: string; note?: string | null };
+    const line = event.type === "customer_request.created" ? `📨 ${p.company} (${p.kind}): ${String(p.text ?? "").slice(0, 200)}` : `${p.decision === "approved" ? "✅" : "✏️"} ${p.company}: ${p.title}${p.note ? ` (${p.note})` : ""}`;
+    await sendAlert(deps.telegram, [line], "/cockpit/customers", fetchImpl);
+  }
   // Every event also goes to n8n, where Genesis workflows subscribe to what they need.
   if (deps.n8nWebhookUrl) {
     const res = await fetchImpl(deps.n8nWebhookUrl, {

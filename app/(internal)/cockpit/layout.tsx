@@ -22,6 +22,7 @@ export default async function CockpitLayout({ children }: { children: React.Reac
           { href: "/cockpit/markets", label: "Markets & hubs", icon: "🎯" },
           { href: "/cockpit/outreach", label: "Outbound", icon: "📣" },
           { href: "/cockpit/crm", label: "CRM", icon: "📇" },
+          { href: "/cockpit/customers", label: "Customers", icon: "🏢" },
           { href: "/cockpit/catalog", label: "Marketplace catalogue", icon: "🛒" },
         ] },
         { title: "Delivery", items: [

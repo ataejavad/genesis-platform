@@ -87,6 +87,12 @@ export const organizations = pgTable("organizations", {
   slug: text("slug").notNull().unique(),
   kind: orgKind("kind").notNull().default("customer"),
   country: text("country"),
+  // customer orgs (step 5): trade slug as in the check-ups, dashboard language, where the customer came from
+  industry: text("industry"),
+  locale: text("locale"),
+  prospectId: uuid("prospect_id"),
+  // monthly loss in € from the first check-up: the starting point every result is compared with
+  baselineEur: integer("baseline_eur"),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -472,4 +478,132 @@ export const inbox = pgTable(
     createdAt: createdAt(),
   },
   (t) => [index("inbox_party_idx").on(t.channel, t.party, t.createdAt), uniqueIndex("inbox_provider_idx").on(t.channel, t.providerId)],
+);
+
+/* ───────────── Customer dashboard (step 5, doc 15 §6و) ───────────── */
+// Every table here is private to one customer: org_id on each row (RLS with slice D hardening).
+
+// A service the customer pays for, described by its result; the monthly fee is fixed (we sell results, not usage).
+export const subscriptions = pgTable(
+  "subscriptions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orgId: uuid("org_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+    // product slug in the catalogue
+    product: text("product").notNull(),
+    plan: text("plan").notNull(),
+    monthlyEur: integer("monthly_eur").notNull(),
+    // active, paused, cancelled
+    status: text("status").notNull().default("active"),
+    startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: createdAt(),
+  },
+  (t) => [index("subscriptions_org_idx").on(t.orgId)],
+);
+
+// One measured result, written by the agent or person that delivered it (calls answered, quotes sent, € won).
+export const outcomes = pgTable(
+  "outcomes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orgId: uuid("org_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+    subscriptionId: uuid("subscription_id").references(() => subscriptions.id, { onDelete: "set null" }),
+    // metric id from src/server/portal-metrics.ts
+    metric: text("metric").notNull(),
+    value: numeric("value", { precision: 12, scale: 2, mode: "number" }).notNull(),
+    // money this result is worth to the customer, by the rule of the metric (shown with the rule)
+    eur: integer("eur").notNull().default(0),
+    at: timestamp("at", { withTimezone: true }).notNull().defaultNow(),
+    source: text("source").notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index("outcomes_org_idx").on(t.orgId, t.at)],
+);
+
+// Goals agreed with the customer (shared success plan): from where to where, by when.
+export const goals = pgTable(
+  "goals",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orgId: uuid("org_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+    metric: text("metric").notNull(),
+    // per-language title, e.g. {"it": "Nessuna chiamata persa", "fa": "..."}
+    title: jsonb("title").$type<Record<string, string>>().notNull(),
+    baseline: numeric("baseline", { precision: 12, scale: 2, mode: "number" }).notNull(),
+    target: numeric("target", { precision: 12, scale: 2, mode: "number" }).notNull(),
+    // current value as last measured
+    current: numeric("current", { precision: 12, scale: 2, mode: "number" }),
+    unit: text("unit").notNull(),
+    due: timestamp("due", { withTimezone: true }),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index("goals_org_idx").on(t.orgId)],
+);
+
+// Something waiting for the customer's yes: a delivery, a message we send in their name, a change.
+export const customerApprovals = pgTable(
+  "customer_approvals",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orgId: uuid("org_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    detail: text("detail"),
+    link: text("link"),
+    // pending, approved, changes
+    status: text("status").notNull().default("pending"),
+    note: text("note"),
+    createdBy: text("created_by").notNull(),
+    decidedBy: text("decided_by"),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("customer_approvals_org_idx").on(t.orgId, t.status)],
+);
+
+// What the customer asks for: a new problem to solve, a change, help, a data request.
+export const customerRequests = pgTable(
+  "customer_requests",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orgId: uuid("org_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+    userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
+    // solution, change, support, upgrade, data_delete
+    kind: text("kind").notNull(),
+    text: text("text").notNull(),
+    // open, in_progress, done
+    status: text("status").notNull().default("open"),
+    // answer from our team, shown to the customer
+    reply: text("reply"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index("customer_requests_org_idx").on(t.orgId, t.status)],
+);
+
+// The dashboard conversation (home = chat). Messages keep the cards they showed, so history reads the same later.
+export const portalThreads = pgTable(
+  "portal_threads",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orgId: uuid("org_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+    userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index("portal_threads_user_idx").on(t.orgId, t.userId, t.updatedAt)],
+);
+
+export const portalMessages = pgTable(
+  "portal_messages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    threadId: uuid("thread_id").notNull().references(() => portalThreads.id, { onDelete: "cascade" }),
+    role: text("role").notNull(),
+    text: text("text").notNull(),
+    cards: jsonb("cards").$type<unknown[]>().notNull().default([]),
+    createdAt: createdAt(),
+  },
+  (t) => [index("portal_messages_thread_idx").on(t.threadId, t.createdAt)],
 );
