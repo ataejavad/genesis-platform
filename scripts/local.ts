@@ -26,6 +26,8 @@ const env = {
   ADMIN_PASSWORD: process.env.ADMIN_PASSWORD ?? "local-demo-password",
   ADMIN_NAME: process.env.ADMIN_NAME ?? "Local admin",
   BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET ?? "local-only-secret-do-not-use-in-production",
+  // sign-in links and redirects point here (without it Better Auth prints a red "Base URL is not set" warning)
+  BETTER_AUTH_URL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
 };
 // Async on purpose: the database server lives in this process, so it must keep running while we wait.
 const run = (cmd: string) =>

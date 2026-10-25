@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { LOSS_REASONS } from "@/config/loss-reasons";
 import { addMaterial, approveProtocol, convert, draftProtocol, newProject, qaBy, qaDecide, quote, reject, shareMaterial, type Result } from "./actions";
 
 function Status({ state }: { state: Result }) {
@@ -14,7 +15,7 @@ export function OrderActions({ id, email }: { id: string; email: string }) {
   return (
     <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
       <form action={a1}><input type="hidden" name="order" value={id} /><input type="hidden" name="email" value={email} /><button className="btn sm ok" disabled={p1}>Send contract</button></form>
-      <form action={a2}><input type="hidden" name="order" value={id} /><button className="btn sm" disabled={p2}>Reject</button></form>
+      <form action={a2} className="row" style={{ gap: 4 }}><input type="hidden" name="order" value={id} /><select name="reason" aria-label="Why lost" required defaultValue=""><option value="" disabled>why lost?</option>{LOSS_REASONS.map((r) => <option key={r} value={r}>{r.replace("_", " ")}</option>)}</select><button className="btn sm" disabled={p2}>Reject</button></form>
       <Status state={s1 ?? s2} />
     </div>
   );

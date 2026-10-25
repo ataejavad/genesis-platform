@@ -13,6 +13,7 @@ import { createOrder } from "@/server/projects";
 import { journeyCopy } from "@/config/journey-copy";
 import { draftBrief } from "@/server/brief";
 import { complain } from "@/server/complaints";
+import { cancelSubscription } from "@/server/service";
 import { type Card, materialFile, materialTurn, replyFor, scriptedReply } from "@/server/portal-chat";
 
 const actorOf = (userId: string): Actor => ({ type: "user", id: userId });
@@ -123,6 +124,15 @@ export async function complainNow(text: string) {
   const r = await complain(getDb(), actorOf(user.id), org.id, user.id, text);
   revalidatePath("/portal", "layout");
   return { ok: true, text: journeyCopy(lang).complaintDone[r.step].replace("{d}", when(r.dueAt.toISOString(), lang)) };
+}
+
+/** The customer gives notice from the chat (contract: 30 days' notice from the dashboard), with the reason. */
+export async function cancelNow(subscriptionId: string, reason: string, note: string) {
+  const { user, org, lang, viewingAs } = await requireCustomer();
+  if (viewingAs) return { ok: false, text: "" };
+  const r = await cancelSubscription(getDb(), actorOf(user.id), org.id, subscriptionId, reason, note || undefined);
+  revalidatePath("/portal", "layout");
+  return { ok: true, text: journeyCopy(lang).cancel.done.replace("{d}", new Intl.DateTimeFormat({ it: "it-IT", de: "de-DE", fa: "fa-IR" }[lang] ?? "en-GB", { dateStyle: "long", timeZone: "Europe/Rome" }).format(r.endsAt)) };
 }
 
 export async function setLanguage(lang: string) {

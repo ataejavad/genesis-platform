@@ -15,6 +15,7 @@ import { opsWatch } from "./ops-watch";
 import { sendDueEmails, startDueAiCalls } from "./outreach";
 import { deliveryWatch } from "./projects";
 import { retention } from "./retention";
+import { endSubscriptions, monthlyService } from "./service";
 import { isStopped, switchesLike } from "./switches";
 import type { TelegramConfig } from "./telegram";
 import type { VoiceCaller } from "./voice";
@@ -33,13 +34,14 @@ export const JOBS: JobDef[] = [
   { id: "outreach.send", what: "Approved emails that are due; AI calls where switched on", schedule: { every: 10 }, outward: true, run: async (db, d) => ({ emails: d.mailer ? await sendDueEmails(db, d.mailer) : "no mailer", calls: d.voice ? await startDueAiCalls(db, d.voice, planEnv()) : "no voice" }) },
   { id: "delivery.watch", what: "Milestones waiting on the customer, project health", schedule: { every: 60 }, run: (db, _d, now) => deliveryWatch(db, now) },
   { id: "ops.watch", what: "Work that stopped moving (process auditor at run time)", schedule: { every: 60 }, run: async (db, _d, now) => { const { items: _items, ...r } = await opsWatch(db, now); return r; } },
-  { id: "money", what: "Monthly fees, payment reminders, partner framework contracts", schedule: { every: 60 }, run: async (db) => ({ billed: await billSubscriptions(db), dunning: await dunning(db), contracts: await ensurePartnerContracts(db) }) },
+  { id: "money", what: "Monthly fees (ending notices), payment reminders, partner framework contracts", schedule: { every: 60 }, run: async (db, _d, now) => ({ ended: await endSubscriptions(db, now), billed: await billSubscriptions(db), dunning: await dunning(db), contracts: await ensurePartnerContracts(db) }) },
   { id: "agents.budget", what: "Pause agents over their monthly budget", schedule: { every: 60 }, run: (db, _d, now) => checkBudgets(db, now) },
   { id: "lead.reminders", what: "Deadline reminders the hub leads asked for (30 days before)", schedule: { daily: "07:00" }, outward: true, run: (db, _d, now) => leadReminders(db, now) },
   { id: "experiments", what: "Close experiment windows; mark winners ready for Javad", schedule: { daily: "07:30" }, run: (db, _d, now) => checkExperiments(db, now) },
   { id: "daily.report", what: "Javad's morning brief (Telegram + Cockpit › Today)", schedule: { daily: "08:00" }, run: async (db, d, now) => { const r = await dailyReport(db, now, d.telegram); return { verdict: r.verdict, sent: Boolean(r.sentAt) }; } },
   { id: "customer.health", what: "Weekly health score per customer; at-risk alert", schedule: { weekly: 1, at: "07:00" }, run: (db, _d, now) => customerHealthWeek(db, now) },
   { id: "results.monthly", what: "Each customer's results of last month by email", schedule: { monthly: 1, at: "09:00" }, outward: true, run: (db, _d, now) => monthlyResults(db, now) },
+  { id: "service.monthly", what: "Monthly service: each subscription's check-up tasks to partners + its expected running costs", schedule: { monthly: 1, at: "06:00" }, run: (db, _d, now) => monthlyService(db, now) },
   { id: "data.retention", what: "Delete data past its retention period (GDPR)", schedule: { monthly: 1, at: "03:00" }, run: (db, _d, now) => retention(db, now) },
   { id: "ai.scout", what: "AI-capability scout: what new AI can take over or make cheaper (proposals, switched off)", schedule: { monthly: 3, at: "06:00" }, run: (db, _d, now) => aiScout(db, now) },
 ];

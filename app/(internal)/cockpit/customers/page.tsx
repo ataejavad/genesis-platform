@@ -4,7 +4,9 @@ import { latestHealth } from "@/server/health";
 import { listCustomers, listServices, openRequests } from "@/server/portal";
 import { METRICS } from "@/server/portal-metrics";
 import { PageHead } from "@/ui/Shell";
-import { askApproval, complaint, goal, quote, recordResult, reply } from "./actions";
+import { LOSS_REASONS } from "@/config/loss-reasons";
+import { MARGIN_FLOOR, margins, notices, periodOf } from "@/server/service";
+import { askApproval, cancelFor, complaint, cost, goal, keep, quote, recordResult, reply } from "./actions";
 import { listComplaints } from "@/server/complaints";
 import { listPackages } from "@/server/projects";
 import { EraseForm } from "./EraseForm";
@@ -16,8 +18,10 @@ const eur = (n: number) => `€${n.toLocaleString("en-GB")}`;
 // /api/v1/customer-approvals (scope portal:write); until they run, results are recorded here by hand.
 export default async function CockpitCustomers() {
   const db = getDb();
-  const [customers, requests, health, open, packages] = await Promise.all([listCustomers(db), openRequests(db), latestHealth(db), listComplaints(db), listPackages(db)]);
+  const period = periodOf(new Date());
+  const [customers, requests, health, open, packages, margin, leaving] = await Promise.all([listCustomers(db), openRequests(db), latestHealth(db), listComplaints(db), listPackages(db), margins(db, period), notices(db)]);
   const now = Date.now();
+  const costLabels = [...new Set(packages.flatMap((p) => [...p.monthly.costs.map((c) => c.label), ...p.monthly.tasks.map((t) => t.title)]))];
   const healthOf = new Map(health.map((h) => [h.h.orgId, h.h]));
   const services = Object.fromEntries(await Promise.all(customers.map(async (c) => [c.org.id, await listServices(db, c.org.id, "en")] as const)));
   const industries = [...new Set(products.flatMap((p) => p.industries))];
@@ -37,6 +41,21 @@ export default async function CockpitCustomers() {
               <input name="note" placeholder="What you did / agreed" style={{ flexBasis: "100%" }} />
               {c.step !== "founder" && <button className="btn sm" name="do" value="escalate">Next step</button>}
               <button className="btn sm primary" name="do" value="resolve">Resolved</button>
+            </form>
+          ))}
+        </div>
+      </div>
+
+      <div className="card" id="notices">
+        <h3>Gave notice ({leaving.length})</h3>
+        <p className="muted small">They cancel from their dashboard with 30 days&apos; notice (contract). Call them before it ends; if they stay, press &quot;Stays&quot;. The reason feeds the sales lessons.</p>
+        {leaving.length === 0 && <p className="muted">None.</p>}
+        <div className="list">
+          {leaving.map(({ s, company }) => (
+            <form key={s.id} action={keep} className="item row">
+              <input type="hidden" name="id" value={s.id} />
+              <div className="grow"><b>{company}</b> <span className="muted small">{s.product} · {eur(s.monthlyEur)}/month · ends {s.endsAt!.toISOString().slice(0, 10)}</span> <span className="badge warn">{s.cancelReason ?? "no reason"}</span>{s.cancelNote && <div className="small">&quot;{s.cancelNote}&quot;</div>}</div>
+              <button className="btn sm ok">Stays (withdraw notice)</button>
             </form>
           ))}
         </div>
@@ -72,9 +91,9 @@ export default async function CockpitCustomers() {
       <div className="card table-wrap">
         <h3>Accounts ({customers.length})</h3>
         <table>
-          <thead><tr><th>Company</th><th>Trade</th><th>Fee / month</th><th>Back this month</th><th>ROI</th><th>Open requests</th><th>Waiting on customer</th><th>Health</th></tr></thead>
+          <thead><tr><th>Company</th><th>Trade</th><th>Fee / month</th><th title="Partner check-ups, tools and usage; estimates until the real bill is recorded">Cost {period}</th><th>Margin</th><th>Back this month</th><th>ROI</th><th>Open requests</th><th>Waiting on customer</th><th>Health</th></tr></thead>
           <tbody>
-            {customers.map((c) => <tr key={c.org.id}><td>{c.org.name} <span className="muted small">{c.org.country}</span></td><td>{c.org.industry}</td><td>{eur(c.feeEur)}</td><td>{eur(c.monthEur)}</td><td>{c.roi ?? "–"}×</td><td>{c.openRequests}</td><td>{c.waitingOnCustomer}</td><td>{(() => { const h = healthOf.get(c.org.id); return h ? <span className={`badge ${h.band === "red" ? "bad" : h.band === "watch" ? "warn" : "ok"}`} title={((h.signals as { reasons?: string[] }).reasons ?? []).join("; ")}>{h.score}</span> : <span className="muted small">Monday</span>; })()}</td></tr>)}
+            {customers.map((c) => <tr key={c.org.id}><td>{c.org.name} <span className="muted small">{c.org.country}</span></td><td>{c.org.industry}</td><td>{eur(c.feeEur)}</td>{(() => { const m = margin.get(c.org.id); return m ? <><td title={m.lines.map((l) => `${l.label}: €${l.eur} (${l.source})`).join("\n")}>{eur(Math.round(m.costEur))}{m.estimated && <span className="muted small"> est.</span>}</td><td><span className={`badge ${m.marginPct !== null && m.marginPct < MARGIN_FLOOR ? "bad" : "ok"}`}>{m.marginPct ?? "–"}%</span></td></> : <><td className="muted">–</td><td className="muted">–</td></>; })()}<td>{eur(c.monthEur)}</td><td>{c.roi ?? "–"}×</td><td>{c.openRequests}</td><td>{c.waitingOnCustomer}</td><td>{(() => { const h = healthOf.get(c.org.id); return h ? <span className={`badge ${h.band === "red" ? "bad" : h.band === "watch" ? "warn" : "ok"}`} title={((h.signals as { reasons?: string[] }).reasons ?? []).join("; ")}>{h.score}</span> : <span className="muted small">Monday</span>; })()}</td></tr>)}
           </tbody>
         </table>
       </div>
@@ -88,6 +107,22 @@ export default async function CockpitCustomers() {
             <select name="metric">{METRICS.map((m) => <option key={m.id} value={m.id}>{m.label.en}</option>)}</select>
             <div className="row"><input name="value" placeholder="How many" inputMode="decimal" required /><input name="eur" placeholder="€ value" inputMode="numeric" required /></div>
             <button className="btn primary">Record</button>
+          </form>
+          <form action={cost} className="card stack">
+            <h3>Record a running cost</h3>
+            <p className="muted small">A real bill (voice minutes, number, tool) replaces the estimate with the same name for that month.</p>
+            <select name="sub" required>{customers.flatMap((c) => services[c.org.id].map((s) => <option key={s.id} value={s.id}>{c.org.name}: {s.name}</option>))}</select>
+            <input name="label" list="cost-labels" placeholder="Cost line, e.g. Voice minutes (estimate)" required />
+            <datalist id="cost-labels">{costLabels.map((l) => <option key={l} value={l} />)}</datalist>
+            <div className="row"><select name="kind" aria-label="Kind"><option value="usage">usage</option><option value="tool">tool</option><option value="partner">partner</option><option value="other">other</option></select><input name="eur" placeholder="€" inputMode="decimal" required /><input name="period" defaultValue={period} aria-label="Month" /></div>
+            <button className="btn primary">Record cost</button>
+          </form>
+          <form action={cancelFor} className="card stack">
+            <h3>Customer cancels (by phone or email)</h3>
+            <select name="sub" required>{customers.flatMap((c) => services[c.org.id].map((s) => <option key={s.id} value={`${c.org.id}:${s.id}`}>{c.org.name}: {s.name}</option>))}</select>
+            <select name="reason" required defaultValue=""><option value="" disabled>Why?</option>{LOSS_REASONS.map((r) => <option key={r} value={r}>{r.replace("_", " ")}</option>)}</select>
+            <input name="note" placeholder="In their words" />
+            <button className="btn">Record notice (30 days)</button>
           </form>
           <form action={askApproval} className="card stack">
             <h3>Ask the customer to approve</h3>

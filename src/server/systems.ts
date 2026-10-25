@@ -1,17 +1,18 @@
-import { and, count, desc, eq, gte, inArray, isNotNull, isNull, lt, sql, sum } from "drizzle-orm";
+import { and, count, desc, eq, gte, inArray, gt, isNotNull, isNull, lt, sql, sum } from "drizzle-orm";
 import { MODULES, type ModuleDef, SYSTEMS } from "@/config/modules";
 import { STEPS } from "@/config/process-map";
 import type { Db } from "@/db";
 import {
   agentRuns, apiKeys, checkups, companyPages, complaints, contacts, contentItems, contentRevisions, contracts, customerApprovals, customerHealth, customerRequests, deliveries, events,
   experiments, invoices, orders, inviteTokens, jobs, leads, lessons, milestones, notifications, outcomes, partnerDocuments, partnerMessages, partners, payouts, portalMessages,
-  projectInputs, projects, prospects, protocols, subscriptions, touches,
+  projectInputs, projects, prospects, protocols, subscriptions, supplyGaps, touches,
 } from "@/db/schema";
 import { MAX_ATTEMPTS } from "@/worker/dispatch";
 import { type AgentRow, agentBoard, monthSpend } from "./agents";
 import { jobBoard } from "./orchestrator";
 import { lastMarketRun } from "./market-filters";
 import { isStopped } from "./switches";
+import { MARGIN_FLOOR, margins, periodOf } from "./service";
 
 /*
  * Cockpit › Systems (step 10): every module of the machine in one table — status light, last activity, cost,
@@ -40,6 +41,18 @@ const KPI: Record<string, (c: Ctx) => Promise<string>> = {
   },
   autoAccepted: async ({ db, month }) => `${await n(db.select({ n: count() }).from(milestones).where(and(eq(milestones.acceptedBy, "auto"), gte(milestones.acceptedAt, month))))} accepted by silence this month`,
   reworks: async ({ db, month }) => `${await n(db.select({ n: count() }).from(jobs).where(and(eq(jobs.role, "revision"), gte(jobs.createdAt, month))))} reworks this month`,
+  monthlyService: async ({ db, now }) => {
+    const [r] = await db.select({ n: count(), done: sql<number>`count(*) filter (where ${jobs.status} in ('accepted', 'paid'))::int` }).from(jobs).where(eq(jobs.period, periodOf(now)));
+    return `${r.n} monthly check-ups this month, ${r.done} done`;
+  },
+  margin: async ({ db, now }) => {
+    const m = [...(await margins(db, periodOf(now))).values()];
+    const fee = m.reduce((s, x) => s + x.feeEur, 0);
+    const cost = m.reduce((s, x) => s + x.costEur, 0);
+    return fee ? `${Math.round(((fee - cost) / fee) * 100)}% on €${fee} MRR, ${m.filter((x) => x.marginPct !== null && x.marginPct < MARGIN_FLOOR).length} under ${MARGIN_FLOOR}%` : "no running subscriptions";
+  },
+  churn: async ({ db, now, month }) => `${await n(db.select({ n: count() }).from(subscriptions).where(and(eq(subscriptions.status, "active"), gt(subscriptions.endsAt, now))))} on notice, ${await n(db.select({ n: count() }).from(events).where(and(eq(events.type, "loss.recorded"), gte(events.createdAt, month))))} losses with a reason this month`,
+  supplyGaps: async ({ db, month }) => `${await n(db.select({ n: count() }).from(supplyGaps).where(eq(supplyGaps.status, "open")))} skills missing, ${await n(db.select({ n: count() }).from(supplyGaps).where(and(eq(supplyGaps.status, "closed"), gte(supplyGaps.closedAt, month))))} filled this month`,
   unpaidMilestones: async ({ db }) => `${await n(db.select({ n: count() }).from(milestones).where(eq(milestones.status, "unpaid")))} milestones waiting for payment`,
   hubPages: async ({ db }) => `${await n(db.select({ n: count() }).from(contentItems).where(eq(contentItems.status, "published")))} pages live`,
   leadsMonth: async ({ db, month }) => `${await n(db.select({ n: count() }).from(leads).where(gte(leads.createdAt, month)))} leads this month`,

@@ -38,6 +38,7 @@ import { SKILLS } from "./partner-rules";
 import { ALLOWED_FILES, MAX_FILE_BYTES, nameFromEmail, redact, TEXT_FILES } from "./redact";
 import { levelFor, offerJob, reviewDelivery } from "./partners";
 import { addSubscription, createCustomer } from "./portal";
+import { orderLost, serviceJobDone } from "./service";
 
 /*
  * Projects, protocols and QA (step 7, doc 15 §6د/§6د2). The whole company on one line:
@@ -66,7 +67,7 @@ export async function seedDelivery(db: Db, actor: Actor = { type: "system", id: 
       await tx.insert(protocolVersions).values({ protocolId: p.id, version: 1, status: "approved", goal: s.goal, inputs: s.inputs, deliverables: s.deliverables, rules: FIXED_RULES, criteria: s.criteria, guidance: s.guidance, standardDays: s.standardDays, createdBy: by(actor), approvedBy: by(actor), approvedAt: new Date(), changeNote: "first version" });
     }
     // package texts live in Git: names and milestone titles follow the seeds (prices too, until the catalogue is editable)
-    for (const s of PACKAGE_SEEDS) await tx.insert(servicePackages).values(s).onConflictDoUpdate({ target: servicePackages.slug, set: { titles: s.titles, milestones: s.milestones } });
+    for (const s of PACKAGE_SEEDS) await tx.insert(servicePackages).values(s).onConflictDoUpdate({ target: servicePackages.slug, set: { titles: s.titles, milestones: s.milestones, monthly: s.monthly } });
   });
 }
 
@@ -210,12 +211,14 @@ export async function convertOrder(db: Db, actor: Actor, orderId: string, now = 
   return { projectId, password };
 }
 
-export async function rejectOrder(db: Db, actor: Actor, orderId: string, note: string) {
+export async function rejectOrder(db: Db, actor: Actor, orderId: string, note: string, reason = "other") {
   await db.transaction(async (tx) => {
     const [o] = await tx.update(orders).set({ status: "rejected", note: note.slice(0, 2000) }).where(and(eq(orders.id, orderId), inArray(orders.status, ["new", "contract"]))).returning();
     if (!o) throw notFound("order");
+    // why we lost it: three of the same reason in 30 days become a sales lesson
+    await orderLost(tx, actor, orderId, reason);
     if (o.contractId) await tx.update(contracts).set({ status: "cancelled" }).where(and(eq(contracts.id, o.contractId), eq(contracts.status, "sent")));
-    await audit(tx, actor, "order.rejected", { type: "order", id: orderId }, { status: "new" }, { status: "rejected", note });
+    await audit(tx, actor, "order.rejected", { type: "order", id: orderId }, { status: "new" }, { status: "rejected", note, reason });
   });
 }
 
@@ -344,6 +347,8 @@ export async function customerProjects(db: Db, orgId: string) {
 
 /** Called in the same transaction as an accepted delivery: cost booked; a finished milestone goes to the customer. */
 export async function onJobAccepted(tx: Tx, actor: Actor, job: typeof jobs.$inferSelect, now: Date) {
+  // a monthly check-up of a subscription: its real cost, and the customer hears it is done
+  if (job.subscriptionId) return serviceJobDone(tx, actor, job, now);
   if (!job.projectId) return;
   await tx.insert(projectCosts).values({ projectId: job.projectId, kind: "partner", amountEur: job.payEur, jobId: job.id, note: job.title }).onConflictDoNothing();
   if (!job.milestoneId || job.role === "qa") return;

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { LOSS_REASONS } from "@/config/loss-reasons";
 import { getDb } from "@/db";
 import { getPageFor, pageUrl } from "@/server/company-pages";
 import { pageDocSchema } from "@/server/company-page-doc";
@@ -26,7 +27,7 @@ export default async function Company({ params }: { params: Promise<{ id: string
   return (
     <main>
       <PageHead title={p.name} crumbs="Cockpit › CRM" sub={`${p.industry} · ${p.country} · ${p.source} · stage ${p.stage.replace(/_/g, " ")} · tier ${pr.tier} (score ${pr.score})`}
-        actions={<div className="row">{p.stage !== "won" && <WonForm prospect={p.id} packages={packages} />}<form action={stage} className="row" style={{ gap: 6 }}><input type="hidden" name="prospect" value={p.id} /><select name="stage" defaultValue={p.stage}>{STAGES.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}</select><button className="btn">Set stage</button></form></div>} />
+        actions={<div className="row">{p.stage !== "won" && <WonForm prospect={p.id} packages={packages} />}<form action={stage} className="row" style={{ gap: 6 }}><input type="hidden" name="prospect" value={p.id} /><select name="stage" defaultValue={p.stage}>{STAGES.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}</select><select name="reason" aria-label="If lost: why" defaultValue={p.lostReason ?? ""}><option value="">if lost: why?</option>{LOSS_REASONS.map((r) => <option key={r} value={r}>{r.replace("_", " ")}</option>)}</select><button className="btn">Set stage</button></form></div>} />
 
       <section className="grid g3" style={{ marginBottom: 18 }}>
         <div className="card">

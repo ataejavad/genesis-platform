@@ -70,7 +70,15 @@ export type EventType =
   | "milestone.revision_cap"
   | "milestone.started"
   | "milestone.auto_accepted"
-  | "job.rework";
+  | "job.rework"
+  | "service.checked"
+  | "service.cost_recorded"
+  | "subscription.cancelled"
+  | "subscription.kept"
+  | "subscription.ended"
+  | "loss.recorded"
+  | "supply.gap"
+  | "supply.invited";
 
 // Call inside the same transaction as the change it describes (transactional outbox).
 export async function emit(

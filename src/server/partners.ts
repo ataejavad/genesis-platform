@@ -3,7 +3,7 @@ import { hashPassword } from "better-auth/crypto";
 import { and, asc, desc, eq, gte, inArray, isNotNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { Db, DbOrTx } from "@/db";
-import { account, apiKeys, deliveries, jobOffers, jobs, memberships, milestones, organizations, partnerDocuments, partnerMessages, partners, partnerServices, payouts, user } from "@/db/schema";
+import { account, apiKeys, deliveries, jobOffers, jobs, memberships, milestones, organizations, partnerDocuments, partnerMessages, partners, partnerServices, payouts, supplyGaps, user } from "@/db/schema";
 import type { Actor } from "./actor";
 import { createApiKey } from "./api-keys";
 import { AppError, notFound } from "./errors";
@@ -12,6 +12,7 @@ import { audit, emit } from "./events";
 import { contractsFor, createPartnerContract, signedPartners } from "./contracts";
 import { onJobAccepted, partnerMaterials } from "./projects";
 import { maskContacts, match, SKILLS, type Stats, screen, tierOf } from "./partner-rules";
+import { closeGapsFor } from "./supply";
 
 /*
  * Partner portal (step 6, doc 15 §6ب): apply → screening → active → offers (matched, with reasons) → accept →
@@ -39,7 +40,9 @@ export const applyInput = z.object({
 
 export async function openSkills(db: DbOrTx) {
   const rows = await db.select({ skills: jobs.skills }).from(jobs).where(inArray(jobs.status, ["open", "offered"]));
-  return [...new Set(rows.flatMap((r) => r.skills))];
+  // skills we are recruiting for count as wanted too (they rank such applicants first)
+  const gaps = await db.select({ skill: supplyGaps.skill }).from(supplyGaps).where(eq(supplyGaps.status, "open"));
+  return [...new Set([...rows.flatMap((r) => r.skills), ...gaps.map((g) => g.skill)])];
 }
 
 /** Public application (a conversation on the site). Screened by rules at once; Javad decides in the cockpit. */
@@ -48,8 +51,16 @@ export async function applyPartner(db: Db, input: z.input<typeof applyInput>) {
   const email = v.email.toLowerCase();
   return db.transaction(async (tx) => {
     const [existing] = await tx.select({ id: partners.id, status: partners.status }).from(partners).where(eq(partners.email, email));
-    if (existing) return { id: existing.id, duplicate: true };
+    if (existing && existing.status !== "rejected") return { id: existing.id, duplicate: true };
     const screening = screen({ skills: v.skills, links: v.links, languages: v.languages, pitch: v.pitch ?? null }, await openSkills(tx));
+    if (existing) {
+      // a rejected applicant applies again (often after a recruiting invite): the same record goes back to Javad
+      await tx.update(partners).set({ status: "applied", kind: v.kind, name: v.name, country: v.country.toUpperCase(), languages: v.languages, skills: v.skills, links: v.links, pitch: v.pitch ?? null, screening, decidedAt: null, consentAt: new Date() }).where(eq(partners.id, existing.id));
+      const actor: Actor = { type: "system", id: "partner-apply" };
+      await emit(tx, actor, "partner.applied", { type: "partner", id: existing.id }, { name: v.name, kind: v.kind, country: v.country.toUpperCase(), skills: v.skills, score: screening.score, again: true });
+      await audit(tx, actor, "partner.applied", { type: "partner", id: existing.id }, { status: "rejected" }, { status: "applied", skills: v.skills });
+      return { id: existing.id, duplicate: false };
+    }
     const [row] = await tx
       .insert(partners)
       .values({ kind: v.kind, name: v.name, email, country: v.country.toUpperCase(), languages: v.languages, skills: v.skills, links: v.links, pitch: v.pitch ?? null, locale: v.locale.slice(0, 2), screening, consentAt: new Date() })
@@ -83,6 +94,7 @@ export async function decideApplication(db: Db, actor: Actor, id: string, accept
     await tx.insert(memberships).values({ orgId: org.id, userId: u.id, role: "owner" }).onConflictDoNothing();
     await tx.update(partners).set({ status: "active", orgId: org.id, userId: u.id, decidedAt: new Date() }).where(eq(partners.id, id));
     await emit(tx, actor, "partner.activated", { type: "partner", id }, { name: p.name });
+    await closeGapsFor(tx, p);
     await audit(tx, actor, "partner.activated", { type: "partner", id }, { status: p.status }, { status: "active" });
     // no job offer before the framework agreement (NDA, sub-processing, white-label) is signed
     await createPartnerContract(tx, actor, id);

@@ -42,7 +42,7 @@ export async function toggle(f: FormData) {
   await run((a) => setSwitch(getDb(), a, str(f, "country"), str(f, "channel") as Switch, str(f, "enabled") === "on"));
 }
 export async function stage(f: FormData) {
-  await run((a) => setStage(getDb(), a, str(f, "prospect"), str(f, "stage"), str(f, "note") || undefined));
+  await run((a) => setStage(getDb(), a, str(f, "prospect"), str(f, "stage"), str(f, "note") || undefined, str(f, "reason") || undefined));
 }
 export async function basis(f: FormData) {
   await run((a) => setLegalBasis(getDb(), a, str(f, "contact"), str(f, "basis") || null, str(f, "source") || null));

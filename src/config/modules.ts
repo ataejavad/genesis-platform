@@ -78,6 +78,8 @@ export const MODULES: ModuleDef[] = [
   { n: 28, name: "Customer accounts + services", system: "retain", runs: "from signed contracts", events: ["customer.created", "subscription.started"], kpi: "mrr", link: "/cockpit/customers" },
   { n: 75, name: "Complaint path (fix → new partner → founder)", system: "retain", runs: "'not satisfied' in the chat", events: ["complaint.opened", "complaint.escalated", "complaint.resolved"], kpi: "complaints", link: "/cockpit/customers#complaints" },
   { n: 76, name: "Ratings after each hand-over", system: "retain", runs: "customer accepts a milestone", events: ["milestone.rated"], kpi: "ratings", link: "/cockpit/projects" },
+  { n: 79, name: "Monthly service (check-ups per subscription)", system: "retain", runs: "day 1 06:00", job: "service.monthly", events: ["service.checked"], kpi: "monthlyService", link: "/cockpit/projects" },
+  { n: 81, name: "Notice + loss reasons", system: "retain", runs: "customer cancels in the chat; deal lost; order rejected", events: ["subscription.cancelled", "subscription.kept", "subscription.ended", "loss.recorded"], kpi: "churn", link: "/cockpit/customers#notices" },
   { n: 62, name: "Customer health (weekly)", system: "retain", runs: "Monday 07:00", job: "customer.health", events: ["customer.at_risk"], kpi: "atRisk", link: "/cockpit/customers" },
   { n: 63, name: "Monthly results email", system: "retain", runs: "day 1 09:00", job: "results.monthly", needs: MAIL, events: ["results.reported"], link: "/cockpit/customers" },
   { n: 64, name: "Success story + referral ask", system: "retain", runs: "when a project closes", events: ["project.closed"], kpi: "stories", link: "/cockpit/customers" },
@@ -106,11 +108,13 @@ export const MODULES: ModuleDef[] = [
   { n: 33, name: "Levels + payouts", system: "partner", runs: "on acceptance", events: ["payout.paid"], kpi: "payoutsDue", link: "/cockpit/finance" },
   { n: 34, name: "Partner documents + expiry", system: "partner", runs: "partner adds, we check", events: ["partner.document_added"], kpi: "docsPending", link: "/cockpit/partners" },
   { n: 35, name: "Agent-partner API", system: "partner", runs: "agent partners pull work", kpi: "agentPartners", link: "/cockpit/api" },
+  { n: 82, name: "Recruiting for missing skills", system: "partner", runs: "ops-watch finds a job with no partner", events: ["supply.gap", "supply.invited"], kpi: "supplyGaps", link: "/cockpit/partners#gaps" },
   { n: 36, name: "Partner assistant + Today list", system: "partner", runs: "every partner message", agent: "partner-advisor", link: "/cockpit/agents" },
 
   // money
   { n: 53, name: "Payment requests + invoices", system: "money", runs: "first milestone, next milestones, monthly (hourly job)", job: "money", events: ["invoice.requested", "invoice.paid"], kpi: "openInvoices", link: "/cockpit/finance" },
   { n: 77, name: "Pay before each milestone", system: "money", runs: "milestone accepted → next billed; paid → it starts", events: ["milestone.started"], kpi: "unpaidMilestones", link: "/cockpit/finance" },
+  { n: 80, name: "Running cost + margin per customer", system: "money", runs: "estimates monthly, real bills recorded", events: ["service.cost_recorded"], kpi: "margin", link: "/cockpit/customers" },
   { n: 54, name: "Dunning", system: "money", runs: "hourly with money", events: ["invoice.reminded"], kpi: "overdue", link: "/cockpit/finance" },
   { n: 57, name: "SEPA payout batch", system: "money", runs: "Javad downloads the file", kpi: "payoutsDue", link: "/cockpit/finance" },
 

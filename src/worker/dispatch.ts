@@ -91,6 +91,17 @@ async function handle(db: Db, deps: DispatchDeps, event: Event) {
               : `⌛ ${p.code} ${p.title} (${p.company}) accepted after 7 silent days`;
     await sendAlert(deps.telegram, [line], event.type.startsWith("complaint") ? "/cockpit/customers" : "/cockpit/projects", fetchImpl);
   }
+  // Monthly service: a customer leaving, a missing skill (recruiting post ready).
+  if (deps.telegram && ["subscription.cancelled", "subscription.ended", "supply.gap"].includes(event.type)) {
+    const p = event.payload as { company?: string; product?: string; monthlyEur?: number; reason?: string; note?: string | null; endsAt?: string; skill?: string; language?: string | null; job?: string; candidates?: number };
+    const line =
+      event.type === "subscription.cancelled"
+        ? `🚪 ${p.company} gave notice on ${p.product} (€${p.monthlyEur}/month), reason: ${p.reason}${p.note ? ` "${p.note}"` : ""}. Ends ${String(p.endsAt).slice(0, 10)}: call them`
+        : event.type === "subscription.ended"
+          ? `👋 ${p.product} of a customer ended (${p.reason ?? "no reason"})`
+          : `🧲 No partner for ${p.skill}${p.language ? ` (${p.language})` : ""} ("${p.job}"): recruiting post ready${p.candidates ? `, ${p.candidates} earlier applicants to decide or invite` : ""}`;
+    await sendAlert(deps.telegram, [line], event.type === "supply.gap" ? "/cockpit/partners#gaps" : "/cockpit/customers#notices", fetchImpl);
+  }
   // Assembly and QA-partner work is offered to the partners who do it, like any task.
   if (event.type === "job.opened") await offerJob(db, { type: "system", id: "assignment" }, event.subjectId!).catch((e) => console.error("offer failed", e));
   // A customer file waits for a person before any partner sees it.

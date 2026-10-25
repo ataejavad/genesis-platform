@@ -365,6 +365,8 @@ export const prospects = pgTable(
     meetingAt: timestamp("meeting_at", { withTimezone: true }),
     wonAt: timestamp("won_at", { withTimezone: true }),
     lostAt: timestamp("lost_at", { withTimezone: true }),
+    // one of LOSS_REASONS (price, timing, fit, competitor, no_answer, quality, other)
+    lostReason: text("lost_reason"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -498,6 +500,10 @@ export const subscriptions = pgTable(
     // active, paused, cancelled
     status: text("status").notNull().default("active"),
     startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
+    // notice given: billed until it ends (30 days), with the reason so we learn why customers leave
+    endsAt: timestamp("ends_at", { withTimezone: true }),
+    cancelReason: text("cancel_reason"),
+    cancelNote: text("cancel_note"),
     createdAt: createdAt(),
   },
   (t) => [index("subscriptions_org_idx").on(t.orgId)],
@@ -724,6 +730,9 @@ export const jobs = pgTable(
     // work; assemble (puts the parts of a milestone together); qa (checks another partner's delivery)
     role: text("role").notNull().default("work"),
     reviewsDeliveryId: uuid("reviews_delivery_id"),
+    // monthly service: the subscription this check-up belongs to and its month ("2026-11")
+    subscriptionId: uuid("subscription_id"),
+    period: text("period"),
     createdBy: text("created_by").notNull(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
@@ -853,6 +862,11 @@ export const protocolVersions = pgTable(
 
 export type TaskTemplate = { title: string; brief: string; protocol: string; skills: string[]; payEur: number; days: number; milestone: number };
 export type MilestoneTemplate = { title: string; titles?: Record<string, string>; sharePct: number };
+// What the monthly fee delivers after go-live: the check-up tasks each month and the running costs we expect.
+export type MonthlyPlan = {
+  tasks: { title: string; brief: string; protocol: string; skills: string[]; payEur: number; day: number; titles?: Record<string, string> }[];
+  costs: { label: string; kind: "tool" | "usage" | "other"; eur: number }[];
+};
 
 // The catalogue: a product we sell = protocols + task template + milestones + price. No package, no sale.
 export const servicePackages = pgTable("service_packages", {
@@ -870,6 +884,7 @@ export const servicePackages = pgTable("service_packages", {
   personalData: boolean("personal_data").notNull().default(true),
   // rounds of changes included per milestone (Fiverr-style cap); more is a priced change request
   revisions: integer("revisions").notNull().default(2),
+  monthly: jsonb("monthly").$type<MonthlyPlan>().notNull().default({ tasks: [], costs: [] }),
   active: boolean("active").notNull().default(true),
   createdAt: createdAt(),
 });
@@ -897,6 +912,8 @@ export const orders = pgTable(
     // step 8: no partner work before a signed contract and the deposit
     contractId: uuid("contract_id"),
     depositEur: integer("deposit_eur"),
+    // why it was rejected (LOSS_REASONS)
+    lostReason: text("lost_reason"),
     createdAt: createdAt(),
   },
   (t) => [index("orders_status_idx").on(t.status)],
@@ -1350,4 +1367,49 @@ export const complaints = pgTable(
     createdAt: createdAt(),
   },
   (t) => [index("complaints_org_idx").on(t.orgId, t.status)],
+);
+
+/* ───────────── Monthly service, supply and losses (gap audit 2026-10-25b) ───────────── */
+
+// What a subscription costs us each month: partner check-ups, tools, usage (voice minutes, model use). Estimates
+// come from the package; an actual figure for the same label and month replaces the estimate.
+export const serviceCosts = pgTable(
+  "service_costs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orgId: uuid("org_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+    subscriptionId: uuid("subscription_id").notNull().references(() => subscriptions.id, { onDelete: "cascade" }),
+    period: text("period").notNull(),
+    // partner, tool, usage, other
+    kind: text("kind").notNull(),
+    label: text("label").notNull(),
+    amountEur: numeric("amount_eur", { precision: 10, scale: 2, mode: "number" }).notNull(),
+    // estimate (from the package) or actual (bill, partner payout)
+    source: text("source").notNull(),
+    jobId: uuid("job_id"),
+    createdBy: text("created_by").notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex("service_costs_line_idx").on(t.subscriptionId, t.period, t.label, t.source), index("service_costs_org_idx").on(t.orgId, t.period)],
+);
+
+// A skill nobody can do right now: a recruiting post draft and look-alike people to invite. Closed when a partner with it starts.
+export const supplyGaps = pgTable(
+  "supply_gaps",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    skill: text("skill").notNull(),
+    language: text("language"),
+    country: text("country"),
+    jobId: uuid("job_id"),
+    post: text("post").notNull(),
+    // partner ids of earlier applicants with this skill worth inviting again
+    candidates: jsonb("candidates").$type<string[]>().notNull().default([]),
+    invitedAt: timestamp("invited_at", { withTimezone: true }),
+    // open, closed
+    status: text("status").notNull().default("open"),
+    closedAt: timestamp("closed_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("supply_gaps_status_idx").on(t.status, t.skill)],
 );
