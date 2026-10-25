@@ -1,33 +1,52 @@
+import { desc } from "drizzle-orm";
+import { getDb } from "@/db";
+import { apiKeys } from "@/db/schema";
+import { connections } from "@/server/systems";
 import { PageHead } from "@/ui/Shell";
+import { NewKey, RevokeKey } from "../systems/Forms";
 
 const endpoints = [
-  { m: "POST", p: "/api/v1/drafts", d: "Agent sends a page draft (live)", live: true },
-  { m: "GET", p: "/api/v1/drafts/:id", d: "Approval status of a draft (live)", live: true },
-  { m: "GET", p: "/api/v1/catalog", d: "Catalogue for buyer agents (sample)", live: true },
-  { m: "GET", p: "/llms.txt", d: "Machine-readable site summary (live)", live: true },
-  { m: "POST", p: "/api/v1/concierge", d: "Concierge chat turn (streaming) + detected need", live: false },
-  { m: "POST", p: "/api/v1/checkups", d: "Check-up answers → report + CRM lead", live: false },
-  { m: "POST", p: "/api/v1/companies/:id/signals", d: "Engagement signal → persona tier upgrade", live: false },
-  { m: "POST", p: "/api/v1/orders", d: "Order → invoice → provision My Apps", live: false },
-  { m: "POST", p: "/api/v1/contracts", d: "Generate contract for any relationship", live: false },
-  { m: "POST", p: "/api/v1/deliverables/:id/checks", d: "QA judge writes per-criterion results", live: false },
-  { m: "POST", p: "/api/v1/messages", d: "Mediated message (auto-masking, translation)", live: false },
-  { m: "MCP", p: "mcp://legendpartner", d: "MCP server for external agents", live: false },
+  ["POST", "/api/v1/drafts", "Agent sends a page draft (content:draft)"],
+  ["POST", "/api/v1/prospects", "Company finder adds a company (crm:write)"],
+  ["GET/POST", "/api/v1/agents/runs", "Script agents: may I run? report usage; lessons (content:draft / crm:write)"],
+  ["GET", "/api/v1/market-filters", "Paused market filters for the finder (crm:write)"],
+  ["POST", "/api/v1/outreach/run", "Send due emails and AI calls (outreach:run)"],
+  ["POST", "/api/v1/outcomes", "A delivering agent records a customer result (portal:write)"],
+  ["POST", "/api/v1/customer-approvals", "Ask a customer for a yes (portal:write)"],
+  ["GET/POST", "/api/v1/partner/jobs · offers · deliveries", "Agent partners pull and deliver work (partner:work)"],
+  ["POST", "/api/v1/orders", "Order from the marketplace, dashboard or chat"],
+  ["GET", "/llms.txt · /sitemap.xml", "Machine-readable site for agents and search engines"],
 ];
+const day = (d: Date | null) => (d ? d.toISOString().slice(0, 16).replace("T", " ") : "never");
 
-export default function Api() {
+// API & connections (step 10): real keys (only the hash is stored), and which services are connected (never the key itself).
+export default async function Api() {
+  const db = getDb();
+  const keys = await db.select().from(apiKeys).orderBy(desc(apiKeys.createdAt)).limit(100);
+  const conns = connections();
   return (
     <main>
-      <PageHead title="API & connections" crumbs="Cockpit › Machine" sub="API-first: every screen action is also an API, used by n8n, agents and later customers." actions={<button className="btn primary">＋ New API key</button>} />
-      <div className="card table-wrap" style={{ marginBottom: 18 }}>
-        <table className="table"><thead><tr><th>Method</th><th>Path</th><th>What</th><th>Status</th></tr></thead>
-          <tbody>{endpoints.map((e) => (<tr key={e.p}><td><span className="badge">{e.m}</span></td><td className="ltr">{e.p}</td><td>{e.d}</td><td>{e.live ? <span className="badge ok">built</span> : <span className="badge gray">planned</span>}</td></tr>))}</tbody></table>
-      </div>
-      <div className="grid g4">
-        <div className="card"><h3>n8n</h3><p className="muted small">Runs the agents; every system event goes to its webhook.</p><span className="badge warn">webhook not set</span></div>
-        <div className="card"><h3>Langfuse</h3><p className="muted small">LLM traces, cost, prompt versions, A/B (self-hosted, EU).</p><span className="badge gray">to install</span></div>
-        <div className="card"><h3>Telegram</h3><p className="muted small">Approvals, alerts and emergency stop on your phone.</p><span className="badge warn">bot not created</span></div>
-        <div className="card"><h3>Claude API</h3><p className="muted small">The agents' brain. Key lives in .env on the server, never in chat.</p><span className="badge warn">waiting for key</span></div>
+      <PageHead title="API & connections" crumbs="Cockpit › Machine" sub="Every agent works through the API with its own scoped key; nothing writes to the database directly. Keys for outside services live in .env on the computer or server, never in chat." />
+      <section className="grid g4" style={{ marginBottom: 18 }}>
+        {conns.map((c) => <div key={c.name} className="card"><div className="row" style={{ justifyContent: "space-between" }}><b>{c.name}</b><span className={`badge ${c.ok ? "ok" : "warn"}`}>{c.ok ? "connected" : "not set"}</span></div><p className="muted small">{c.why}</p>{!c.ok && <div className="muted small ltr">.env: {c.keys}</div>}</div>)}
+      </section>
+      <section className="grid g-2-1" style={{ marginBottom: 18 }}>
+        <div className="card table-wrap">
+          <h3>Agent keys</h3>
+          <table className="table"><thead><tr><th>Name</th><th>Key starts</th><th>Scopes</th><th>Last used</th><th>Created</th><th /></tr></thead>
+            <tbody>{keys.map((k) => (
+              <tr key={k.id} style={{ opacity: k.revokedAt ? 0.5 : 1 }}>
+                <td><b>{k.name}</b></td><td className="ltr small">{k.prefix}…</td><td className="small">{k.scopes.join(", ")}</td><td className="small">{day(k.lastUsedAt)}</td><td className="small">{day(k.createdAt)}</td>
+                <td>{k.revokedAt ? <span className="muted small">revoked</span> : <RevokeKey id={k.id} />}</td>
+              </tr>
+            ))}</tbody></table>
+        </div>
+        <NewKey />
+      </section>
+      <div className="card table-wrap">
+        <h3>Endpoints</h3>
+        <table className="table"><thead><tr><th>Method</th><th>Path</th><th>What</th></tr></thead>
+          <tbody>{endpoints.map(([m, p, d]) => <tr key={p}><td><span className="badge">{m}</span></td><td className="ltr small">{p}</td><td className="small">{d}</td></tr>)}</tbody></table>
       </div>
     </main>
   );

@@ -2,7 +2,13 @@
 
 Every agent and module built before step 10 lands here, so the cockpit ends up as one control room, not a
 pile of separate tools. For each item the cockpit needs: status, last run, cost, KPI, on/off, manual run.
-Add a line whenever you build something that runs on its own or produces numbers.
+Add a line whenever you build something that runs on its own or produces numbers, **and the same row to
+`src/config/modules.ts`** (Cockpit › Systems reads it; `npm test` fails when a number here has no module there).
+
+**Step 10 (2026-10-25): wired.** Every row below is a module in Cockpit › Systems with status light, last activity,
+€ this month, KPI and its control (agent switch + budget, job switch + run now, or the page). The "Now" column
+records how each item was before step 10. Rows 8 and 23 were folded into others (8 → Markets › demand without a hub,
+23 → row 64).
 
 | # | Item | Built in | Runs | What the cockpit must show / control | Now |
 |---|------|----------|------|--------------------------------------|-----|
@@ -66,3 +72,14 @@ Add a line whenever you build something that runs on its own or produces numbers
 | 58 | Lead double opt-in → CRM (`confirmLead`, `prospectFromLead`) | Step 8 | Lead captured → confirmation email → link → prospect (source hub) | Confirmation rate, leads → prospects → customers | Live |
 | 59 | CRM won → order (`wonToOrder`) | Step 8 | Javad picks the package on the prospect page | Won deals, days from won to signed | Live |
 | 60 | GDPR erasure (`eraseCustomer`) | Step 8 | Customer request "data_delete" → Javad types the company name → erased; contracts/invoices kept 10 years | Requests, days to erase (30-day limit) | Live |
+| 61 | Opening-line experiment (`improve.ts`, `outreach.opening`) | Step 9 | Every researched company gets a variant; reply = success, opt-out = guardrail | Arms, rate, ready → adopt | Wired: Experiments |
+| 62 | Customer health (`health.ts#customerHealthWeek`) | Step 9 | Monday 07:00 | Score per customer, red alert | Wired: Customers health column |
+| 63 | Monthly results email (`monthlyResults`, `results.reported`) | Step 9 | Day 1 09:00 | Sent per month | Wired: job + Systems |
+| 64 | Success story + referral ask (`askForStory`) | Step 9 | On `project.closed` | Asked, accepted | Wired: Systems |
+| 65 | Data retention (`retention.ts`) | Step 9 | Day 1 03:00 | Rows deleted per kind | Wired: job + Systems |
+| 66 | Orchestrator (`orchestrator.ts`, `job_runs`) | Step 9 | Worker / local mode every minute | Jobs, last run, failures, on/off, run now | Wired: Agent center › jobs |
+| 67 | Daily brief (`daily-report.ts`) | Step 9 | 08:00 Rome | Verdict, numbers, decisions, stuck | Wired: Today |
+| 68 | Agent budgets (`checkBudgets`) | Step 9 | Hourly | Spend vs budget, paused agents | Wired: Agent center |
+| 69 | Experiments + lessons (`checkExperiments`, `lessons`) | Step 9 | Daily 07:30 | Ready tests, lessons in use | Wired: Experiments |
+| 70 | Event outbox → Telegram + n8n (`dispatch.ts`) | Slice A | Worker, continuous | Dead events | Wired: Systems |
+| 71 | Emergency stop + switches (`switches.ts`) | Step 10 | Cockpit › Systems | Stop all agents + outbound; job on/off; market filters | Built in step 10 |

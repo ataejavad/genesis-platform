@@ -3,6 +3,7 @@ import { agentBoard, monthSpend } from "@/server/agents";
 import { jobBoard } from "@/server/orchestrator";
 import { PageHead } from "@/ui/Shell";
 import { Progress } from "@/ui/bits";
+import { JobSwitch } from "../systems/Forms";
 import { AgentControls, RunJob } from "./Forms";
 
 const when = (d: Date | null) => (d ? d.toISOString().slice(0, 16).replace("T", " ") : "never");
@@ -47,11 +48,11 @@ export default async function AgentCenter() {
         <table className="table"><thead><tr><th>Job</th><th>When</th><th>Last run</th><th>Result</th><th /></tr></thead>
           <tbody>{jobs.map((j) => (
             <tr key={j.id}>
-              <td><b>{j.id}</b><div className="muted small">{j.what}</div></td>
+              <td><b>{j.id}</b>{!j.enabled && <span className="badge gray" style={{ marginLeft: 4 }}>off</span>}{j.outward && <span className="badge" style={{ marginLeft: 4 }} title="held by the emergency stop">outward</span>}<div className="muted small">{j.what}</div></td>
               <td className="small">{j.when}</td>
               <td className="small">{when(j.lastAt)} {j.ok === null ? null : <span className={`badge ${j.ok ? "ok" : "bad"}`}>{j.ok ? "ok" : "failed"}</span>}</td>
               <td className="small muted" style={{ maxWidth: 320, wordBreak: "break-word" }}>{j.error ?? (j.result ? JSON.stringify(j.result).slice(0, 160) : "–")}</td>
-              <td><RunJob id={j.id} /></td>
+              <td><div className="row" style={{ gap: 6 }}><JobSwitch id={j.id} enabled={j.enabled} /><RunJob id={j.id} /></div></td>
             </tr>
           ))}</tbody></table>
       </div>

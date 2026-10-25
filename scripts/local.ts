@@ -86,6 +86,7 @@ void (async () => {
 async function localWorker() {
   const { dispatchSimple } = await import("../src/worker/dispatch");
   const { runDue } = await import("../src/server/orchestrator");
+  const { isStopped } = await import("../src/server/switches");
   const { sendQueued } = await import("../src/server/notify");
   const { mailerFromEnv } = await import("../src/server/mailer");
   const { telegramConfigFromEnv } = await import("../src/server/telegram");
@@ -102,7 +103,7 @@ async function localWorker() {
         await runDue(wdb, jobDeps);
       }
       await dispatchSimple(wdb, deps);
-      if (jobDeps.mailer) await sendQueued(wdb, jobDeps.mailer);
+      if (jobDeps.mailer && !(await isStopped(wdb))) await sendQueued(wdb, jobDeps.mailer);
     } catch (err) {
       console.error("local worker:", err instanceof Error ? err.message : err);
     }

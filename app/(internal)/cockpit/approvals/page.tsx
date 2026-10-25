@@ -10,13 +10,15 @@ import { HubView } from "@/ui/site/HubView";
 import { MAX_ATTEMPTS } from "@/worker/dispatch";
 import { PageHead } from "@/ui/Shell";
 import { decide } from "../actions";
-import { approvals } from "@/mock/cockpit";
+import Link from "next/link";
+import { needsYou } from "@/server/needs-you";
 
 export const dynamic = "force-dynamic";
 
 export default async function Approvals() {
   const db = getDb();
-  const [pending, [published], [stuck]] = await Promise.all([
+  const [needs, pending, [published], [stuck]] = await Promise.all([
+    needsYou(db),
     listPendingApprovals(db),
     db.select({ n: count() }).from(contentItems).where(eq(contentItems.status, "published")),
     db.select({ n: count() }).from(events).where(and(isNull(events.dispatchedAt), gte(events.attempts, MAX_ATTEMPTS))),
@@ -24,13 +26,13 @@ export default async function Approvals() {
 
   return (
     <main>
-      <PageHead title="Approvals" crumbs="Cockpit" sub="Risk-tiered: low risk is automatic with sampling, medium goes to the QA judge, high and the hard limits come here (or Telegram)." />
+      <PageHead title="Needs you" crumbs="Cockpit" sub="One inbox: everything any module waits on you for, most urgent first. Low-risk work runs on its own; high risk and the hard limits come here (or Telegram)." />
       <div className="card" style={{ marginBottom: 20 }}>
-        <div className="card-head"><h3>Agent & partner proposals</h3><span className="badge gray">sample data</span></div>
-        <table className="table"><thead><tr><th>Type</th><th>What</th><th>From</th><th>Risk</th><th>Why it is here</th><th /></tr></thead>
-          <tbody>{approvals.map((a) => <tr key={a.t}><td>{a.kind}</td><td><b>{a.t}</b></td><td>{a.by}</td><td><span className={`badge ${a.risk === "high" ? "bad" : a.risk === "medium" ? "warn" : "gray"}`}>{a.risk}</span></td><td className="muted small">{a.why}</td><td><div className="row"><button className="btn sm ok">Approve</button><button className="btn sm danger">Reject</button></div></td></tr>)}</tbody></table>
+        <div className="card-head"><h3>✋ Everything waiting for you</h3><span className="badge ok">live</span></div>
+        <div className="list">{needs.map((x) => <div key={x.id} className="item"><span className="badge warn num">{x.n}</span><div className="grow small"><b>{x.label}</b><div className="muted">{x.why}</div></div><Link className="btn sm" href={x.link}>Open</Link></div>)}
+          {!needs.length && <div className="muted small">Nothing waits for you.</div>}</div>
       </div>
-      <h2>Website content <span className="badge ok">live database</span></h2>
+      <h2 id="content">Website content</h2>
       <section className="grid g3" style={{ marginBottom: 20 }}>
         <div className="card stat"><div className="label">Waiting</div><div className="value">{pending.length}</div></div>
         <div className="card stat"><div className="label">Published pages</div><div className="value">{published.n}</div></div>

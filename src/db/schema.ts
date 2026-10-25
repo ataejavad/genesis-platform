@@ -1297,3 +1297,15 @@ export const customerHealth = pgTable(
   },
   (t) => [uniqueIndex("customer_health_org_week_idx").on(t.orgId, t.week)],
 );
+
+/* ───────────── Cockpit (step 10) ───────────── */
+
+// Javad's switches outside the agent registry: orchestrator jobs ("job:<id>"), market filters ("filter:<CC>:<NACE>")
+// and the emergency stop ("stop:all"). A missing row means the default (on; filters undecided).
+export const switches = pgTable("switches", {
+  id: text("id").primaryKey(),
+  enabled: boolean("enabled").notNull(),
+  note: text("note"),
+  updatedBy: text("updated_by").notNull(),
+  updatedAt: updatedAt(),
+});

@@ -31,6 +31,7 @@ export function Shell({
   user,
   demo = true,
   lang = "fa",
+  command,
   children,
 }: {
   brand: string;
@@ -39,6 +40,8 @@ export function Shell({
   user: { name: string; sub: string };
   demo?: boolean;
   lang?: "fa" | "en";
+  /** replaces the demo command bar (the cockpit passes its jump bar) */
+  command?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const path = usePathname();
@@ -78,7 +81,7 @@ export function Shell({
       <div className="main">
         {demo && <div className="demo-banner">{t.demo}</div>}
         <header className="topbar">
-          <CommandBar lang={lang} />
+          {command ?? <CommandBar lang={lang} />}
           <div className="user">
             <div style={{ textAlign: "start", lineHeight: 1.3 }}>
               <div style={{ fontWeight: 600, fontSize: 14 }}>{user.name}</div>

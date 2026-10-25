@@ -114,6 +114,10 @@ async function handle(db: Db, deps: DispatchDeps, event: Event) {
           : [`🚩 ${p.company} at risk (${p.score}/100): ${(p.reasons ?? []).join("; ")}`, "/cockpit/customers"];
     await sendAlert(deps.telegram, [line], link, fetchImpl);
   }
+  // Emergency stop and its release reach Javad's phone (he may have pressed it from someone else's laptop).
+  if (deps.telegram && event.type === "switch.changed" && event.payload.id === "stop:all") {
+    await sendAlert(deps.telegram, [event.payload.enabled ? "⛔ Emergency stop ON: agents and outbound messages are held" : "▶️ Emergency stop lifted: agents and outbound messages run again"], "/cockpit/systems", fetchImpl);
+  }
   // A finished project: ask the customer for a success story and a referral (customer success).
   if (event.type === "project.closed") await askForStory(db, event.subjectId!);
   // Every event also goes to n8n, where Genesis workflows subscribe to what they need.

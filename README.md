@@ -28,6 +28,8 @@ Design: `business-plan/15-web-app-design.md` (project files). This repository is
 | `src/config/agents.ts`, `src/server/agents.ts` | Agent registry: one KPI, target and €/month budget per agent; `runAgent()` gates and meters every Claude call |
 | `src/server/improve.ts`, `src/config/experiments.ts` | Improvement loop: experiments, outcomes, z-test, Javad adopts, lessons read by agents |
 | `src/server/health.ts`, `retention.ts`, `lead-reminders.ts` | Weekly customer health, monthly results email, story/referral ask, GDPR retention, hub deadline reminders |
+| `src/config/modules.ts`, `src/server/systems.ts` | Step 10: every module of the machine (docs/cockpit-wiring.md) with status, last activity, €, KPI and control in Cockpit › Systems |
+| `src/server/switches.ts`, `needs-you.ts`, `market-filters.ts` | Emergency stop, job switches, market-filter gate; one "Needs you" inbox behind the menu counts |
 | `app/(site)/[locale]/…` | Public pages rendered from published content, with schema.org JSON-LD |
 | `app/(internal)/cockpit` | Approval queue for admins |
 | `app/api/v1/drafts` | Agent API |

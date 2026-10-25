@@ -61,7 +61,8 @@ export type EventType =
   | "experiment.decided"
   | "customer.at_risk"
   | "results.reported"
-  | "lead.reminder_due";
+  | "lead.reminder_due"
+  | "switch.changed";
 
 // Call inside the same transaction as the change it describes (transactional outbox).
 export async function emit(

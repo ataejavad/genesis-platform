@@ -32,8 +32,14 @@ type Imported = Found & { industry?: string; contacts?: { name?: string; role?: 
 const targets = (JSON.parse(readFileSync("data/outreach/targets.json", "utf8")) as { targets: Target[] }).targets.filter((t) => !values.industry || t.industry === values.industry);
 
 console.log(`outbound: finder ${finderEnabled() ? "Apify" : values.import ? "import" : "off"}, people ${apolloEnabled() ? "Apollo" : "off"}, research ${researchEnabled() ? "Claude" : "template"}`);
+// hard gate: a market filter Javad paused in Cockpit › Markets stops the finder for that division
+const paused = values.dry || !key ? [] : await fetch(`${appUrl}/api/v1/market-filters`, { headers: { authorization: `Bearer ${key}` } }).then((r) => r.json() as Promise<{ paused?: string[] }>).then((r) => r.paused ?? []).catch(() => [] as string[]);
 let added = 0;
 for (const t of targets) {
+  if (paused.includes(`filter:${t.country.toUpperCase()}:${t.nace.slice(0, 3).toUpperCase()}`)) {
+    console.log(`${t.industry}-${t.country}: filter ${t.nace.slice(0, 3)} paused in the cockpit, skipped`);
+    continue;
+  }
   let found: Imported[] = [];
   let spent = 0;
   if (values.import) {

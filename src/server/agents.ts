@@ -6,6 +6,7 @@ import { agentRuns, agentSettings, checkups, inbox, leads, partners, portalMessa
 import type { Actor } from "./actor";
 import { AppError } from "./errors";
 import { audit, emit } from "./events";
+import { isStopped } from "./switches";
 
 /*
  * Agents as employees (doc 15 §6ز, value filter): each Claude call goes through runAgent(), which checks the switch
@@ -34,13 +35,15 @@ export async function agentStatus(db: DbOrTx, id: string, now = new Date()) {
   const spent = await spentEur(db, id, monthStart(now));
   const paused = Boolean(s?.pausedUntil && s.pausedUntil > now);
   const enabled = s?.enabled ?? true;
-  return { def, enabled, budgetEur, spentEur: spent, paused, pausedUntil: s?.pausedUntil ?? null, allowed: enabled && !paused && spent < budgetEur };
+  // the emergency stop in the cockpit holds every agent until Javad lifts it
+  const stopped = await isStopped(db);
+  return { def, enabled, budgetEur, spentEur: spent, paused, pausedUntil: s?.pausedUntil ?? null, stopped, allowed: enabled && !paused && !stopped && spent < budgetEur };
 }
 
 /** The one door for in-app Claude calls: switch + budget first, then the call, then tokens and € on record. */
 export async function runAgent<T>(db: Db, id: string, action: string, fn: () => Promise<T>, meta: Record<string, unknown> = {}): Promise<T> {
   const st = await agentStatus(db, id);
-  if (!st.allowed) throw new AppError(423, "agent_paused", `${id} is ${!st.enabled ? "switched off" : "over its monthly budget"}`);
+  if (!st.allowed) throw new AppError(423, "agent_paused", `${id} is ${st.stopped ? "held by the emergency stop" : !st.enabled ? "switched off" : "over its monthly budget"}`);
   const started = Date.now();
   const usage = { input: 0, output: 0, searches: 0 };
   try {
