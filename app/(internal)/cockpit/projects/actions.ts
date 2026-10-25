@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getDb } from "@/db";
 import { requireAdmin } from "@/lib/auth";
-import { approveVersion, convertOrder, createProject, draftVersion, humanReview, quoteChange, rejectOrder } from "@/server/projects";
+import { addInput, approveVersion, convertOrder, createProject, decideInput, draftVersion, humanReview, quoteChange, rejectOrder, setQaBy } from "@/server/projects";
 
 // Cockpit actions for step 7 (orders, projects, protocols, QA). Each acts as the signed-in admin; audited in the module.
 export type Result = { ok: boolean; message: string } | null;
@@ -72,4 +72,35 @@ export async function qaDecide(_: Result, f: FormData): Promise<Result> {
     const r = await humanReview(getDb(), a, str(f, "delivery"), results, Number(str(f, "quality") || 4), str(f, "note"));
     return r.payout ? "Accepted: payout due, milestone checked." : "Sent back to the partner with your note.";
   }, ["/cockpit/qa", "/cockpit/projects", "/cockpit/partners"]);
+}
+
+/** Material from a meeting, a call or an email, typed or as a file: cleaned for partners like the customer's own. */
+export async function addMaterial(_: Result, f: FormData): Promise<Result> {
+  const project = str(f, "project");
+  return act(async (a) => {
+    const file = f.get("file");
+    const hasFile = file instanceof File && file.size > 0;
+    const row = await addInput(getDb(), a, {
+      projectId: project, label: str(f, "label") || "Other", source: hasFile && !str(f, "text") ? "file" : "meeting", text: str(f, "text") || undefined,
+      file: hasFile ? { name: file.name.slice(0, 200), type: file.type, bytes: new Uint8Array(await file.arrayBuffer()) } : undefined,
+    });
+    return row.status === "check" ? "Saved. The file waits for your check below before partners see it." : `Saved and shared with the project's partners${row.removed.length ? ` (removed: ${row.removed.join(", ")})` : ""}.`;
+  }, [`/cockpit/projects/${project}`]);
+}
+
+export async function shareMaterial(_: Result, f: FormData): Promise<Result> {
+  return act(async (a) => {
+    const share = str(f, "share") === "yes";
+    await decideInput(getDb(), a, str(f, "input"), share);
+    return share ? "Shared with the project's partners." : "Withheld: partners never see it.";
+  }, [`/cockpit/projects/${str(f, "project")}`]);
+}
+
+export async function qaBy(_: Result, f: FormData): Promise<Result> {
+  return act(async (a) => {
+    const v = str(f, "qaBy");
+    if (!["judge", "partner", "us"].includes(v)) throw new Error("unknown QA mode");
+    await setQaBy(getDb(), a, str(f, "project"), v as "judge" | "partner" | "us");
+    return "Saved. New deliveries follow it.";
+  }, [`/cockpit/projects/${str(f, "project")}`]);
 }

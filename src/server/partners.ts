@@ -9,7 +9,7 @@ import { createApiKey } from "./api-keys";
 import { AppError, notFound } from "./errors";
 import { customerCode as codeFor } from "./delivery-rules";
 import { audit, emit } from "./events";
-import { onJobAccepted } from "./projects";
+import { onJobAccepted, partnerMaterials } from "./projects";
 import { maskContacts, match, SKILLS, type Stats, screen, tierOf } from "./partner-rules";
 
 /*
@@ -193,8 +193,11 @@ export async function matchesFor(db: DbOrTx, jobId: string) {
   const [job] = await db.select().from(jobs).where(eq(jobs.id, jobId));
   if (!job) throw notFound("job");
   const active = await db.select().from(partners).where(eq(partners.status, "active"));
+  // whoever made the work never checks it
+  const maker = job.reviewsDeliveryId ? (await db.select({ p: deliveries.partnerId }).from(deliveries).where(eq(deliveries.id, job.reviewsDeliveryId)))[0]?.p : null;
   const out = [];
   for (const p of active) {
+    if (p.id === maker) continue;
     const [load] = await db.select({ n: sql<number>`count(*)::int` }).from(jobs).where(and(eq(jobs.partnerId, p.id), inArray(jobs.status, ["assigned", "delivered"])));
     const [dpa] = await db.select({ n: sql<number>`count(*)::int` }).from(partnerDocuments).where(and(eq(partnerDocuments.partnerId, p.id), eq(partnerDocuments.kind, "dpa"), eq(partnerDocuments.status, "ok")));
     const m = match(job, { skills: p.skills, languages: p.languages, country: p.country, capacity: p.capacity, active: load.n, stats: await statsFor(db, p.id), dpaSigned: dpa.n > 0 });
@@ -260,7 +263,10 @@ export async function workFor(db: Db, partnerId: string) {
   const rows = await db.select().from(jobs).where(eq(jobs.partnerId, partnerId)).orderBy(asc(jobs.dueAt));
   const ids = rows.map((r) => r.id);
   const dels = ids.length ? await db.select().from(deliveries).where(inArray(deliveries.jobId, ids)).orderBy(desc(deliveries.version)) : [];
-  return rows.map((j) => ({ job: j, last: dels.find((d) => d.jobId === j.id) ?? null }));
+  // what the customer gave, cleaned of their identity (step 7: customer → partner pipe)
+  const mats = new Map<string, Awaited<ReturnType<typeof partnerMaterials>>>();
+  for (const pid of new Set(rows.filter((r) => r.projectId && ["assigned", "delivered"].includes(r.status)).map((r) => r.projectId!))) mats.set(pid, await partnerMaterials(db, pid));
+  return rows.map((j) => ({ job: j, last: dels.find((d) => d.jobId === j.id) ?? null, materials: (j.projectId && mats.get(j.projectId)) || [] }));
 }
 
 /* ───────────── Delivery and review ───────────── */
@@ -273,7 +279,8 @@ export async function deliver(db: Db, actor: Actor, partnerId: string, jobId: st
     const [job] = await tx.select().from(jobs).where(and(eq(jobs.id, jobId), eq(jobs.partnerId, partnerId)));
     if (!job) throw notFound("job");
     if (job.status !== "assigned") throw new AppError(409, "not_assigned", "job is not waiting for a delivery");
-    if (v.selfCheck.length !== job.checklist.length || v.selfCheck.some((x) => !x)) throw new AppError(400, "self_check", "tick every point of the checklist before delivering");
+    // a QA partner's ticks are their verdict per criterion (unticked = fails); everyone else ticks every point
+    if (v.selfCheck.length !== job.checklist.length || (job.role !== "qa" && v.selfCheck.some((x) => !x))) throw new AppError(400, "self_check", "tick every point of the checklist before delivering");
     const [{ n }] = await tx.select({ n: sql<number>`count(*)::int` }).from(deliveries).where(eq(deliveries.jobId, jobId));
     const note = v.note ? maskContacts(v.note).shown : null;
     const [row] = await tx.insert(deliveries).values({ jobId, partnerId, version: n + 1, link: v.link, note, selfCheck: v.selfCheck }).returning();

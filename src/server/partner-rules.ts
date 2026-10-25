@@ -21,6 +21,8 @@ export const SKILLS: { id: string; label: L }[] = [
   { id: "data", label: { en: "Data and research", it: "Dati e ricerca", de: "Daten und Recherche", fa: "داده و تحقیق" } },
   { id: "admin", label: { en: "Paperwork and incentives", it: "Pratiche e incentivi", de: "Anträge und Förderungen", fa: "کارهای اداری و مشوق‌ها" } },
   { id: "industry", label: { en: "Industry expert", it: "Esperto di settore", de: "Branchenexperte", fa: "کارشناس صنعت" } },
+  { id: "assembly", label: { en: "Assembling parts into one delivery", it: "Assemblaggio delle parti in una consegna", de: "Teile zu einer Lieferung zusammenführen", fa: "مونتاژ بخش‌ها در یک تحویل" } },
+  { id: "qa", label: { en: "Quality checks (QA)", it: "Controllo qualità (QA)", de: "Qualitätsprüfung (QA)", fa: "کنترل کیفیت (QA)" } },
 ];
 export const skillLabel = (id: string, lang: string) => {
   const s = SKILLS.find((x) => x.id === id);
@@ -56,7 +58,7 @@ export function tierOf(s: Stats) {
 
 /* ───────────── Matching a job to partners (with reasons) ───────────── */
 
-export type MatchJob = { skills: string[]; language: string | null; country: string | null; personalData: boolean };
+export type MatchJob = { skills: string[]; language: string | null; country: string | null; personalData: boolean; role?: string };
 export type MatchPartner = { skills: string[]; languages: string[]; country: string; capacity: number; active: number; stats: Stats; dpaSigned: boolean };
 
 // EU/EEA plus countries with an EU adequacy decision (personal data may go there without extra clauses).
@@ -65,6 +67,8 @@ const SAFE = new Set("AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT N
 /** null when the partner may not take the job at all; otherwise the score and its parts. */
 export function match(job: MatchJob, p: MatchPartner) {
   if (job.personalData && (!p.dpaSigned || !SAFE.has(p.country.toUpperCase()))) return null;
+  // assembling and checking are roles: only partners who said they do them (a QA company, an assembler agent)
+  if (job.role && job.role !== "work" && !job.skills.every((s) => p.skills.includes(s))) return null;
   const why: { factor: string; points: number; max: number }[] = [];
   const need = job.skills.length ? job.skills : [];
   const covered = need.filter((s) => p.skills.includes(s)).length;

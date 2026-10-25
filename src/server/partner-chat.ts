@@ -16,7 +16,7 @@ export const PARTNER_INTENTS = ["today", "job", "offers", "earnings", "level", "
 export type PartnerIntent = (typeof PARTNER_INTENTS)[number];
 
 export type OfferCardData = { id: string; title: string; brief: string; kind: string; customerCode: string | null; payEur: number; dueAt: string; fit: number; why: { factor: string; points: number; max: number }[]; checklist: string[] };
-export type JobCardData = { id: string; title: string; customerCode: string | null; status: string; dueAt: string; payEur: number; brief: string; checklist: string[]; review: string | null; lastStatus: string | null };
+export type JobCardData = { id: string; title: string; customerCode: string | null; status: string; dueAt: string; payEur: number; brief: string; checklist: string[]; review: string | null; lastStatus: string | null; materials?: string[] };
 export type PartnerCard =
   | { type: "today"; data: TodayItem[] }
   | { type: "job"; data: JobCardData }
@@ -60,8 +60,8 @@ export async function jobCard(db: Db, partnerId: string, text: string): Promise<
   const score = (title: string) => normalize(title).split(/[^\p{L}\d]+/u).filter((w) => words.has(w)).length;
   const active = (s: string) => (s === "assigned" ? 0 : s === "delivered" ? 1 : 2);
   const best = [...work].sort((a, b) => score(b.job.title) - score(a.job.title) || active(a.job.status) - active(b.job.status) || a.job.dueAt.getTime() - b.job.dueAt.getTime())[0];
-  const { job, last } = best;
-  return { id: job.id, title: job.title, customerCode: job.customerCode, status: job.status, dueAt: job.dueAt.toISOString().slice(0, 10), payEur: job.payEur, brief: job.brief, checklist: job.checklist, review: last?.review ?? null, lastStatus: last?.status ?? null };
+  const { job, last, materials } = best;
+  return { id: job.id, title: job.title, customerCode: job.customerCode, status: job.status, dueAt: job.dueAt.toISOString().slice(0, 10), payEur: job.payEur, brief: job.brief, checklist: job.checklist, review: last?.review ?? null, lastStatus: last?.status ?? null, materials: materials.map((m) => m.label) };
 }
 
 type Reply = { intent: PartnerIntent; text: string; cards: PartnerCard[] };

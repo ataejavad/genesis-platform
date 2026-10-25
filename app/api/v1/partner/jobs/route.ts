@@ -13,7 +13,7 @@ export async function GET(req: Request) {
     const db = getDb();
     const auth = await authenticateAgent(db, req.headers.get("authorization"), "partner:work");
     const p = await partnerForKey(db, auth.actor.apiKeyId);
-    const work = (await workFor(db, p.id)).map(({ job, last }) => ({ id: job.id, title: job.title, brief: job.brief, checklist: job.checklist, status: job.status, dueAt: job.dueAt, payEur: job.payEur, lastDelivery: last && { version: last.version, status: last.status, review: last.review } }));
+    const work = (await workFor(db, p.id)).map(({ job, last, materials }) => ({ id: job.id, title: job.title, brief: job.brief, checklist: job.checklist, role: job.role, materials, status: job.status, dueAt: job.dueAt, payEur: job.payEur, lastDelivery: last && { version: last.version, status: last.status, review: last.review } }));
     return Response.json({ offers: await offerCards(db, p.id), work });
   } catch (err) {
     return errorResponse(err);

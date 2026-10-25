@@ -111,6 +111,7 @@ export function JobCard({ data: j, t, lang }: P & { data: JobCardData }) {
       <div className="row small" style={{ gap: 16 }}><span>{t.card.pay}: <b className="num">{fmtEur(j.payEur, lang)}</b></span><span>{t.card.due}: <b>{j.dueAt}</b></span></div>
       <div className="small"><b>{t.today.brief}:</b> {j.brief}</div>
       <div className="small"><b>{t.today.checklist}:</b><ul>{j.checklist.map((x) => <li key={x}>{x}</li>)}</ul></div>
+      {j.materials && j.materials.length > 0 && <div className="small"><b>{t.page.work.materials}:</b> {j.materials.join(" · ")}</div>}
       {j.review && <div className="small"><b>{t.today.review}:</b> {j.review}</div>}
       <Link className="btn sm" href="/partner/work" style={{ alignSelf: "start" }}>{t.today.open}</Link>
     </div>

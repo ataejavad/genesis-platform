@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 import { createDb } from "../src/db";
-import { jobs, organizations, partners, projects } from "../src/db/schema";
+import { jobs, organizations, partners, projectInputs, projects } from "../src/db/schema";
 import { deliver, offersFor, respondOffer } from "../src/server/partners";
-import { convertOrder, createOrder, createProject, humanReview, seedDelivery } from "../src/server/projects";
+import { addInput, convertOrder, createOrder, createProject, humanReview, seedDelivery } from "../src/server/projects";
 
 // Step 7 demo: first protocols and packages (always, idempotent), then once: a customer project waiting for
 // the demo customer's OK, an internal project with a delivery in the QA queue, and a new marketplace order.
@@ -34,5 +34,13 @@ if (any || !rossi || !giulia) {
   // 3. A new order from the marketplace, waiting in Cockpit › Projects
   await createOrder(db, { type: "system", id: "marketplace" }, { packageSlug: "phone-agent", source: "market", company: "Bianchi Serramenti (demo)", email: "bianchi@example.com", vat: "IT01234567890", country: "IT", industry: "glass", locale: "it" });
   console.log("demo projects created");
+}
+// Customer material (step 7 intake): notes from the kick-off call, identity removed for partners; one item is
+// left for the demo customer to answer in the chat ("Cosa vi serve da noi?").
+const [rossiProject] = rossi ? await db.select().from(projects).where(eq(projects.orgId, rossi.id)).limit(1) : [];
+if (rossiProject && !(await db.select({ id: projectInputs.id }).from(projectInputs).where(eq(projectInputs.projectId, rossiProject.id))).length) {
+  await addInput(db, actor, { projectId: rossiProject.id, label: "Website form access", source: "meeting", text: "Call con Rossi Impianti Srl, 24/10: il modulo è su WordPress (Contact Form 7). Accesso admin lo manda Marco a giulia@rossi-impianti.it, tel. 333 765 4321." });
+  await addInput(db, actor, { projectId: rossiProject.id, label: "CRM access", source: "meeting", text: "Usano Pipedrive, piano Essential. Utente API da creare." });
+  console.log("demo material added");
 }
 await db.$client.end();

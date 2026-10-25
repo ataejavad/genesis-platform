@@ -169,7 +169,21 @@ function ConfirmCard({ card, t, onDone }: P & { card: Extract<Card, { type: "con
   );
 }
 
-export function CardView({ card, t, lang, onDone }: P & { card: Card; onDone?: (text: string) => void }) {
+/** What we still need for each project; pressing one asks for it in the conversation. */
+export function NeedsCard({ data, t, onSend }: P & { data: Extract<Card, { type: "needs" }>["data"]; onSend?: (text: string) => void }) {
+  return (
+    <div className="stack">
+      {data.map((p) => (
+        <div key={p.projectId} className="card pcard stack">
+          <div className="row" style={{ flexWrap: "wrap", gap: 8 }}><b>{t.card.needs}</b><span className="muted small">{p.title} · {p.code}</span></div>
+          <ul className="plist">{p.needs.map((n) => <li key={n.label}><span>{n.text}</span><span className="spacer" />{onSend && <button className="btn sm" onClick={() => onSend(`📎 ${n.text}`)}>{t.card.give}</button>}</li>)}</ul>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function CardView({ card, t, lang, onDone, onSend }: P & { card: Card; onDone?: (text: string) => void; onSend?: (text: string) => void }) {
   switch (card.type) {
     case "results": return <ResultsCard data={card.data} t={t} lang={lang} />;
     case "goals": return <GoalsCard data={card.data} t={t} lang={lang} />;
@@ -177,6 +191,7 @@ export function CardView({ card, t, lang, onDone }: P & { card: Card; onDone?: (
     case "services": return <ServicesCard data={card.data} t={t} lang={lang} />;
     case "next": return <NextCard data={card.data} t={t} lang={lang} />;
     case "projects": return <ProjectsCard data={card.data} t={t} lang={lang} />;
+    case "needs": return <NeedsCard data={card.data} t={t} lang={lang} onSend={onSend} />;
     case "requests": return <RequestsCard data={card.data} t={t} lang={lang} />;
     case "confirm": return <ConfirmCard card={card} t={t} lang={lang} onDone={onDone} />;
     case "link": return <Link className="btn sm" href={card.href}>{card.label} →</Link>;

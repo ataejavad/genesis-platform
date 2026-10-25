@@ -1,7 +1,7 @@
 import { and, asc, desc, eq, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { judge, qaJudgeEnabled, verdictOf } from "@/agents/qa-judge";
-import { FIXED_RULES, PACKAGE_SEEDS, PROTOCOL_SEEDS } from "@/config/delivery-seeds";
+import { ASSEMBLY_CHECKS, FIXED_RULES, inputText, PACKAGE_SEEDS, PROTOCOL_SEEDS } from "@/config/delivery-seeds";
 import type { Db, DbOrTx, Tx } from "@/db";
 import {
   changeRequests,
@@ -9,22 +9,27 @@ import {
   customerApprovals,
   deliveries,
   jobs,
+  memberships,
   milestones,
   orders,
   organizations,
   partners,
   projectCosts,
+  projectInputs,
   projects,
   protocols,
   protocolVersions,
   qaReviews,
   servicePackages,
+  user,
 } from "@/db/schema";
 import type { Actor } from "./actor";
 import { customerCode, health, lessonsFrom, qaRoute, riskOf } from "./delivery-rules";
 import { AppError, notFound } from "./errors";
+import { putFile } from "./files";
 import { audit, emit } from "./events";
 import { SKILLS } from "./partner-rules";
+import { ALLOWED_FILES, MAX_FILE_BYTES, nameFromEmail, redact, TEXT_FILES } from "./redact";
 import { levelFor, offerJob, reviewDelivery } from "./partners";
 import { addSubscription, createCustomer } from "./portal";
 
@@ -326,11 +331,19 @@ export async function customerProjects(db: Db, orgId: string) {
 export async function onJobAccepted(tx: Tx, actor: Actor, job: typeof jobs.$inferSelect, now: Date) {
   if (!job.projectId) return;
   await tx.insert(projectCosts).values({ projectId: job.projectId, kind: "partner", amountEur: job.payEur, jobId: job.id, note: job.title }).onConflictDoNothing();
-  if (!job.milestoneId) return;
+  if (!job.milestoneId || job.role === "qa") return;
   const [m] = await tx.select().from(milestones).where(eq(milestones.id, job.milestoneId)).for("update");
   if (!m || !["open", "changes"].includes(m.status)) return;
   const [{ open }] = await tx.select({ open: sql<number>`count(*)::int` }).from(jobs).where(and(eq(jobs.milestoneId, m.id), sql`${jobs.status} not in ('accepted', 'cancelled')`, sql`${jobs.id} <> ${job.id}`));
   if (open > 0) return;
+  // several partners made parts of this milestone: one assembler (a person, a company or an agent) makes one hand-over first
+  if (job.role === "work") {
+    const works = await tx.select().from(jobs).where(and(eq(jobs.milestoneId, m.id), eq(jobs.role, "work"), sql`${jobs.status} <> 'cancelled'`));
+    if (works.length >= 2) {
+      await openAssembly(tx, actor, m, works, now);
+      return;
+    }
+  }
   const [p] = await tx.select().from(projects).where(eq(projects.id, job.projectId));
   if (!p.orgId) {
     // internal work: nobody outside to ask
@@ -345,6 +358,28 @@ export async function onJobAccepted(tx: Tx, actor: Actor, job: typeof jobs.$infe
   await emit(tx, actor, "customer_approval.requested", { type: "customer_approval", id: a.id }, { orgId: p.orgId, title: a.title });
   await emit(tx, actor, "milestone.ready", { type: "milestone", id: m.id }, { projectId: p.id, code: p.code, title: m.title });
   await audit(tx, actor, "milestone.ready", { type: "milestone", id: m.id }, { status: m.status }, { status: "ready", approvalId: a.id });
+}
+
+async function openAssembly(tx: Tx, actor: Actor, m: typeof milestones.$inferSelect, works: (typeof jobs.$inferSelect)[], now: Date) {
+  const [p] = await tx.select().from(projects).where(eq(projects.id, m.projectId));
+  const dels = await tx.select().from(deliveries).where(and(inArray(deliveries.jobId, works.map((w) => w.id)), eq(deliveries.status, "accepted"))).orderBy(desc(deliveries.version));
+  const parts = works.map((w) => {
+    const d = dels.find((x) => x.jobId === w.id);
+    return `- ${w.title}: ${d?.link ?? "?"}${d?.note ? ` (${d.note})` : ""}`;
+  });
+  const payEur = Math.max(40, Math.round(works.reduce((s, w) => s + w.payEur, 0) * 0.1));
+  const first = works[0];
+  const [a] = await tx
+    .insert(jobs)
+    .values({
+      title: `Assemble: ${m.title}`, brief: [`Put these parts together into one hand-over for the milestone "${m.title}".`, "", ...parts, "", `Rules: ${FIXED_RULES.join(" ")}`].join("\n"),
+      kind: first.kind, customerOrgId: first.customerOrgId, customerCode: first.customerCode, skills: ["assembly"], language: first.language, country: first.country, personalData: first.personalData,
+      payEur, dueAt: new Date(now.getTime() + 2 * DAY), checklist: ASSEMBLY_CHECKS[p.language] ?? ASSEMBLY_CHECKS.en, projectId: p.id, milestoneId: m.id, role: "assemble", createdBy: by(actor),
+    })
+    .returning();
+  await tx.update(projects).set({ budgetEur: p.budgetEur + payEur }).where(eq(projects.id, p.id));
+  await emit(tx, actor, "job.opened", { type: "job", id: a.id }, { projectId: p.id, code: p.code, role: "assemble", title: a.title });
+  await audit(tx, actor, "job.opened", { type: "job", id: a.id }, null, { role: "assemble", parts: works.length, payEur });
 }
 
 async function acceptMilestone(tx: Tx, actor: Actor, m: typeof milestones.$inferSelect, p: typeof projects.$inferSelect, now: Date) {
@@ -436,15 +471,22 @@ async function deliveryContext(db: DbOrTx, deliveryId: string) {
 }
 
 /**
- * After a partner delivers (worker, on delivery.submitted): the judge looks when the key is set, then the
- * delivery is either accepted automatically (low risk, trusted partner, not sampled) or waits in the QA queue.
+ * After a partner delivers (worker, on delivery.submitted). Who checks depends on the project: our judge (when the
+ * key is set; a person when unsure), a QA partner (a QA company or agent, never the maker), or always a person.
+ * Then the delivery is accepted automatically (low risk, trusted partner, not sampled) or waits in the QA queue.
  */
 export async function afterDelivery(db: Db, deliveryId: string, sample = Math.random()) {
   const ctx = await deliveryContext(db, deliveryId);
   if (ctx.delivery.status !== "submitted") return { route: "done" as const, why: "already reviewed" };
+  if (ctx.job.role === "qa") return qaReportIn(db, ctx, sample);
+  const qaBy = ctx.project?.qaBy ?? "judge";
+  if (qaBy === "partner" && ctx.version && ctx.project) {
+    await openQaJob(db, ctx);
+    return { route: "qa-partner" as const, why: "a QA partner checks it first" };
+  }
   const actor: Actor = { type: "system", id: "qa-judge" };
   let judged: { verdict: "accept" | "changes" | "review" } | null = null;
-  if (ctx.version && qaJudgeEnabled()) {
+  if (qaBy === "judge" && ctx.version && qaJudgeEnabled()) {
     try {
       const results = await judge({ goal: ctx.version.goal, rules: ctx.version.rules, criteria: ctx.version.criteria, selfCheck: ctx.delivery.selfCheck, link: ctx.delivery.link, note: ctx.delivery.note });
       const verdict = verdictOf(ctx.version.criteria, results);
@@ -457,11 +499,60 @@ export async function afterDelivery(db: Db, deliveryId: string, sample = Math.ra
       console.error("QA judge failed; a person reviews", err);
     }
   }
+  return routeDelivery(db, ctx, judged, sample, actor);
+}
+
+async function routeDelivery(db: Db, ctx: Awaited<ReturnType<typeof deliveryContext>>, judged: { verdict: "accept" | "changes" | "review" } | null, sample: number, actor: Actor) {
   const [{ last }] = ctx.job.milestoneId ? await db.select({ last: sql<boolean>`${milestones.seq} = (select max(m2.seq) from milestones m2 where m2.project_id = ${milestones.projectId})` }).from(milestones).where(eq(milestones.id, ctx.job.milestoneId)) : [{ last: false }];
   const tier = (await levelFor(db, ctx.delivery.partnerId)).tier.id;
   const r = qaRoute({ risk: (ctx.project?.risk as "low" | "medium" | "high" | undefined) ?? null, judge: judged, partnerTier: tier, lastMilestone: Boolean(last), sample });
-  if (r.route === "auto") await reviewDelivery(db, actor, deliveryId, true, 4, "Accepted by QA (all mandatory criteria passed).");
+  if (r.route === "auto") await reviewDelivery(db, actor, ctx.delivery.id, true, 4, "Accepted by QA (all mandatory criteria passed).");
   return r;
+}
+
+/** A QA job for a QA partner: the criteria as their checklist, the delivery link in the brief. */
+async function openQaJob(db: Db, ctx: Awaited<ReturnType<typeof deliveryContext>>) {
+  const v = ctx.version!;
+  const p = ctx.project!;
+  const actor: Actor = { type: "system", id: "qa-router" };
+  await db.transaction(async (tx) => {
+    const payEur = Math.max(20, Math.round(ctx.job.payEur * 0.15));
+    const brief = [
+      "Check this delivery against the criteria. Tick a criterion only when it passes; explain every failure in your note.",
+      "", `Work: ${ctx.job.title} (v${ctx.delivery.version})`, `Delivery: ${ctx.delivery.link}`, ctx.delivery.note ? `Note from the maker: ${ctx.delivery.note}` : "", `Goal: ${v.goal}`, `Rules: ${v.rules.join(" ")}`,
+    ].filter(Boolean).join("\n");
+    const [q] = await tx
+      .insert(jobs)
+      .values({
+        title: `QA: ${ctx.job.title}`, brief, kind: ctx.job.kind, customerOrgId: ctx.job.customerOrgId, customerCode: ctx.job.customerCode, skills: ["qa"], language: ctx.job.language, country: ctx.job.country,
+        personalData: ctx.job.personalData, payEur, dueAt: new Date(Date.now() + 2 * DAY), checklist: v.criteria.map((c) => c.texts?.[p.language] ?? c.text), projectId: p.id, protocolVersionId: v.id,
+        role: "qa", reviewsDeliveryId: ctx.delivery.id, createdBy: by(actor),
+      })
+      .returning();
+    await tx.update(projects).set({ budgetEur: sql`${projects.budgetEur} + ${payEur}` }).where(eq(projects.id, p.id));
+    await emit(tx, actor, "job.opened", { type: "job", id: q.id }, { projectId: p.id, code: p.code, role: "qa", title: q.title });
+    await audit(tx, actor, "job.opened", { type: "job", id: q.id }, null, { role: "qa", reviews: ctx.delivery.id, payEur });
+  });
+}
+
+/** The QA partner delivered their check: it counts like the judge's, then the checked work is routed as usual. */
+async function qaReportIn(db: Db, ctx: Awaited<ReturnType<typeof deliveryContext>>, sample: number) {
+  const actor: Actor = { type: "system", id: "qa-router" };
+  const target = ctx.job.reviewsDeliveryId;
+  const criteria = ctx.version?.criteria ?? [];
+  const results = criteria.map((_, idx) => ({ idx, result: (ctx.delivery.selfCheck[idx] ? "pass" : "fail") as "pass" | "fail", ...(ctx.delivery.selfCheck[idx] ? {} : { note: ctx.delivery.note ?? undefined }) }));
+  const verdict = verdictOf(criteria, results);
+  if (target)
+    await db.transaction(async (tx) => {
+      await tx.insert(qaReviews).values({ deliveryId: target, by: `partner:${ctx.delivery.partnerId}`, results, verdict });
+      await emit(tx, actor, "qa.judged", { type: "delivery", id: target }, { jobId: ctx.job.id, verdict, by: "partner" });
+    });
+  // the QA work itself is done once the report is in (its quality shows later in judge agreement)
+  await reviewDelivery(db, actor, ctx.delivery.id, true, 4, "QA report received.");
+  if (!target) return { route: "done" as const, why: "QA job without a delivery" };
+  const checked = await deliveryContext(db, target);
+  if (checked.delivery.status !== "submitted") return { route: "done" as const, why: "already reviewed" };
+  return routeDelivery(db, checked, { verdict }, sample, actor);
 }
 
 /** Deliveries waiting for a person, with the judge's view per criterion when there is one. */
@@ -477,7 +568,8 @@ export async function qaQueue(db: Db) {
     .where(eq(deliveries.status, "submitted"))
     .orderBy(asc(deliveries.createdAt));
   const ids = rows.map((r) => r.delivery.id);
-  const reviews = ids.length ? await db.select().from(qaReviews).where(and(inArray(qaReviews.deliveryId, ids), eq(qaReviews.by, "judge"))) : [];
+  // the judge's or a QA partner's view, newest first
+  const reviews = ids.length ? await db.select().from(qaReviews).where(and(inArray(qaReviews.deliveryId, ids), sql`${qaReviews.by} not like 'user:%'`)).orderBy(desc(qaReviews.createdAt)) : [];
   return rows.map((r) => ({ ...r, judge: reviews.find((x) => x.deliveryId === r.delivery.id) ?? null }));
 }
 
@@ -525,4 +617,114 @@ export async function deliveryWatch(db: Db, now = new Date()) {
     });
   const late = await db.select({ id: jobs.id }).from(jobs).where(and(sql`${jobs.projectId} is not null`, inArray(jobs.status, ["open", "offered", "assigned"]), lt(jobs.dueAt, now)));
   return { reminded: waiting.length, lateTasks: late.length };
+}
+
+/* ───────────── Customer material: intake, identity removed, shared with the project's partners ───────────── */
+
+/** What the protocols of a project ask from the customer, minus what they already gave. */
+async function needsOf(db: DbOrTx, projectId: string) {
+  const vs = await db.select({ inputs: protocolVersions.inputs }).from(jobs).innerJoin(protocolVersions, eq(protocolVersions.id, jobs.protocolVersionId)).where(and(eq(jobs.projectId, projectId), eq(jobs.role, "work")));
+  const given = new Set((await db.select({ label: projectInputs.label }).from(projectInputs).where(and(eq(projectInputs.projectId, projectId), sql`${projectInputs.status} <> 'withheld'`))).map((r) => r.label));
+  return [...new Set(vs.flatMap((v) => v.inputs))].filter((l) => !given.has(l));
+}
+
+export const projectNeeds = (db: Db, projectId: string) => needsOf(db, projectId);
+
+/** Running projects of a customer with what we still need from them, in their language. */
+export async function customerNeeds(db: Db, orgId: string, lang: string) {
+  const ps = await db.select().from(projects).where(and(eq(projects.orgId, orgId), eq(projects.status, "running"))).orderBy(asc(projects.createdAt));
+  const out = [];
+  for (const p of ps) {
+    const needs = await needsOf(db, p.id);
+    if (needs.length) out.push({ projectId: p.id, code: p.code, title: p.title, needs: needs.map((label) => ({ label, text: inputText(label, lang) })) });
+  }
+  return out;
+}
+
+/** The customer's names we hide from partners: the company and its people. */
+async function identityOf(db: DbOrTx, orgId: string | null) {
+  if (!orgId) return { company: [], people: [] };
+  const [org] = await db.select({ name: organizations.name }).from(organizations).where(eq(organizations.id, orgId));
+  const people = await db.select({ name: user.name, email: user.email }).from(memberships).innerJoin(user, eq(user.id, memberships.userId)).where(eq(memberships.orgId, orgId));
+  const names = people.flatMap((u) => [u.name, nameFromEmail(u.email)]).filter((n): n is string => Boolean(n) && !n!.includes("@") && n !== org?.name);
+  return { company: org ? [org.name] : [], people: names };
+}
+
+export const inputInput = z.object({
+  projectId: z.string().uuid(),
+  label: z.string().trim().min(2).max(200),
+  source: z.enum(["chat", "meeting", "file"]),
+  text: z.string().trim().max(20000).optional(),
+  file: z.object({ name: z.string().max(200), type: z.string().max(200), bytes: z.custom<Uint8Array>((b) => b instanceof Uint8Array) }).optional(),
+});
+
+/**
+ * Saves what the customer (or we, from a meeting) gave. Text and text files are cleaned and shared with the
+ * project's partners at once; PDFs, images and office files wait until a person has looked (Cockpit › project).
+ * `orgId` is set when the customer gives it: the project must be theirs.
+ */
+export async function addInput(db: Db, actor: Actor, input: z.input<typeof inputInput>, orgId?: string) {
+  const v = inputInput.parse(input);
+  if (!v.text && !v.file) throw new AppError(400, "empty", "nothing to save");
+  const [p] = await db.select().from(projects).where(eq(projects.id, v.projectId));
+  if (!p || (orgId && p.orgId !== orgId)) throw notFound("project");
+  const known = await identityOf(db, p.orgId);
+  let text = v.text ?? null;
+  let fileKey: string | null = null;
+  let status = "shared";
+  if (v.file) {
+    if (!ALLOWED_FILES.includes(v.file.type)) throw new AppError(400, "file_type", "this kind of file is not accepted");
+    if (v.file.bytes.byteLength > MAX_FILE_BYTES) throw new AppError(400, "file_size", "file too large (10 MB max)");
+    fileKey = await putFile(v.file.bytes);
+    if (TEXT_FILES.includes(v.file.type)) text = [text, new TextDecoder().decode(v.file.bytes)].filter(Boolean).join("\n\n");
+    else status = "check";
+  }
+  const cleaned = text ? redact(text, known) : null;
+  return db.transaction(async (tx) => {
+    const [row] = await tx
+      .insert(projectInputs)
+      .values({ projectId: p.id, orgId: p.orgId, label: v.label, source: v.source, text, cleanText: cleaned?.clean ?? null, removed: cleaned?.removed ?? [], fileName: v.file?.name ?? null, fileType: v.file?.type ?? null, fileSize: v.file?.bytes.byteLength ?? null, fileKey, status, createdBy: by(actor) })
+      .returning();
+    await emit(tx, actor, "project_input.added", { type: "project_input", id: row.id }, { projectId: p.id, code: p.code, label: v.label, source: v.source, status, file: v.file?.name ?? null });
+    await audit(tx, actor, "project_input.added", { type: "project_input", id: row.id }, null, { projectId: p.id, label: v.label, source: v.source, status, removed: row.removed });
+    return row;
+  });
+}
+
+/** A person looked at a file: partners may see it now, or never. */
+export async function decideInput(db: Db, actor: Actor, id: string, share: boolean) {
+  return db.transaction(async (tx) => {
+    const [row] = await tx.update(projectInputs).set({ status: share ? "shared" : "withheld", decidedBy: by(actor) }).where(eq(projectInputs.id, id)).returning();
+    if (!row) throw notFound("input");
+    await emit(tx, actor, "project_input.decided", { type: "project_input", id }, { projectId: row.projectId, shared: share });
+    await audit(tx, actor, "project_input.decided", { type: "project_input", id }, null, { status: row.status });
+    return row;
+  });
+}
+
+export async function projectInputsFor(db: Db, projectId: string) {
+  return db.select().from(projectInputs).where(eq(projectInputs.projectId, projectId)).orderBy(asc(projectInputs.createdAt));
+}
+
+/** What a partner of the project sees: cleaned text, and files a person cleared. Never the raw text. */
+export async function partnerMaterials(db: DbOrTx, projectId: string) {
+  const rows = await db.select().from(projectInputs).where(and(eq(projectInputs.projectId, projectId), eq(projectInputs.status, "shared"))).orderBy(asc(projectInputs.createdAt));
+  return rows.map((r) => ({ id: r.id, label: r.label, text: r.cleanText, file: r.fileKey && !TEXT_FILES.includes(r.fileType ?? "") ? { name: r.fileName, url: `/api/files/${r.id}` } : null }));
+}
+
+/** May this partner open this input's file? Only a partner working on the project now, and only once cleared. */
+export async function partnerMayOpen(db: Db, partnerId: string, inputId: string) {
+  const [row] = await db.select().from(projectInputs).where(eq(projectInputs.id, inputId));
+  if (!row || row.status !== "shared" || !row.fileKey || TEXT_FILES.includes(row.fileType ?? "")) return null;
+  const [j] = await db.select({ id: jobs.id }).from(jobs).where(and(eq(jobs.projectId, row.projectId), eq(jobs.partnerId, partnerId), inArray(jobs.status, ["assigned", "delivered"])));
+  return j ? row : null;
+}
+
+export async function setQaBy(db: Db, actor: Actor, projectId: string, qaBy: "judge" | "partner" | "us") {
+  await db.transaction(async (tx) => {
+    const [p] = await tx.select().from(projects).where(eq(projects.id, projectId));
+    if (!p) throw notFound("project");
+    await tx.update(projects).set({ qaBy }).where(eq(projects.id, projectId));
+    await audit(tx, actor, "project.qa_by", { type: "project", id: projectId }, { qaBy: p.qaBy }, { qaBy });
+  });
 }

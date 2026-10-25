@@ -21,7 +21,7 @@ export default async function QaQueue() {
             {q.code && <span className="badge gray">{q.code} v{q.version?.version}</span>}
           </div>
           <div className="small">{q.partner} · v{q.delivery.version} · <a href={q.delivery.link} target="_blank" rel="noopener noreferrer">{q.delivery.link}</a> · {q.delivery.createdAt <= q.job.dueAt ? "on time" : "late"}{q.delivery.note && <> · “{q.delivery.note}”</>}</div>
-          {q.judge ? <div className="callout ai small">✦ Judge: <b>{q.judge.verdict}</b></div> : <div className="muted small">No judge yet (starts with the Claude key): you decide.</div>}
+          {q.judge ? <div className="callout ai small">✦ {q.judge.by === "judge" ? "Judge" : "QA partner"}: <b>{q.judge.verdict}</b></div> : <div className="muted small">{q.project?.qaBy === "us" ? "This project is always checked by you." : "No judge yet (starts with the Claude key): you decide."}</div>}
           <QaForm delivery={q.delivery.id} criteria={q.version?.criteria ?? q.job.checklist.map((text) => ({ text, mandatory: true, method: "human" }))} judge={q.judge?.results ?? null} />
         </div>
       ))}

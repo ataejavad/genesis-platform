@@ -82,6 +82,23 @@ export function PortalChat(props: Props) {
 
   const note = (text: string) => setMsgs((m) => [...m, { role: "assistant", text }]);
 
+  // project material: a file answers the open question in the conversation (customer side only)
+  const fileInput = useRef<HTMLInputElement>(null);
+  const attach = (file: File | undefined) => {
+    if (!file || pending || props.kind !== "portal") return;
+    setMsgs((m) => [...m, { role: "user", text: `📎 ${file.name}` }]);
+    const form = new FormData();
+    form.set("file", file);
+    start(async () => {
+      const r = await portalActions.sendFile(threadId, form);
+      if (fileInput.current) fileInput.current.value = "";
+      if (!r) return;
+      setMsgs((m) => [...m, { role: "assistant", text: r.text, cards: r.cards }]);
+      if (!threadId) setThreads((ts) => [{ id: r.threadId, title: `📎 ${file.name}` }, ...ts]);
+      setThreadId(r.threadId);
+    });
+  };
+
   return (
     <div className="pchat">
       <aside className="pthreads" aria-label={t.history}>
@@ -100,7 +117,7 @@ export function PortalChat(props: Props) {
               <div className={`msg ${m.role === "user" ? "me" : "them"}`}>{m.text}</div>
               {m.cards?.map((c, j) => (
                 <div key={j} className="pcardwrap">
-                  {props.kind === "portal" ? <CardView card={c as Card} t={props.t} lang={lang} onDone={note} /> : <PartnerCardView card={c as PartnerCard} t={props.t} lang={lang} onDone={note} />}
+                  {props.kind === "portal" ? <CardView card={c as Card} t={props.t} lang={lang} onDone={note} onSend={send} /> : <PartnerCardView card={c as PartnerCard} t={props.t} lang={lang} onDone={note} />}
                 </div>
               ))}
             </div>
@@ -121,6 +138,12 @@ export function PortalChat(props: Props) {
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); } }}
           />
           <div className="row" style={{ gap: 6 }}>
+            {props.kind === "portal" && (
+              <>
+                <input ref={fileInput} type="file" hidden accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.csv,.md,.docx,.xlsx" onChange={(e) => attach(e.target.files?.[0])} />
+                <button type="button" className="btn" onClick={() => fileInput.current?.click()} aria-label={props.t.attach} title={props.t.attach} disabled={pending}>📎</button>
+              </>
+            )}
             <button type="button" className="btn" onClick={listen} aria-label={t.speak} title={t.speak} aria-pressed={listening}>🎤</button>
             <button className="btn primary" disabled={pending}>{t.send}</button>
           </div>

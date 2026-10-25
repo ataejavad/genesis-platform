@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { getDb } from "@/db";
 import { AppError } from "@/server/errors";
-import { projectDetail } from "@/server/projects";
+import { projectDetail, projectInputsFor, projectNeeds } from "@/server/projects";
 import { notFound } from "next/navigation";
 import { Progress } from "@/ui/bits";
 import { PageHead } from "@/ui/Shell";
-import { ChangeForm } from "../Forms";
+import { ChangeForm, MaterialForm, QaByForm, ShareButtons } from "../Forms";
 
 const eur = (n: number) => `€${n.toLocaleString("en-GB")}`;
 const badge = (s: string) => (["accepted", "approved", "closed"].includes(s) ? "ok" : ["ready", "delivered", "quoted", "offered"].includes(s) ? "warn" : s === "changes" || s === "rejected" ? "bad" : "gray");
@@ -17,6 +17,7 @@ export default async function Project({ params }: { params: Promise<{ id: string
     throw err;
   });
   const p = d.project;
+  const [inputs, needs] = await Promise.all([projectInputsFor(getDb(), id), projectNeeds(getDb(), id)]);
   return (
     <main className="stack">
       <PageHead title={`${p.code} · ${p.title}`} crumbs="Cockpit › Projects" sub={`${d.company ? `${d.company} (white-label)` : "Internal"} · ${p.packageSlug ?? "custom"} · risk ${p.risk} (${p.riskWhy.join(", ")}) · due ${p.dueAt.toISOString().slice(0, 10)} · ${p.status}`} />
@@ -40,11 +41,40 @@ export default async function Project({ params }: { params: Promise<{ id: string
         </div>
       </section>
 
+      <section className="grid g2">
+        <div className="card">
+          <h3>Customer material → partners (identity removed)</h3>
+          {needs.length > 0 && <p className="small">Still needed: {needs.join(" · ")} <span className="muted">(the customer's chat asks for these)</span></p>}
+          <div className="list">
+            {inputs.map((i) => (
+              <div key={i.id} className="item small" style={{ alignItems: "start" }}>
+                <div className="grow">
+                  <b>{i.label}</b> <span className="muted">· {i.source} · {i.createdAt.toISOString().slice(0, 10)}</span>
+                  {i.cleanText && <div style={{ whiteSpace: "pre-wrap" }}>{i.cleanText.slice(0, 600)}{i.cleanText.length > 600 ? " …" : ""}</div>}
+                  {i.removed.length > 0 && <div className="muted">Removed: {i.removed.join(", ")}</div>}
+                  {i.fileKey && <div><a href={`/api/files/${i.id}`} target="_blank" rel="noopener">📎 {i.fileName}</a> <span className="muted">({Math.round((i.fileSize ?? 0) / 1024)} KB, original)</span></div>}
+                  {i.status === "check" && <ShareButtons project={p.id} input={i.id} />}
+                </div>
+                <span className={`badge ${i.status === "shared" ? "ok" : i.status === "check" ? "warn" : "gray"}`}>{i.status}</span>
+              </div>
+            ))}
+            {inputs.length === 0 && <p className="muted small">Nothing yet.</p>}
+          </div>
+        </div>
+        <div className="card stack">
+          <h3>Add from a meeting or email</h3>
+          <MaterialForm project={p.id} needs={needs} />
+          <h3>Who checks deliveries</h3>
+          <QaByForm project={p.id} value={p.qaBy} />
+          <p className="muted small">Several partners on one milestone → an assembler (skill "assembly": a person, a company or an AI agent) makes one hand-over before the customer sees it.</p>
+        </div>
+      </section>
+
       <div className="card table-wrap">
         <h3>Tasks</h3>
         <table className="table">
           <thead><tr><th>Task</th><th>Protocol</th><th>Partner</th><th>Status</th><th>Pay</th><th>Due</th><th>Last delivery</th></tr></thead>
-          <tbody>{d.tasks.map((t) => <tr key={t.job.id}><td>{t.job.title}</td><td className="small">{t.protocol ? <Link href="/cockpit/protocols">{t.protocol.code} v{t.protocol.version}</Link> : "–"}</td><td>{t.partner ?? <span className="muted">offered</span>}</td><td><span className={`badge ${badge(t.job.status)}`}>{t.job.status}</span></td><td className="num">{eur(t.job.payEur)}</td><td className="small">{t.job.dueAt.toISOString().slice(0, 10)}</td><td className="small">{t.last ? <>v{t.last.version} · {t.last.status}{t.last.status === "submitted" && <> · <Link href="/cockpit/qa">QA queue</Link></>}</> : "–"}</td></tr>)}</tbody>
+          <tbody>{d.tasks.map((t) => <tr key={t.job.id}><td>{t.job.title}{t.job.role !== "work" && <span className="badge" style={{ marginLeft: 6 }}>{t.job.role}</span>}</td><td className="small">{t.protocol ? <Link href="/cockpit/protocols">{t.protocol.code} v{t.protocol.version}</Link> : "–"}</td><td>{t.partner ?? <span className="muted">offered</span>}</td><td><span className={`badge ${badge(t.job.status)}`}>{t.job.status}</span></td><td className="num">{eur(t.job.payEur)}</td><td className="small">{t.job.dueAt.toISOString().slice(0, 10)}</td><td className="small">{t.last ? <>v{t.last.version} · {t.last.status}{t.last.status === "submitted" && <> · <Link href="/cockpit/qa">QA queue</Link></>}</> : "–"}</td></tr>)}</tbody>
         </table>
       </div>
 

@@ -98,3 +98,26 @@ export const PACKAGE_SEEDS: PackageSeed[] = [
     tasks: [{ title: "Connect the website form to the CRM", brief: "Website form leads must reach the CRM with source and phone filled, plus an alert to the office.", protocol: "PR-03", skills: ["automation", "crm"], payEur: 200, days: 3, milestone: 0 }],
   },
 ];
+
+// What the customer reads when we ask for a protocol input (the English text is the key stored with the answer).
+export const INPUT_TEXTS: Record<string, Record<string, string>> = {
+  "Opening hours and holidays": { it: "Orari di apertura e ferie", de: "Öffnungszeiten und Ferien", fa: "ساعت کاری و تعطیلات" },
+  "Top 10 caller questions with answers": { it: "Le 10 domande più frequenti dei clienti, con le risposte", de: "Die 10 häufigsten Anruferfragen mit Antworten", fa: "۱۰ سؤال پرتکرار تماس‌گیرنده‌ها با جواب" },
+  "Transfer number and when to transfer": { it: "Numero a cui passare la chiamata e quando", de: "Weiterleitungsnummer und wann weitergeleitet wird", fa: "شماره انتقال تماس و زمان انتقال" },
+  "Approved greeting text": { it: "Testo del saluto approvato", de: "Freigegebener Begrüßungstext", fa: "متن خوشامد تأییدشده" },
+  "Call log of the first live week": { it: "Registro chiamate della prima settimana", de: "Anrufprotokoll der ersten Woche", fa: "گزارش تماس‌های هفته اول" },
+  "Office feedback": { it: "Commenti dell'ufficio", de: "Rückmeldung des Büros", fa: "نظر دفتر" },
+  "Where quotes are stored": { it: "Dove sono salvati i preventivi", de: "Wo die Angebote gespeichert sind", fa: "پیش‌فاکتورها کجا ذخیره می‌شوند" },
+  "Approved reminder texts": { it: "Testi dei promemoria approvati", de: "Freigegebene Erinnerungstexte", fa: "متن‌های یادآوری تأییدشده" },
+  "Who gets the replies": { it: "Chi riceve le risposte", de: "Wer die Antworten bekommt", fa: "جواب‌ها به چه کسی برسد" },
+  "Website form access": { it: "Accesso al modulo del sito", de: "Zugang zum Website-Formular", fa: "دسترسی به فرم سایت" },
+  "CRM access": { it: "Accesso al CRM", de: "Zugang zum CRM", fa: "دسترسی به CRM" },
+  "Who gets the alert": { it: "Chi riceve l'avviso", de: "Wer die Benachrichtigung bekommt", fa: "هشدار به چه کسی برسد" },
+};
+export const inputText = (label: string, lang: string) => INPUT_TEXTS[label]?.[lang] ?? label;
+
+// Assembly and QA work, when several partners make one milestone or a QA partner checks a delivery.
+export const ASSEMBLY_CHECKS: Record<string, string[]> = {
+  en: ["Every part is included and works together with the others", "Nothing contradicts the goal or the rules of the parts' protocols", "One hand-over: a single link and a one-page guide for the whole milestone"],
+  it: ["Ogni parte è inclusa e funziona insieme alle altre", "Niente contraddice l'obiettivo o le regole dei protocolli delle parti", "Una sola consegna: un link e una guida di una pagina per tutta la fase"],
+};

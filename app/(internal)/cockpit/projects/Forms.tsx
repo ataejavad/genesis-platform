@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { approveProtocol, convert, draftProtocol, newProject, qaDecide, quote, reject, type Result } from "./actions";
+import { addMaterial, approveProtocol, convert, draftProtocol, newProject, qaBy, qaDecide, quote, reject, shareMaterial, type Result } from "./actions";
 
 function Status({ state }: { state: Result }) {
   return state ? <span className={`badge ${state.ok ? "ok" : "warn"}`} role="status" style={{ whiteSpace: "normal" }}>{state.message}</span> : null;
@@ -99,6 +99,46 @@ export function QaForm({ delivery, criteria, judge }: { delivery: string; criter
         <button className="btn primary" disabled={pending} style={{ alignSelf: "end" }}>Decide</button>
       </div>
       <Status state={state} />
+    </form>
+  );
+}
+
+export function MaterialForm({ project, needs }: { project: string; needs: string[] }) {
+  const [state, action, pending] = useActionState<Result, FormData>(addMaterial, null);
+  return (
+    <form action={action} className="stack">
+      <input type="hidden" name="project" value={project} />
+      <label className="field">What it answers<select name="label">{needs.map((n) => <option key={n} value={n}>{n}</option>)}<option value="Other">Other / meeting notes</option></select></label>
+      <label className="field">Notes from the meeting, call or email<textarea name="text" style={{ minHeight: 80 }} placeholder="Paste or type. Names, emails, phones, VAT, IBAN and addresses are replaced before partners see it." /></label>
+      <label className="field">Or a file (PDF, image, Word, Excel, text; 10 MB)<input type="file" name="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.csv,.md,.docx,.xlsx" /></label>
+      <div className="row"><button className="btn sm primary" disabled={pending}>Add to the project</button><Status state={state} /></div>
+    </form>
+  );
+}
+
+export function ShareButtons({ project, input }: { project: string; input: string }) {
+  const [state, action, pending] = useActionState<Result, FormData>(shareMaterial, null);
+  if (state?.ok) return <Status state={state} />;
+  return (
+    <div className="row" style={{ gap: 6 }}>
+      <form action={action}><input type="hidden" name="project" value={project} /><input type="hidden" name="input" value={input} /><input type="hidden" name="share" value="yes" /><button className="btn sm ok" disabled={pending}>Checked: share</button></form>
+      <form action={action}><input type="hidden" name="project" value={project} /><input type="hidden" name="input" value={input} /><input type="hidden" name="share" value="no" /><button className="btn sm" disabled={pending}>Withhold</button></form>
+      <Status state={state} />
+    </div>
+  );
+}
+
+export function QaByForm({ project, value }: { project: string; value: string }) {
+  const [state, action, pending] = useActionState<Result, FormData>(qaBy, null);
+  return (
+    <form action={action} className="row" style={{ gap: 6, flexWrap: "wrap" }}>
+      <input type="hidden" name="project" value={project} />
+      <select name="qaBy" defaultValue={value} style={{ width: "auto" }}>
+        <option value="judge">Our AI judge (a person when unsure)</option>
+        <option value="partner">A QA partner (company or agent, never the maker)</option>
+        <option value="us">Always a person (Javad)</option>
+      </select>
+      <button className="btn sm" disabled={pending}>Save</button><Status state={state} />
     </form>
   );
 }

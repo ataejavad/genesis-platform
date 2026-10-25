@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import type { Db } from "@/db";
 import { events } from "@/db/schema";
+import { offerJob } from "@/server/partners";
 import { afterDelivery } from "@/server/projects";
 import { sendAlert, sendApprovalRequest, type TelegramConfig } from "@/server/telegram";
 
@@ -70,6 +71,13 @@ async function handle(db: Db, deps: DispatchDeps, event: Event) {
             ? `⏳ ${p.code} ${p.title} (${p.company}) waits for the customer's OK for ${p.waitingHours}h`
             : `📝 Change request ${p.decision}`;
     await sendAlert(deps.telegram, [line], "/cockpit/projects", fetchImpl);
+  }
+  // Assembly and QA-partner work is offered to the partners who do it, like any task.
+  if (event.type === "job.opened") await offerJob(db, { type: "system", id: "assignment" }, event.subjectId!).catch((e) => console.error("offer failed", e));
+  // A customer file waits for a person before any partner sees it.
+  if (deps.telegram && event.type === "project_input.added" && event.payload.status === "check") {
+    const p = event.payload as { code?: string; label?: string; file?: string };
+    await sendAlert(deps.telegram, [`📎 ${p.code}: the customer sent "${p.file}" (${p.label}). Check it before partners see it`], `/cockpit/projects`, fetchImpl);
   }
   // Every event also goes to n8n, where Genesis workflows subscribe to what they need.
   if (deps.n8nWebhookUrl) {

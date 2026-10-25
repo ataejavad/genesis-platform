@@ -713,6 +713,9 @@ export const jobs = pgTable(
     projectId: uuid("project_id"),
     milestoneId: uuid("milestone_id"),
     protocolVersionId: uuid("protocol_version_id"),
+    // work; assemble (puts the parts of a milestone together); qa (checks another partner's delivery)
+    role: text("role").notNull().default("work"),
+    reviewsDeliveryId: uuid("reviews_delivery_id"),
     createdBy: text("created_by").notNull(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
@@ -915,10 +918,40 @@ export const projects = pgTable(
     closedAt: timestamp("closed_at", { withTimezone: true }),
     // what we learned at closing (failed criteria, delays): input for better protocols and estimates
     lessons: jsonb("lessons").$type<string[]>().notNull().default([]),
+    // who checks deliveries: judge (our AI, a person when unsure), partner (a QA company or agent), us (always a person)
+    qaBy: text("qa_by").notNull().default("judge"),
     createdBy: text("created_by").notNull(),
     createdAt: createdAt(),
   },
   (t) => [index("projects_org_idx").on(t.orgId), index("projects_status_idx").on(t.status)],
+);
+
+// What the customer (or we, from a meeting) gave for a project. Partners only ever see the cleaned version.
+export const projectInputs = pgTable(
+  "project_inputs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    projectId: uuid("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+    orgId: uuid("org_id").references(() => organizations.id, { onDelete: "cascade" }),
+    // which protocol input this answers ("Opening hours and holidays"), or "Other"
+    label: text("label").notNull(),
+    // chat, meeting, file
+    source: text("source").notNull(),
+    text: text("text"),
+    // the text with the customer's identity replaced by placeholders, and what was replaced (kinds only)
+    cleanText: text("clean_text"),
+    removed: jsonb("removed").$type<string[]>().notNull().default([]),
+    fileName: text("file_name"),
+    fileType: text("file_type"),
+    fileSize: integer("file_size"),
+    fileKey: text("file_key"),
+    // shared (partners see it), check (a person looks first: files we cannot clean), withheld
+    status: text("status").notNull(),
+    createdBy: text("created_by").notNull(),
+    decidedBy: text("decided_by"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("project_inputs_project_idx").on(t.projectId)],
 );
 
 export const milestones = pgTable(
