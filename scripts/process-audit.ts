@@ -28,6 +28,14 @@ for (const s of STEPS) {
 
 // 3. Human steps with a promise to someone must be watched, or they stall silently.
 for (const s of STEPS) if (s.by === "human" && s.sla && !s.watch) errors.push(`${s.id}: human step with SLA ${s.sla} but nothing watches it`);
+
+// 3b. AI wave: every step a person does has a date when an agent takes it over, or "keep" with the reason.
+const month = new Date().toISOString().slice(0, 7);
+for (const s of STEPS) {
+  if (s.by !== "human") continue;
+  if (!s.agentBy || !s.agentHow) errors.push(`${s.id}: person's step without agentBy ("YYYY-MM" or "keep") and agentHow`);
+  else if (s.agentBy !== "keep" && !/^\d{4}-\d{2}$/.test(s.agentBy)) errors.push(`${s.id}: agentBy must be "YYYY-MM" or "keep"`);
+}
 const ids = new Set<string>();
 for (const s of STEPS) (ids.has(s.id) ? errors.push(`duplicate step id ${s.id}`) : ids.add(s.id));
 
@@ -35,6 +43,8 @@ for (const s of STEPS) (ids.has(s.id) ? errors.push(`duplicate step id ${s.id}`)
 const rank = (s: Step) => (s.impact ?? 9) * 10 + (s.by === "planned" ? 0 : 1);
 const gaps = STEPS.filter((s) => s.gap).sort((a, b) => rank(a) - rank(b));
 const human = STEPS.filter((s) => s.by === "human");
+const toAgent = human.filter((s) => s.agentBy && s.agentBy !== "keep").sort((a, b) => a.agentBy!.localeCompare(b.agentBy!));
+const overdue = toAgent.filter((s) => s.agentBy! < month);
 const deadEnds = eventTypes.filter((t) => (triggers.get(t) ?? []).every((s) => s.by === "planned") && !LOG_ONLY[t]);
 const byFlow = [...new Set(STEPS.map((s) => s.flow))].map((f) => {
   const st = STEPS.filter((s) => s.flow === f);
@@ -62,6 +72,15 @@ const md = [
   "",
   deadEnds.length ? deadEnds.map((t) => `- \`${t}\` → ${(triggers.get(t) ?? []).map((s) => `${s.id} (step ${s.step})`).join(", ")}`).join("\n") : "None.",
   "",
+  "## Autonomy roadmap: when each person's step moves to an agent",
+  "",
+  `${toAgent.length} of ${human.length} steps have a date, ${human.length - toAgent.length} stay with a person on purpose (money, law, strategy)${overdue.length ? `; **${overdue.length} overdue**` : ""}.`,
+  "",
+  "| When | Step | How the agent takes over |",
+  "|---|---|---|",
+  ...toAgent.map((s) => `| ${s.agentBy}${s.agentBy! < month ? " ⚠ overdue" : ""} | ${s.id} | ${s.agentHow} |`),
+  ...human.filter((s) => s.agentBy === "keep").map((s) => `| keep | ${s.id} | ${s.agentHow} |`),
+  "",
   "## Steps a person does today (founder load)",
   "",
   ...human.map((s) => `- **${s.id}** (${s.edge}): ${s.does}${s.sla ? ` · promise ${s.sla}` : ""}${s.watch ? ` · watched by ${s.watch}` : " · **unwatched**"}`),
@@ -69,7 +88,7 @@ const md = [
 ].join("\n");
 writeFileSync("docs/process-audit.md", md);
 
-console.log(`process audit: ${STEPS.length} steps, ${human.length} manual, ${gaps.length} gaps, ${deadEnds.length} dead-end events → docs/process-audit.md`);
+console.log(`process audit: ${STEPS.length} steps, ${human.length} manual (${overdue.length} overdue for an agent), ${gaps.length} gaps, ${deadEnds.length} dead-end events → docs/process-audit.md`);
 if (errors.length) {
   console.error(`\n${errors.length} problem(s):\n- ${errors.join("\n- ")}`);
   process.exit(1);

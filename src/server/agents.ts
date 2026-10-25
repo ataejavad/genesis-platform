@@ -2,7 +2,7 @@ import { and, countDistinct, eq, gte, lt, or, sql, sum } from "drizzle-orm";
 import { costEur, metered } from "@/agents/meter";
 import { AGENTS, type AgentDef, agentDef, type KpiId } from "@/config/agents";
 import type { Db, DbOrTx } from "@/db";
-import { agentRuns, agentSettings, checkups, inbox, leads, partners, portalMessages, portalThreads, prospects, qaReviews } from "@/db/schema";
+import { agentRuns, agentSettings, checkups, inbox, leads, lessons, partners, portalMessages, portalThreads, prospects, qaReviews } from "@/db/schema";
 import type { Actor } from "./actor";
 import { AppError } from "./errors";
 import { audit, emit } from "./events";
@@ -127,6 +127,7 @@ async function measure(db: Db, a: AgentDef, w: Window): Promise<Measure> {
       }
       return { value: both ? Math.round((agree / both) * 100) : null, n: both, spentEur: spent };
     },
+    costPerAdoption: async () => per((await db.select({ n: sql<number>`count(*)::int` }).from(lessons).where(and(eq(lessons.area, "ai-scout"), eq(lessons.active, true), inWin(lessons.createdAt))))[0].n),
     costPerConversation: async () => per((await db.select({ n: countDistinct(inbox.party) }).from(inbox).where(and(eq(inbox.channel, "whatsapp"), inWin(inbox.createdAt))))[0].n),
   };
   return kpi[a.kpi.id]();
