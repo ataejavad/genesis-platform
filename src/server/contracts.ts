@@ -68,19 +68,19 @@ export async function sendContract(db: Db, actor: Actor, orderId: string) {
     }
     const [org] = await tx.select().from(organizations).where(eq(organizations.id, orgId));
     const lang = contractLang(o.locale ?? org.locale);
-    // deposit = the first milestone's share, at most half: the customer never prepays the whole job
-    const deposit = Math.round((pkg.setupEur * Math.min(pkg.milestones[0]?.sharePct ?? 50, 50)) / 100);
+    // each milestone is paid before it starts (marketplace lesson): the deposit is the first milestone's amount
+    const deposit = pkg.milestones.length > 1 ? Math.round((pkg.setupEur * (pkg.milestones[0]?.sharePct ?? 50)) / 100) : pkg.setupEur;
     const msText = pkg.milestones.map((m, i) => `${i + 1}) ${m.titles?.[lang] ?? m.title} (${pkg.milestones.length - 1 === i ? money(pkg.setupEur - pkg.milestones.slice(0, -1).reduce((s, x) => s + Math.round((pkg.setupEur * x.sharePct) / 100), 0), lang) : money(Math.round((pkg.setupEur * m.sharePct) / 100), lang)})`).join("; ");
     const us = await ourName(tx);
     const pack = packFor(org.country);
     const built = assemble("customer", lang, org.country, {
-      company: us, customer: org.name, service: pkg.titles[lang] ?? pkg.title, setup: money(pkg.setupEur, lang), monthly: money(pkg.monthlyEur, lang), deposit: money(deposit, lang), days: String(pack.paymentDays), milestones: msText,
+      company: us, customer: org.name, service: pkg.titles[lang] ?? pkg.title, setup: money(pkg.setupEur, lang), monthly: money(pkg.monthlyEur, lang), deposit: money(deposit, lang), revisions: String(pkg.revisions), days: String(pack.paymentDays), milestones: msText,
       parties: `${us} – ${org.name}${o.vat ? ` (${o.vat})` : ""}`,
     });
     const summary = {
       give: [`${pkg.title}: ${pkg.milestones.map((m) => m.title).join(" → ")}`, `Monthly service after the last milestone (€${pkg.monthlyEur}/month, cancel with 30 days)`, "DPA annex (we are processor), EU data"],
-      get: [`€${pkg.setupEur} set-up + €${pkg.monthlyEur}/month (+ VAT where due)`, `Deposit €${deposit} before any work starts`],
-      money: [`Balance per accepted milestone, ${pack.paymentDays} days`, "Late interest D.Lgs 231/2002 + €40", "Pause after 14 days late"],
+      get: [`€${pkg.setupEur} set-up + €${pkg.monthlyEur}/month (+ VAT where due)`, `First milestone €${deposit} before any work starts`],
+      money: [`Each next milestone paid before it starts, ${pack.paymentDays} days`, `${pkg.revisions} rounds of changes per milestone; more is quoted`, "Deemed acceptance after 7 silent days (reminders day 1, 3, 6)", "Late interest D.Lgs 231/2002 + €40", "Pause after 14 days late"],
       risks: [...(built.pack.reviewed ? [] : [`${built.pack.name} template ${built.pack.templateVersion} not reviewed by a lawyer yet`]), `${built.onerous.length} onerous clauses need the customer's separate code`],
     };
     const [c] = await tx

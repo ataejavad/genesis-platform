@@ -5,6 +5,8 @@ import { getDb } from "@/db";
 import { requireAdmin } from "@/lib/auth";
 import { AppError } from "@/server/errors";
 import { eraseCustomer } from "@/server/privacy";
+import { quoteRequest } from "@/server/brief";
+import { escalate, resolveComplaint } from "@/server/complaints";
 import { addGoal, addOutcome, addSubscription, answerRequest, askCustomerApproval, createCustomer } from "@/server/portal";
 
 // Cockpit actions for customer accounts (step 5). Each acts as the signed-in admin and is audited in the module.
@@ -52,6 +54,12 @@ export async function askApproval(f: FormData) {
 }
 export async function reply(f: FormData) {
   await run((a) => answerRequest(getDb(), a, str(f, "id"), str(f, "reply"), str(f, "status") === "done" ? "done" : "in_progress"));
+}
+export async function quote(f: FormData) {
+  await run((a) => quoteRequest(getDb(), a, str(f, "id"), str(f, "package")));
+}
+export async function complaint(f: FormData) {
+  await run((a) => (str(f, "do") === "escalate" ? escalate(getDb(), a, str(f, "id"), str(f, "note")) : resolveComplaint(getDb(), a, str(f, "id"), str(f, "note"))));
 }
 export async function goal(f: FormData) {
   await run((a) => addGoal(getDb(), a, { orgId: str(f, "org"), metric: str(f, "metric"), title: { [str(f, "lang") || "en"]: str(f, "title"), en: str(f, "title") }, baseline: num(f, "baseline"), target: num(f, "target"), unit: str(f, "unit") }));

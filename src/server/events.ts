@@ -62,7 +62,15 @@ export type EventType =
   | "customer.at_risk"
   | "results.reported"
   | "lead.reminder_due"
-  | "switch.changed";
+  | "switch.changed"
+  | "complaint.opened"
+  | "complaint.escalated"
+  | "complaint.resolved"
+  | "milestone.rated"
+  | "milestone.revision_cap"
+  | "milestone.started"
+  | "milestone.auto_accepted"
+  | "job.rework";
 
 // Call inside the same transaction as the change it describes (transactional outbox).
 export async function emit(

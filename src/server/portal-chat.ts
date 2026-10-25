@@ -4,7 +4,12 @@ import { normalize } from "@/lib/chat-match";
 import { listGoals, listRequests, listServices, nextStep, pendingApprovals, type RequestKind, results } from "./portal";
 import { INPUT_TEXTS } from "@/config/delivery-seeds";
 import type { Actor } from "./actor";
-import { addInput, customerNeeds, customerProjects } from "./projects";
+import { addInput, customerNeeds, customerProjects, SILENCE } from "./projects";
+import { inArray } from "drizzle-orm";
+import { milestones } from "@/db/schema";
+import { journeyCopy } from "@/config/journey-copy";
+import { type Brief, draftBrief } from "./brief";
+import { openComplaintFor, type Step } from "./complaints";
 
 /*
  * The dashboard home is a conversation (Javad 2026-10-25: "like Claude: the customer talks, and sees results
@@ -14,18 +19,20 @@ import { addInput, customerNeeds, customerProjects } from "./projects";
  * comes from the multilingual word rules below; with a key Claude picks the intent and cards (portal-advisor.ts).
  */
 
-export const INTENTS = ["results", "goals", "approvals", "materials", "projects", "services", "next", "problem", "support", "billing", "data", "requests", "help"] as const;
+export const INTENTS = ["complaint", "results", "goals", "approvals", "materials", "projects", "services", "next", "problem", "support", "billing", "data", "requests", "help"] as const;
 export type Intent = (typeof INTENTS)[number];
 
 export type Card =
   | { type: "results"; data: Awaited<ReturnType<typeof results>> }
   | { type: "goals"; data: Awaited<ReturnType<typeof listGoals>> }
-  | { type: "approvals"; data: { id: string; title: string; detail: string | null; link: string | null }[] }
+  | { type: "approvals"; data: { id: string; title: string; detail: string | null; link: string | null; milestone?: boolean; autoOn?: string | null }[] }
+  | { type: "brief"; data: Brief }
+  | { type: "complaint"; data: { text: string; step: Step | "support"; open: boolean } }
   | { type: "services"; data: Awaited<ReturnType<typeof listServices>> }
   | { type: "projects"; data: Awaited<ReturnType<typeof customerProjects>> }
   | { type: "needs"; data: Awaited<ReturnType<typeof customerNeeds>> }
   | { type: "next"; data: NonNullable<Awaited<ReturnType<typeof nextStep>>> }
-  | { type: "requests"; data: { id: string; kind: string; text: string; status: string; reply: string | null; createdAt: string }[] }
+  | { type: "requests"; data: { id: string; kind: string; text: string; status: string; reply: string | null; createdAt: string; priceBy?: string | null }[] }
   | { type: "confirm"; kind: RequestKind; text: string }
   | { type: "link"; href: string; label: string };
 
@@ -33,6 +40,7 @@ export type Reply = { text: string; cards: Card[] };
 
 // Order matters: the first rule that matches wins.
 const RULES: [Intent, RegExp][] = [
+  ["complaint", /non (sono|siamo) soddisf|insoddisf|delus|not (happy|satisfied)|unhappy|disappointed|dissatisf|nicht zufrieden|unzufrieden|enttausch|راضی نیستم|راضی نیستیم|ناراضی/],
   ["support", /non funziona|non va|errore|guasto|broken|not working|doesn.?t work|error|bug|funktioniert nicht|fehler|kaputt|کار نمی.?کن|خراب|خطا/],
   ["approvals", /approv|conferm|aspett|in attesa|waiting|pending|sign.?off|freigab|bestatig|wartet|تا\u0654?یید|منتظر/],
   ["materials", /material|document|allegat|allego|file|cosa vi serve|cosa serve|what do you need|send you|unterlagen|dokument|was brauchen sie|مدارک|فایل|سند|چه چیزی لازم|چی لازم/],
@@ -54,8 +62,24 @@ export function detectIntent(text: string): Intent {
 }
 
 /** Builds the reply for an intent from the customer's own data. */
+async function briefReply(db: Db, lang: string, text: string): Promise<Reply> {
+  const b = await draftBrief(db, lang, text);
+  return { text: b.package ? journeyCopy(lang).briefReady : journeyCopy(lang).briefQuote, cards: [{ type: "brief", data: b }] };
+}
+
+/** What waits for the customer's OK; a milestone shows the day it counts as accepted if nobody answers. */
+export async function approvalCards(db: Db, orgId: string) {
+  const a = await pendingApprovals(db, orgId);
+  const ms = a.some((x) => x.milestoneId) ? await db.select({ id: milestones.id, readyAt: milestones.readyAt }).from(milestones).where(inArray(milestones.id, a.flatMap((x) => (x.milestoneId ? [x.milestoneId] : [])))) : [];
+  return a.map((x) => {
+    const r = ms.find((m) => m.id === x.milestoneId)?.readyAt;
+    return { id: x.id, title: x.title, detail: x.detail, link: x.link, milestone: Boolean(x.milestoneId), autoOn: r ? new Date(r.getTime() + SILENCE.autoAcceptDays * 864e5).toISOString().slice(0, 10) : null };
+  });
+}
+
 export async function replyFor(db: Db, orgId: string, lang: string, intent: Intent, userText: string): Promise<Reply> {
   const c = portalCopy(lang).r;
+  const j = journeyCopy(lang);
   const p = portalCopy(lang);
   switch (intent) {
     case "results": {
@@ -67,8 +91,14 @@ export async function replyFor(db: Db, orgId: string, lang: string, intent: Inte
       return g.length ? { text: c.goals, cards: [{ type: "goals", data: g }] } : { text: c.goalsNone, cards: [{ type: "confirm", kind: "change", text: userText }] };
     }
     case "approvals": {
-      const a = await pendingApprovals(db, orgId);
-      return { text: a.length ? c.approvals.replace("{n}", String(a.length)) : c.approvalsNone, cards: a.length ? [{ type: "approvals", data: a.map((x) => ({ id: x.id, title: x.title, detail: x.detail, link: x.link })) }] : [] };
+      const a = await approvalCards(db, orgId);
+      return { text: a.length ? c.approvals.replace("{n}", String(a.length)) : c.approvalsNone, cards: a.length ? [{ type: "approvals", data: a }] : [] };
+    }
+    case "complaint": {
+      // the ladder is explained on the card; nothing changes until the customer presses it
+      const open = await openComplaintFor(db, orgId);
+      const step: Step | "support" = open ? (open.step === "fix" ? "swap" : "founder") : (await customerProjects(db, orgId)).length ? "fix" : "support";
+      return { text: j.complaintAsk[step], cards: [{ type: "complaint", data: { text: userText, step, open: Boolean(open) } }] };
     }
     case "projects": {
       const pr = await customerProjects(db, orgId);
@@ -88,8 +118,8 @@ export async function replyFor(db: Db, orgId: string, lang: string, intent: Inte
       return n ? { text: c.next, cards: [{ type: "next", data: n }] } : { text: c.nextNone, cards: [] };
     }
     case "problem":
-      // a sentence that already says what is wrong goes straight to a confirm card; "I have a new problem" asks first
-      return userText.trim().split(/\s+/).length >= 6 ? { text: c.confirmSolution, cards: [{ type: "confirm", kind: "solution", text: userText }] } : { text: c.newProblem, cards: [] };
+      // a sentence that already says what is wrong becomes a brief to confirm; "I have a new problem" asks first
+      return userText.trim().split(/\s+/).length >= 6 ? briefReply(db, lang, userText) : { text: c.newProblem, cards: [] };
     case "support":
       return { text: c.confirmSupport, cards: [{ type: "confirm", kind: "support", text: userText }] };
     case "billing": {
@@ -100,7 +130,7 @@ export async function replyFor(db: Db, orgId: string, lang: string, intent: Inte
       return { text: c.data, cards: [{ type: "link", href: "/portal/data", label: p.nav.data }] };
     case "requests": {
       const r = (await listRequests(db, orgId)).slice(0, 5);
-      return { text: r.length ? c.requests : c.requestsNone, cards: r.length ? [{ type: "requests", data: r.map((x) => ({ id: x.id, kind: x.kind, text: x.text, status: x.status, reply: x.reply, createdAt: x.createdAt.toISOString().slice(0, 10) })) }] : [] };
+      return { text: r.length ? c.requests : c.requestsNone, cards: r.length ? [{ type: "requests", data: r.map((x) => ({ id: x.id, kind: x.kind, text: x.text, status: x.status, reply: x.reply, createdAt: x.createdAt.toISOString().slice(0, 10), priceBy: x.status === "open" && x.dueAt && (x.kind === "solution" || x.kind === "change") ? x.dueAt.toISOString() : null })) }] : [] };
     }
     default:
       return { text: c.fallback, cards: [] };
@@ -111,9 +141,7 @@ export async function replyFor(db: Db, orgId: string, lang: string, intent: Inte
 export const awaitingProblem = (lastBotText: string | undefined, lang: string) => lastBotText === portalCopy(lang).r.newProblem;
 
 export async function scriptedReply(db: Db, orgId: string, lang: string, text: string, lastBotText?: string): Promise<Reply & { intent: Intent }> {
-  if (awaitingProblem(lastBotText, lang) && text.trim().length > 3) {
-    return { intent: "problem", text: portalCopy(lang).r.confirmSolution, cards: [{ type: "confirm", kind: "solution", text }] };
-  }
+  if (awaitingProblem(lastBotText, lang) && text.trim().length > 3) return { intent: "problem", ...(await briefReply(db, lang, text)) };
   const intent = detectIntent(text);
   return { intent, ...(await replyFor(db, orgId, lang, intent, text)) };
 }

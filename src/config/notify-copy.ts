@@ -22,7 +22,8 @@ export type Template =
   | "payout"
   | "leadConfirm"
   | "monthlyReport"
-  | "deadlineReminder";
+  | "deadlineReminder"
+  | "autoAccepted";
 
 type T = Record<Template, { subject: string; body: string }>;
 
@@ -39,7 +40,7 @@ const it: T = {
   reminder4: { subject: "Ultimo sollecito prima della sospensione: {amount}", body: "Buongiorno {name},\n\nil pagamento di {amount} ({title}) è scaduto da due settimane. Senza pagamento entro 3 giorni lavorativi sospenderemo il servizio, come previsto dal contratto. Rispondete pure a questa email se c'è un problema.\n{link}" + sign },
   issued: { subject: "Fattura {number}", body: "Buongiorno {name},\n\ngrazie per il pagamento. La fattura {number} di {amount} è nella vostra area e arriva anche tramite SdI.\n{link}" + sign },
   approval: { subject: "Da verificare: {title}", body: "Buongiorno {name},\n\n{title} è pronto. Verificatelo e confermate, oppure diteci cosa cambiare:\n{link}" + sign },
-  approvalReminder: { subject: "Promemoria: {title} aspetta il vostro OK", body: "Buongiorno {name},\n\n{title} aspetta la vostra verifica da {hours} ore. Basta un clic:\n{link}" + sign },
+  approvalReminder: { subject: "Promemoria: {title} aspetta il vostro OK", body: "Buongiorno {name},\n\n{title} aspetta la vostra verifica da {hours} ore. Basta un clic:\n{link}\n\nSe non riceviamo risposta, il {auto} la fase vale come accettata (come da contratto)." + sign },
   offer: { subject: "Nuovo lavoro per te: {title}", body: "Ciao {name},\n\nc'è un nuovo lavoro che fa per te: {title} ({pay}). Guardalo e accetta se ti va:\n{link}" + sign },
   accepted: { subject: "Lavoro accettato: {title}", body: "Ciao {name},\n\n«{title}» è stato accettato. Il pagamento è previsto entro il {due}.\n{link}" + sign },
   changes: { subject: "Modifiche richieste: {title}", body: "Ciao {name},\n\nper «{title}» servono alcune modifiche:\n{note}\n{link}" + sign },
@@ -48,6 +49,7 @@ const it: T = {
   leadConfirm: { subject: "Confermate la vostra iscrizione", body: "Buongiorno,\n\nper ricevere {what}, confermate con un clic:\n{link}\n\nSe non siete stati voi, ignorate questa email." + sign },
   deadlineReminder: { subject: "Tra {days} giorni: {title}", body: "Buongiorno,\n\ncome richiesto, vi ricordiamo la scadenza del {date}: {title}.\n{what}\n\nCosa possiamo fare noi: {offer}\nTutte le scadenze del vostro settore: {link}\n\nNon volete più questi promemoria? {unsubscribe}" + sign },
   monthlyReport: { subject: "I vostri risultati di {month}: {eur}", body: "Buongiorno {name},\n\na {month} il servizio vi ha portato {eur} (canone {fee}). Dall'inizio: {total}.\n\nIl dettaglio, mese per mese, è nella vostra area:\n{link}\n\nC'è qualcosa da migliorare? Rispondete pure a questa email." + sign },
+  autoAccepted: { subject: "Fase accettata: {title}", body: "Buongiorno {name},\n\n{title} è stata consegnata 7 giorni fa e, senza risposta, ora vale come accettata (come da contratto). Se qualcosa non va, scriveteci nella vostra area: lo correggiamo.\n{link}" + sign },
 };
 
 const en: T = {
@@ -61,7 +63,7 @@ const en: T = {
   reminder4: { subject: "Final reminder before suspension: {amount}", body: "Hello {name},\n\nthe payment of {amount} ({title}) is two weeks overdue. Without payment within 3 working days we will suspend the service as the contract allows. Reply to this email if there is a problem.\n{link}" + sign },
   issued: { subject: "Invoice {number}", body: "Hello {name},\n\nthank you for your payment. Invoice {number} for {amount} is in your area.\n{link}" + sign },
   approval: { subject: "Ready for your check: {title}", body: "Hello {name},\n\n{title} is ready. Check it and accept, or tell us what to change:\n{link}" + sign },
-  approvalReminder: { subject: "Reminder: {title} waits for your OK", body: "Hello {name},\n\n{title} has been waiting for your check for {hours} hours. One click is enough:\n{link}" + sign },
+  approvalReminder: { subject: "Reminder: {title} waits for your OK", body: "Hello {name},\n\n{title} has been waiting for your check for {hours} hours. One click is enough:\n{link}\n\nIf we hear nothing, the step counts as accepted on {auto} (as in the contract)." + sign },
   offer: { subject: "New job for you: {title}", body: "Hi {name},\n\nthere is a new job that fits you: {title} ({pay}). Have a look and accept if you like:\n{link}" + sign },
   accepted: { subject: "Work accepted: {title}", body: "Hi {name},\n\n\"{title}\" was accepted. Payment is due by {due}.\n{link}" + sign },
   changes: { subject: "Changes requested: {title}", body: "Hi {name},\n\n\"{title}\" needs a few changes:\n{note}\n{link}" + sign },
@@ -70,6 +72,7 @@ const en: T = {
   leadConfirm: { subject: "Please confirm your subscription", body: "Hello,\n\nto receive {what}, confirm with one click:\n{link}\n\nIf this was not you, ignore this email." + sign },
   deadlineReminder: { subject: "In {days} days: {title}", body: "Hello,\n\nas you asked, a reminder of the deadline on {date}: {title}.\n{what}\n\nHow we can help: {offer}\nAll deadlines for your trade: {link}\n\nNo more reminders? {unsubscribe}" + sign },
   monthlyReport: { subject: "Your results for {month}: {eur}", body: "Hello {name},\n\nin {month} the service brought you {eur} (fee {fee}). Since the start: {total}.\n\nThe details, month by month, are in your area:\n{link}\n\nAnything we should improve? Just reply to this email." + sign },
+  autoAccepted: { subject: "Step accepted: {title}", body: "Hello {name},\n\n{title} was delivered 7 days ago and, without an answer, now counts as accepted (as in the contract). If anything is wrong, tell us in your area and we fix it.\n{link}" + sign },
 };
 
 const de: T = {
@@ -83,7 +86,7 @@ const de: T = {
   reminder4: { subject: "Letzte Mahnung vor Aussetzung: {amount}", body: "Guten Tag {name},\n\ndie Zahlung von {amount} ({title}) ist seit zwei Wochen überfällig. Ohne Zahlung binnen 3 Arbeitstagen setzen wir den Service vertragsgemäß aus. Antworten Sie gern, falls es ein Problem gibt.\n{link}" + sign },
   issued: { subject: "Rechnung {number}", body: "Guten Tag {name},\n\ndanke für Ihre Zahlung. Rechnung {number} über {amount} liegt in Ihrem Bereich.\n{link}" + sign },
   approval: { subject: "Zur Prüfung: {title}", body: "Guten Tag {name},\n\n{title} ist fertig. Prüfen und abnehmen, oder sagen Sie uns, was zu ändern ist:\n{link}" + sign },
-  approvalReminder: { subject: "Erinnerung: {title} wartet auf Ihr OK", body: "Guten Tag {name},\n\n{title} wartet seit {hours} Stunden auf Ihre Prüfung. Ein Klick genügt:\n{link}" + sign },
+  approvalReminder: { subject: "Erinnerung: {title} wartet auf Ihr OK", body: "Guten Tag {name},\n\n{title} wartet seit {hours} Stunden auf Ihre Prüfung. Ein Klick genügt:\n{link}\n\nHören wir nichts, gilt die Phase am {auto} als abgenommen (laut Vertrag)." + sign },
   offer: { subject: "Neuer Auftrag für Sie: {title}", body: "Hallo {name},\n\nes gibt einen passenden Auftrag: {title} ({pay}). Ansehen und annehmen, wenn Sie möchten:\n{link}" + sign },
   accepted: { subject: "Arbeit abgenommen: {title}", body: "Hallo {name},\n\n„{title}“ wurde abgenommen. Zahlung bis {due}.\n{link}" + sign },
   changes: { subject: "Änderungen gewünscht: {title}", body: "Hallo {name},\n\nfür „{title}“ braucht es Änderungen:\n{note}\n{link}" + sign },
@@ -92,6 +95,7 @@ const de: T = {
   leadConfirm: { subject: "Bitte bestätigen Sie Ihre Anmeldung", body: "Guten Tag,\n\num {what} zu erhalten, bestätigen Sie mit einem Klick:\n{link}\n\nFalls Sie das nicht waren, ignorieren Sie diese E-Mail." + sign },
   deadlineReminder: { subject: "In {days} Tagen: {title}", body: "Guten Tag,\n\nwie gewünscht erinnern wir Sie an die Frist am {date}: {title}.\n{what}\n\nWie wir helfen können: {offer}\nAlle Fristen Ihrer Branche: {link}\n\nKeine Erinnerungen mehr? {unsubscribe}" + sign },
   monthlyReport: { subject: "Ihre Ergebnisse im {month}: {eur}", body: "Guten Tag {name},\n\nim {month} hat Ihnen der Service {eur} gebracht (Gebühr {fee}). Seit Beginn: {total}.\n\nDie Details, Monat für Monat, finden Sie in Ihrem Bereich:\n{link}\n\nGibt es etwas zu verbessern? Antworten Sie einfach auf diese E-Mail." + sign },
+  autoAccepted: { subject: "Phase abgenommen: {title}", body: "Guten Tag {name},\n\n{title} wurde vor 7 Tagen geliefert und gilt ohne Antwort nun als abgenommen (laut Vertrag). Wenn etwas nicht passt, schreiben Sie uns in Ihrem Bereich; wir bessern nach.\n{link}" + sign },
 };
 
 const fa: T = {
@@ -105,7 +109,7 @@ const fa: T = {
   reminder4: { subject: "آخرین یادآوری پیش از توقف سرویس: {amount}", body: "سلام {name}،\n\nپرداخت {amount} ({title}) دو هفته دیر شده است. اگر تا ۳ روز کاری پرداخت نشود، طبق قرارداد سرویس متوقف می‌شود. اگر مشکلی هست جواب همین ایمیل را بدهید.\n{link}" + sign },
   issued: { subject: "فاکتور {number}", body: "سلام {name}،\n\nممنون از پرداخت شما. فاکتور {number} به مبلغ {amount} در فضای شماست.\n{link}" + sign },
   approval: { subject: "آماده بررسی: {title}", body: "سلام {name}،\n\n{title} آماده است. بررسی و تأیید کنید، یا بگویید چه چیزی تغییر کند:\n{link}" + sign },
-  approvalReminder: { subject: "یادآوری: {title} منتظر تأیید شماست", body: "سلام {name}،\n\n{title} {hours} ساعت است منتظر بررسی شماست. یک کلیک کافی است:\n{link}" + sign },
+  approvalReminder: { subject: "یادآوری: {title} منتظر تأیید شماست", body: "سلام {name}،\n\n{title} {hours} ساعت است منتظر بررسی شماست. یک کلیک کافی است:\n{link}\n\nاگر جوابی نرسد، این مرحله {auto} تأییدشده حساب می‌شود (طبق قرارداد)." + sign },
   offer: { subject: "کار تازه برای شما: {title}", body: "سلام {name}،\n\nیک کار مناسب شما هست: {title} ({pay}). ببینید و اگر خواستید قبول کنید:\n{link}" + sign },
   accepted: { subject: "کار قبول شد: {title}", body: "سلام {name}،\n\n«{title}» قبول شد. پرداخت تا {due}.\n{link}" + sign },
   changes: { subject: "اصلاح لازم است: {title}", body: "سلام {name}،\n\n«{title}» چند اصلاح لازم دارد:\n{note}\n{link}" + sign },
@@ -114,6 +118,7 @@ const fa: T = {
   leadConfirm: { subject: "لطفاً عضویت را تأیید کنید", body: "سلام،\n\nبرای دریافت {what}، با یک کلیک تأیید کنید:\n{link}\n\nاگر شما نبودید، این ایمیل را نادیده بگیرید." + sign },
   deadlineReminder: { subject: "{days} روز دیگر: {title}", body: "سلام،\n\nهمان‌طور که خواستید، یادآوری مهلت {date}: {title}.\n{what}\n\nکاری که ما می‌توانیم بکنیم: {offer}\nهمه مهلت‌های صنف شما: {link}\n\nدیگر یادآوری نمی‌خواهید؟ {unsubscribe}" + sign },
   monthlyReport: { subject: "نتیجه‌های {month}: {eur}", body: "سلام {name}،\n\nدر {month} این سرویس {eur} برایتان آورد (هزینه ماهانه {fee}). از ابتدا: {total}.\n\nجزئیات ماه به ماه در پنل شماست:\n{link}\n\nچیزی هست که بهتر کنیم؟ همین ایمیل را جواب دهید." + sign },
+  autoAccepted: { subject: "مرحله تأیید شد: {title}", body: "سلام {name}،\n\n{title} ۷ روز پیش تحویل شد و چون جوابی نرسید، حالا تأییدشده حساب می‌شود (طبق قرارداد). اگر چیزی درست نیست، در پنل‌تان بنویسید تا اصلاحش کنیم.\n{link}" + sign },
 };
 
 const ALL: Record<string, T> = { it, en, de, fa };

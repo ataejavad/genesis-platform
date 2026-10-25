@@ -3,7 +3,7 @@ import { MODULES, type ModuleDef, SYSTEMS } from "@/config/modules";
 import { STEPS } from "@/config/process-map";
 import type { Db } from "@/db";
 import {
-  agentRuns, apiKeys, checkups, companyPages, contacts, contentItems, contentRevisions, contracts, customerApprovals, customerHealth, customerRequests, deliveries, events,
+  agentRuns, apiKeys, checkups, companyPages, complaints, contacts, contentItems, contentRevisions, contracts, customerApprovals, customerHealth, customerRequests, deliveries, events,
   experiments, invoices, orders, inviteTokens, jobs, leads, lessons, milestones, notifications, outcomes, partnerDocuments, partnerMessages, partners, payouts, portalMessages,
   projectInputs, projects, prospects, protocols, subscriptions, touches,
 } from "@/db/schema";
@@ -32,6 +32,15 @@ type Ctx = { db: Db; now: Date; month: Date; agents: AgentRow[] };
 
 const KPI: Record<string, (c: Ctx) => Promise<string>> = {
   filters: async () => `last run ${lastMarketRun() ?? "never"}`,
+  quotes: async ({ db }) => `${await n(db.select({ n: count() }).from(customerRequests).where(and(eq(customerRequests.status, "open"), inArray(customerRequests.kind, ["solution", "change"]))))} prices promised, ${await n(db.select({ n: count() }).from(customerRequests).where(and(eq(customerRequests.status, "open"), lt(customerRequests.dueAt, new Date()))))} late`,
+  complaints: async ({ db, month }) => `${await n(db.select({ n: count() }).from(complaints).where(eq(complaints.status, "open")))} open, ${await n(db.select({ n: count() }).from(complaints).where(gte(complaints.createdAt, month)))} this month`,
+  ratings: async ({ db, month }) => {
+    const [r] = await db.select({ n: count(milestones.rating), avg: sql<number | null>`avg(${milestones.rating})::float` }).from(milestones).where(gte(milestones.acceptedAt, month));
+    return r.n ? `${Math.round((r.avg ?? 0) * 10) / 10}/5 from ${r.n} this month` : "no ratings this month";
+  },
+  autoAccepted: async ({ db, month }) => `${await n(db.select({ n: count() }).from(milestones).where(and(eq(milestones.acceptedBy, "auto"), gte(milestones.acceptedAt, month))))} accepted by silence this month`,
+  reworks: async ({ db, month }) => `${await n(db.select({ n: count() }).from(jobs).where(and(eq(jobs.role, "revision"), gte(jobs.createdAt, month))))} reworks this month`,
+  unpaidMilestones: async ({ db }) => `${await n(db.select({ n: count() }).from(milestones).where(eq(milestones.status, "unpaid")))} milestones waiting for payment`,
   hubPages: async ({ db }) => `${await n(db.select({ n: count() }).from(contentItems).where(eq(contentItems.status, "published")))} pages live`,
   leadsMonth: async ({ db, month }) => `${await n(db.select({ n: count() }).from(leads).where(gte(leads.createdAt, month)))} leads this month`,
   reminders: async ({ db, month }) => `${await n(db.select({ n: count() }).from(events).where(and(eq(events.type, "lead.reminder_due"), gte(events.createdAt, month))))} reminders this month`,

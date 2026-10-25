@@ -5,10 +5,13 @@ import { ASSEMBLY_CHECKS, FIXED_RULES, inputText, PACKAGE_SEEDS, PROTOCOL_SEEDS 
 import type { Db, DbOrTx, Tx } from "@/db";
 import {
   changeRequests,
+  complaints,
   contracts,
   type Criterion,
   customerApprovals,
+  customerRequests,
   deliveries,
+  jobOffers,
   jobs,
   memberships,
   milestones,
@@ -258,7 +261,9 @@ async function insertProject(tx: Tx, actor: Actor, v: { orgId: string | null; pa
   for (const [seq, m] of pkg.milestones.entries()) {
     const amount = seq === pkg.milestones.length - 1 ? left : Math.round((pkg.setupEur * m.sharePct) / 100);
     left -= amount;
-    const [row] = await tx.insert(milestones).values({ projectId: project.id, orgId: v.orgId, seq, title: m.titles?.[lang] ?? m.title, amountEur: amount }).returning();
+    // the customer's countdown: the last task of this milestone; later milestones wait for their payment
+    const days = Math.max(0, ...pkg.tasks.map((t, i) => ((t.milestone ?? 0) === seq ? due[i] : 0))) || day;
+    const [row] = await tx.insert(milestones).values({ projectId: project.id, orgId: v.orgId, seq, title: m.titles?.[lang] ?? m.title, amountEur: amount, status: seq === 0 ? "open" : "planned", dueAt: new Date(v.now.getTime() + days * DAY) }).returning();
     ms.push(row);
   }
   for (const [i, t] of pkg.tasks.entries()) {
@@ -267,7 +272,7 @@ async function insertProject(tx: Tx, actor: Actor, v: { orgId: string | null; pa
     await tx.insert(jobs).values({
       title: t.title, brief, kind: v.orgId ? "customer" : "internal", customerOrgId: v.orgId, customerCode: org ? customerCode(org.id, org.industry, org.country) : null,
       skills: t.skills.filter((s) => SKILLS.some((k) => k.id === s)), language: lang, country: org?.country ?? null, personalData: pkg.personalData, payEur: t.payEur,
-      dueAt: new Date(v.now.getTime() + due[i] * DAY), checklist: pv.criteria.map((c) => c.texts?.[lang] ?? c.text),
+      dueAt: new Date(v.now.getTime() + due[i] * DAY), checklist: pv.criteria.map((c) => c.texts?.[lang] ?? c.text), status: (t.milestone ?? 0) > 0 && ms[t.milestone] ? "held" : "open",
       projectId: project.id, milestoneId: ms[t.milestone]?.id ?? ms[0].id, protocolVersionId: pv.id, createdBy: by(actor),
     });
   }
@@ -276,7 +281,7 @@ async function insertProject(tx: Tx, actor: Actor, v: { orgId: string | null; pa
   return project;
 }
 
-/** Tasks of the first open milestone go to the best-matching partners (the assignment agent's job). */
+/** Open tasks (the milestones already paid) go to the best-matching partners (the assignment agent's job). */
 async function offerTasks(db: Db, actor: Actor, projectId: string) {
   const open = await db.select().from(jobs).where(and(eq(jobs.projectId, projectId), eq(jobs.status, "open")));
   for (const j of open) await offerJob(db, actor, j.id);
@@ -331,7 +336,7 @@ export async function customerProjects(db: Db, orgId: string) {
   const rows = await projectRows(db, (await db.select({ id: projects.id }).from(projects).where(eq(projects.orgId, orgId))).map((r) => r.id));
   return rows.map((r) => ({
     id: r.project.id, code: r.project.code, title: r.project.title, status: r.project.status, dueAt: r.project.dueAt.toISOString().slice(0, 10), progress: r.health.progress, monthlyEur: r.project.monthlyEur,
-    milestones: r.milestones.map((m) => ({ title: m.title, status: m.status, amountEur: m.amountEur })),
+    milestones: r.milestones.map((m) => ({ title: m.title, status: m.status, amountEur: m.amountEur, dueAt: m.dueAt?.toISOString().slice(0, 10) ?? null, rating: m.rating })),
   }));
 }
 
@@ -344,7 +349,7 @@ export async function onJobAccepted(tx: Tx, actor: Actor, job: typeof jobs.$infe
   if (!job.milestoneId || job.role === "qa") return;
   const [m] = await tx.select().from(milestones).where(eq(milestones.id, job.milestoneId)).for("update");
   if (!m || !["open", "changes"].includes(m.status)) return;
-  const [{ open }] = await tx.select({ open: sql<number>`count(*)::int` }).from(jobs).where(and(eq(jobs.milestoneId, m.id), sql`${jobs.status} not in ('accepted', 'cancelled')`, sql`${jobs.id} <> ${job.id}`));
+  const [{ open }] = await tx.select({ open: sql<number>`count(*)::int` }).from(jobs).where(and(eq(jobs.milestoneId, m.id), sql`${jobs.status} not in ('accepted', 'paid', 'cancelled')`, sql`${jobs.id} <> ${job.id}`));
   if (open > 0) return;
   // several partners made parts of this milestone: one assembler (a person, a company or an agent) makes one hand-over first
   if (job.role === "work") {
@@ -364,7 +369,7 @@ export async function onJobAccepted(tx: Tx, actor: Actor, job: typeof jobs.$infe
     .insert(customerApprovals)
     .values({ orgId: p.orgId, title: `${p.title}: ${m.title}`, detail: `${p.code} · ${(CHECK_IT[p.language] ?? CHECK_IT.en)}`, milestoneId: m.id, createdBy: by(actor) })
     .returning();
-  await tx.update(milestones).set({ status: "ready", readyAt: now, approvalId: a.id }).where(eq(milestones.id, m.id));
+  await tx.update(milestones).set({ status: "ready", readyAt: now, approvalId: a.id, reminders: 0, remindedAt: null }).where(eq(milestones.id, m.id));
   await emit(tx, actor, "customer_approval.requested", { type: "customer_approval", id: a.id }, { orgId: p.orgId, title: a.title });
   await emit(tx, actor, "milestone.ready", { type: "milestone", id: m.id }, { projectId: p.id, code: p.code, title: m.title });
   await audit(tx, actor, "milestone.ready", { type: "milestone", id: m.id }, { status: m.status }, { status: "ready", approvalId: a.id });
@@ -392,25 +397,27 @@ async function openAssembly(tx: Tx, actor: Actor, m: typeof milestones.$inferSel
   await audit(tx, actor, "job.opened", { type: "job", id: a.id }, null, { role: "assemble", parts: works.length, payEur });
 }
 
-async function acceptMilestone(tx: Tx, actor: Actor, m: typeof milestones.$inferSelect, p: typeof projects.$inferSelect, now: Date) {
-  await tx.update(milestones).set({ status: "accepted", acceptedAt: now }).where(eq(milestones.id, m.id));
+async function acceptMilestone(tx: Tx, actor: Actor, m: typeof milestones.$inferSelect, p: typeof projects.$inferSelect, now: Date, acceptedBy = p.orgId ? "customer" : "internal") {
+  await tx.update(milestones).set({ status: "accepted", acceptedAt: now, acceptedBy }).where(eq(milestones.id, m.id));
+  // a complaint about this milestone ends when the customer (or the silence rule) accepts the fixed work
+  await tx.update(complaints).set({ status: "resolved", resolvedAt: now, resolvedBy: `milestone:${acceptedBy}` }).where(and(eq(complaints.milestoneId, m.id), eq(complaints.status, "open")));
   // invoiceable now: step 8 (contracts and finance) turns this event into the invoice of this milestone
   await emit(tx, actor, "milestone.accepted", { type: "milestone", id: m.id }, { projectId: p.id, code: p.code, orgId: p.orgId, title: m.title, amountEur: m.amountEur });
   await audit(tx, actor, "milestone.accepted", { type: "milestone", id: m.id }, { status: m.status }, { status: "accepted" });
   const [{ left }] = await tx.select({ left: sql<number>`count(*)::int` }).from(milestones).where(and(eq(milestones.projectId, p.id), sql`${milestones.status} <> 'accepted'`, sql`${milestones.id} <> ${m.id}`));
-  if (left === 0) await closeProject(tx, actor, p, now);
+  // a complaint can reopen a milestone of a closed project: it is not closed (and billed monthly) twice
+  if (left === 0 && p.status !== "closed") await closeProject(tx, actor, p, now);
 }
 
 /** Called in the same transaction as the customer's decision on an approval. */
-export async function onApprovalDecided(tx: Tx, actor: Actor, a: typeof customerApprovals.$inferSelect, decision: "approved" | "changes", now = new Date()) {
+export async function onApprovalDecided(tx: Tx, actor: Actor, a: typeof customerApprovals.$inferSelect, decision: "approved" | "changes", now = new Date(), rating?: { stars: number; note?: string }) {
   if (a.milestoneId) {
     const [m] = await tx.select().from(milestones).where(eq(milestones.id, a.milestoneId));
     const [p] = await tx.select().from(projects).where(eq(projects.id, m.projectId));
-    if (decision === "approved") await acceptMilestone(tx, actor, m, p, now);
-    else {
-      await tx.update(milestones).set({ status: "changes" }).where(eq(milestones.id, m.id));
-      await emit(tx, actor, "milestone.changes", { type: "milestone", id: m.id }, { projectId: p.id, code: p.code, title: m.title, note: a.note });
-    }
+    if (decision === "approved") {
+      if (rating) await rateMilestone(tx, actor, m, p, rating.stars, rating.note);
+      await acceptMilestone(tx, actor, m, p, now);
+    } else await askForChanges(tx, actor, m, p, a.note ?? "", now);
   }
   if (a.changeRequestId) {
     const [cr] = await tx.select().from(changeRequests).where(eq(changeRequests.id, a.changeRequestId));
@@ -418,11 +425,107 @@ export async function onApprovalDecided(tx: Tx, actor: Actor, a: typeof customer
     if (decision === "approved") {
       const [p] = await tx.select().from(projects).where(eq(projects.id, cr.projectId));
       const [{ seq }] = await tx.select({ seq: sql<number>`coalesce(max(${milestones.seq}), -1)::int + 1` }).from(milestones).where(eq(milestones.projectId, p.id));
-      await tx.insert(milestones).values({ projectId: p.id, orgId: p.orgId, seq, title: `Change: ${cr.text.slice(0, 80)}`, amountEur: cr.priceEur });
+      // paid before it starts, like every milestone (billed by finance once the earlier ones are accepted)
+      await tx.insert(milestones).values({ projectId: p.id, orgId: p.orgId, seq, title: `Change: ${cr.text.slice(0, 80)}`, amountEur: cr.priceEur, status: "planned", dueAt: new Date(Math.max(now.getTime(), p.dueAt.getTime()) + cr.days * DAY) });
       await tx.update(projects).set({ priceEur: p.priceEur + cr.priceEur, dueAt: new Date(p.dueAt.getTime() + cr.days * DAY), status: "running" }).where(eq(projects.id, p.id));
     }
-    await emit(tx, actor, "change_request.decided", { type: "change_request", id: cr.id }, { projectId: cr.projectId, decision });
+    await emit(tx, actor, "change_request.decided", { type: "change_request", id: cr.id }, { projectId: cr.projectId, decision, orgId: cr.orgId });
   }
+}
+
+/* ───────────── Changes, rework and ratings (marketplace lessons 2026-10-25) ───────────── */
+
+const REWORK_DAYS = 3;
+// what the customer reads when the included rounds of changes are used up
+const OVER_CAP: Record<string, string> = {
+  en: "The {n} rounds of changes included in this step are used. We send you a price for this change within 24 hours; you can still accept the step as it is.",
+  it: "I {n} giri di modifiche inclusi in questa fase sono stati usati. Vi mandiamo un prezzo per questa modifica entro 24 ore; potete comunque accettare la fase così com'è.",
+  de: "Die {n} enthaltenen Änderungsrunden dieser Phase sind aufgebraucht. Wir senden Ihnen binnen 24 Stunden einen Preis für diese Änderung; Sie können die Phase auch so abnehmen.",
+  fa: "{n} دور اصلاحِ این مرحله استفاده شده است. ظرف ۲۴ ساعت برای این تغییر قیمت می‌فرستیم؛ می‌توانید همین مرحله را همان‌طور که هست تأیید کنید.",
+};
+
+/** The customer's 1-5 after a hand-over; a low one reaches Javad at once (partners never see who rated). */
+async function rateMilestone(tx: Tx, actor: Actor, m: typeof milestones.$inferSelect, p: typeof projects.$inferSelect, stars: number, note?: string) {
+  const rating = Math.max(1, Math.min(5, Math.round(stars)));
+  await tx.update(milestones).set({ rating, ratingNote: note?.trim().slice(0, 500) || null }).where(eq(milestones.id, m.id));
+  await emit(tx, actor, "milestone.rated", { type: "milestone", id: m.id }, { projectId: p.id, code: p.code, title: m.title, orgId: p.orgId, rating, note: note ?? null });
+  await audit(tx, actor, "milestone.rated", { type: "milestone", id: m.id }, null, { rating, note });
+}
+
+/** "Ask for changes": within the included rounds the last maker reworks it for free; beyond them it is priced first. */
+async function askForChanges(tx: Tx, actor: Actor, m: typeof milestones.$inferSelect, p: typeof projects.$inferSelect, note: string, now: Date) {
+  const [pkg] = p.packageSlug ? await tx.select({ revisions: servicePackages.revisions }).from(servicePackages).where(eq(servicePackages.slug, p.packageSlug)) : [];
+  const cap = pkg?.revisions ?? 2;
+  if (m.revisions >= cap && p.orgId) {
+    const [req] = await tx.insert(customerRequests).values({ orgId: p.orgId, kind: "change", text: `${p.code} ${m.title}: ${note || "more changes"}`.slice(0, 4000), dueAt: new Date(now.getTime() + DAY) }).returning();
+    const [a] = await tx.insert(customerApprovals).values({ orgId: p.orgId, title: `${p.title}: ${m.title}`, detail: `${p.code} · ${(OVER_CAP[p.language] ?? OVER_CAP.en).replace("{n}", String(cap))}`, milestoneId: m.id, createdBy: by(actor) }).returning();
+    await tx.update(milestones).set({ approvalId: a.id, readyAt: now, reminders: 0, remindedAt: null }).where(eq(milestones.id, m.id));
+    await emit(tx, actor, "milestone.revision_cap", { type: "milestone", id: m.id }, { projectId: p.id, code: p.code, title: m.title, cap, note, requestId: req.id });
+    await audit(tx, actor, "milestone.revision_cap", { type: "milestone", id: m.id }, { revisions: m.revisions }, { requestId: req.id });
+    return;
+  }
+  await tx.update(milestones).set({ status: "changes", revisions: m.revisions + 1 }).where(eq(milestones.id, m.id));
+  const job = await reworkJob(tx, actor, m, p, note, "revision", now);
+  await emit(tx, actor, "milestone.changes", { type: "milestone", id: m.id }, { projectId: p.id, code: p.code, title: m.title, note, round: m.revisions + 1, cap, jobId: job?.id ?? null });
+}
+
+/**
+ * New work on a milestone the customer is not happy with. revision/fix: the partner who made the last version redoes
+ * it at no extra pay (included in the job); swap: a copy goes to other partners (we pay again, the customer does not).
+ */
+export async function reworkJob(tx: Tx, actor: Actor, m: typeof milestones.$inferSelect, p: typeof projects.$inferSelect, note: string, kind: "revision" | "fix" | "swap", now = new Date()) {
+  const done = await tx.select().from(jobs).where(and(eq(jobs.milestoneId, m.id), inArray(jobs.role, ["work", "assemble", "revision"]), inArray(jobs.status, ["accepted", "paid", "delivered", "assigned"]))).orderBy(desc(jobs.createdAt));
+  const src = done.find((j) => j.role === "assemble") ?? done[0];
+  if (!src) return null;
+  // whoever is still working on an earlier fix stops: the newest request wins
+  await tx.update(jobs).set({ status: "cancelled" }).where(and(eq(jobs.milestoneId, m.id), eq(jobs.role, "revision"), inArray(jobs.status, ["open", "offered", "assigned"])));
+  const same = kind !== "swap" && src.partnerId;
+  const label = kind === "swap" ? "Redo" : "Changes";
+  const [j] = await tx
+    .insert(jobs)
+    .values({
+      title: `${label}: ${src.title.replace(/^(Changes|Redo): /, "")}`, brief: [`The customer asked for this ${kind === "swap" ? "to be redone by someone new" : "to be changed"}:`, note || "(no details: see the checklist)", "", "Original brief:", src.brief].join("\n"),
+      kind: src.kind, customerOrgId: src.customerOrgId, customerCode: src.customerCode, skills: src.skills, language: src.language, country: src.country, personalData: src.personalData,
+      payEur: same ? 0 : src.payEur, dueAt: new Date(now.getTime() + (same ? REWORK_DAYS : REWORK_DAYS * 2) * DAY), checklist: src.checklist, projectId: p.id, milestoneId: m.id, protocolVersionId: src.protocolVersionId,
+      role: "revision", status: same ? "assigned" : "open", partnerId: same ? src.partnerId : null, createdBy: by(actor),
+    })
+    .returning();
+  if (!same) {
+    // the partner being replaced is never offered the redo
+    if (src.partnerId) await tx.insert(jobOffers).values({ jobId: j.id, partnerId: src.partnerId, fit: 0, why: [{ factor: "replaced", points: 0, max: 0 }], status: "withdrawn" }).onConflictDoNothing();
+    await tx.update(projects).set({ budgetEur: p.budgetEur + src.payEur }).where(eq(projects.id, p.id));
+    await emit(tx, actor, "job.opened", { type: "job", id: j.id }, { projectId: p.id, code: p.code, role: "revision", title: j.title });
+  } else await emit(tx, actor, "job.rework", { type: "job", id: j.id }, { partnerId: src.partnerId, title: j.title, note, projectId: p.id, code: p.code });
+  await audit(tx, actor, "job.rework", { type: "job", id: j.id }, null, { kind, from: src.id, partnerId: same ? src.partnerId : null });
+  return j;
+}
+
+/* ───────────── Pay before each milestone ───────────── */
+
+/**
+ * A paid (or free) milestone starts: its held tasks open and go to partners. When the payment came later than
+ * planned, the dates of this and every later milestone move by the wait, so nobody is "late" for our waiting.
+ */
+export async function startMilestone(db: Db, actor: Actor, milestoneId: string, now = new Date()) {
+  const projectId = await db.transaction(async (tx) => {
+    const [m] = await tx.select().from(milestones).where(eq(milestones.id, milestoneId)).for("update");
+    if (!m || !["planned", "unpaid"].includes(m.status)) return null;
+    const [prev] = await tx.select().from(milestones).where(and(eq(milestones.projectId, m.projectId), eq(milestones.seq, m.seq - 1)));
+    const shift = Math.max(0, Math.round((now.getTime() - (prev?.dueAt ?? now).getTime()) / 1000));
+    if (shift > 0) {
+      const by_ = `${shift} seconds`;
+      await tx.update(jobs).set({ dueAt: sql`${jobs.dueAt} + ${by_}::interval` }).where(and(eq(jobs.projectId, m.projectId), eq(jobs.status, "held")));
+      await tx.update(milestones).set({ dueAt: sql`${milestones.dueAt} + ${by_}::interval` }).where(and(eq(milestones.projectId, m.projectId), sql`${milestones.seq} >= ${m.seq}`, sql`${milestones.status} <> 'accepted'`));
+      await tx.update(projects).set({ dueAt: sql`${projects.dueAt} + ${by_}::interval` }).where(eq(projects.id, m.projectId));
+    }
+    await tx.update(milestones).set({ status: "open" }).where(eq(milestones.id, m.id));
+    await tx.update(jobs).set({ status: "open" }).where(and(eq(jobs.milestoneId, m.id), eq(jobs.status, "held")));
+    await emit(tx, actor, "milestone.started", { type: "milestone", id: m.id }, { projectId: m.projectId, title: m.title, orgId: m.orgId, shiftDays: Math.round(shift / 86400) });
+    await audit(tx, actor, "milestone.started", { type: "milestone", id: m.id }, { status: m.status }, { status: "open", shiftSeconds: shift });
+    return m.projectId;
+  });
+  if (projectId) await offerTasks(db, actor, projectId);
+  return projectId;
 }
 
 /** All milestones accepted: the monthly service starts, real margin and lessons are recorded. */
@@ -616,22 +719,45 @@ export async function judgeAgreement(db: Db) {
 
 /* ───────────── Delivery watchdog (worker, hourly) ───────────── */
 
-/** Milestones waiting on the customer for more than 24 hours get a reminder (once a day); late tasks are flagged. */
+/** Reminders after 1, 3 and 6 days of silence; on day 7 the milestone counts as accepted (contract clause "deemed acceptance"). */
+export const SILENCE = { remindDays: [1, 3, 6], autoAcceptDays: 7 };
+
+/** Milestones waiting on the customer get reminders, then are accepted on their own after 7 silent days; late tasks are counted. */
 export async function deliveryWatch(db: Db, now = new Date()) {
   const actor: Actor = { type: "system", id: "delivery-watchdog" };
   const waiting = await db
-    .select({ m: milestones, code: projects.code, title: projects.title, company: organizations.name })
+    .select({ m: milestones, p: projects, company: organizations.name })
     .from(milestones)
     .innerJoin(projects, eq(projects.id, milestones.projectId))
     .leftJoin(organizations, eq(organizations.id, milestones.orgId))
-    .where(and(eq(milestones.status, "ready"), lt(milestones.readyAt, new Date(now.getTime() - DAY)), or(isNull(milestones.remindedAt), lt(milestones.remindedAt, new Date(now.getTime() - DAY)))));
-  for (const w of waiting)
+    .where(and(eq(milestones.status, "ready"), lt(milestones.readyAt, new Date(now.getTime() - DAY))));
+  let reminded = 0;
+  let autoAccepted = 0;
+  for (const w of waiting) {
+    const days = (now.getTime() - w.m.readyAt!.getTime()) / DAY;
+    const autoOn = new Date(w.m.readyAt!.getTime() + SILENCE.autoAcceptDays * DAY);
+    if (days >= SILENCE.autoAcceptDays && w.m.reminders >= SILENCE.remindDays.length) {
+      await db.transaction(async (tx) => {
+        const [m] = await tx.select().from(milestones).where(eq(milestones.id, w.m.id)).for("update");
+        if (m.status !== "ready") return;
+        if (m.approvalId) await tx.update(customerApprovals).set({ status: "approved", note: "accepted after 7 days without an answer", decidedBy: "system:auto-accept", decidedAt: now }).where(and(eq(customerApprovals.id, m.approvalId), eq(customerApprovals.status, "pending")));
+        await acceptMilestone(tx, actor, m, w.p, now, "auto");
+        await emit(tx, actor, "milestone.auto_accepted", { type: "milestone", id: m.id }, { orgId: m.orgId, code: w.p.code, title: `${w.p.title}: ${m.title}`, company: w.company });
+      });
+      autoAccepted++;
+      continue;
+    }
+    // the next reminder is due when its day has come (missed ones are not sent twice)
+    const due = SILENCE.remindDays.filter((d) => days >= d).length;
+    if (due <= w.m.reminders) continue;
     await db.transaction(async (tx) => {
-      await tx.update(milestones).set({ remindedAt: now }).where(eq(milestones.id, w.m.id));
-      await emit(tx, actor, "milestone.reminded", { type: "milestone", id: w.m.id }, { code: w.code, title: `${w.title}: ${w.m.title}`, company: w.company, waitingHours: Math.round((now.getTime() - (w.m.readyAt?.getTime() ?? now.getTime())) / 36e5) });
+      await tx.update(milestones).set({ remindedAt: now, reminders: due }).where(eq(milestones.id, w.m.id));
+      await emit(tx, actor, "milestone.reminded", { type: "milestone", id: w.m.id }, { orgId: w.m.orgId, code: w.p.code, title: `${w.p.title}: ${w.m.title}`, company: w.company, waitingHours: Math.round(days * 24), reminder: due, autoOn: autoOn.toISOString() });
     });
+    reminded++;
+  }
   const late = await db.select({ id: jobs.id }).from(jobs).where(and(sql`${jobs.projectId} is not null`, inArray(jobs.status, ["open", "offered", "assigned"]), lt(jobs.dueAt, now)));
-  return { reminded: waiting.length, lateTasks: late.length };
+  return { reminded, autoAccepted, lateTasks: late.length };
 }
 
 /* ───────────── Customer material: intake, identity removed, shared with the project's partners ───────────── */

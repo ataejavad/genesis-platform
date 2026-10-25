@@ -14,7 +14,7 @@ export default async function PortalRequests() {
     <main className="stack" style={{ maxWidth: 900 }}>
       <PageHead title={t.page.requests.title} sub={t.page.requests.sub} />
       <RequestForm t={t} kinds={["solution", "change", "support", "upgrade"]} />
-      {rows.length ? <RequestsCard data={rows.map((x) => ({ id: x.id, kind: x.kind, text: x.text, status: x.status, reply: x.reply, createdAt: x.createdAt.toISOString().slice(0, 10) }))} t={t} lang={lang} /> : <p className="muted">{t.r.requestsNone}</p>}
+      {rows.length ? <RequestsCard data={rows.map((x) => ({ id: x.id, kind: x.kind, text: x.text, status: x.status, reply: x.reply, createdAt: x.createdAt.toISOString().slice(0, 10), priceBy: x.status === "open" && x.dueAt && (x.kind === "solution" || x.kind === "change") ? x.dueAt.toISOString() : null }))} t={t} lang={lang} /> : <p className="muted">{t.r.requestsNone}</p>}
     </main>
   );
 }

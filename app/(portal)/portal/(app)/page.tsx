@@ -4,7 +4,8 @@ import { getDb } from "@/db";
 import { requireCustomer } from "@/lib/portal-auth";
 import { contractsFor } from "@/server/contracts";
 import { invoicesFor } from "@/server/finance";
-import { listThreads, pendingApprovals, results } from "@/server/portal";
+import { listThreads, results } from "@/server/portal";
+import { approvalCards } from "@/server/portal-chat";
 import { ApprovalsCard } from "@/ui/portal/Cards";
 import { PortalChat } from "@/ui/portal/PortalChat";
 
@@ -13,7 +14,7 @@ export default async function PortalHome() {
   const { user, org, lang } = await requireCustomer();
   const db = getDb();
   const t = portalCopy(lang);
-  const [r, waiting, threads, contracts, invoices] = await Promise.all([results(db, org.id), pendingApprovals(db, org.id), listThreads(db, org.id, user.id), contractsFor(db, { orgId: org.id }), invoicesFor(db, org.id)]);
+  const [r, waiting, threads, contracts, invoices] = await Promise.all([results(db, org.id), approvalCards(db, org.id), listThreads(db, org.id, user.id), contractsFor(db, { orgId: org.id }), invoicesFor(db, org.id)]);
   const m = moneyCopy(lang);
   // contract to sign and money to pay come first: nothing starts without them (step 8)
   const todo = [
@@ -37,7 +38,7 @@ export default async function PortalHome() {
       {waiting.length > 0 && (
         <div style={{ marginBottom: 14 }}>
           <div className="small" style={{ marginBottom: 6 }}><b>✋ {t.r.approvals.replace("{n}", String(waiting.length))}</b></div>
-          <ApprovalsCard data={waiting.map((a) => ({ id: a.id, title: a.title, detail: a.detail, link: a.link }))} t={t} lang={lang} />
+          <ApprovalsCard data={waiting} t={t} lang={lang} />
         </div>
       )}
       <PortalChat key={lang} kind="portal" t={t} lang={lang} name={user.name.split(" ")[0]} threads={threads.map((x) => ({ id: x.id, title: x.title }))} />

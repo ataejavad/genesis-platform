@@ -128,7 +128,18 @@ export async function notifyEvent(db: Db, e: Event) {
       const orgId = (p.orgId as string | undefined) ?? null;
       const target = orgId ?? (e.type === "milestone.reminded" ? ((await db.execute(sql`select org_id from milestones where id = ${id}`)) as unknown as { org_id: string | null }[])[0]?.org_id : null);
       if (!target) return;
-      for (const r of await customerPeople(db, target)) await queue(db, r, e.type === "milestone.reminded" ? "approvalReminder" : "approval", { title: String(p.title ?? ""), hours: Number(p.waitingHours ?? 24), link: `${appUrl()}/portal` }, e.id);
+      for (const r of await customerPeople(db, target)) await queue(db, r, e.type === "milestone.reminded" ? "approvalReminder" : "approval", { title: String(p.title ?? ""), hours: Number(p.waitingHours ?? 24), auto: p.autoOn ? day(new Date(String(p.autoOn)), r.locale) : "", link: `${appUrl()}/portal` }, e.id);
+      return;
+    }
+    case "milestone.auto_accepted": {
+      if (!p.orgId) return;
+      for (const r of await customerPeople(db, String(p.orgId))) await queue(db, r, "autoAccepted", { title: String(p.title ?? ""), link: `${appUrl()}/portal` }, e.id);
+      return;
+    }
+    case "job.rework": {
+      // the partner who made it fixes it (included in the job): same message as changes asked on a delivery
+      const r = await partnerPerson(db, String(p.partnerId));
+      if (r) await queue(db, r, "changes", { title: String(p.title ?? ""), note: String(p.note ?? ""), link: `${appUrl()}/partner/work` }, e.id);
       return;
     }
     case "job.offered": {

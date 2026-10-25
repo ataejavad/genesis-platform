@@ -4,6 +4,7 @@ import { changeRequests, contracts, customerApprovals, customerRequests, deliver
 import { MAX_ATTEMPTS } from "@/worker/dispatch";
 import type { Actor } from "./actor";
 import { emit } from "./events";
+import { overdueComplaints } from "./complaints";
 import { offerJob } from "./partners";
 
 /*
@@ -66,7 +67,10 @@ export async function opsWatch(db: Db, now = new Date()) {
 
   // 4. People waiting on us.
   const reqs = await db.select({ id: customerRequests.id, kind: customerRequests.kind, at: customerRequests.createdAt }).from(customerRequests).where(and(eq(customerRequests.status, "open"), lt(customerRequests.createdAt, before(WATCH.requestHours))));
-  for (const r of reqs) items.push({ key: `request:${r.id}`, kind: "request", text: `Customer request (${r.kind}) unanswered for ${age(now, r.at)}h`, link: "/cockpit/customers" });
+  for (const r of reqs) items.push({ key: `request:${r.id}`, kind: "request", text: r.kind === "solution" || r.kind === "change" ? `PRICE PROMISED in 24h, now ${age(now, r.at)}h: ${r.kind === "change" ? "extra change" : "new problem"} not quoted` : `Customer request (${r.kind}) unanswered for ${age(now, r.at)}h`, link: "/cockpit/customers" });
+
+  // complaint steps past their deadline (free fix 3 days, new partner 7 days, Javad 1 working day)
+  for (const c of await overdueComplaints(db, now)) items.push({ key: `complaint:${c.c.id}:${c.c.step}`, kind: "complaint", text: `Complaint of ${c.company} past its ${c.c.step} deadline: ${c.c.step === "founder" ? "call them today" : "escalate or resolve"}`, link: "/cockpit/customers" });
 
   const apps = await db.select({ id: partners.id, name: partners.name, at: partners.createdAt }).from(partners).where(and(eq(partners.status, "applied"), lt(partners.createdAt, before(WATCH.applicationHours))));
   for (const a of apps) items.push({ key: `application:${a.id}`, kind: "application", text: `Partner application from ${a.name} waits ${Math.round(age(now, a.at) / 24)} days`, link: "/cockpit/partners" });

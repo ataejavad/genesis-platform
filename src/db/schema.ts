@@ -580,6 +580,9 @@ export const customerRequests = pgTable(
     status: text("status").notNull().default("open"),
     // answer from our team, shown to the customer
     reply: text("reply"),
+    // a new problem: the brief the customer confirmed in the chat, and our promise to send a price by then
+    brief: jsonb("brief").$type<Record<string, unknown>>(),
+    dueAt: timestamp("due_at", { withTimezone: true }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -865,6 +868,8 @@ export const servicePackages = pgTable("service_packages", {
   tasks: jsonb("tasks").$type<TaskTemplate[]>().notNull(),
   milestones: jsonb("milestones").$type<MilestoneTemplate[]>().notNull(),
   personalData: boolean("personal_data").notNull().default(true),
+  // rounds of changes included per milestone (Fiverr-style cap); more is a priced change request
+  revisions: integer("revisions").notNull().default(2),
   active: boolean("active").notNull().default(true),
   createdAt: createdAt(),
 });
@@ -971,12 +976,23 @@ export const milestones = pgTable(
     seq: integer("seq").notNull(),
     title: text("title").notNull(),
     amountEur: integer("amount_eur").notNull(),
-    // open → ready (all tasks accepted; customer asked) → accepted (invoiceable, step 8) | changes
+    // planned → unpaid (payment requested before it starts) → open (paid, work running) → ready (customer asked)
+    // → accepted (by the customer, or on its own after 7 silent days) | changes
     status: text("status").notNull().default("open"),
     approvalId: uuid("approval_id"),
+    // when it should be ready (the customer's countdown)
+    dueAt: timestamp("due_at", { withTimezone: true }),
     readyAt: timestamp("ready_at", { withTimezone: true }),
     acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+    // customer, auto (silence after the reminders), internal
+    acceptedBy: text("accepted_by"),
     remindedAt: timestamp("reminded_at", { withTimezone: true }),
+    // reminders sent for the current approval (day 1, 3, 6), and rounds of changes used
+    reminders: integer("reminders").notNull().default(0),
+    revisions: integer("revisions").notNull().default(0),
+    // the customer's 1-5 after the hand-over (feeds partner level and customer health; partners stay hidden)
+    rating: integer("rating"),
+    ratingNote: text("rating_note"),
     createdAt: createdAt(),
   },
   (t) => [index("milestones_project_idx").on(t.projectId)],
@@ -1309,3 +1325,29 @@ export const switches = pgTable("switches", {
   updatedBy: text("updated_by").notNull(),
   updatedAt: updatedAt(),
 });
+
+/* ───────────── Customer journey (marketplace lessons, 2026-10-25) ───────────── */
+
+// "Not satisfied" in the chat: free fix by the same partner → another partner → Javad. Each step has a deadline.
+export const complaints = pgTable(
+  "complaints",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orgId: uuid("org_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+    projectId: uuid("project_id").references(() => projects.id, { onDelete: "cascade" }),
+    milestoneId: uuid("milestone_id"),
+    text: text("text").notNull(),
+    // fix, swap, founder
+    step: text("step").notNull(),
+    // open, resolved
+    status: text("status").notNull().default("open"),
+    // the job doing this step's work (fix or swap)
+    jobId: uuid("job_id"),
+    dueAt: timestamp("due_at", { withTimezone: true }).notNull(),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+    resolvedBy: text("resolved_by"),
+    note: text("note"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("complaints_org_idx").on(t.orgId, t.status)],
+);

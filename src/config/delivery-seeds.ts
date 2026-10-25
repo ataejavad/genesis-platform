@@ -79,7 +79,7 @@ export const PACKAGE_SEEDS: PackageSeed[] = [
   {
     slug: "phone-agent", title: "AI phone assistant", titles: { en: "AI phone assistant", it: "Assistente telefonico AI", de: "KI-Telefonassistent", fa: "دستیار تلفنی هوشمند" },
     setupEur: 490, monthlyEur: 390,
-    milestones: [{ title: "Set up and tested", titles: { it: "Configurato e collaudato", de: "Eingerichtet und getestet", fa: "راه‌اندازی و آزمون شد" }, sharePct: 60 }, { title: "First live week reviewed", titles: { it: "Prima settimana live verificata", de: "Erste Live-Woche geprüft", fa: "هفته اول کار واقعی بررسی شد" }, sharePct: 40 }],
+    milestones: [{ title: "Set up and tested", titles: { it: "Configurato e collaudato", de: "Eingerichtet und getestet", fa: "راه‌اندازی و آزمون شد" }, sharePct: 50 }, { title: "First live week reviewed", titles: { it: "Prima settimana live verificata", de: "Erste Live-Woche geprüft", fa: "هفته اول کار واقعی بررسی شد" }, sharePct: 50 }],
     tasks: [
       { title: "Set up the phone assistant", brief: "Configure the phone assistant with the customer's hours, questions and transfer rules; test it.", protocol: "PR-02", skills: ["ai-setup"], payEur: 220, days: 5, milestone: 0 },
       { title: "First-week review and tuning", brief: "Review the first live week of calls and tune what failed.", protocol: "PR-08", skills: ["ai-setup"], payEur: 90, days: 10, milestone: 1 },
@@ -121,3 +121,11 @@ export const ASSEMBLY_CHECKS: Record<string, string[]> = {
   en: ["Every part is included and works together with the others", "Nothing contradicts the goal or the rules of the parts' protocols", "One hand-over: a single link and a one-page guide for the whole milestone"],
   it: ["Ogni parte è inclusa e funziona insieme alle altre", "Niente contraddice l'obiettivo o le regole dei protocolli delle parti", "Una sola consegna: un link e una guida di una pagina per tutta la fase"],
 };
+
+// Words in the customer's own description that point to a catalogue result (brief card). Checked in order;
+// with a Claude key the advisor's extracted request is matched the same way.
+export const PACKAGE_MATCH: [string, RegExp][] = [
+  ["phone-agent", /telefon|chiamat|squill|segreteria|centralino|phone|calls?\b|missed call|anruf|telefon|تلفن|تماس|زنگ/],
+  ["followup-agent", /preventiv|offert|quote|follow.?up|angebot|nachfass|پیش.?فاکتور|پیگیری/],
+  ["lead-crm", /\bleads?\b|crm|contatt|modulo|kontaktformular|anfragen|سرنخ|فرم/],
+];

@@ -67,6 +67,7 @@ export const MODULES: ModuleDef[] = [
   // convert
   { n: 37, name: "Orders inbox", system: "convert", runs: "marketplace, dashboard, CRM won", events: ["order.created"], kpi: "orders", link: "/cockpit/projects" },
   { n: 59, name: "CRM won → order", system: "convert", runs: "Javad on the prospect page", events: ["order.created"], kpi: "orders", link: "/cockpit/crm" },
+  { n: 72, name: "Brief card + 24h price promise", system: "convert", runs: "customer describes a problem in the chat", events: ["order.created", "customer_request.created"], kpi: "quotes", link: "/cockpit/customers" },
   { n: 52, name: "Contract factory", system: "convert", runs: "Send contract / partner activation", events: ["contract.sent", "contract.signed"], kpi: "contracts", link: "/cockpit/contracts" },
 
   // retain
@@ -75,11 +76,15 @@ export const MODULES: ModuleDef[] = [
   { n: 26, name: "Customer approvals", system: "retain", runs: "agents and team ask", events: ["customer_approval.requested", "customer_approval.decided"], kpi: "customerWaiting", link: "/cockpit/customers" },
   { n: 27, name: "Customer requests", system: "retain", runs: "chat + request cards", events: ["customer_request.created"], kpi: "openRequests", link: "/cockpit/customers" },
   { n: 28, name: "Customer accounts + services", system: "retain", runs: "from signed contracts", events: ["customer.created", "subscription.started"], kpi: "mrr", link: "/cockpit/customers" },
+  { n: 75, name: "Complaint path (fix → new partner → founder)", system: "retain", runs: "'not satisfied' in the chat", events: ["complaint.opened", "complaint.escalated", "complaint.resolved"], kpi: "complaints", link: "/cockpit/customers#complaints" },
+  { n: 76, name: "Ratings after each hand-over", system: "retain", runs: "customer accepts a milestone", events: ["milestone.rated"], kpi: "ratings", link: "/cockpit/projects" },
   { n: 62, name: "Customer health (weekly)", system: "retain", runs: "Monday 07:00", job: "customer.health", events: ["customer.at_risk"], kpi: "atRisk", link: "/cockpit/customers" },
   { n: 63, name: "Monthly results email", system: "retain", runs: "day 1 09:00", job: "results.monthly", needs: MAIL, events: ["results.reported"], link: "/cockpit/customers" },
   { n: 64, name: "Success story + referral ask", system: "retain", runs: "when a project closes", events: ["project.closed"], kpi: "stories", link: "/cockpit/customers" },
 
   // deliver
+  { n: 73, name: "Deemed acceptance (reminders day 1/3/6, accepted day 7)", system: "deliver", runs: "hourly with delivery.watch", job: "delivery.watch", events: ["milestone.reminded", "milestone.auto_accepted"], kpi: "autoAccepted", link: "/cockpit/projects" },
+  { n: 74, name: "Free change rounds + rework to the maker", system: "deliver", runs: "customer asks for changes", events: ["milestone.changes", "milestone.revision_cap", "job.rework"], kpi: "reworks", link: "/cockpit/projects" },
   { n: 38, name: "Planner (package → milestones + tasks)", system: "deliver", runs: "on order conversion", events: ["project.created"], kpi: "projects", link: "/cockpit/projects" },
   { n: 39, name: "QA judge", system: "deliver", runs: "on every delivery", agent: "qa-judge", needs: CLAUDE, events: ["qa.judged"], link: "/cockpit/qa" },
   { n: 40, name: "Risk-tiered approvals", system: "deliver", runs: "every project and delivery", kpi: "qaQueue", link: "/cockpit/qa" },
@@ -104,7 +109,8 @@ export const MODULES: ModuleDef[] = [
   { n: 36, name: "Partner assistant + Today list", system: "partner", runs: "every partner message", agent: "partner-advisor", link: "/cockpit/agents" },
 
   // money
-  { n: 53, name: "Payment requests + invoices", system: "money", runs: "deposit, milestones, monthly (hourly job)", job: "money", events: ["invoice.requested", "invoice.paid"], kpi: "openInvoices", link: "/cockpit/finance" },
+  { n: 53, name: "Payment requests + invoices", system: "money", runs: "first milestone, next milestones, monthly (hourly job)", job: "money", events: ["invoice.requested", "invoice.paid"], kpi: "openInvoices", link: "/cockpit/finance" },
+  { n: 77, name: "Pay before each milestone", system: "money", runs: "milestone accepted → next billed; paid → it starts", events: ["milestone.started"], kpi: "unpaidMilestones", link: "/cockpit/finance" },
   { n: 54, name: "Dunning", system: "money", runs: "hourly with money", events: ["invoice.reminded"], kpi: "overdue", link: "/cockpit/finance" },
   { n: 57, name: "SEPA payout batch", system: "money", runs: "Javad downloads the file", kpi: "payoutsDue", link: "/cockpit/finance" },
 

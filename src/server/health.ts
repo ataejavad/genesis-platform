@@ -1,6 +1,6 @@
 import { and, eq, gte, inArray, lt, lte, sql } from "drizzle-orm";
 import type { Db } from "@/db";
-import { customerApprovals, customerHealth, customerRequests, invoices, organizations, portalMessages, portalThreads, projects, subscriptions } from "@/db/schema";
+import { complaints, customerApprovals, customerHealth, customerRequests, invoices, milestones, organizations, portalMessages, portalThreads, projects, subscriptions } from "@/db/schema";
 import type { Actor } from "./actor";
 import { emit } from "./events";
 import { askCustomerApproval, results } from "./portal";
@@ -57,7 +57,12 @@ export async function scoreCustomer(db: Db, orgId: string, now = new Date()) {
   if (waiting.n) reasons.push(`${waiting.n} approval(s) waiting on them > 7 days`);
   const usPts = open.n ? 0 : 10;
   if (open.n) reasons.push(`${open.n} request(s) unanswered by us > 2 days`);
-  const score = resultPts + usePts + moneyPts + waitPts + usPts;
+  // what the customer told us: a low rating (≤ 2 of 5) in 30 days or a complaint still open
+  const [low] = await db.select({ n: sql<number>`count(*)::int` }).from(milestones).where(and(eq(milestones.orgId, orgId), lte(milestones.rating, 2), gte(milestones.acceptedAt, new Date(now.getTime() - 30 * DAY))));
+  const [unhappy] = await db.select({ n: sql<number>`count(*)::int` }).from(complaints).where(and(eq(complaints.orgId, orgId), eq(complaints.status, "open")));
+  if (low.n) reasons.push(`${low.n} low rating(s) in 30 days: call them`);
+  if (unhappy.n) reasons.push("complaint open: make it right first");
+  const score = Math.max(0, resultPts + usePts + moneyPts + waitPts + usPts - (low.n ? 15 : 0) - (unhappy.n ? 15 : 0));
   const band = score < HEALTH.red ? "red" : score < HEALTH.watch ? "watch" : "green";
   return { score, band, signals: { valueVsFee, activeDays14: use.days, overdueInvoices: late.n, waitingApprovals: waiting.n, openRequests: open.n, reasons } satisfies HealthSignals };
 }

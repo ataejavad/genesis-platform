@@ -99,11 +99,13 @@ describe("customer dashboard", () => {
     const r = await scriptedReply(db, c.org.id, "it", "Quanto abbiamo recuperato questo mese?");
     expect(r.cards[0].type).toBe("results");
     expect(r.text).toContain("180");
-    // "I have a new problem" asks first; the next message becomes a confirm card
+    // "I have a new problem" asks first; the next message becomes a brief card
     const ask = await scriptedReply(db, c.org.id, "it", "Ho un nuovo problema");
     expect(ask.cards).toEqual([]);
     const confirm = await scriptedReply(db, c.org.id, "it", "le email dei clienti restano senza risposta", ask.text);
-    expect(confirm.cards).toEqual([{ type: "confirm", kind: "solution", text: "le email dei clienti restano senza risposta" }]);
+    // outside the catalogue: a brief with our promise to send a price within 24 hours
+    expect(confirm.cards).toMatchObject([{ type: "brief", data: { problem: "le email dei clienti restano senza risposta", package: null } }]);
+    expect((confirm.cards[0] as { data: { quoteBy: string } }).data.quoteBy).toBeTruthy();
     const next = await scriptedReply(db, c.org.id, "it", "Cosa conviene risolvere adesso?");
     expect(next.cards[0].type).toBe("next");
     expect((await nextStep(db, c.org.id, "it"))?.product).not.toBe("phone-agent");

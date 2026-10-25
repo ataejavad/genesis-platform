@@ -27,7 +27,7 @@ export type Pack = {
 
 export const PACKS: Record<string, Pack> = {
   IT: {
-    code: "IT", name: "Italy", templateVersion: "IT-2026.1", reviewed: false,
+    code: "IT", name: "Italy", templateVersion: "IT-2026.2", reviewed: false,
     law: { it: "legge italiana", en: "Italian law", de: "italienisches Recht" }, court: "Milano", currency: "EUR", vatRate: 22, paymentDays: 14,
     reverseCharge: { it: "Operazione non soggetta – inversione contabile, art. 7-ter DPR 633/72 e art. 196 Dir. 2006/112/CE", en: "VAT reverse charge – art. 196 Directive 2006/112/EC (art. 7-ter DPR 633/72)", de: "Steuerschuldnerschaft des Leistungsempfängers – Art. 196 RL 2006/112/EG" },
     outsideEu: { it: "Operazione non soggetta, art. 7-ter DPR 633/72", en: "Outside the scope of Italian VAT, art. 7-ter DPR 633/72", de: "Nicht steuerbar, Art. 7-ter DPR 633/72" },
@@ -57,27 +57,27 @@ export const CUSTOMER_CLAUSES: Clause[] = [
     id: "price",
     title: { it: "Prezzo e pagamento", en: "Price and payment", de: "Preis und Zahlung" },
     text: {
-      it: "Avvio: {setup} + IVA se dovuta; poi {monthly} al mese. Un anticipo di {deposit} si paga prima dell'inizio dei lavori; il resto alla conferma di ogni fase. Pagamento con bonifico SEPA entro {days} giorni dalla richiesta. In caso di ritardo si applicano gli interessi del D.Lgs. 231/2002 e l'indennizzo di 40 €.",
-      en: "Set-up: {setup} plus VAT where due; then {monthly} per month. A deposit of {deposit} is paid before work starts; the rest on acceptance of each milestone. Payment by SEPA transfer within {days} days of the request. Late payment carries the interest of Legislative Decree 231/2002 and the €40 compensation.",
-      de: "Einrichtung: {setup} zzgl. USt., soweit geschuldet; danach {monthly} pro Monat. Eine Anzahlung von {deposit} ist vor Arbeitsbeginn fällig, der Rest bei Abnahme jeder Phase. Zahlung per SEPA-Überweisung binnen {days} Tagen. Bei Verzug gelten die Zinsen nach D.Lgs. 231/2002 und die Pauschale von 40 €.",
+      it: "Avvio: {setup} + IVA se dovuta; poi {monthly} al mese. Ogni fase si paga prima che inizi: la prima ({deposit}) dopo la firma, ognuna delle successive quando la precedente è accettata. Pagamento con bonifico SEPA entro {days} giorni dalla richiesta. In caso di ritardo si applicano gli interessi del D.Lgs. 231/2002 e l'indennizzo di 40 €.",
+      en: "Set-up: {setup} plus VAT where due; then {monthly} per month. Each milestone is paid before it starts: the first ({deposit}) after signing, each next one when the previous one is accepted. Payment by SEPA transfer within {days} days of the request. Late payment carries the interest of Legislative Decree 231/2002 and the €40 compensation.",
+      de: "Einrichtung: {setup} zzgl. USt., soweit geschuldet; danach {monthly} pro Monat. Jede Phase wird vor ihrem Beginn bezahlt: die erste ({deposit}) nach der Unterschrift, jede weitere, sobald die vorherige abgenommen ist. Zahlung per SEPA-Überweisung binnen {days} Tagen. Bei Verzug gelten die Zinsen nach D.Lgs. 231/2002 und die Pauschale von 40 €.",
     },
   },
   {
     id: "milestones",
     title: { it: "Fasi e collaudo", en: "Milestones and acceptance", de: "Phasen und Abnahme" },
     text: {
-      it: "Fasi: {milestones}. Al termine di ogni fase {customer} la verifica nella propria area e la accetta oppure indica cosa cambiare.",
-      en: "Milestones: {milestones}. At the end of each milestone {customer} checks it in its dashboard and accepts it or says what to change.",
-      de: "Phasen: {milestones}. Am Ende jeder Phase prüft {customer} sie im eigenen Bereich und nimmt sie ab oder nennt die Änderungen.",
+      it: "Fasi: {milestones}. Al termine di ogni fase {customer} la verifica nella propria area e la accetta oppure indica cosa cambiare. Ogni fase comprende {revisions} giri di modifiche nell'ambito concordato; altre modifiche si quotano prima di eseguirle.",
+      en: "Milestones: {milestones}. At the end of each milestone {customer} checks it in its dashboard and accepts it or says what to change. Each milestone includes {revisions} rounds of changes within the agreed scope; further changes are priced before any work.",
+      de: "Phasen: {milestones}. Am Ende jeder Phase prüft {customer} sie im eigenen Bereich und nimmt sie ab oder nennt die Änderungen. Jede Phase enthält {revisions} Änderungsrunden im vereinbarten Umfang; weitere Änderungen werden vorher angeboten.",
     },
   },
   {
     id: "deemed", onerous: true,
     title: { it: "Accettazione tacita della fase", en: "Deemed acceptance", de: "Stillschweigende Abnahme" },
     text: {
-      it: "Se entro 10 giorni lavorativi dalla consegna di una fase, e dopo due promemoria, {customer} non la accetta né indica per iscritto cosa non funziona, la fase si considera accettata.",
-      en: "If within 10 working days of a milestone's delivery, and after two reminders, {customer} neither accepts it nor states in writing what does not work, the milestone is deemed accepted.",
-      de: "Nimmt {customer} eine Phase binnen 10 Arbeitstagen nach Lieferung und nach zwei Erinnerungen weder ab noch benennt schriftlich Mängel, gilt sie als abgenommen.",
+      it: "Se entro 7 giorni dalla consegna di una fase, e dopo tre promemoria (giorno 1, 3 e 6), {customer} non la accetta né indica cosa non funziona, la fase si considera accettata.",
+      en: "If within 7 days of a milestone's delivery, and after three reminders (day 1, 3 and 6), {customer} neither accepts it nor states what does not work, the milestone is deemed accepted.",
+      de: "Nimmt {customer} eine Phase binnen 7 Tagen nach Lieferung und nach drei Erinnerungen (Tag 1, 3 und 6) weder ab noch benennt Mängel, gilt sie als abgenommen.",
     },
   },
   {

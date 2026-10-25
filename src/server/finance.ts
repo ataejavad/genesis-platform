@@ -9,7 +9,7 @@ import type { Actor } from "./actor";
 import { AppError, notFound } from "./errors";
 import { audit, emit } from "./events";
 import { markPaid } from "./partners";
-import { convertOrder } from "./projects";
+import { convertOrder, startMilestone } from "./projects";
 
 /*
  * Money (step 8, doc 15 §6ج): payment request first, legal invoice when paid (Italy invoices services at payment).
@@ -108,6 +108,8 @@ export async function markInvoicePaid(db: Db, actor: Actor, invoiceId: string, n
     const [o] = await db.select({ status: orders.status }).from(orders).where(eq(orders.id, inv.orderId));
     if (o?.status === "signed") await convertOrder(db, actor, inv.orderId, now);
   }
+  // a later milestone starts only once its payment is in
+  if (inv.kind === "milestone" && inv.milestoneId) await startMilestone(db, actor, inv.milestoneId, now);
   return inv;
 }
 
@@ -141,24 +143,24 @@ export async function cancelInvoice(db: Db, actor: Actor, invoiceId: string, why
 }
 
 /**
- * Accepted milestone (worker, on milestone.accepted): bill its amount minus what the deposit still covers.
- * The deposit covers the first milestone by default, so the first acceptance usually bills nothing.
+ * Each milestone is paid before it starts (marketplace lesson 2026-10-25; the deposit is the first one). After an
+ * accepted milestone or an approved change (worker), the next planned milestone is billed and starts when paid.
+ * Internal or free milestones start at once.
  */
-export async function billMilestone(db: Db, milestoneId: string, now = new Date()) {
-  return db.transaction(async (tx) => {
-    const [m] = await tx.select().from(milestones).where(eq(milestones.id, milestoneId));
-    if (!m?.orgId) return null;
-    const [p] = await tx.select().from(projects).where(eq(projects.id, m.projectId));
-    const deposits = p.orderId ? await tx.select().from(invoices).where(and(eq(invoices.orderId, p.orderId), eq(invoices.kind, "deposit"), inArray(invoices.status, ["paid", "issued"]))) : [];
-    const deposit = deposits.reduce((s, d) => s + d.netEur, 0);
-    const accepted = await tx.select().from(milestones).where(and(eq(milestones.projectId, p.id), eq(milestones.status, "accepted")));
-    const covered = accepted.filter((x) => x.id !== m.id).reduce((s, x) => s + x.amountEur, 0);
-    const billed = (await tx.select().from(invoices).where(and(eq(invoices.projectId, p.id), eq(invoices.kind, "milestone")))).reduce((s, x) => s + x.netEur, 0);
-    const creditLeft = Math.max(0, deposit - (covered - billed));
-    const due = round2(m.amountEur - Math.min(creditLeft, m.amountEur));
-    if (due <= 0) return null;
-    return requestInvoice(tx, { type: "system", id: "billing" }, { orgId: m.orgId, kind: "milestone", title: `${p.title}: ${m.title}`, netEur: due, projectId: p.id, milestoneId: m.id, orderId: p.orderId }, now);
+export async function billNext(db: Db, projectId: string, now = new Date()) {
+  const r = await db.transaction(async (tx) => {
+    const [p] = await tx.select().from(projects).where(eq(projects.id, projectId));
+    if (!p) return null;
+    const ms = await tx.select().from(milestones).where(eq(milestones.projectId, projectId)).orderBy(asc(milestones.seq)).for("update");
+    const next = ms.find((m) => m.status !== "accepted");
+    if (!next || next.status !== "planned") return null;
+    if (!p.orgId || next.amountEur <= 0) return { start: next.id };
+    await tx.update(milestones).set({ status: "unpaid" }).where(eq(milestones.id, next.id));
+    const inv = await requestInvoice(tx, { type: "system", id: "billing" }, { orgId: p.orgId, kind: "milestone", title: `${p.title}: ${next.title}`, netEur: next.amountEur, projectId: p.id, milestoneId: next.id, orderId: p.orderId }, now);
+    return { invoice: inv };
   });
+  if (r && "start" in r && r.start) await startMilestone(db, { type: "system", id: "billing" }, r.start, now);
+  return r && "invoice" in r ? r.invoice : null;
 }
 
 /** Monthly fees (worker, daily): one request per active subscription and month, in advance. */

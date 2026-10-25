@@ -1,9 +1,9 @@
 import { asc, eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
-import { contracts, events, invoices, leads, milestones, notifications, orders, organizations, prospects, subscriptions, user } from "@/db/schema";
+import { contracts, events, invoices, jobs, leads, milestones, notifications, orders, organizations, prospects, subscriptions, user } from "@/db/schema";
 import { confirmSignCode, requestSignCode, sendContract } from "@/server/contracts";
 import { prospectFromLead, wonToOrder } from "@/server/crm";
-import { billMilestone, billSubscriptions, dunning, epcPayload, issuePaid, markInvoicePaid, payoutBatch, reminderLevel, saveCompany, vatFor } from "@/server/finance";
+import { billNext, billSubscriptions, dunning, epcPayload, issuePaid, markInvoicePaid, payoutBatch, reminderLevel, saveCompany, vatFor } from "@/server/finance";
 import { captureLead } from "@/server/leads";
 import { confirmLead, createInvite, leadToken, notifyEvent, redeemInvite } from "@/server/notify";
 import { applyPartner, decideApplication, offersFor, todayFor } from "@/server/partners";
@@ -70,16 +70,29 @@ describe("contract → deposit → project (step 8 gate)", () => {
     expect(JSON.stringify((await db.select().from(events)).map((e) => e.payload))).not.toContain("333333");
   });
 
-  it("bills milestones net of the deposit, monthly fees once per month, and reminds by date", async () => {
+  it("bills each milestone before it starts, monthly fees once per month, and reminds by date", async () => {
     await seedDelivery(db);
     const o = await order();
     const { projectId } = await startOrder(db, javad, o.id);
     const ms = await db.select().from(milestones).where(eq(milestones.projectId, projectId)).orderBy(asc(milestones.seq));
+    // the deposit paid the first milestone; the second waits, and so do its tasks
+    expect(ms.map((m) => [m.status, m.amountEur])).toEqual([["open", 245], ["planned", 245]]);
+    expect((await db.select().from(jobs).where(eq(jobs.milestoneId, ms[1].id))).map((j) => j.status)).toEqual(["held"]);
+    expect(await billNext(db, projectId)).toBeNull(); // nothing to bill while the first one runs
     await db.update(milestones).set({ status: "accepted" }).where(eq(milestones.id, ms[0].id));
-    expect(await billMilestone(db, ms[0].id)).toMatchObject({ netEur: 49 }); // 294 minus the deposit (capped at half the set-up)
-    await db.update(milestones).set({ status: "accepted" }).where(eq(milestones.id, ms[1].id));
-    expect(await billMilestone(db, ms[1].id)).toMatchObject({ kind: "milestone", netEur: 196 });
-    expect(await billMilestone(db, ms[1].id)).toBeNull(); // once
+    const inv = await billNext(db, projectId);
+    expect(inv).toMatchObject({ kind: "milestone", netEur: 245, milestoneId: ms[1].id });
+    expect(await billNext(db, projectId)).toBeNull(); // once
+    expect((await db.select().from(milestones).where(eq(milestones.id, ms[1].id)))[0].status).toBe("unpaid");
+    // paid late: it starts now and its dates move by the wait
+    const late = new Date(Date.now() + 20 * DAY);
+    await markInvoicePaid(db, javad, inv!.id, late);
+    const [m1] = await db.select().from(milestones).where(eq(milestones.id, ms[1].id));
+    expect(m1.status).toBe("open");
+    expect(m1.dueAt!.getTime()).toBeGreaterThan(late.getTime());
+    const [j1] = await db.select().from(jobs).where(eq(jobs.milestoneId, ms[1].id));
+    expect(["open", "offered"]).toContain(j1.status);
+    expect(j1.dueAt.getTime()).toBeGreaterThan(late.getTime());
 
     const [org] = await db.select().from(organizations).where(eq(organizations.name, "Bianchi Impianti"));
     await db.insert(subscriptions).values({ orgId: org.id, product: "phone-agent", plan: "standard", monthlyEur: 390, startedAt: new Date(Date.now() - DAY) });
@@ -89,10 +102,10 @@ describe("contract → deposit → project (step 8 gate)", () => {
     const now = new Date();
     expect(reminderLevel(new Date(now.getTime() + 2 * DAY), new Date(now.getTime() - 12 * DAY), now)).toBe(1);
     expect(reminderLevel(new Date(now.getTime() - 8 * DAY), new Date(now.getTime() - 22 * DAY), now)).toBe(3);
-    expect(await dunning(db, new Date(now.getTime() + 30 * DAY))).toBe(3);
+    expect(await dunning(db, new Date(now.getTime() + 30 * DAY))).toBe(1);
     expect(await dunning(db, new Date(now.getTime() + 30 * DAY))).toBe(0);
     const reminded = (await db.select().from(events).where(eq(events.type, "invoice.reminded"))).map((e) => e.payload.level);
-    expect(reminded).toEqual([4, 4, 4]);
+    expect(reminded).toEqual([4]);
   });
 
   it("applies the VAT rule of the country pack and builds the bank QR payload", () => {

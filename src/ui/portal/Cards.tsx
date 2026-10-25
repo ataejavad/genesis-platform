@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { decide, orderPackage, sendRequest } from "./actions";
+import { complainNow, confirmBrief, decide, orderPackage, sendRequest } from "./actions";
+import { journeyCopy } from "@/config/journey-copy";
 import { fmtEur, fmtNum, NUM_LOCALE, type PortalCopy } from "@/config/portal-copy";
 import { metricHow, metricLabel } from "@/server/portal-metrics";
 import type { Card } from "@/server/portal-chat";
 
 type P = { t: PortalCopy; lang: string };
 const num = fmtNum;
+const dayOf = (iso: string, lang: string, time = false) => new Intl.DateTimeFormat(NUM_LOCALE[lang] ?? "en-GB", time ? { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Rome" } : { dateStyle: "medium" }).format(new Date(iso));
 const pct = (n: number, lang: string) => new Intl.NumberFormat(NUM_LOCALE[lang] ?? "en-GB", { style: "percent", maximumFractionDigits: 0 }).format(n);
 
 export function ResultsCard({ data: r, t, lang, full }: P & { data: Extract<Card, { type: "results" }>["data"]; full?: boolean }) {
@@ -61,12 +63,16 @@ export function GoalsCard({ data, t, lang }: P & { data: Extract<Card, { type: "
   );
 }
 
-export function ApprovalsCard({ data, t, onDone }: P & { data: Extract<Card, { type: "approvals" }>["data"]; onDone?: (text: string) => void }) {
+export function ApprovalsCard({ data, t, lang, onDone }: P & { data: Extract<Card, { type: "approvals" }>["data"]; onDone?: (text: string) => void }) {
+  const j = journeyCopy(lang).approval;
   const [done, setDone] = useState<Record<string, string>>({});
+  const [stars, setStars] = useState<Record<string, number>>({});
+  const [notes, setNotes] = useState<Record<string, string>>({});
   const [pending, start] = useTransition();
   const act = (id: string, d: "approved" | "changes") =>
     start(async () => {
-      const r = await decide(id, d);
+      // "Ask for changes" sends what the customer wrote in the sentence box as the change to make
+      const r = await decide(id, d, d === "changes" ? notes[id] : undefined, stars[id], d === "approved" ? notes[id] : undefined);
       setDone((x) => ({ ...x, [id]: r.text }));
       onDone?.(r.text);
     });
@@ -74,7 +80,19 @@ export function ApprovalsCard({ data, t, onDone }: P & { data: Extract<Card, { t
     <div className="card pcard list">
       {data.map((a) => (
         <div className="item" key={a.id}>
-          <div className="grow small"><b>{a.title}</b>{a.detail && <div className="muted">{a.detail}</div>}{a.link && <a href={a.link} target="_blank" rel="noopener">{t.card.open} ↗</a>}</div>
+          <div className="grow small">
+            <b>{a.title}</b>{a.detail && <div className="muted">{a.detail}</div>}{a.link && <a href={a.link} target="_blank" rel="noopener">{t.card.open} ↗</a>}
+            {a.autoOn && <div className="muted">⏳ {j.autoOn.replace("{d}", dayOf(a.autoOn, lang))}</div>}
+            {a.milestone && !done[a.id] && (
+              <div className="stack" style={{ gap: 4, marginTop: 6 }}>
+                <div className="row" style={{ gap: 2, flexWrap: "wrap" }} role="radiogroup" aria-label={j.rate}>
+                  <span className="muted" style={{ marginInlineEnd: 6 }}>{j.rate}</span>
+                  {[1, 2, 3, 4, 5].map((n) => <button key={n} type="button" role="radio" aria-checked={stars[a.id] === n} aria-label={j.stars.replace("{n}", String(n))} className="btn sm" style={{ padding: "0 6px", opacity: (stars[a.id] ?? 0) >= n ? 1 : 0.35 }} onClick={() => setStars((x) => ({ ...x, [a.id]: n }))}>★</button>)}
+                </div>
+                <input aria-label={j.note} placeholder={j.note} value={notes[a.id] ?? ""} maxLength={500} onChange={(e) => setNotes((x) => ({ ...x, [a.id]: e.target.value }))} />
+              </div>
+            )}
+          </div>
           {done[a.id] ? <span className="badge ok" role="status">✓ {done[a.id]}</span> : (
             <div className="row" style={{ gap: 6 }}>
               <button className="btn sm ok" disabled={pending} onClick={() => act(a.id, "approved")}>{t.card.approve}</button>
@@ -126,7 +144,7 @@ export function ProjectsCard({ data, t, lang }: P & { data: Extract<Card, { type
         <div key={p.id} className="card pcard stack">
           <div className="row" style={{ flexWrap: "wrap", gap: 8 }}><b>{p.title}</b><span className="muted small">{p.code}</span><span className="spacer" /><span className="small muted">{t.card.readyBy} {p.dueAt}</span></div>
           <div className="progress" title={`${Math.round(p.progress * 100)}%`}><span style={{ width: `${Math.round(p.progress * 100)}%` }} /></div>
-          <ul className="plist">{p.milestones.map((m) => <li key={m.title}><span>{m.title}</span><span className="spacer" /><span className={`badge ${m.status === "accepted" ? "ok" : m.status === "ready" ? "warn" : "gray"}`}>{t.card.ms[m.status] ?? m.status}</span><b className="num">{fmtEur(m.amountEur, lang)}</b></li>)}</ul>
+          <ul className="plist">{p.milestones.map((m) => <li key={m.title}><span>{m.title}{m.dueAt && m.status !== "accepted" && <span className="muted small"> · {journeyCopy(lang).due.replace("{d}", dayOf(m.dueAt, lang))}</span>}{m.rating ? <span className="muted small"> · {"★".repeat(m.rating)}</span> : null}</span><span className="spacer" /><span className={`badge ${m.status === "accepted" ? "ok" : m.status === "ready" || m.status === "unpaid" ? "warn" : "gray"}`}>{t.card.ms[m.status] ?? journeyCopy(lang).ms[m.status] ?? m.status}</span><b className="num">{fmtEur(m.amountEur, lang)}</b></li>)}</ul>
           {p.monthlyEur > 0 && <div className="muted small">{fmtEur(p.monthlyEur, lang)} {t.card.perMonth}</div>}
         </div>
       ))}
@@ -134,13 +152,13 @@ export function ProjectsCard({ data, t, lang }: P & { data: Extract<Card, { type
   );
 }
 
-export function RequestsCard({ data, t }: P & { data: Extract<Card, { type: "requests" }>["data"] }) {
+export function RequestsCard({ data, t, lang }: P & { data: Extract<Card, { type: "requests" }>["data"] }) {
   return (
     <div className="card pcard list">
       {data.map((r) => (
         <div className="item small" key={r.id}>
           <div className="grow"><span className="badge">{t.card.kinds[r.kind] ?? r.kind}</span> {r.text}{r.reply && <div className="callout small" style={{ marginTop: 6 }}>{r.reply}</div>}</div>
-          <span className="muted">{t.card.status[r.status] ?? r.status}</span>
+          <span className="muted">{r.priceBy ? `⏳ ${journeyCopy(lang).priceBy.replace("{d}", dayOf(r.priceBy, lang, true))}` : (t.card.status[r.status] ?? r.status)}</span>
         </div>
       ))}
     </div>
@@ -163,6 +181,60 @@ function ConfirmCard({ card, t, onDone }: P & { card: Extract<Card, { type: "con
             <button className="btn sm primary" disabled={pending || text.trim().length < 2} onClick={() => start(async () => { const r = await sendRequest(card.kind, text); if (r.ok) { setState("sent"); onDone?.(r.text!); } })}>{t.card.ask}</button>
             <button className="btn sm" onClick={() => setState("no")}>{t.card.cancel}</button>
           </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/** The scope the customer confirms with one press (marketplace lesson: Upwork Uma, Fiverr Dynamic Matching). */
+function BriefCard({ data: b, lang, onDone }: P & { data: Extract<Card, { type: "brief" }>["data"]; onDone?: (text: string) => void }) {
+  const j = journeyCopy(lang).brief;
+  const [state, setState] = useState<"ask" | "no" | string>("ask");
+  const [text, setText] = useState(b.problem);
+  const [pending, start] = useTransition();
+  if (state === "no") return null;
+  return (
+    <div className="card pcard stack">
+      <b>📝 {j.title}</b>
+      {state !== "ask" ? <span className="badge ok" role="status">✓ {state}</span> : (
+        <>
+          <label className="small muted" htmlFor="brief-problem">{j.problem}</label>
+          <textarea id="brief-problem" value={text} onChange={(e) => setText(e.target.value)} style={{ minHeight: 56 }} />
+          <ul className="plist small">
+            <li><span className="muted">{j.result}</span><span className="spacer" /><b>{b.package?.title ?? j.custom}</b></li>
+            {b.package && <li><span className="muted">{j.steps}</span><span className="spacer" /><span>{b.package.steps.join(" → ")}</span></li>}
+            {b.package && <li><span className="muted">⏱</span><span className="spacer" /><span>{j.days.replace("{n}", String(b.package.days))}</span></li>}
+            {b.package && <li><span>✓ {j.included.replace("{n}", String(b.package.revisions))}</span></li>}
+            <li><span className="muted">✗ {j.excluded}</span></li>
+            <li><span className="muted">💶</span><span className="spacer" /><b>{b.package ? j.price.replace("{setup}", fmtEur(b.package.setupEur, lang)).replace("{monthly}", fmtEur(b.package.monthlyEur, lang)) : j.quoteBy.replace("{d}", dayOf(b.quoteBy!, lang, true))}</b></li>
+            {b.package && <li><span className="muted small">{j.pay}</span></li>}
+          </ul>
+          <div className="row" style={{ gap: 8 }}>
+            <button className="btn sm primary" disabled={pending || text.trim().length < 3} onClick={() => start(async () => { const r = await confirmBrief(text); if (r.ok) { setState(r.text); onDone?.(r.text); } })}>{j.confirm}</button>
+            <button className="btn sm" onClick={() => setState("no")}>{j.cancel}</button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/** "Not satisfied": the whole ladder is shown; one press starts the next step. */
+function ComplaintCard({ data, lang, onDone }: P & { data: Extract<Card, { type: "complaint" }>["data"]; onDone?: (text: string) => void }) {
+  const j = journeyCopy(lang).complaint;
+  const [state, setState] = useState<string | null>(null);
+  const [text, setText] = useState(data.text);
+  const [pending, start] = useTransition();
+  const at = ["fix", "swap", "founder"].indexOf(data.step);
+  return (
+    <div className="card pcard stack">
+      <b>🤝 {j.title}</b>
+      {data.step !== "support" && <ol className="small">{j.ladder.map((l, i) => <li key={l} className={i < at ? "muted" : undefined} style={{ fontWeight: i === at ? 700 : 400 }}>{l}</li>)}</ol>}
+      {state ? <span className="badge ok" role="status">✓ {state}</span> : (
+        <>
+          <textarea aria-label={j.title} value={text} onChange={(e) => setText(e.target.value)} style={{ minHeight: 56 }} />
+          <div><button className="btn sm primary" disabled={pending || text.trim().length < 2} onClick={() => start(async () => { const r = await complainNow(text); if (r.ok) { setState(r.text); onDone?.(r.text); } })}>{j.go[data.step]}</button></div>
         </>
       )}
     </div>
@@ -194,6 +266,8 @@ export function CardView({ card, t, lang, onDone, onSend }: P & { card: Card; on
     case "needs": return <NeedsCard data={card.data} t={t} lang={lang} onSend={onSend} />;
     case "requests": return <RequestsCard data={card.data} t={t} lang={lang} />;
     case "confirm": return <ConfirmCard card={card} t={t} lang={lang} onDone={onDone} />;
+    case "brief": return <BriefCard data={card.data} t={t} lang={lang} onDone={onDone} />;
+    case "complaint": return <ComplaintCard data={card.data} t={t} lang={lang} onDone={onDone} />;
     case "link": return <Link className="btn sm" href={card.href}>{card.label} →</Link>;
   }
 }

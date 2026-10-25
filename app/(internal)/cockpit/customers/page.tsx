@@ -4,7 +4,9 @@ import { latestHealth } from "@/server/health";
 import { listCustomers, listServices, openRequests } from "@/server/portal";
 import { METRICS } from "@/server/portal-metrics";
 import { PageHead } from "@/ui/Shell";
-import { askApproval, goal, recordResult, reply } from "./actions";
+import { askApproval, complaint, goal, quote, recordResult, reply } from "./actions";
+import { listComplaints } from "@/server/complaints";
+import { listPackages } from "@/server/projects";
 import { EraseForm } from "./EraseForm";
 import { OpenAccount } from "./OpenAccount";
 
@@ -14,13 +16,31 @@ const eur = (n: number) => `€${n.toLocaleString("en-GB")}`;
 // /api/v1/customer-approvals (scope portal:write); until they run, results are recorded here by hand.
 export default async function CockpitCustomers() {
   const db = getDb();
-  const [customers, requests, health] = await Promise.all([listCustomers(db), openRequests(db), latestHealth(db)]);
+  const [customers, requests, health, open, packages] = await Promise.all([listCustomers(db), openRequests(db), latestHealth(db), listComplaints(db), listPackages(db)]);
+  const now = Date.now();
   const healthOf = new Map(health.map((h) => [h.h.orgId, h.h]));
   const services = Object.fromEntries(await Promise.all(customers.map(async (c) => [c.org.id, await listServices(db, c.org.id, "en")] as const)));
   const industries = [...new Set(products.flatMap((p) => p.industries))];
   return (
     <main className="stack">
       <PageHead title="Customers" crumbs="Cockpit" sub="Accounts, results, requests. Customers see all of this in their dashboard (/portal)." />
+
+      <div className="card" id="complaints">
+        <h3>Complaints ({open.length})</h3>
+        <p className="muted small">The customer climbs one ladder in the chat: free fix by the same partner (3 days) → another partner redoes it at our cost (7 days) → you (1 working day). Accepting the fixed step closes it.</p>
+        {open.length === 0 && <p className="muted">None.</p>}
+        <div className="list">
+          {open.map(({ c, company, code }) => (
+            <form key={c.id} action={complaint} className="item row" style={{ alignItems: "start", flexWrap: "wrap" }}>
+              <input type="hidden" name="id" value={c.id} />
+              <div className="grow"><b>{company}</b> <span className="muted small">{code}</span> <span className={`badge ${c.step === "founder" ? "bad" : "warn"}`}>{c.step}</span> <span className={`small ${c.dueAt.getTime() < now ? "bad" : "muted"}`}>due {c.dueAt.toISOString().slice(0, 16).replace("T", " ")}</span><div className="small" style={{ whiteSpace: "pre-wrap" }}>{c.text}</div></div>
+              <input name="note" placeholder="What you did / agreed" style={{ flexBasis: "100%" }} />
+              {c.step !== "founder" && <button className="btn sm" name="do" value="escalate">Next step</button>}
+              <button className="btn sm primary" name="do" value="resolve">Resolved</button>
+            </form>
+          ))}
+        </div>
+      </div>
 
       <div className="card">
         <h3>Requests waiting on us ({requests.length})</h3>
@@ -30,11 +50,19 @@ export default async function CockpitCustomers() {
             <div key={r.id} className="item" style={{ display: "block" }}>
             <form action={reply} className="row" style={{ alignItems: "start" }}>
               <input type="hidden" name="id" value={r.id} />
-              <div className="grow"><b>{company}</b> <span className="badge">{r.kind}</span> <span className="muted small">{r.createdAt.toISOString().slice(0, 16).replace("T", " ")} · {r.status}</span><div>{r.text}</div></div>
+              <div className="grow"><b>{company}</b> <span className="badge">{r.kind}</span> <span className="muted small">{r.createdAt.toISOString().slice(0, 16).replace("T", " ")} · {r.status}</span>{r.dueAt && (r.kind === "solution" || r.kind === "change") && r.status === "open" && <span className={`small ${r.dueAt.getTime() < now ? "bad" : "muted"}`}> · price promised by {r.dueAt.toISOString().slice(0, 16).replace("T", " ")}</span>}<div>{r.text}</div></div>
               <textarea name="reply" defaultValue={r.reply ?? ""} placeholder="Answer the customer sees" style={{ minHeight: 48, flexBasis: "100%" }} />
               <button className="btn sm" name="status" value="in_progress">Save · in progress</button>
               <button className="btn sm primary" name="status" value="done">Answer · done</button>
             </form>
+            {r.kind === "solution" && (
+              <form action={quote} className="row small" style={{ marginTop: 6 }}>
+                <input type="hidden" name="id" value={r.id} />
+                <select name="package" aria-label="Catalogue result">{packages.map((p) => <option key={p.slug} value={p.slug}>{p.title} · €{p.setupEur} + €{p.monthlyEur}/mo</option>)}</select>
+                <button className="btn sm primary">Quote with this result (order + contract)</button>
+                <span className="muted">or answer with a custom price above</span>
+              </form>
+            )}
             {r.kind === "data_delete" && <EraseForm org={r.orgId} request={r.id} company={company} />}
             </div>
           ))}

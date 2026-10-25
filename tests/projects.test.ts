@@ -1,8 +1,9 @@
 import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
-import { customerApprovals, events, jobs, milestones, projects, subscriptions } from "@/db/schema";
+import { customerApprovals, customerRequests, events, jobs, milestones, payouts, projects, subscriptions } from "@/db/schema";
+import { billNext, markInvoicePaid } from "@/server/finance";
 import { health, qaRoute, riskOf } from "@/server/delivery-rules";
-import { addDocument, applyPartner, checkDocument, decideApplication, deliver, offersFor, respondOffer } from "@/server/partners";
+import { addDocument, applyPartner, checkDocument, decideApplication, deliver, offersFor, respondOffer, statsFor } from "@/server/partners";
 import { decideCustomerApproval } from "@/server/portal";
 import {
   approveVersion,
@@ -72,26 +73,55 @@ describe("order to closed project", () => {
     expect(password.length).toBeGreaterThan(8);
     const d = await projectDetail(db, projectId);
     expect(d.project).toMatchObject({ code: "P-1001", risk: "low", priceEur: 490, monthlyEur: 390, budgetEur: 310, language: "it" });
-    expect(d.milestones.map((m) => m.amountEur)).toEqual([294, 196]);
-    // tasks carry the protocol's criteria in the customer's language, white-label code, and went out as offers
-    expect(d.tasks[0].job.checklist[0]).toBe("L'assistente dice di essere un'AI nella prima frase");
-    expect(d.tasks[0].job.customerCode).toMatch(/^C-.{4} · installers · IT$/);
-    expect(d.tasks.every((t) => t.job.status === "offered")).toBe(true);
+    expect(d.milestones.map((m) => [m.amountEur, m.status])).toEqual([[245, "open"], [245, "planned"]]);
+    // tasks carry the protocol's criteria in the customer's language, white-label code; only the paid milestone's went out
+    const first = d.tasks.find((t) => t.job.milestoneId === d.milestones[0].id)!;
+    expect(first.job.checklist[0]).toBe("L'assistente dice di essere un'AI nella prima frase");
+    expect(first.job.customerCode).toMatch(/^C-.{4} · installers · IT$/);
+    expect(first.job.status).toBe("offered");
+    expect(d.tasks.find((t) => t.job.milestoneId === d.milestones[1].id)!.job.status).toBe("held");
 
     await deliverAll(pid, projectId);
-    // first milestone done → the customer is asked; second still open
-    let ms = await db.select().from(milestones).where(eq(milestones.projectId, projectId));
-    expect(ms.map((m) => m.status).sort()).toEqual(["ready", "ready"]);
     const orgId = d.project.orgId ?? (await db.select().from(projects).where(eq(projects.id, projectId)))[0].orgId!;
     const asks = await db.select().from(customerApprovals).where(eq(customerApprovals.orgId, orgId));
-    expect(asks).toHaveLength(2);
-    expect((await customerProjects(db, orgId))[0]).toMatchObject({ code: "P-1001", progress: 1 });
+    expect(asks).toHaveLength(1);
+    const shown = (await customerProjects(db, orgId))[0];
+    expect(shown).toMatchObject({ code: "P-1001" });
+    expect(shown.progress).toBeGreaterThan(0);
+    expect(shown.progress).toBeLessThan(1);
+    expect(shown.milestones.map((x) => x.status)).toEqual(["ready", "planned"]);
 
-    // one approved, one sent back, then approved
-    await decideCustomerApproval(db, javad, orgId, asks[0].id, "approved");
-    await decideCustomerApproval(db, javad, orgId, asks[1].id, "changes", "the greeting is too long");
-    ms = await db.select().from(milestones).where(eq(milestones.projectId, projectId));
-    expect(ms.map((m) => m.status).sort()).toEqual(["accepted", "changes"]);
+    // approved with a rating → the next milestone is billed first and starts when paid
+    await decideCustomerApproval(db, javad, orgId, asks[0].id, "approved", undefined, { stars: 4, note: "bene" });
+    let ms = await db.select().from(milestones).where(eq(milestones.projectId, projectId)).orderBy(milestones.seq);
+    expect(ms[0]).toMatchObject({ status: "accepted", rating: 4, acceptedBy: "customer" });
+    const inv = await billNext(db, projectId);
+    expect(inv).toMatchObject({ kind: "milestone", netEur: 245 });
+    await markInvoicePaid(db, javad, inv!.id);
+    await deliverAll(pid, projectId);
+    ms = await db.select().from(milestones).where(eq(milestones.projectId, projectId)).orderBy(milestones.seq);
+    expect(ms[1].status).toBe("ready");
+
+    // changes within the 2 free rounds go straight back to the partner who made it, at no extra pay
+    const askOf = async () => (await db.select().from(customerApprovals).where(eq(customerApprovals.orgId, orgId))).find((x) => x.status === "pending")!;
+    for (const round of [1, 2]) {
+      await decideCustomerApproval(db, javad, orgId, (await askOf()).id, "changes", "the greeting is too long");
+      const [m] = await db.select().from(milestones).where(eq(milestones.id, ms[1].id));
+      expect(m).toMatchObject({ status: "changes", revisions: round });
+      const rework = (await db.select().from(jobs).where(eq(jobs.milestoneId, m.id))).find((j) => j.role === "revision" && j.status === "assigned")!;
+      expect(rework).toMatchObject({ partnerId: pid, payEur: 0 });
+      expect(rework.brief).toContain("the greeting is too long");
+      const dl = await deliver(db, sys, pid, rework.id, { link: "https://example.com/v2", selfCheck: rework.checklist.map(() => true) });
+      await humanReview(db, javad, dl.id, rework.checklist.map((_, idx) => ({ idx, result: "pass" as const })), 5, "ok");
+      expect((await db.select().from(milestones).where(eq(milestones.id, m.id)))[0].status).toBe("ready");
+    }
+    // a third round is priced first: a change request for Javad, and the step can still be accepted as it is
+    await decideCustomerApproval(db, javad, orgId, (await askOf()).id, "changes", "now also a new menu");
+    const [capped] = await db.select().from(milestones).where(eq(milestones.id, ms[1].id));
+    expect(capped).toMatchObject({ status: "ready", revisions: 2 });
+    expect((await askOf()).detail).toContain("2");
+    expect((await db.select().from(customerRequests).where(eq(customerRequests.orgId, orgId))).map((r) => r.kind)).toEqual(["change"]);
+    expect((await db.select().from(payouts)).every((p) => p.amountEur > 0)).toBe(true);
     expect((await db.select().from(projects).where(eq(projects.id, projectId)))[0].status).toBe("running");
 
     // a change request is priced and needs the customer's yes; then it is part of the project
@@ -100,13 +130,15 @@ describe("order to closed project", () => {
     await decideCustomerApproval(db, javad, orgId, crAsk.id, "approved");
     const after = await projectDetail(db, projectId);
     expect(after.project.priceEur).toBe(610);
-    expect(after.milestones).toHaveLength(3);
+    expect(after.milestones.map((m) => m.status)).toEqual(["accepted", "ready", "planned"]); // paid before it starts
 
     const types = (await db.select({ t: events.type }).from(events)).map((e) => e.t);
-    expect(types).toEqual(expect.arrayContaining(["order.created", "project.created", "milestone.ready", "milestone.accepted", "milestone.changes", "change_request.decided"]));
+    expect(types).toEqual(expect.arrayContaining(["order.created", "project.created", "milestone.ready", "milestone.accepted", "milestone.rated", "milestone.started", "milestone.changes", "job.rework", "milestone.revision_cap", "change_request.decided"]));
     const list = await listProjects(db);
     expect(list.kpi.cataloguePct).toBe(1);
     expect(list.rows[0].costEur).toBe(310);
+    // the customer's 4 counts with our QA 5s in the partner's quality
+    expect((await statsFor(db, pid)).avgQuality).toBeLessThan(5);
   });
 
   it("closes the project when every milestone is accepted and starts the monthly service", async () => {
@@ -124,7 +156,7 @@ describe("order to closed project", () => {
     expect(subs).toMatchObject([{ product: "followup-agent", monthlyEur: 190 }]);
   });
 
-  it("queues deliveries for a person without the judge, and reminds customers after 24 hours", async () => {
+  it("queues deliveries for a person without the judge, reminds on day 1, 3, 6 and accepts on day 7", async () => {
     await seedDelivery(db);
     const pid = await partner("sara@example.com");
     const order = await createOrder(db, sys, { packageSlug: "lead-crm", source: "market", company: "Verdi Snc", email: "verdi@example.com", country: "IT", industry: "installers" });
@@ -136,8 +168,19 @@ describe("order to closed project", () => {
     expect(q.map((x) => x.delivery.id)).toEqual([dl.id]);
     expect(q[0].code).toBe("PR-03");
     await humanReview(db, javad, dl.id, j.checklist.map((_, idx) => ({ idx, result: "pass" as const })), 4, "fine");
-    expect(await deliveryWatch(db, new Date(Date.now() + 2 * 864e5))).toMatchObject({ reminded: 1 });
-    expect(await deliveryWatch(db, new Date(Date.now() + 2 * 864e5 + 36e5))).toMatchObject({ reminded: 0 });
+    const at = (d: number) => new Date(Date.now() + d * 864e5 + 36e5);
+    expect(await deliveryWatch(db, at(1))).toMatchObject({ reminded: 1 });
+    expect(await deliveryWatch(db, at(1.1))).toMatchObject({ reminded: 0 });
+    expect(await deliveryWatch(db, at(3))).toMatchObject({ reminded: 1 });
+    expect(await deliveryWatch(db, at(6))).toMatchObject({ reminded: 1, autoAccepted: 0 });
+    expect(await deliveryWatch(db, at(7))).toMatchObject({ autoAccepted: 1 });
+    const [m] = await db.select().from(milestones).where(eq(milestones.projectId, projectId));
+    expect(m).toMatchObject({ status: "accepted", acceptedBy: "auto", reminders: 3 });
+    const reminders = (await db.select().from(events).where(eq(events.type, "milestone.reminded"))).map((e) => e.payload.reminder);
+    expect(reminders).toEqual([1, 2, 3]);
+    expect((await db.select().from(customerApprovals))[0]).toMatchObject({ status: "approved", decidedBy: "system:auto-accept" });
+    // the project closed on its own (single milestone): the monthly service runs
+    expect((await db.select().from(projects).where(eq(projects.id, projectId)))[0].status).toBe("closed");
   });
 
   it("versions protocols: drafts need Javad's approval and retire the old version", async () => {

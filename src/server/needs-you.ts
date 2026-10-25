@@ -1,6 +1,6 @@
-import { and, count, eq, isNull, lt, or } from "drizzle-orm";
+import { and, count, eq, inArray, isNull, lt, notInArray, or } from "drizzle-orm";
 import type { Db } from "@/db";
-import { approvals, contracts, customerRequests, deliveries, experiments, orders, partnerDocuments, partnerMessages, partners, payouts, projectInputs, touches } from "@/db/schema";
+import { approvals, complaints, contracts, customerRequests, deliveries, experiments, orders, partnerDocuments, partnerMessages, partners, payouts, projectInputs, touches } from "@/db/schema";
 
 /*
  * One "Needs you" inbox (step 10): everything that waits for Javad, from every module, with where to act.
@@ -14,7 +14,9 @@ export async function needsYou(db: Db, now = new Date()): Promise<Need[]> {
   const all: Need[] = [
     { id: "payouts", label: "Partner payouts due", n: await c(db.select({ n: count() }).from(payouts).where(and(eq(payouts.status, "due"), lt(payouts.dueAt, new Date(now.getTime() + 864e5))))), link: "/cockpit/finance", why: "fast pay is our promise to partners" },
     { id: "orders", label: "New orders to start (Send contract)", n: await c(db.select({ n: count() }).from(orders).where(eq(orders.status, "new"))), link: "/cockpit/projects", why: "a customer waits; target within a day" },
-    { id: "requests", label: "Customer requests to answer", n: await c(db.select({ n: count() }).from(customerRequests).where(eq(customerRequests.status, "open"))), link: "/cockpit/customers", why: "answer within a working day" },
+    { id: "complaints", label: "Complaints on your desk (founder step or overdue)", n: await c(db.select({ n: count() }).from(complaints).where(and(eq(complaints.status, "open"), or(eq(complaints.step, "founder"), lt(complaints.dueAt, now))))), link: "/cockpit/customers#complaints", why: "an unhappy customer is the fastest churn" },
+    { id: "quotes", label: "Prices promised within 24 hours", n: await c(db.select({ n: count() }).from(customerRequests).where(and(eq(customerRequests.status, "open"), inArray(customerRequests.kind, ["solution", "change"])))), link: "/cockpit/customers", why: "we promised a price within 24 hours" },
+    { id: "requests", label: "Customer requests to answer", n: await c(db.select({ n: count() }).from(customerRequests).where(and(eq(customerRequests.status, "open"), notInArray(customerRequests.kind, ["solution", "change"])))), link: "/cockpit/customers", why: "answer within a working day" },
     { id: "qa", label: "Deliveries to review", n: await c(db.select({ n: count() }).from(deliveries).where(eq(deliveries.status, "submitted"))), link: "/cockpit/qa", why: "the partner waits for money, the customer for the result" },
     { id: "inputs", label: "Customer files to check before partners see them", n: await c(db.select({ n: count() }).from(projectInputs).where(eq(projectInputs.status, "check"))), link: "/cockpit/projects", why: "partners are blocked until then" },
     { id: "content", label: "Website drafts to approve", n: await c(db.select({ n: count() }).from(approvals).where(eq(approvals.status, "pending"))), link: "/cockpit/approvals#content", why: "nothing public changes without you" },

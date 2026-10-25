@@ -10,6 +10,9 @@ import type { Actor } from "@/server/actor";
 import { runAgent } from "@/server/agents";
 import { createRequest, decideCustomerApproval, listGoals, nextStep, pendingApprovals, REQUEST_KINDS, type RequestKind, results, saveTurn, setOrgLocale, threadMessages } from "@/server/portal";
 import { createOrder } from "@/server/projects";
+import { journeyCopy } from "@/config/journey-copy";
+import { draftBrief } from "@/server/brief";
+import { complain } from "@/server/complaints";
 import { type Card, materialFile, materialTurn, replyFor, scriptedReply } from "@/server/portal-chat";
 
 const actorOf = (userId: string): Actor => ({ type: "user", id: userId });
@@ -85,11 +88,41 @@ export async function orderPackage(slug: string) {
   return { ok: true, text: portalCopy(lang).card.ordered };
 }
 
-export async function decide(id: string, decision: "approved" | "changes", note?: string) {
+export async function decide(id: string, decision: "approved" | "changes", note?: string, stars?: number, ratingNote?: string) {
   const { user, org, lang } = await requireCustomer();
-  await decideCustomerApproval(getDb(), actorOf(user.id), org.id, id, decision === "approved" ? "approved" : "changes", note);
+  const rating = decision === "approved" && stars && stars >= 1 && stars <= 5 ? { stars, note: ratingNote?.slice(0, 500) } : undefined;
+  await decideCustomerApproval(getDb(), actorOf(user.id), org.id, id, decision === "approved" ? "approved" : "changes", note?.slice(0, 2000), rating);
   revalidatePath("/portal", "layout");
   return { ok: true, text: decision === "approved" ? portalCopy(lang).r.approved : portalCopy(lang).r.changes };
+}
+
+const when = (iso: string, lang: string) => new Intl.DateTimeFormat({ it: "it-IT", de: "de-DE", fa: "fa-IR" }[lang] ?? "en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Rome" }).format(new Date(iso));
+
+/** The customer confirmed the brief card: a catalogue result is ordered at once, anything else is priced within 24 hours. */
+export async function confirmBrief(problem: string) {
+  const { user, org, lang, viewingAs } = await requireCustomer();
+  if (viewingAs) return { ok: false, text: "" };
+  const db = getDb();
+  // the package is matched again on the server from the customer's words, never taken from the browser
+  const b = await draftBrief(db, lang, problem);
+  const j = journeyCopy(lang).brief;
+  if (b.package) {
+    await createOrder(db, actorOf(user.id), { packageSlug: b.package.slug, source: "portal", orgId: org.id, locale: lang, note: b.problem });
+    revalidatePath("/portal", "layout");
+    return { ok: true, text: j.ordered };
+  }
+  const r = await createRequest(db, actorOf(user.id), org.id, user.id, "solution", b.problem, b);
+  revalidatePath("/portal", "layout");
+  return { ok: true, text: j.requested.replace("{d}", when(r.dueAt!.toISOString(), lang)) };
+}
+
+/** "Not satisfied": the next step of the complaint path (free fix → someone new → founder). */
+export async function complainNow(text: string) {
+  const { user, org, lang, viewingAs } = await requireCustomer();
+  if (viewingAs) return { ok: false, text: "" };
+  const r = await complain(getDb(), actorOf(user.id), org.id, user.id, text);
+  revalidatePath("/portal", "layout");
+  return { ok: true, text: journeyCopy(lang).complaintDone[r.step].replace("{d}", when(r.dueAt.toISOString(), lang)) };
 }
 
 export async function setLanguage(lang: string) {

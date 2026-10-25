@@ -1,9 +1,9 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import { hashPassword } from "better-auth/crypto";
-import { and, asc, desc, eq, gte, inArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, isNotNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { Db, DbOrTx } from "@/db";
-import { account, apiKeys, deliveries, jobOffers, jobs, memberships, organizations, partnerDocuments, partnerMessages, partners, partnerServices, payouts, user } from "@/db/schema";
+import { account, apiKeys, deliveries, jobOffers, jobs, memberships, milestones, organizations, partnerDocuments, partnerMessages, partners, partnerServices, payouts, user } from "@/db/schema";
 import type { Actor } from "./actor";
 import { createApiKey } from "./api-keys";
 import { AppError, notFound } from "./errors";
@@ -132,7 +132,17 @@ export async function statsFor(db: DbOrTx, partnerId: string): Promise<Stats> {
     })
     .from(deliveries)
     .where(eq(deliveries.partnerId, partnerId));
-  return { accepted: r.accepted, avgQuality: r.avg === null ? null : Math.round(r.avg * 10) / 10, onTimeRate: r.onTime === null ? null : Math.round(r.onTime * 100) / 100 };
+  // the customers' own 1-5 on milestones this partner worked on count like our QA scores (they never see who it was)
+  const [c] = await db
+    .select({ n: sql<number>`count(distinct ${milestones.id})::int`, avg: sql<number | null>`avg(${milestones.rating})::float` })
+    .from(milestones)
+    .innerJoin(jobs, eq(jobs.milestoneId, milestones.id))
+    .where(and(eq(jobs.partnerId, partnerId), isNotNull(milestones.rating), inArray(jobs.status, ["accepted", "paid"])));
+  const [nq] = await db.select({ n: sql<number>`count(${deliveries.quality})::int` }).from(deliveries).where(and(eq(deliveries.partnerId, partnerId), eq(deliveries.status, "accepted")));
+  const parts = [r.avg === null ? null : { avg: r.avg, n: nq.n }, c.avg === null ? null : { avg: c.avg, n: c.n }].filter((x) => x !== null);
+  const n = parts.reduce((s, x) => s + x.n, 0);
+  const avg = n ? parts.reduce((s, x) => s + x.avg * x.n, 0) / n : null;
+  return { accepted: r.accepted, avgQuality: avg === null ? null : Math.round(avg * 10) / 10, onTimeRate: r.onTime === null ? null : Math.round(r.onTime * 100) / 100 };
 }
 
 export async function levelFor(db: DbOrTx, partnerId: string) {
@@ -310,7 +320,8 @@ export async function reviewDelivery(db: Db, actor: Actor, deliveryId: string, a
     let payout = null;
     if (accept) {
       const lvl = await levelFor(tx, d.partnerId);
-      [payout] = await tx.insert(payouts).values({ partnerId: d.partnerId, jobId: d.jobId, amountEur: job.payEur, dueAt: new Date(now.getTime() + lvl.tier.payoutDays * 864e5) }).returning();
+      // a free rework (included changes or a complaint fix) has nothing to pay
+      if (job.payEur > 0) [payout] = await tx.insert(payouts).values({ partnerId: d.partnerId, jobId: d.jobId, amountEur: job.payEur, dueAt: new Date(now.getTime() + lvl.tier.payoutDays * 864e5) }).returning();
       // a project task: cost booked, a finished milestone goes to the customer (step 7)
       await onJobAccepted(tx, actor, { ...job, status: "accepted" }, now);
     }

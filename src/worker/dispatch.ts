@@ -2,7 +2,7 @@ import { and, asc, eq, isNull, lt, sql } from "drizzle-orm";
 import type { Db } from "@/db";
 import { events } from "@/db/schema";
 import { prospectFromLead } from "@/server/crm";
-import { billMilestone } from "@/server/finance";
+import { billNext } from "@/server/finance";
 import { askForStory } from "@/server/health";
 import { notifyEvent } from "@/server/notify";
 import { offerJob } from "@/server/partners";
@@ -76,6 +76,21 @@ async function handle(db: Db, deps: DispatchDeps, event: Event) {
             : `📝 Change request ${p.decision}`;
     await sendAlert(deps.telegram, [line], "/cockpit/projects", fetchImpl);
   }
+  // Customer journey: complaints, low ratings and the price cap on changes reach Javad at once.
+  if (deps.telegram && ["complaint.opened", "complaint.escalated", "milestone.rated", "milestone.revision_cap", "milestone.auto_accepted"].includes(event.type) && !(event.type === "milestone.rated" && Number(event.payload.rating) > 2)) {
+    const p = event.payload as { company?: string; code?: string; title?: string; text?: string; step?: string; rating?: number; note?: string | null; cap?: number };
+    const line =
+      event.type === "complaint.opened"
+        ? `😠 ${p.company} not satisfied with ${p.code} ${p.title}: "${p.text}". Free fix started (3 days)`
+        : event.type === "complaint.escalated"
+          ? p.step === "founder" ? `🆘 ${p.company}: complaint is now YOURS (call within 1 working day): "${p.text}"` : `🔁 ${p.company}: fix did not help, another partner redoes it: "${p.text}"`
+          : event.type === "milestone.rated"
+            ? `⭐ ${p.rating}/5 from the customer on ${p.code} ${p.title}${p.note ? `: "${p.note}"` : ""}`
+            : event.type === "milestone.revision_cap"
+              ? `💶 ${p.code} ${p.title}: ${p.cap} free rounds used; quote the extra change within 24h`
+              : `⌛ ${p.code} ${p.title} (${p.company}) accepted after 7 silent days`;
+    await sendAlert(deps.telegram, [line], event.type.startsWith("complaint") ? "/cockpit/customers" : "/cockpit/projects", fetchImpl);
+  }
   // Assembly and QA-partner work is offered to the partners who do it, like any task.
   if (event.type === "job.opened") await offerJob(db, { type: "system", id: "assignment" }, event.subjectId!).catch((e) => console.error("offer failed", e));
   // A customer file waits for a person before any partner sees it.
@@ -90,8 +105,8 @@ async function handle(db: Db, deps: DispatchDeps, event: Event) {
   }
   // Step 8: everyone outside hears about what concerns them, in their language (queued; sent when a mailer is set).
   await notifyEvent(db, event);
-  // Accepted milestone → payment request for what the deposit does not cover; confirmed hub lead → CRM.
-  if (event.type === "milestone.accepted") await billMilestone(db, event.subjectId!);
+  // Accepted milestone or approved change → the next milestone is billed before it starts; confirmed hub lead → CRM.
+  if (event.type === "milestone.accepted" || (event.type === "change_request.decided" && event.payload.decision === "approved")) await billNext(db, String(event.payload.projectId));
   if (event.type === "lead.confirmed") await db.transaction((tx) => prospectFromLead(tx, { type: "system", id: "double-opt-in" }, event.subjectId!));
   if (deps.telegram && (event.type === "contract.signed" || event.type === "invoice.paid" || (event.type === "invoice.reminded" && Number(event.payload.level) >= 3))) {
     const p = event.payload as { kind?: string; totalEur?: number; title?: string; level?: number; daysLate?: number; independenceFlags?: string[] };

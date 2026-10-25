@@ -203,7 +203,7 @@ export async function askCustomerApproval(db: Db, actor: Actor, input: z.infer<t
   });
 }
 
-export async function decideCustomerApproval(db: Db, actor: Actor, orgId: string, id: string, decision: "approved" | "changes", note?: string) {
+export async function decideCustomerApproval(db: Db, actor: Actor, orgId: string, id: string, decision: "approved" | "changes", note?: string, rating?: { stars: number; note?: string }) {
   return db.transaction(async (tx) => {
     const [before] = await tx.select().from(customerApprovals).where(and(eq(customerApprovals.id, id), eq(customerApprovals.orgId, orgId)));
     if (!before) throw notFound("approval");
@@ -214,7 +214,7 @@ export async function decideCustomerApproval(db: Db, actor: Actor, orgId: string
       .where(eq(customerApprovals.id, id))
       .returning();
     // a milestone or a change request of a project (step 7)
-    await onApprovalDecided(tx, actor, after, decision);
+    await onApprovalDecided(tx, actor, after, decision, new Date(), rating);
     const [org] = await tx.select({ name: organizations.name }).from(organizations).where(eq(organizations.id, orgId));
     await emit(tx, actor, "customer_approval.decided", { type: "customer_approval", id }, { orgId, company: org.name, title: before.title, decision, note: note ?? null });
     await audit(tx, actor, "customer_approval.decided", { type: "customer_approval", id }, { status: before.status }, { status: decision, note });
@@ -227,11 +227,15 @@ export async function decideCustomerApproval(db: Db, actor: Actor, orgId: string
 export const REQUEST_KINDS = ["solution", "change", "support", "upgrade", "data_delete"] as const;
 export type RequestKind = (typeof REQUEST_KINDS)[number];
 
-export async function createRequest(db: Db, actor: Actor, orgId: string, userId: string | null, kind: RequestKind, text: string) {
+/** Our promise: a new problem gets a price within 24 hours (marketplace lesson 2026-10-25; ops-watch checks it). */
+export const QUOTE_HOURS = 24;
+
+export async function createRequest(db: Db, actor: Actor, orgId: string, userId: string | null, kind: RequestKind, text: string, brief?: Record<string, unknown>, now = new Date()) {
   const body = text.trim().slice(0, 4000);
   if (body.length < 2) throw new AppError(400, "invalid", "empty request");
   return db.transaction(async (tx) => {
-    const [row] = await tx.insert(customerRequests).values({ orgId, userId, kind, text: body }).returning();
+    const dueAt = new Date(now.getTime() + QUOTE_HOURS * 36e5);
+    const [row] = await tx.insert(customerRequests).values({ orgId, userId, kind, text: body, brief: brief ?? null, dueAt }).returning();
     const [org] = await tx.select({ name: organizations.name }).from(organizations).where(eq(organizations.id, orgId));
     await emit(tx, actor, "customer_request.created", { type: "customer_request", id: row.id }, { orgId, company: org.name, kind, text: body.slice(0, 500) });
     await audit(tx, actor, "customer_request.created", { type: "customer_request", id: row.id }, null, { kind, text: body });
