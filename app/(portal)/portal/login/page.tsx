@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { portalCopy } from "@/config/portal-copy";
 import { guestLang } from "@/lib/portal-auth";
 import { BRAND } from "@/mock/data";
-import { LoginForm } from "./LoginForm";
+import { LoginForm } from "@/ui/shared/LoginForm";
 
 export default async function PortalLogin() {
   const lang = await guestLang((await headers()).get("accept-language"));
@@ -13,7 +13,7 @@ export default async function PortalLogin() {
         <span className="logo">L</span>
         <h1 style={{ margin: 0 }}>{t.title}</h1>
       </div>
-      <LoginForm t={t} />
+      <LoginForm t={t} next="/portal" />
       <p className="muted small" style={{ marginTop: 12 }}>{BRAND}</p>
     </main>
   );

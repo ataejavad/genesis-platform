@@ -44,6 +44,17 @@ async function handle(db: Db, deps: DispatchDeps, event: Event) {
     const line = event.type === "customer_request.created" ? `📨 ${p.company} (${p.kind}): ${String(p.text ?? "").slice(0, 200)}` : `${p.decision === "approved" ? "✅" : "✏️"} ${p.company}: ${p.title}${p.note ? ` (${p.note})` : ""}`;
     await sendAlert(deps.telegram, [line], "/cockpit/customers", fetchImpl);
   }
+  // Partner portal: new applications, work to review, and messages (review requests and hidden contacts first).
+  if (deps.telegram && ["partner.applied", "delivery.submitted", "partner.message"].includes(event.type)) {
+    const p = event.payload as { name?: string; kind?: string; country?: string; score?: number; title?: string; partner?: string; version?: number; text?: string; flagged?: boolean; reviewRequest?: boolean };
+    const line =
+      event.type === "partner.applied"
+        ? `🤝 New partner application: ${p.name} (${p.kind}, ${p.country}), score ${p.score}`
+        : event.type === "delivery.submitted"
+          ? `📦 ${p.partner} delivered "${p.title}" (v${p.version}): review it`
+          : `${p.reviewRequest ? "⚖️ Human review requested" : p.flagged ? "🚩 Contact details hidden" : "💬"} ${p.partner}: ${String(p.text ?? "").slice(0, 200)}`;
+    await sendAlert(deps.telegram, [line], "/cockpit/partners", fetchImpl);
+  }
   // Every event also goes to n8n, where Genesis workflows subscribe to what they need.
   if (deps.n8nWebhookUrl) {
     const res = await fetchImpl(deps.n8nWebhookUrl, {

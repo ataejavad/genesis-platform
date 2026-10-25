@@ -25,7 +25,7 @@ export default async function PortalHome() {
           <ApprovalsCard data={waiting.map((a) => ({ id: a.id, title: a.title, detail: a.detail, link: a.link }))} t={t} lang={lang} />
         </div>
       )}
-      <PortalChat key={lang} t={t} lang={lang} name={user.name.split(" ")[0]} threads={threads.map((x) => ({ id: x.id, title: x.title }))} />
+      <PortalChat key={lang} kind="portal" t={t} lang={lang} name={user.name.split(" ")[0]} threads={threads.map((x) => ({ id: x.id, title: x.title }))} />
     </main>
   );
 }

@@ -43,6 +43,13 @@
       "when": 1792923683013,
       "tag": "0005_customer-portal",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792927981950,
+      "tag": "0006_partner-portal",
+      "breakpoints": true
     }
   ]
 }

@@ -49,13 +49,15 @@ if (n === 0) {
   await run("npm run seed");
   await run("npm run demo");
 }
-// Demo customer for the dashboard (once; also on databases made before step 5).
+// Demo customer and partner (once each; also on databases made before steps 5 and 6).
 await run("npm run demo:portal");
+await run("npm run demo:partner");
 
 console.log(`
   Site:     http://localhost:3000
   Cockpit:  http://localhost:3000/cockpit   (${env.ADMIN_EMAIL} / ${env.ADMIN_PASSWORD})
   Customer: http://localhost:3000/portal    (customer@local.test / local-demo-password)
+  Partner:  http://localhost:3000/partner   (partner@local.test / local-demo-password)
   Stop:     Ctrl+C
 `);
 

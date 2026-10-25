@@ -1,21 +1,32 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
+import type { PartnerCopy } from "@/config/partner-copy";
 import type { PortalCopy } from "@/config/portal-copy";
+import type { PartnerCard } from "@/server/partner-chat";
 import type { Card } from "@/server/portal-chat";
-import { loadThread, sendMessage } from "./actions";
+import { PartnerCardView } from "../partner/PartnerCards";
+import * as partnerActions from "../partner/actions";
+import * as portalActions from "./actions";
 import { CardView } from "./Cards";
 
-type Msg = { role: "user" | "assistant"; text: string; cards?: Card[] };
+type AnyCard = Card | PartnerCard;
+type Msg = { role: "user" | "assistant"; text: string; cards?: AnyCard[] };
+type Props =
+  | { kind: "portal"; t: PortalCopy; lang: string; name: string; threads: Thread[] }
+  | { kind: "partner"; t: PartnerCopy; lang: string; name: string; threads: Thread[] };
 type Thread = { id: string; title: string };
 
 const SPEECH_LANG: Record<string, string> = { it: "it-IT", en: "en-GB", de: "de-DE", fa: "fa-IR" };
 
 /**
- * Dashboard home (Javad 2026-10-25): a conversation like Claude's. Earlier conversations on the side, the
- * answer in the middle with live cards (results, approvals, goals, next step) from the customer's own data.
+ * Home of the outside doors (Javad 2026-10-25): a conversation like Claude's. Earlier conversations on the side,
+ * the answer in the middle with live cards from the user's own data. Customer dashboard and partner portal
+ * share it; each brings its own actions and cards.
  */
-export function PortalChat({ t, lang, name, threads: initialThreads }: { t: PortalCopy; lang: string; name: string; threads: Thread[] }) {
+export function PortalChat(props: Props) {
+  const { t, lang, name, threads: initialThreads } = props;
+  const { sendMessage, loadThread } = props.kind === "portal" ? portalActions : partnerActions;
   const hello: Msg = { role: "assistant", text: t.hello.replace("{name}", name) };
   const [threads, setThreads] = useState(initialThreads);
   const [threadId, setThreadId] = useState<string | null>(null);
@@ -87,7 +98,11 @@ export function PortalChat({ t, lang, name, threads: initialThreads }: { t: Port
           {msgs.map((m, i) => (
             <div key={i} className={`pturn ${m.role} fade-in`}>
               <div className={`msg ${m.role === "user" ? "me" : "them"}`}>{m.text}</div>
-              {m.cards?.map((c, j) => <div key={j} className="pcardwrap"><CardView card={c} t={t} lang={lang} onDone={note} /></div>)}
+              {m.cards?.map((c, j) => (
+                <div key={j} className="pcardwrap">
+                  {props.kind === "portal" ? <CardView card={c as Card} t={props.t} lang={lang} onDone={note} /> : <PartnerCardView card={c as PartnerCard} t={props.t} lang={lang} onDone={note} />}
+                </div>
+              ))}
             </div>
           ))}
           {pending && <div className="pturn assistant"><div className="msg them muted">{t.thinking}</div></div>}

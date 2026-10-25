@@ -607,3 +607,185 @@ export const portalMessages = pgTable(
   },
   (t) => [index("portal_messages_thread_idx").on(t.threadId, t.createdAt)],
 );
+
+/* ───────────── Partner portal (step 6, doc 15 §6ب) ───────────── */
+// Everyone who works for us or through us: a person, a company or an agent. Each partner has its own
+// organization (kind partner); every row below is scoped by partner id.
+
+export const partners = pgTable(
+  "partners",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orgId: uuid("org_id").references(() => organizations.id, { onDelete: "set null" }),
+    userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
+    // agent partners work through the API with their own key
+    apiKeyId: uuid("api_key_id").references(() => apiKeys.id),
+    // person, company, agent
+    kind: text("kind").notNull(),
+    // applied → active (or rejected); paused stops new offers
+    status: text("status").notNull().default("applied"),
+    name: text("name").notNull(),
+    email: text("email").notNull(),
+    country: text("country").notNull(),
+    languages: text("languages").array().notNull().default(sql`'{}'::text[]`),
+    skills: text("skills").array().notNull().default(sql`'{}'::text[]`),
+    // public links the partner gave (CV, portfolio, LinkedIn)
+    links: text("links").array().notNull().default(sql`'{}'::text[]`),
+    pitch: text("pitch"),
+    // jobs at the same time the partner says they can take (their own tool; we never track hours)
+    capacity: integer("capacity").notNull().default(2),
+    // portal language
+    locale: text("locale").notNull().default("en"),
+    // screening result: score 0–100 and reasons, by rules or Claude
+    screening: jsonb("screening").$type<{ score: number; why: string[]; by: string }>(),
+    consentAt: timestamp("consent_at", { withTimezone: true }).notNull(),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [uniqueIndex("partners_email_idx").on(t.email), index("partners_status_idx").on(t.status)],
+);
+
+export const partnerDocuments = pgTable(
+  "partner_documents",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    partnerId: uuid("partner_id").notNull().references(() => partners.id, { onDelete: "cascade" }),
+    // cv, portfolio, vat, insurance, contract, nda, dpa, id
+    kind: text("kind").notNull(),
+    link: text("link").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    // pending, ok, rejected
+    status: text("status").notNull().default("pending"),
+    note: text("note"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("partner_documents_partner_idx").on(t.partnerId)],
+);
+
+// What a partner sells us, at their price (our sale price lives in the catalogue).
+export const partnerServices = pgTable(
+  "partner_services",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    partnerId: uuid("partner_id").notNull().references(() => partners.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    skills: text("skills").array().notNull().default(sql`'{}'::text[]`),
+    // fixed, hourly, monthly
+    priceModel: text("price_model").notNull(),
+    priceEur: integer("price_eur").notNull(),
+    deliveryDays: integer("delivery_days").notNull(),
+    active: boolean("active").notNull().default(true),
+    createdAt: createdAt(),
+  },
+  (t) => [index("partner_services_partner_idx").on(t.partnerId)],
+);
+
+// A piece of work for a partner: internal (for us) or for a customer (white-label, customer shown by code).
+export const jobs = pgTable(
+  "jobs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    title: text("title").notNull(),
+    brief: text("brief").notNull(),
+    kind: text("kind").notNull().default("internal"),
+    customerOrgId: uuid("customer_org_id").references(() => organizations.id, { onDelete: "set null" }),
+    // what the partner sees instead of the customer's name, e.g. "C-1042 · installers · IT"
+    customerCode: text("customer_code"),
+    skills: text("skills").array().notNull().default(sql`'{}'::text[]`),
+    language: text("language"),
+    country: text("country"),
+    // the job touches personal data: only partners with a signed DPA in the EU/adequate countries
+    personalData: boolean("personal_data").notNull().default(false),
+    // what we pay the partner; our sale price stays in the cockpit
+    payEur: integer("pay_eur").notNull(),
+    priceEur: integer("price_eur"),
+    dueAt: timestamp("due_at", { withTimezone: true }).notNull(),
+    // acceptance criteria the partner self-checks before delivering
+    checklist: jsonb("checklist").$type<string[]>().notNull().default([]),
+    // open → offered → assigned → delivered → accepted (→ paid) | cancelled
+    status: text("status").notNull().default("open"),
+    partnerId: uuid("partner_id").references(() => partners.id),
+    createdBy: text("created_by").notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index("jobs_status_idx").on(t.status), index("jobs_partner_idx").on(t.partnerId)],
+);
+
+export const jobOffers = pgTable(
+  "job_offers",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    jobId: uuid("job_id").notNull().references(() => jobs.id, { onDelete: "cascade" }),
+    partnerId: uuid("partner_id").notNull().references(() => partners.id, { onDelete: "cascade" }),
+    // match score 0–100 and the reasons shown to the partner (algorithmic transparency)
+    fit: integer("fit").notNull(),
+    why: jsonb("why").$type<{ factor: string; points: number; max: number }[]>().notNull(),
+    // offered, accepted, declined, withdrawn
+    status: text("status").notNull().default("offered"),
+    respondedAt: timestamp("responded_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex("job_offers_job_partner_idx").on(t.jobId, t.partnerId), index("job_offers_partner_idx").on(t.partnerId, t.status)],
+);
+
+export const deliveries = pgTable(
+  "deliveries",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    jobId: uuid("job_id").notNull().references(() => jobs.id, { onDelete: "cascade" }),
+    partnerId: uuid("partner_id").notNull().references(() => partners.id),
+    version: integer("version").notNull(),
+    link: text("link").notNull(),
+    note: text("note"),
+    // the partner's self-check against the checklist: index → done
+    selfCheck: jsonb("self_check").$type<boolean[]>().notNull().default([]),
+    // submitted, accepted, changes
+    status: text("status").notNull().default("submitted"),
+    review: text("review"),
+    quality: integer("quality"),
+    onTime: boolean("on_time"),
+    reviewedBy: text("reviewed_by"),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("deliveries_job_idx").on(t.jobId)],
+);
+
+export const payouts = pgTable(
+  "payouts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    partnerId: uuid("partner_id").notNull().references(() => partners.id),
+    jobId: uuid("job_id").references(() => jobs.id),
+    amountEur: integer("amount_eur").notNull(),
+    // due, paid
+    status: text("status").notNull().default("due"),
+    dueAt: timestamp("due_at", { withTimezone: true }).notNull(),
+    paidAt: timestamp("paid_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("payouts_partner_idx").on(t.partnerId), uniqueIndex("payouts_job_idx").on(t.jobId)],
+);
+
+// Messages between a partner and us. Contact details are masked in what the other side reads.
+export const partnerMessages = pgTable(
+  "partner_messages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    partnerId: uuid("partner_id").notNull().references(() => partners.id, { onDelete: "cascade" }),
+    jobId: uuid("job_id").references(() => jobs.id, { onDelete: "set null" }),
+    // partner or us
+    author: text("author").notNull(),
+    body: text("body").notNull(),
+    // what the other side sees (contact details masked)
+    shown: text("shown").notNull(),
+    flagged: boolean("flagged").notNull().default(false),
+    // a partner asking a person to review an automated decision (offer, rank, screening)
+    reviewRequest: boolean("review_request").notNull().default(false),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("partner_messages_partner_idx").on(t.partnerId, t.createdAt)],
+);

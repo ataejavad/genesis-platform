@@ -27,7 +27,7 @@ export default async function CockpitLayout({ children }: { children: React.Reac
         ] },
         { title: "Delivery", items: [
           { href: "/cockpit/projects", label: "Projects", icon: "📁" },
-          { href: "/cockpit/partners", label: "Partners", icon: "🤝", count: 3 },
+          { href: "/cockpit/partners", label: "Partners", icon: "🤝" },
           { href: "/cockpit/protocols", label: "Protocols", icon: "📐" },
           { href: "/cockpit/qa", label: "QA queue", icon: "🔍", count: 2 },
           { href: "/cockpit/moderation", label: "Moderation", icon: "🛡️", count: 2 },

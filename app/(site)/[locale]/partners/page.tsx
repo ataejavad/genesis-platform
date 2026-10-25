@@ -1,34 +1,32 @@
 import type { Metadata } from "next";
+import { partnerCopy } from "@/config/partner-copy";
+import { BRAND } from "@/mock/data";
+import { SKILLS, skillLabel } from "@/server/partner-rules";
 import { Apply } from "./apply";
 
-export const metadata: Metadata = { title: "همکاری با ما" };
+type Props = { params: Promise<{ locale: string }> };
 
-const kinds = [
-  { icon: "🧑‍💻", t: "فریلنسر و متخصص", d: "بازاریاب، توسعه‌دهنده n8n، طراح، مترجم، کارشناس صنعت." },
-  { icon: "🏢", t: "شرکت تأمین‌کننده", d: "آژانس‌ها و شرکت‌های اجرایی که پروژه مشتری را تحویل می‌دهند." },
-  { icon: "🤖", t: "ایجنت و نرم‌افزار", d: "سازندگان ایجنت و API که می‌خواهند در کاتالوگ ما باشند." },
-];
-const why = [
-  "پروژه آماده: ما مشتری را پیدا می‌کنیم، شما فقط تحویل می‌دهید.",
-  "معیار روشن: هر کار پروتکل و معیار قبولی دارد؛ می‌دانید چه چیزی خوب است.",
-  "تسویه سریع: پرداخت حداکثر ۷ روز بعد از قبولی تحویل.",
-  "رتبه و رشد: کیفیت بالاتر، رتبه بالاتر، پروژه‌های بیشتر و بهتر.",
-];
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  return { title: partnerCopy(locale.slice(0, 2)).apply.kicker };
+}
 
-export default function PartnersPage() {
+// "Work with us": who we look for, why it pays to deliver with us, and the application as a conversation.
+export default async function PartnersPage({ params }: Props) {
+  const { locale } = await params;
+  const lang = locale.slice(0, 2);
+  const t = partnerCopy(lang).apply;
   return (
     <main>
       <section className="wrap-site hero" style={{ paddingBottom: 24 }}>
         <div>
-          <span className="badge ai" style={{ marginBottom: 14 }}>✦ پورتال همکاران</span>
-          <h1>با ما برای <em>بهترین شرکت‌های اروپا</em> کار کنید</h1>
-          <p className="lead">همه کار داخل یک پلتفرم: پروژه، پروتکل، پیام، تحویل و تسویه. شما روی تخصصتان تمرکز می‌کنید؛ فروش و هماهنگی با ماست.</p>
-          <div className="stack">
-            {why.map((w) => <div key={w} className="row"><span className="badge ok">✓</span><span>{w}</span></div>)}
-          </div>
+          <span className="badge ai" style={{ marginBottom: 14 }}>{t.kicker}</span>
+          <h1>{t.title}</h1>
+          <p className="lead">{t.lead}</p>
+          <div className="stack">{t.why.map((w) => <div key={w} className="row"><span className="badge ok">✓</span><span>{w}</span></div>)}</div>
         </div>
         <div className="grid">
-          {kinds.map((k) => (
+          {t.kinds.map((k) => (
             <div key={k.t} className="card row" style={{ alignItems: "flex-start" }}>
               <span style={{ fontSize: 28 }}>{k.icon}</span>
               <div><h3 style={{ marginBottom: 4 }}>{k.t}</h3><div className="muted small">{k.d}</div></div>
@@ -37,7 +35,7 @@ export default function PartnersPage() {
         </div>
       </section>
       <section className="wrap-site section" style={{ maxWidth: 820, paddingTop: 0 }}>
-        <Apply />
+        <Apply t={t} skills={SKILLS.map((s) => ({ id: s.id, label: skillLabel(s.id, lang) }))} locale={locale} brand={BRAND} />
       </section>
     </main>
   );

@@ -23,7 +23,16 @@ export type EventType =
   | "outcome.recorded"
   | "customer_approval.requested"
   | "customer_approval.decided"
-  | "customer_request.created";
+  | "customer_request.created"
+  | "partner.applied"
+  | "partner.activated"
+  | "partner.message"
+  | "partner.document_added"
+  | "job.offered"
+  | "job.assigned"
+  | "delivery.submitted"
+  | "delivery.reviewed"
+  | "payout.paid";
 
 // Call inside the same transaction as the change it describes (transactional outbox).
 export async function emit(
