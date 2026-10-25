@@ -129,5 +129,6 @@ export const MODULES: ModuleDef[] = [
   { n: 68, name: "Agent budgets", system: "machine", runs: "hourly", job: "agents.budget", events: ["agent.paused"], kpi: "aiSpend", link: "/cockpit/agents" },
   { n: 69, name: "Experiments + lessons", system: "machine", runs: "daily 07:30", job: "experiments", events: ["experiment.ready", "experiment.decided"], kpi: "lessonsActive", link: "/cockpit/experiments" },
   { n: 71, name: "Emergency stop + switches", system: "machine", runs: "Cockpit › Systems", events: ["switch.changed"], link: "/cockpit/systems" },
+  { n: 78, name: "AI scout", system: "machine", runs: "day 3 06:00", agent: "ai-scout", job: "ai.scout", needs: CLAUDE, link: "/cockpit/experiments" },
   { n: 70, name: "Event outbox → Telegram + n8n", system: "machine", runs: "worker, continuous", needs: ["TELEGRAM_BOT_TOKEN"], kpi: "deadEvents", link: "/cockpit/systems" },
 ];

@@ -2,6 +2,7 @@ import { desc, eq } from "drizzle-orm";
 import type { Db } from "@/db";
 import { jobRuns } from "@/db/schema";
 import { checkBudgets } from "./agents";
+import { aiScout } from "./ai-scout";
 import { ensurePartnerContracts } from "./contracts";
 import { planEnv } from "./crm";
 import { dailyReport } from "./daily-report";
@@ -40,6 +41,7 @@ export const JOBS: JobDef[] = [
   { id: "customer.health", what: "Weekly health score per customer; at-risk alert", schedule: { weekly: 1, at: "07:00" }, run: (db, _d, now) => customerHealthWeek(db, now) },
   { id: "results.monthly", what: "Each customer's results of last month by email", schedule: { monthly: 1, at: "09:00" }, outward: true, run: (db, _d, now) => monthlyResults(db, now) },
   { id: "data.retention", what: "Delete data past its retention period (GDPR)", schedule: { monthly: 1, at: "03:00" }, run: (db, _d, now) => retention(db, now) },
+  { id: "ai.scout", what: "AI-capability scout: what new AI can take over or make cheaper (proposals, switched off)", schedule: { monthly: 3, at: "06:00" }, run: (db, _d, now) => aiScout(db, now) },
 ];
 
 const RETRY_MS = 15 * 60_000;

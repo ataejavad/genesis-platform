@@ -4,7 +4,7 @@
  * spend) → Javad decides keep / stop in the daily brief. Javad's switches live in the database (agent_settings).
  */
 
-export type KpiId = "costPerLead" | "costPerReply" | "unlockRate" | "costPerActiveCustomer" | "costPerActivePartner" | "judgeAgreement" | "costPerConversation";
+export type KpiId = "costPerLead" | "costPerReply" | "unlockRate" | "costPerActiveCustomer" | "costPerActivePartner" | "judgeAgreement" | "costPerConversation" | "costPerAdoption";
 
 export type AgentDef = {
   id: string;
@@ -25,6 +25,7 @@ export const AGENTS: AgentDef[] = [
   { id: "portal-advisor", name: "Customer advisor", job: "Answers customers in their dashboard chat", runs: "app", kpi: { id: "costPerActiveCustomer", label: "€ per active customer / month", target: 5, better: "lower", unit: "€" }, budgetEur: 20 },
   { id: "partner-advisor", name: "Partner advisor", job: "Answers partners in their portal chat", runs: "app", kpi: { id: "costPerActivePartner", label: "€ per active partner / month", target: 3, better: "lower", unit: "€" }, budgetEur: 15 },
   { id: "qa-judge", name: "QA judge", job: "Checks deliveries against the protocol before customers see them", runs: "app", kpi: { id: "judgeAgreement", label: "agreement with human review", target: 85, better: "higher", unit: "%" }, budgetEur: 25 },
+  { id: "ai-scout", name: "AI scout", job: "Monthly: new AI that takes over a person's step or cuts a partner cost", runs: "app", kpi: { id: "costPerAdoption", label: "€ per adopted idea", target: 20, better: "lower", unit: "€" }, budgetEur: 10 },
   { id: "whatsapp-agent", name: "WhatsApp agent", job: "Answers prospects on WhatsApp", runs: "app", kpi: { id: "costPerConversation", label: "€ per conversation", target: 0.5, better: "lower", unit: "€" }, budgetEur: 15 },
 ];
 
