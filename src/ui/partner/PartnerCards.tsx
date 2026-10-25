@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import type { PartnerCopy } from "@/config/partner-copy";
 import { fmtEur, fmtNum } from "@/config/portal-copy";
-import type { OfferCardData, PartnerCard } from "@/server/partner-chat";
+import type { JobCardData, OfferCardData, PartnerCard } from "@/server/partner-chat";
+import type { TodayItem } from "@/server/partners";
 import { messageTeam, respond } from "./actions";
 
 type P = { t: PartnerCopy; lang: string };
@@ -79,6 +80,43 @@ export function EarningsCard({ data: e, t, lang }: P & { data: Extract<PartnerCa
   );
 }
 
+const TODAY_ICON: Record<string, string> = { overdue: "⏰", changes: "✏️", dueToday: "📌", offer: "📥", dueSoon: "🗓️", message: "💬", doc: "📄", noDpa: "🔒", payout: "💶" };
+
+/** Today's priorities (Javad 2026-10-25): what to do now, most urgent first; each line opens its page. */
+export function TodayList({ items, t, lang }: P & { items: TodayItem[] }) {
+  const d = t.page.profile.kinds;
+  return (
+    <ul className="today-list">
+      {items.map((i, n) => (
+        <li key={n} className={`today-item ${i.kind}`}>
+          <Link href={i.href}>
+            <span aria-hidden="true">{TODAY_ICON[i.kind]}</span>
+            <span className="grow"><b>{t.today.kinds[i.kind]}</b>{i.kind !== "noDpa" && <> · {i.kind === "doc" ? (d[i.title] ?? i.title) : i.title}</>}</span>
+            {i.amountEur !== undefined && <b className="num">{fmtEur(i.amountEur, lang)}</b>}
+            {i.date && <span className="muted small">{i.date}</span>}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export function JobCard({ data: j, t, lang }: P & { data: JobCardData }) {
+  return (
+    <div className="card pcard stack">
+      <div className="row" style={{ flexWrap: "wrap", gap: 8 }}>
+        <b>{j.title}</b>{j.customerCode && <span className="badge">{t.card.customer} {j.customerCode}</span>}
+        <span className="spacer" /><span className="badge">{t.status[j.lastStatus === "changes" ? "changes" : j.status] ?? j.status}</span>
+      </div>
+      <div className="row small" style={{ gap: 16 }}><span>{t.card.pay}: <b className="num">{fmtEur(j.payEur, lang)}</b></span><span>{t.card.due}: <b>{j.dueAt}</b></span></div>
+      <div className="small"><b>{t.today.brief}:</b> {j.brief}</div>
+      <div className="small"><b>{t.today.checklist}:</b><ul>{j.checklist.map((x) => <li key={x}>{x}</li>)}</ul></div>
+      {j.review && <div className="small"><b>{t.today.review}:</b> {j.review}</div>}
+      <Link className="btn sm" href="/partner/work" style={{ alignSelf: "start" }}>{t.today.open}</Link>
+    </div>
+  );
+}
+
 function ConfirmCard({ text, t, onDone }: P & { text: string; onDone?: (text: string) => void }) {
   const [value, setValue] = useState(text);
   const [state, setState] = useState<"ask" | "sent" | "no">("ask");
@@ -102,6 +140,11 @@ export function PartnerCardView({ card, t, lang, onDone }: P & { card: PartnerCa
     case "next": return <Link className="tile" href="/partner/work"><b>{card.data.title}</b><span className="small">{t.card.due}: {card.data.dueAt} · {t.status[card.data.status] ?? card.data.status}</span></Link>;
     case "earnings": return <EarningsCard data={card.data} t={t} lang={lang} />;
     case "level": return <LevelCard data={card.data} t={t} lang={lang} />;
+    case "today": return <div className="card pcard"><TodayList items={card.data} t={t} lang={lang} /></div>;
+    case "job": return <JobCard data={card.data} t={t} lang={lang} />;
+    case "messages": return <div className="card pcard"><ul className="plist">{card.data.map((m, i) => <li key={i}><span>{m.text}</span><span className="spacer" /><span className="muted small">{m.at}</span></li>)}</ul></div>;
+    case "docs": return <div className="card pcard"><ul className="plist">{card.data.map((d, i) => <li key={i}><span>{t.page.profile.kinds[d.kind] ?? d.kind}</span><span className="spacer" />{d.expiring && <span className="badge warn">{t.page.profile.expiring}</span>}<span className="muted small">{t.page.profile.docStatus[d.status] ?? d.status}{d.expiresAt ? ` · ${d.expiresAt}` : ""}</span></li>)}</ul></div>;
+    case "rules": return <div className="card pcard"><ul>{card.data.map((r) => <li key={r} className="small">{r}</li>)}</ul></div>;
     case "confirm": return <ConfirmCard text={card.text} t={t} lang={lang} onDone={onDone} />;
   }
 }

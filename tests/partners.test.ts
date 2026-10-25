@@ -10,6 +10,7 @@ import {
   decideApplication,
   deliver,
   earnings,
+  todayFor,
   issuePartnerKey,
   levelFor,
   markPaid,
@@ -21,6 +22,7 @@ import {
   sendPartnerMessage,
 } from "@/server/partners";
 import { authenticateAgent } from "@/server/api-keys";
+import { detectPartnerIntent, partnerReply } from "@/server/partner-chat";
 import { useTestDb } from "./helpers";
 
 const db = useTestDb();
@@ -136,5 +138,27 @@ describe("partner flow", () => {
     const second = await issuePartnerKey(db, javad, p.id);
     await expect(authenticateAgent(db, `Bearer ${first}`, "partner:work")).rejects.toThrow(/revoked/);
     await expect(authenticateAgent(db, `Bearer ${second}`, "portal:write")).rejects.toThrow(/scope/);
+  });
+
+  it("puts today's priorities first and answers project questions in the chat", async () => {
+    const p = await activePartner("Luca Verdi", "luca@example.com");
+    const j = await job({ title: "Collegare il modulo al CRM", dueAt: new Date(Date.now() + 864e5) });
+    await offerJob(db, javad, j.id, 1, 0);
+    const [o] = await offersFor(db, p.id);
+    await respondOffer(db, sys, p.id, o.offer.id, true);
+    const late = await job({ title: "Report mensile clienti", dueAt: new Date(Date.now() - 864e5) });
+    await offerJob(db, javad, late.id, 1, 0);
+    await sendPartnerMessage(db, javad, p.id, "us", "Welcome aboard");
+    const today = await todayFor(db, p.id);
+    expect(today.map((i) => i.kind)).toEqual(["offer", "dueSoon", "message", "noDpa"]);
+
+    expect(detectPartnerIntent("Cosa devo fare oggi?")).toBe("today");
+    expect(detectPartnerIntent("What do I need for the next level?")).toBe("level");
+    expect(detectPartnerIntent("Mi mandi la checklist del progetto CRM?")).toBe("job");
+    expect(detectPartnerIntent("امروز چه کاری دارم؟")).toBe("today");
+    const r = await partnerReply(db, p.id, "it", "Qual è la checklist del progetto modulo CRM?");
+    expect(r.cards[0]).toMatchObject({ type: "job", data: { title: "Collegare il modulo al CRM", checklist: ["Test lead arrives in CRM", "Source field filled"] } });
+    const m = await partnerReply(db, p.id, "en", "What did the team write me?");
+    expect(m.cards[0]).toMatchObject({ type: "messages", data: [{ text: "Welcome aboard" }] });
   });
 });

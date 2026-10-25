@@ -24,7 +24,8 @@ export async function sendMessage(threadId: string | null, text: string) {
   if (!msg || !partner.orgId) return null;
   const history = threadId ? await threadMessages(db, partner.orgId, user.id, threadId) : null;
   const lastBot = history?.messages.filter((m) => m.role === "assistant").at(-1)?.text;
-  const reply = await partnerReply(db, partner.id, lang, msg, lastBot);
+  const transcript = (history?.messages ?? []).map((m) => ({ role: m.role as "user" | "assistant", text: m.text }));
+  const reply = await partnerReply(db, partner.id, lang, msg, lastBot, transcript);
   const saved = await saveTurn(db, partner.orgId, user.id, threadId, msg, { text: reply.text, cards: reply.cards });
   return { threadId: saved.threadId, text: reply.text, cards: reply.cards as PartnerCard[] };
 }

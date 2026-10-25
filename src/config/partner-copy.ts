@@ -3,9 +3,9 @@
 const en = {
   door: "Partner portal",
   nav: { home: "Home", offers: "Job offers", work: "My work", earnings: "Earnings", level: "Level", services: "Services & availability", profile: "Profile & documents", messages: "Messages" },
-  hello: "Hi {name}. Ask me what's next, how much you earned, or what your next level needs. New job offers show up here too.",
+  hello: "Hi {name}. Ask me anything about your work: what to do today, a project's brief and checklist, offers, pay, documents or messages from the team. You don't need to look through the pages.",
   placeholder: "Write or speak: e.g. \"What's my next job?\"",
-  chips: ["What's next for me?", "Any new job offers?", "How much did I earn this month?", "What do I need for the next level?", "I need help from the team"],
+  chips: ["What do I have to do today?", "Any new job offers?", "How much did I earn this month?", "What do I need for the next level?", "I need help from the team"],
   disclosure: "You are talking to our AI assistant. A person reviews any automated decision on request.",
   send: "Send", speak: "Speak", newChat: "New conversation", history: "Earlier conversations", thinking: "…",
   r: {
@@ -27,6 +27,15 @@ const en = {
   status: { assigned: "In progress", delivered: "Delivered, in review", accepted: "Accepted", paid: "Paid", due: "To be paid", changes: "Changes asked", submitted: "In review" } as Record<string, string>,
   tiers: { new: "New", rising: "Rising", trusted: "Trusted", top: "Top" } as Record<string, string>,
   missing: { accepted: "accepted jobs", quality: "average quality", onTime: "on-time share" } as Record<string, string>,
+  today: {
+    title: "Today", empty: "Nothing urgent today. New offers and deadlines will show up here.", open: "Open",
+    kinds: { overdue: "Late: deliver", changes: "Changes asked", dueToday: "Due today", offer: "Answer the offer", dueSoon: "Due soon", message: "New message from the team", doc: "Renew document", noDpa: "Add a signed DPA to get jobs with personal data", payout: "Payout coming" } as Record<string, string>,
+    reply: "Here is what matters today:", replyEmpty: "Nothing urgent today. Want to see your offers or your earnings?",
+    job: "Here is the project:", jobNone: "You have no active project. Want to see the open offers?",
+    messages: "Latest from the team:", messagesNone: "No messages from the team yet.",
+    docs: "Your documents:", docsNone: "No documents yet. Add your VAT number and a signed DPA under Profile & documents.",
+    rules: "How it works:", brief: "Brief", checklist: "Checklist", review: "Reviewer's note",
+  },
   page: {
     offers: { title: "Job offers", sub: "Matched to your skills, languages and free capacity. Every match shows why.", none: "No open offers right now." },
     work: { title: "My work", sub: "Your jobs, their checklists and deliveries.", none: "No jobs yet.", brief: "Brief", checklist: "Checklist (tick every point before delivering)", link: "Link to your work (Drive, Dropbox, …)", note: "Note for the reviewer", deliver: "Deliver", delivered: "Delivered. We review it within one working day.", review: "Reviewer's note", version: "Version {v}" },
@@ -57,9 +66,9 @@ export type PartnerCopy = typeof en;
 const it: PartnerCopy = {
   door: "Portale partner",
   nav: { home: "Home", offers: "Offerte di lavoro", work: "Il mio lavoro", earnings: "Guadagni", level: "Livello", services: "Servizi e disponibilità", profile: "Profilo e documenti", messages: "Messaggi" },
-  hello: "Ciao {name}. Chiedimi cosa c'è dopo, quanto hai guadagnato o cosa serve per il prossimo livello. Anche le nuove offerte arrivano qui.",
+  hello: "Ciao {name}. Chiedimi qualsiasi cosa sul tuo lavoro: cosa fare oggi, descrizione e checklist di un progetto, offerte, pagamenti, documenti o messaggi del team. Non serve cercare tra le pagine.",
   placeholder: "Scrivi o parla: es. \"Qual è il mio prossimo lavoro?\"",
-  chips: ["Cosa devo fare adesso?", "Ci sono nuove offerte?", "Quanto ho guadagnato questo mese?", "Cosa mi serve per il prossimo livello?", "Mi serve aiuto dal team"],
+  chips: ["Cosa devo fare oggi?", "Ci sono nuove offerte?", "Quanto ho guadagnato questo mese?", "Cosa mi serve per il prossimo livello?", "Mi serve aiuto dal team"],
   disclosure: "Stai parlando con il nostro assistente AI. Su richiesta una persona rivede ogni decisione automatica.",
   send: "Invia", speak: "Parla", newChat: "Nuova conversazione", history: "Conversazioni precedenti", thinking: "…",
   r: {
@@ -81,6 +90,15 @@ const it: PartnerCopy = {
   status: { assigned: "In corso", delivered: "Consegnato, in revisione", accepted: "Accettato", paid: "Pagato", due: "Da pagare", changes: "Modifiche richieste", submitted: "In revisione" },
   tiers: { new: "Nuovo", rising: "In crescita", trusted: "Affidabile", top: "Top" },
   missing: { accepted: "lavori accettati", quality: "qualità media", onTime: "quota puntuale" },
+  today: {
+    title: "Oggi", empty: "Niente di urgente oggi. Nuove offerte e scadenze appariranno qui.", open: "Apri",
+    kinds: { overdue: "In ritardo: consegna", changes: "Modifiche richieste", dueToday: "Scade oggi", offer: "Rispondi all'offerta", dueSoon: "Scade a breve", message: "Nuovo messaggio dal team", doc: "Rinnova documento", noDpa: "Aggiungi un DPA firmato per i lavori con dati personali", payout: "Pagamento in arrivo" },
+    reply: "Ecco cosa conta oggi:", replyEmpty: "Niente di urgente oggi. Vuoi vedere le offerte o i guadagni?",
+    job: "Ecco il progetto:", jobNone: "Non hai progetti attivi. Vuoi vedere le offerte aperte?",
+    messages: "Ultimi messaggi dal team:", messagesNone: "Ancora nessun messaggio dal team.",
+    docs: "I tuoi documenti:", docsNone: "Ancora nessun documento. Aggiungi partita IVA e DPA firmato in Profilo e documenti.",
+    rules: "Come funziona:", brief: "Descrizione", checklist: "Checklist", review: "Nota del revisore",
+  },
   page: {
     offers: { title: "Offerte di lavoro", sub: "Scelte in base a competenze, lingue e capacità libera. Ogni offerta mostra il perché.", none: "Nessuna offerta aperta adesso." },
     work: { title: "Il mio lavoro", sub: "I tuoi lavori, le checklist e le consegne.", none: "Ancora nessun lavoro.", brief: "Descrizione", checklist: "Checklist (spunta ogni punto prima di consegnare)", link: "Link al lavoro (Drive, Dropbox, …)", note: "Nota per il revisore", deliver: "Consegna", delivered: "Consegnato. Lo rivediamo entro un giorno lavorativo.", review: "Nota del revisore", version: "Versione {v}" },
@@ -110,9 +128,9 @@ const it: PartnerCopy = {
 const de: PartnerCopy = {
   door: "Partnerportal",
   nav: { home: "Start", offers: "Jobangebote", work: "Meine Arbeit", earnings: "Einnahmen", level: "Stufe", services: "Leistungen & Verfügbarkeit", profile: "Profil & Dokumente", messages: "Nachrichten" },
-  hello: "Hallo {name}. Fragen Sie mich, was als Nächstes ansteht, was Sie verdient haben oder was die nächste Stufe braucht. Neue Angebote erscheinen auch hier.",
+  hello: "Hallo {name}. Fragen Sie mich alles zu Ihrer Arbeit: was heute ansteht, Beschreibung und Checkliste eines Projekts, Angebote, Zahlungen, Dokumente oder Nachrichten vom Team. Sie müssen nicht durch die Seiten suchen.",
   placeholder: "Schreiben oder sprechen: z. B. „Was ist mein nächster Job?“",
-  chips: ["Was steht als Nächstes an?", "Gibt es neue Angebote?", "Wie viel habe ich diesen Monat verdient?", "Was brauche ich für die nächste Stufe?", "Ich brauche Hilfe vom Team"],
+  chips: ["Was steht heute an?", "Gibt es neue Angebote?", "Wie viel habe ich diesen Monat verdient?", "Was brauche ich für die nächste Stufe?", "Ich brauche Hilfe vom Team"],
   disclosure: "Sie sprechen mit unserem KI-Assistenten. Auf Wunsch prüft ein Mensch jede automatische Entscheidung.",
   send: "Senden", speak: "Sprechen", newChat: "Neues Gespräch", history: "Frühere Gespräche", thinking: "…",
   r: {
@@ -134,6 +152,15 @@ const de: PartnerCopy = {
   status: { assigned: "In Arbeit", delivered: "Geliefert, in Prüfung", accepted: "Abgenommen", paid: "Bezahlt", due: "Offen", changes: "Änderungen erbeten", submitted: "In Prüfung" },
   tiers: { new: "Neu", rising: "Aufsteigend", trusted: "Vertrauenswürdig", top: "Top" },
   missing: { accepted: "abgenommene Jobs", quality: "Durchschnittsqualität", onTime: "Pünktlichkeit" },
+  today: {
+    title: "Heute", empty: "Heute nichts Dringendes. Neue Angebote und Fristen erscheinen hier.", open: "Öffnen",
+    kinds: { overdue: "Verspätet: liefern", changes: "Änderungen erbeten", dueToday: "Heute fällig", offer: "Angebot beantworten", dueSoon: "Bald fällig", message: "Neue Nachricht vom Team", doc: "Dokument erneuern", noDpa: "Unterschriebenen AVV hinzufügen für Jobs mit personenbezogenen Daten", payout: "Zahlung kommt" },
+    reply: "Das zählt heute:", replyEmpty: "Heute nichts Dringendes. Angebote oder Einnahmen ansehen?",
+    job: "Hier ist das Projekt:", jobNone: "Sie haben kein aktives Projekt. Offene Angebote ansehen?",
+    messages: "Neueste Nachrichten vom Team:", messagesNone: "Noch keine Nachrichten vom Team.",
+    docs: "Ihre Dokumente:", docsNone: "Noch keine Dokumente. Fügen Sie USt-IdNr. und unterschriebenen AVV unter Profil & Dokumente hinzu.",
+    rules: "So funktioniert es:", brief: "Beschreibung", checklist: "Checkliste", review: "Notiz der Prüfung",
+  },
   page: {
     offers: { title: "Jobangebote", sub: "Passend zu Fähigkeiten, Sprachen und freier Kapazität. Jedes Angebot zeigt den Grund.", none: "Gerade keine offenen Angebote." },
     work: { title: "Meine Arbeit", sub: "Ihre Jobs, Checklisten und Lieferungen.", none: "Noch keine Jobs.", brief: "Beschreibung", checklist: "Checkliste (vor der Lieferung jeden Punkt abhaken)", link: "Link zur Arbeit (Drive, Dropbox, …)", note: "Hinweis für die Prüfung", deliver: "Liefern", delivered: "Geliefert. Wir prüfen innerhalb eines Arbeitstags.", review: "Hinweis der Prüfung", version: "Version {v}" },
@@ -163,9 +190,9 @@ const de: PartnerCopy = {
 const fa: PartnerCopy = {
   door: "پورتال همکاران",
   nav: { home: "خانه", offers: "پیشنهادهای کار", work: "کارهای من", earnings: "درآمد", level: "سطح", services: "خدمات و ظرفیت", profile: "پروفایل و مدارک", messages: "پیام‌ها" },
-  hello: "سلام {name}. بپرسید کار بعدی چیست، چقدر درآمد داشتید یا برای سطح بعد چه لازم است. پیشنهادهای کار تازه هم همین‌جا می‌آید.",
+  hello: "سلام {name}. هر چیزی درباره کارتان بپرسید: کار امروز، شرح و چک‌لیست یک پروژه، پیشنهادها، پرداخت، مدارک یا پیام‌های تیم. لازم نیست صفحه‌ها را بگردید.",
   placeholder: "بنویسید یا بگویید: مثلاً «کار بعدی من چیست؟»",
-  chips: ["کار بعدی من چیست؟", "پیشنهاد کار تازه دارم؟", "این ماه چقدر درآمد داشتم؟", "برای سطح بعد چه لازم دارم؟", "از تیم کمک می‌خواهم"],
+  chips: ["امروز چه کاری دارم؟", "پیشنهاد کار تازه دارم؟", "این ماه چقدر درآمد داشتم؟", "برای سطح بعد چه لازم دارم؟", "از تیم کمک می‌خواهم"],
   disclosure: "با دستیار هوش مصنوعی ما صحبت می‌کنید. هر تصمیم خودکار را به درخواست شما یک انسان بازبینی می‌کند.",
   send: "ارسال", speak: "صحبت", newChat: "گفتگوی تازه", history: "گفتگوهای قبلی", thinking: "…",
   r: {
@@ -187,6 +214,15 @@ const fa: PartnerCopy = {
   status: { assigned: "در حال انجام", delivered: "تحویل شد، در بازبینی", accepted: "قبول شد", paid: "پرداخت شد", due: "در انتظار پرداخت", changes: "اصلاح خواسته شد", submitted: "در بازبینی" },
   tiers: { new: "تازه", rising: "در حال رشد", trusted: "مورد اعتماد", top: "برتر" },
   missing: { accepted: "کار قبول‌شده", quality: "میانگین کیفیت", onTime: "سهم تحویل به‌موقع" },
+  today: {
+    title: "امروز", empty: "امروز کار فوری ندارید. پیشنهادها و مهلت‌های تازه همین‌جا می‌آیند.", open: "باز کن",
+    kinds: { overdue: "دیر شده: تحویل بده", changes: "اصلاح خواسته شد", dueToday: "مهلت امروز", offer: "به پیشنهاد جواب بده", dueSoon: "مهلت نزدیک", message: "پیام تازه از تیم", doc: "تمدید مدرک", noDpa: "برای کارهای دارای داده شخصی، قرارداد DPA امضاشده بگذارید", payout: "پرداخت در راه" },
+    reply: "مهم‌ترین‌های امروز:", replyEmpty: "امروز کار فوری ندارید. پیشنهادها یا درآمدتان را ببینید؟",
+    job: "این پروژه است:", jobNone: "پروژه فعالی ندارید. پیشنهادهای باز را ببینید؟",
+    messages: "آخرین پیام‌های تیم:", messagesNone: "هنوز پیامی از تیم ندارید.",
+    docs: "مدارک شما:", docsNone: "هنوز مدرکی ندارید. شماره مالیاتی و DPA امضاشده را در پروفایل و مدارک بگذارید.",
+    rules: "روش کار:", brief: "شرح", checklist: "چک‌لیست", review: "یادداشت بازبین",
+  },
   page: {
     offers: { title: "پیشنهادهای کار", sub: "بر اساس مهارت، زبان و ظرفیت آزاد شما. هر پیشنهاد دلیلش را نشان می‌دهد.", none: "الان پیشنهاد بازی نیست." },
     work: { title: "کارهای من", sub: "کارها، چک‌لیست‌ها و تحویل‌های شما.", none: "هنوز کاری ندارید.", brief: "شرح کار", checklist: "چک‌لیست (قبل از تحویل همه را تیک بزنید)", link: "لینک کار شما (Drive، Dropbox، ...)", note: "یادداشت برای بازبین", deliver: "تحویل", delivered: "تحویل شد. تا یک روز کاری بازبینی می‌کنیم.", review: "یادداشت بازبین", version: "نسخه {v}" },

@@ -342,6 +342,46 @@ export async function messagesFor(db: Db, partnerId: string) {
   return db.select().from(partnerMessages).where(eq(partnerMessages.partnerId, partnerId)).orderBy(asc(partnerMessages.createdAt)).limit(200);
 }
 
+/* ───────────── Today: what the partner should do now (Javad 2026-10-25) ───────────── */
+
+export type TodayItem = {
+  kind: "overdue" | "changes" | "dueToday" | "offer" | "dueSoon" | "message" | "doc" | "noDpa" | "payout";
+  title: string;
+  date: string | null;
+  href: string;
+  amountEur?: number;
+};
+
+// most urgent first: late work and asked changes, then today, offers, the next days, then the rest
+const ORDER: TodayItem["kind"][] = ["overdue", "changes", "dueToday", "offer", "dueSoon", "message", "doc", "noDpa", "payout"];
+
+/** The short list above the partner's chat: priorities and what is due, all from the partner's own data. */
+export async function todayFor(db: Db, partnerId: string, now = new Date()): Promise<TodayItem[]> {
+  const [work, offers, docs, msgs, pay] = await Promise.all([workFor(db, partnerId), offersFor(db, partnerId), documentsFor(db, partnerId, now), messagesFor(db, partnerId), earnings(db, partnerId, now)]);
+  const day = (d: Date) => d.toISOString().slice(0, 10);
+  const today = day(now);
+  const soon = day(new Date(now.getTime() + 3 * 864e5));
+  const items: TodayItem[] = [];
+  for (const { job, last } of work.filter((w) => w.job.status === "assigned")) {
+    const due = day(job.dueAt);
+    const base = { title: job.title, date: due, href: "/partner/work" };
+    if (last?.status === "changes") items.push({ kind: "changes", ...base });
+    else if (due < today) items.push({ kind: "overdue", ...base });
+    else if (due === today) items.push({ kind: "dueToday", ...base });
+    else if (due <= soon) items.push({ kind: "dueSoon", ...base });
+  }
+  for (const { job } of offers) items.push({ kind: "offer", title: job.title, date: day(job.dueAt), href: "/partner/offers" });
+  // a message from us after the partner last wrote is waiting for them
+  const lastOurs = msgs.filter((m) => m.author === "us").at(-1);
+  const lastTheirs = msgs.filter((m) => m.author === "partner").at(-1);
+  if (lastOurs && (!lastTheirs || lastOurs.createdAt > lastTheirs.createdAt) && now.getTime() - lastOurs.createdAt.getTime() < 7 * 864e5) items.push({ kind: "message", title: lastOurs.shown.slice(0, 120), date: day(lastOurs.createdAt), href: "/partner/messages" });
+  for (const d of docs.filter((x) => x.expiring && x.status !== "rejected")) items.push({ kind: "doc", title: d.kind, date: d.expiresAt ? day(d.expiresAt) : null, href: "/partner/profile" });
+  if (!docs.some((d) => d.kind === "dpa" && d.status !== "rejected")) items.push({ kind: "noDpa", title: "dpa", date: null, href: "/partner/profile" });
+  const nextPay = pay.rows.filter((r) => r.status === "due").sort((a, b) => a.dueAt.localeCompare(b.dueAt))[0];
+  if (nextPay) items.push({ kind: "payout", title: nextPay.title, date: nextPay.dueAt, href: "/partner/earnings", amountEur: nextPay.amountEur });
+  return items.sort((a, b) => ORDER.indexOf(a.kind) - ORDER.indexOf(b.kind) || (a.date ?? "").localeCompare(b.date ?? ""));
+}
+
 /* ───────────── Profile: services, documents, capacity ───────────── */
 
 export const serviceInput = z.object({ title: z.string().trim().min(3).max(200), skills: z.array(z.enum(SKILL_IDS)).max(6).default([]), priceModel: z.enum(["fixed", "hourly", "monthly"]), priceEur: z.number().int().min(1).max(100000), deliveryDays: z.number().int().min(1).max(365) });
