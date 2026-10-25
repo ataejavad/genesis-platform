@@ -7,7 +7,9 @@ import { account, apiKeys, deliveries, jobOffers, jobs, memberships, organizatio
 import type { Actor } from "./actor";
 import { createApiKey } from "./api-keys";
 import { AppError, notFound } from "./errors";
+import { customerCode as codeFor } from "./delivery-rules";
 import { audit, emit } from "./events";
+import { onJobAccepted } from "./projects";
 import { maskContacts, match, SKILLS, type Stats, screen, tierOf } from "./partner-rules";
 
 /*
@@ -178,7 +180,7 @@ export async function createJob(db: Db, actor: Actor, input: z.input<typeof jobI
       const [o] = await tx.select().from(organizations).where(and(eq(organizations.id, v.customerOrgId), eq(organizations.kind, "customer")));
       if (!o) throw notFound("customer");
       // white-label: the partner sees a code, the trade and the country, never the name
-      customerCode = `C-${o.id.slice(0, 4).toUpperCase()} · ${o.industry ?? "?"} · ${o.country ?? "?"}`;
+      customerCode = codeFor(o.id, o.industry, o.country);
     }
     const [row] = await tx.insert(jobs).values({ ...v, customerOrgId: v.customerOrgId ?? null, customerCode, createdBy: `${actor.type}:${actor.id}` }).returning();
     await audit(tx, actor, "job.created", { type: "job", id: row.id }, null, v);
@@ -298,6 +300,8 @@ export async function reviewDelivery(db: Db, actor: Actor, deliveryId: string, a
     if (accept) {
       const lvl = await levelFor(tx, d.partnerId);
       [payout] = await tx.insert(payouts).values({ partnerId: d.partnerId, jobId: d.jobId, amountEur: job.payEur, dueAt: new Date(now.getTime() + lvl.tier.payoutDays * 864e5) }).returning();
+      // a project task: cost booked, a finished milestone goes to the customer (step 7)
+      await onJobAccepted(tx, actor, { ...job, status: "accepted" }, now);
     }
     await emit(tx, actor, "delivery.reviewed", { type: "delivery", id: deliveryId }, { jobId: d.jobId, partnerId: d.partnerId, accepted: accept, quality: accept ? q : null });
     await audit(tx, actor, "delivery.reviewed", { type: "delivery", id: deliveryId }, { status: "submitted" }, { status: accept ? "accepted" : "changes", quality: q, review });

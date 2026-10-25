@@ -32,7 +32,18 @@ export type EventType =
   | "job.assigned"
   | "delivery.submitted"
   | "delivery.reviewed"
-  | "payout.paid";
+  | "payout.paid"
+  | "order.created"
+  | "project.created"
+  | "project.closed"
+  | "qa.judged"
+  | "milestone.ready"
+  | "milestone.accepted"
+  | "milestone.changes"
+  | "milestone.reminded"
+  | "change_request.quoted"
+  | "change_request.decided"
+  | "protocol.approved";
 
 // Call inside the same transaction as the change it describes (transactional outbox).
 export async function emit(

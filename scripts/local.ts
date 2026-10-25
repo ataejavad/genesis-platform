@@ -49,9 +49,10 @@ if (n === 0) {
   await run("npm run seed");
   await run("npm run demo");
 }
-// Demo customer and partner (once each; also on databases made before steps 5 and 6).
+// Demo customer, partner and projects (once each; also on databases made before steps 5–7).
 await run("npm run demo:portal");
 await run("npm run demo:partner");
+await run("npm run demo:delivery");
 
 console.log(`
   Site:     http://localhost:3000

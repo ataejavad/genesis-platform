@@ -50,6 +50,13 @@
       "when": 1792927981950,
       "tag": "0006_partner-portal",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792933232015,
+      "tag": "0007_delivery",
+      "breakpoints": true
     }
   ]
 }

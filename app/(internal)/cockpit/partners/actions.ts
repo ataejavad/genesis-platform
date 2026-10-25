@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getDb } from "@/db";
 import { requireAdmin } from "@/lib/auth";
 import { AppError } from "@/server/errors";
-import { checkDocument, createJob, decideApplication, issuePartnerKey, markPaid, offerJob, reviewDelivery, sendPartnerMessage } from "@/server/partners";
+import { checkDocument, createJob, decideApplication, issuePartnerKey, markPaid, offerJob, sendPartnerMessage } from "@/server/partners";
 
 // Cockpit actions for partners (step 6). Each acts as the signed-in admin and is audited in the module.
 async function run(fn: (actor: { type: "user"; id: string }) => Promise<unknown>) {
@@ -51,9 +51,6 @@ export async function newJob(_: Result, f: FormData): Promise<Result> {
 
 export async function offer(f: FormData) {
   await run((a) => offerJob(getDb(), a, str(f, "job"), Number(str(f, "n") || 3)));
-}
-export async function review(f: FormData) {
-  await run((a) => reviewDelivery(getDb(), a, str(f, "delivery"), str(f, "decision") === "accept", Number(str(f, "quality") || 4), str(f, "review")));
 }
 export async function paid(f: FormData) {
   await run((a) => markPaid(getDb(), a, str(f, "payout")));

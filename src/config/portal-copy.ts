@@ -15,6 +15,7 @@ const en = {
   disclosure: "You are talking to our AI advisor. Our team sees every request.",
   chips: ["How much did we get back this month?", "What is waiting for me?", "How are my goals going?", "What should we fix next?", "I have a new problem"],
   r: {
+    projects: "Your projects:", projectsNone: "No project running. When you start a new result, its progress shows here.",
     results: "This month you got back {eur}, against a fee of {fee}.",
     resultsNone: "No results recorded yet this month. As soon as your first service runs, every call, quote and hour shows up here.",
     goals: "Here are the goals we agreed with you.",
@@ -38,6 +39,7 @@ const en = {
     changes: "Noted: the team will change it and send it again.",
   },
   card: {
+    order: "Start this", ordered: "Ordered. We confirm the start within one working day.", ms: { open: "In progress", ready: "Waiting for your OK", accepted: "Done", changes: "Being fixed" } as Record<string, string>, done: "done", readyBy: "Ready by",
     month: "Back this month", fee: "Your monthly fee", roi: "€ back per € of fee", since: "Since we started", recovered: "of your starting monthly loss won back",
     baseline: "Starting point (your check-up): {eur} lost per month", how: "How we count it", trend: "Last 6 months",
     approve: "Approve", change: "Ask for changes", open: "Open", ask: "Send to team", cancel: "Not now", from: "from {eur}/month",
@@ -73,6 +75,7 @@ const it: PortalCopy = {
   disclosure: "Stai parlando con il nostro consulente AI. Il nostro team vede ogni richiesta.",
   chips: ["Quanto abbiamo recuperato questo mese?", "Cosa aspetta una mia conferma?", "Come vanno i nostri obiettivi?", "Cosa conviene risolvere adesso?", "Ho un nuovo problema"],
   r: {
+    projects: "I vostri progetti:", projectsNone: "Nessun progetto in corso. Quando avviate un nuovo risultato, qui vedete l'avanzamento.",
     results: "Questo mese avete recuperato {eur}, contro un canone di {fee}.",
     resultsNone: "Nessun risultato registrato questo mese. Appena parte il primo servizio, ogni chiamata, preventivo e ora compare qui.",
     goals: "Ecco gli obiettivi concordati con voi.",
@@ -96,6 +99,7 @@ const it: PortalCopy = {
     changes: "Preso nota: il team lo modifica e ve lo rimanda.",
   },
   card: {
+    order: "Avvia", ordered: "Ordinato. Confermiamo l'avvio entro un giorno lavorativo.", ms: { open: "In corso", ready: "Aspetta il vostro OK", accepted: "Fatto", changes: "In correzione" }, done: "fatto", readyBy: "Pronto entro",
     month: "Recuperato questo mese", fee: "Il vostro canone", roi: "€ recuperati per € di canone", since: "Da quando lavoriamo insieme", recovered: "della perdita mensile iniziale recuperata",
     baseline: "Punto di partenza (vostro check-up): {eur} persi al mese", how: "Come lo calcoliamo", trend: "Ultimi 6 mesi",
     approve: "Approva", change: "Chiedi modifiche", open: "Apri", ask: "Invia al team", cancel: "Non ora", from: "da {eur}/mese",
@@ -129,6 +133,7 @@ const de: PortalCopy = {
   disclosure: "Sie sprechen mit unserem KI-Berater. Unser Team sieht jede Anfrage.",
   chips: ["Wie viel haben wir diesen Monat zurückgewonnen?", "Was wartet auf mich?", "Wie stehen unsere Ziele?", "Was sollten wir als Nächstes lösen?", "Ich habe ein neues Problem"],
   r: {
+    projects: "Ihre Projekte:", projectsNone: "Kein laufendes Projekt. Wenn Sie ein neues Ergebnis starten, sehen Sie hier den Fortschritt.",
     results: "Diesen Monat haben Sie {eur} zurückgewonnen, bei einer Gebühr von {fee}.",
     resultsNone: "Diesen Monat noch keine Ergebnisse erfasst. Sobald Ihre erste Leistung läuft, erscheint hier jeder Anruf, jedes Angebot und jede Stunde.",
     goals: "Hier sind die mit Ihnen vereinbarten Ziele.",
@@ -152,6 +157,7 @@ const de: PortalCopy = {
     changes: "Notiert: Das Team ändert es und schickt es erneut.",
   },
   card: {
+    order: "Starten", ordered: "Bestellt. Wir bestätigen den Start innerhalb eines Werktags.", ms: { open: "In Arbeit", ready: "Wartet auf Ihr OK", accepted: "Erledigt", changes: "Wird korrigiert" }, done: "erledigt", readyBy: "Fertig bis",
     month: "Diesen Monat zurück", fee: "Ihre Monatsgebühr", roi: "€ zurück je € Gebühr", since: "Seit Beginn", recovered: "des anfänglichen Monatsverlusts zurückgewonnen",
     baseline: "Ausgangspunkt (Ihr Check-up): {eur} Verlust pro Monat", how: "So rechnen wir", trend: "Letzte 6 Monate",
     approve: "Freigeben", change: "Änderung erbitten", open: "Öffnen", ask: "Ans Team senden", cancel: "Jetzt nicht", from: "ab {eur}/Monat",
@@ -185,6 +191,7 @@ const fa: PortalCopy = {
   disclosure: "با مشاور هوش مصنوعی ما صحبت می‌کنید. تیم ما همه‌ی درخواست‌ها را می‌بیند.",
   chips: ["این ماه چقدر برگشت؟", "چه چیزی منتظر تأیید من است؟", "هدف‌هایمان چطور پیش می‌رود؟", "قدم بعد چه باشد؟", "یک مشکل تازه دارم"],
   r: {
+    projects: "پروژه‌های شما:", projectsNone: "پروژه‌ای در جریان نیست. وقتی نتیجه تازه‌ای را شروع کنید، پیشرفتش اینجا دیده می‌شود.",
     results: "این ماه {eur} برگشت، در برابر هزینه‌ی ماهانه‌ی {fee}.",
     resultsNone: "این ماه هنوز نتیجه‌ای ثبت نشده. با شروع اولین خدمت، هر تماس، پیش‌فاکتور و ساعت اینجا دیده می‌شود.",
     goals: "هدف‌هایی که با شما توافق کردیم:",
@@ -208,6 +215,7 @@ const fa: PortalCopy = {
     changes: "ثبت شد: تیم اصلاح می‌کند و دوباره می‌فرستد.",
   },
   card: {
+    order: "شروع کن", ordered: "سفارش ثبت شد. شروع کار را تا یک روز کاری تأیید می‌کنیم.", ms: { open: "در حال انجام", ready: "منتظر تأیید شما", accepted: "انجام شد", changes: "در حال اصلاح" }, done: "انجام شده", readyBy: "آماده تا",
     month: "برگشتی این ماه", fee: "هزینه‌ی ماهانه‌ی شما", roi: "یورو برگشتی به ازای هر یورو هزینه", since: "از شروع همکاری", recovered: "از ضرر ماهانه‌ی اولیه برگشت",
     baseline: "نقطه‌ی شروع (چک‌آپ شما): {eur} ضرر در ماه", how: "چطور حساب می‌کنیم", trend: "۶ ماه اخیر",
     approve: "تأیید", change: "اصلاح بخواهید", open: "باز کردن", ask: "بفرست برای تیم", cancel: "الان نه", from: "از {eur} در ماه",

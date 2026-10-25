@@ -3,6 +3,7 @@ import { hashPassword } from "better-auth/crypto";
 import { eq } from "drizzle-orm";
 import { createDb } from "../src/db";
 import { account, memberships, organizations, user } from "../src/db/schema";
+import { seedDelivery } from "../src/server/projects";
 
 // Creates the internal organisation and an admin user. Safe to run again.
 // ADMIN_EMAIL=... ADMIN_PASSWORD=... ADMIN_NAME=... npm run seed
@@ -36,4 +37,6 @@ if (!admin) {
   console.log(`admin exists: ${admin.email}`);
 }
 await db.insert(memberships).values({ orgId: org.id, userId: admin.id, role: "owner" }).onConflictDoNothing();
+// first protocols and catalogue packages (step 7); existing ones are kept
+await seedDelivery(db);
 await db.$client.end();

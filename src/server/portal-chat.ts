@@ -2,6 +2,7 @@ import type { Db } from "@/db";
 import { fmtEur, portalCopy } from "@/config/portal-copy";
 import { normalize } from "@/lib/chat-match";
 import { listGoals, listRequests, listServices, nextStep, pendingApprovals, type RequestKind, results } from "./portal";
+import { customerProjects } from "./projects";
 
 /*
  * The dashboard home is a conversation (Javad 2026-10-25: "like Claude: the customer talks, and sees results
@@ -11,7 +12,7 @@ import { listGoals, listRequests, listServices, nextStep, pendingApprovals, type
  * comes from the multilingual word rules below; with a key Claude picks the intent and cards (portal-advisor.ts).
  */
 
-export const INTENTS = ["results", "goals", "approvals", "services", "next", "problem", "support", "billing", "data", "requests", "help"] as const;
+export const INTENTS = ["results", "goals", "approvals", "projects", "services", "next", "problem", "support", "billing", "data", "requests", "help"] as const;
 export type Intent = (typeof INTENTS)[number];
 
 export type Card =
@@ -19,6 +20,7 @@ export type Card =
   | { type: "goals"; data: Awaited<ReturnType<typeof listGoals>> }
   | { type: "approvals"; data: { id: string; title: string; detail: string | null; link: string | null }[] }
   | { type: "services"; data: Awaited<ReturnType<typeof listServices>> }
+  | { type: "projects"; data: Awaited<ReturnType<typeof customerProjects>> }
   | { type: "next"; data: NonNullable<Awaited<ReturnType<typeof nextStep>>> }
   | { type: "requests"; data: { id: string; kind: string; text: string; status: string; reply: string | null; createdAt: string }[] }
   | { type: "confirm"; kind: RequestKind; text: string }
@@ -31,6 +33,7 @@ const RULES: [Intent, RegExp][] = [
   ["support", /non funziona|non va|errore|guasto|broken|not working|doesn.?t work|error|bug|funktioniert nicht|fehler|kaputt|کار نمی.?کن|خراب|خطا/],
   ["approvals", /approv|conferm|aspett|in attesa|waiting|pending|sign.?off|freigab|bestatig|wartet|تا\u0654?یید|منتظر/],
   ["goals", /obiettiv|traguard|goal|target|ziel|هدف/],
+  ["projects", /progett|a che punto|avanzament|project|progress|how far|projekt|fortschritt|wie weit|پروژه|پیشرفت|کجای کار/],
   ["next", /prossim|dopo|cosa conviene|next|what should|grow|crescere|nachst|als nachstes|wachsen|قدم بعد|بعدی|رشد|ارتقا|upgrade/],
   ["billing", /fattur|pagament|canone|bolletta|invoice|payment|billing|fee|rechnung|zahlung|gebuhr|فاکتور|پرداخت|هزینه|قرارداد|contratt|contract|vertrag/],
   ["data", /\bdati\b|gdpr|privacy|esport|cancell|\bdata\b|export|delete|datenschutz|daten|losch|داده|حذف|حریم/],
@@ -62,6 +65,10 @@ export async function replyFor(db: Db, orgId: string, lang: string, intent: Inte
     case "approvals": {
       const a = await pendingApprovals(db, orgId);
       return { text: a.length ? c.approvals.replace("{n}", String(a.length)) : c.approvalsNone, cards: a.length ? [{ type: "approvals", data: a.map((x) => ({ id: x.id, title: x.title, detail: x.detail, link: x.link })) }] : [] };
+    }
+    case "projects": {
+      const pr = await customerProjects(db, orgId);
+      return { text: pr.length ? c.projects : c.projectsNone, cards: pr.length ? [{ type: "projects", data: pr }] : [] };
     }
     case "services": {
       const s = await listServices(db, orgId, lang);

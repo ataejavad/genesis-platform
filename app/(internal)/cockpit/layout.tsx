@@ -29,7 +29,7 @@ export default async function CockpitLayout({ children }: { children: React.Reac
           { href: "/cockpit/projects", label: "Projects", icon: "📁" },
           { href: "/cockpit/partners", label: "Partners", icon: "🤝" },
           { href: "/cockpit/protocols", label: "Protocols", icon: "📐" },
-          { href: "/cockpit/qa", label: "QA queue", icon: "🔍", count: 2 },
+          { href: "/cockpit/qa", label: "QA queue", icon: "🔍" },
           { href: "/cockpit/moderation", label: "Moderation", icon: "🛡️", count: 2 },
         ] },
         { title: "Money & legal", items: [

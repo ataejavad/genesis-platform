@@ -14,6 +14,7 @@ import {
   outcomes,
   portalMessages,
   portalThreads,
+  servicePackages,
   subscriptions,
   user,
 } from "@/db/schema";
@@ -21,6 +22,7 @@ import { type L, products } from "@/mock/site";
 import type { Actor } from "./actor";
 import { AppError, notFound } from "./errors";
 import { audit, emit } from "./events";
+import { onApprovalDecided } from "./projects";
 import { METRICS } from "./portal-metrics";
 
 /*
@@ -177,7 +179,9 @@ export async function nextStep(db: Db, orgId: string, lang: string) {
   const have = new Set((await db.select({ p: subscriptions.product }).from(subscriptions).where(eq(subscriptions.orgId, orgId))).map((r) => r.p));
   const p = products.find((x) => org.industry && x.industries.includes(org.industry) && !have.has(x.slug) && (!x.countries || !org.country || x.countries.includes(org.country)));
   if (!p) return null;
-  return { product: p.slug, icon: p.icon, name: tl(p.name, lang), outcome: tl(p.outcome, lang), fromEur: Math.min(...p.plans.map((x) => x.price)) };
+  // a catalogue package can be ordered with one press; anything else goes to the team as an interest
+  const [pkg] = await db.select({ slug: servicePackages.slug }).from(servicePackages).where(and(eq(servicePackages.slug, p.slug), eq(servicePackages.active, true)));
+  return { product: p.slug, icon: p.icon, name: tl(p.name, lang), outcome: tl(p.outcome, lang), fromEur: Math.min(...p.plans.map((x) => x.price)), orderable: Boolean(pkg) };
 }
 
 /* ───────────── Approvals the customer gives ───────────── */
@@ -209,6 +213,8 @@ export async function decideCustomerApproval(db: Db, actor: Actor, orgId: string
       .set({ status: decision, note: note?.slice(0, 2000) ?? null, decidedBy: `${actor.type}:${actor.id}`, decidedAt: new Date() })
       .where(eq(customerApprovals.id, id))
       .returning();
+    // a milestone or a change request of a project (step 7)
+    await onApprovalDecided(tx, actor, after, decision);
     const [org] = await tx.select({ name: organizations.name }).from(organizations).where(eq(organizations.id, orgId));
     await emit(tx, actor, "customer_approval.decided", { type: "customer_approval", id }, { orgId, company: org.name, title: before.title, decision, note: note ?? null });
     await audit(tx, actor, "customer_approval.decided", { type: "customer_approval", id }, { status: before.status }, { status: decision, note });

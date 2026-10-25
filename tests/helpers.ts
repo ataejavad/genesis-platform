@@ -5,7 +5,7 @@ import { createDb } from "@/db";
 export function useTestDb() {
   const db = createDb(process.env.TEST_DATABASE_URL!, 5);
   beforeEach(async () => {
-    await db.execute(sql`truncate content_items, approvals, events, audit_log, agent_runs, api_keys, markets, leads, checkups, prospects, contacts, touches, company_pages, inbox, channel_switches, organizations, "user", partners, jobs cascade`);
+    await db.execute(sql`truncate content_items, approvals, events, audit_log, agent_runs, api_keys, markets, leads, checkups, prospects, contacts, touches, company_pages, inbox, channel_switches, organizations, "user", partners, jobs, protocols, service_packages, orders, projects cascade`);
   });
   afterAll(() => db.$client.end());
   return db;

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { decide, sendRequest } from "./actions";
+import { decide, orderPackage, sendRequest } from "./actions";
 import { fmtEur, fmtNum, NUM_LOCALE, type PortalCopy } from "@/config/portal-copy";
 import { metricHow, metricLabel } from "@/server/portal-metrics";
 import type { Card } from "@/server/portal-chat";
@@ -110,8 +110,26 @@ export function NextCard({ data, t, lang }: P & { data: Extract<Card, { type: "n
       <div className="row"><span className="ico">{data.icon}</span><b>{data.name}</b></div>
       <div className="small">{data.outcome}</div>
       <div className="row small"><span className="muted">{t.card.from.replace("{eur}", fmtEur(data.fromEur, lang))}</span><span className="spacer" />
-        {sent ? <span className="badge ok" role="status">✓ {sent}</span> : <button className="btn sm primary" disabled={pending} onClick={() => start(async () => setSent((await sendRequest("upgrade", `${data.name} (${data.product})`)).text ?? "✓"))}>{t.card.tellUs}</button>}
+        {sent ? <span className="badge ok" role="status">✓ {sent}</span> : data.orderable
+          ? <button className="btn sm primary" disabled={pending} onClick={() => start(async () => setSent((await orderPackage(data.product)).text))}>{t.card.order}</button>
+          : <button className="btn sm primary" disabled={pending} onClick={() => start(async () => setSent((await sendRequest("upgrade", `${data.name} (${data.product})`)).text ?? "✓"))}>{t.card.tellUs}</button>}
       </div>
+    </div>
+  );
+}
+
+/** Projects in progress: milestones and how far along, never who does the work or what it costs us. */
+export function ProjectsCard({ data, t, lang }: P & { data: Extract<Card, { type: "projects" }>["data"] }) {
+  return (
+    <div className="stack">
+      {data.map((p) => (
+        <div key={p.id} className="card pcard stack">
+          <div className="row" style={{ flexWrap: "wrap", gap: 8 }}><b>{p.title}</b><span className="muted small">{p.code}</span><span className="spacer" /><span className="small muted">{t.card.readyBy} {p.dueAt}</span></div>
+          <div className="progress" title={`${Math.round(p.progress * 100)}%`}><span style={{ width: `${Math.round(p.progress * 100)}%` }} /></div>
+          <ul className="plist">{p.milestones.map((m) => <li key={m.title}><span>{m.title}</span><span className="spacer" /><span className={`badge ${m.status === "accepted" ? "ok" : m.status === "ready" ? "warn" : "gray"}`}>{t.card.ms[m.status] ?? m.status}</span><b className="num">{fmtEur(m.amountEur, lang)}</b></li>)}</ul>
+          {p.monthlyEur > 0 && <div className="muted small">{fmtEur(p.monthlyEur, lang)} {t.card.perMonth}</div>}
+        </div>
+      ))}
     </div>
   );
 }
@@ -158,6 +176,7 @@ export function CardView({ card, t, lang, onDone }: P & { card: Card; onDone?: (
     case "approvals": return <ApprovalsCard data={card.data} t={t} lang={lang} onDone={onDone} />;
     case "services": return <ServicesCard data={card.data} t={t} lang={lang} />;
     case "next": return <NextCard data={card.data} t={t} lang={lang} />;
+    case "projects": return <ProjectsCard data={card.data} t={t} lang={lang} />;
     case "requests": return <RequestsCard data={card.data} t={t} lang={lang} />;
     case "confirm": return <ConfirmCard card={card} t={t} lang={lang} onDone={onDone} />;
     case "link": return <Link className="btn sm" href={card.href}>{card.label} →</Link>;

@@ -553,6 +553,9 @@ export const customerApprovals = pgTable(
     // pending, approved, changes
     status: text("status").notNull().default("pending"),
     note: text("note"),
+    // step 7: approving a milestone or a change request of a project
+    milestoneId: uuid("milestone_id"),
+    changeRequestId: uuid("change_request_id"),
     createdBy: text("created_by").notNull(),
     decidedBy: text("decided_by"),
     decidedAt: timestamp("decided_at", { withTimezone: true }),
@@ -706,11 +709,15 @@ export const jobs = pgTable(
     // open → offered → assigned → delivered → accepted (→ paid) | cancelled
     status: text("status").notNull().default("open"),
     partnerId: uuid("partner_id").references(() => partners.id),
+    // step 7: a task of a project, checked against a fixed protocol version
+    projectId: uuid("project_id"),
+    milestoneId: uuid("milestone_id"),
+    protocolVersionId: uuid("protocol_version_id"),
     createdBy: text("created_by").notNull(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
-  (t) => [index("jobs_status_idx").on(t.status), index("jobs_partner_idx").on(t.partnerId)],
+  (t) => [index("jobs_status_idx").on(t.status), index("jobs_partner_idx").on(t.partnerId), index("jobs_project_idx").on(t.projectId)],
 );
 
 export const jobOffers = pgTable(
@@ -788,4 +795,199 @@ export const partnerMessages = pgTable(
     createdAt: createdAt(),
   },
   (t) => [index("partner_messages_partner_idx").on(t.partnerId, t.createdAt)],
+);
+
+/* ───────────── Delivery: protocols, packages, orders, projects (step 7, doc 15 §6د, §6د2) ───────────── */
+
+// One acceptance criterion: outcome, not method (freelancers decide how). Checked by a rule, the QA judge or a person.
+export type Criterion = { text: string; texts?: Record<string, string>; mandatory: boolean; weight: number; method: "auto" | "judge" | "human" };
+
+// A kind of work we deliver, with versions; every project task is checked against one approved version.
+export const protocols = pgTable("protocols", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  // PR-02
+  code: text("code").notNull().unique(),
+  title: text("title").notNull(),
+  // service and classification (doc 13): NACE industry, APQC process
+  nace: text("nace"),
+  apqc: text("apqc"),
+  createdAt: createdAt(),
+});
+
+export const protocolVersions = pgTable(
+  "protocol_versions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    protocolId: uuid("protocol_id").notNull().references(() => protocols.id, { onDelete: "cascade" }),
+    version: integer("version").notNull(),
+    // draft → approved (by Javad; the previous approved one is retired) | retired
+    status: text("status").notNull().default("draft"),
+    goal: text("goal").notNull(),
+    inputs: jsonb("inputs").$type<string[]>().notNull().default([]),
+    deliverables: jsonb("deliverables").$type<string[]>().notNull().default([]),
+    // fixed rules in every job: white-label, GDPR, AI disclosure (AI Act art. 50), brand tone
+    rules: jsonb("rules").$type<string[]>().notNull().default([]),
+    criteria: jsonb("criteria").$type<Criterion[]>().notNull(),
+    // how we would do it: advice for freelancers, instruction only for staff (bogus self-employment)
+    guidance: text("guidance"),
+    standardDays: integer("standard_days").notNull(),
+    changeNote: text("change_note"),
+    createdBy: text("created_by").notNull(),
+    approvedBy: text("approved_by"),
+    approvedAt: timestamp("approved_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex("protocol_versions_idx").on(t.protocolId, t.version)],
+);
+
+export type TaskTemplate = { title: string; brief: string; protocol: string; skills: string[]; payEur: number; days: number; milestone: number };
+export type MilestoneTemplate = { title: string; titles?: Record<string, string>; sharePct: number };
+
+// The catalogue: a product we sell = protocols + task template + milestones + price. No package, no sale.
+export const servicePackages = pgTable("service_packages", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  // product slug, as in the marketplace and subscriptions
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  titles: jsonb("titles").$type<Record<string, string>>().notNull().default({}),
+  // one-off setup price and the monthly fee after go-live (every service has a monthly fee)
+  setupEur: integer("setup_eur").notNull(),
+  monthlyEur: integer("monthly_eur").notNull(),
+  plan: text("plan").notNull().default("Standard"),
+  tasks: jsonb("tasks").$type<TaskTemplate[]>().notNull(),
+  milestones: jsonb("milestones").$type<MilestoneTemplate[]>().notNull(),
+  personalData: boolean("personal_data").notNull().default(true),
+  active: boolean("active").notNull().default(true),
+  createdAt: createdAt(),
+});
+
+// Every way in (marketplace, dashboard, CRM won, customer request) ends here; one click turns it into a project.
+export const orders = pgTable(
+  "orders",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    // the customer when known (dashboard); otherwise the contact below
+    orgId: uuid("org_id").references(() => organizations.id, { onDelete: "set null" }),
+    packageSlug: text("package_slug").notNull(),
+    // market, portal, crm, request, cockpit
+    source: text("source").notNull(),
+    company: text("company"),
+    email: text("email"),
+    vat: text("vat"),
+    country: text("country"),
+    industry: text("industry"),
+    locale: text("locale").notNull().default("en"),
+    note: text("note"),
+    // new → converted | rejected
+    status: text("status").notNull().default("new"),
+    projectId: uuid("project_id"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("orders_status_idx").on(t.status)],
+);
+
+export const projects = pgTable(
+  "projects",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    // P-1001
+    code: text("code").notNull().unique(),
+    // the customer (null for internal projects)
+    orgId: uuid("org_id").references(() => organizations.id, { onDelete: "set null" }),
+    title: text("title").notNull(),
+    packageSlug: text("package_slug"),
+    // customer or internal
+    kind: text("kind").notNull().default("customer"),
+    // running → delivered (all milestones accepted) → closed | cancelled
+    status: text("status").notNull().default("running"),
+    // low, medium, high, with the reasons (who approves what)
+    risk: text("risk").notNull(),
+    riskWhy: jsonb("risk_why").$type<string[]>().notNull().default([]),
+    priceEur: integer("price_eur").notNull(),
+    monthlyEur: integer("monthly_eur").notNull().default(0),
+    // planned cost (sum of partner pay); actual cost is in project_costs
+    budgetEur: integer("budget_eur").notNull(),
+    language: text("language").notNull().default("en"),
+    country: text("country"),
+    orderId: uuid("order_id"),
+    startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
+    dueAt: timestamp("due_at", { withTimezone: true }).notNull(),
+    closedAt: timestamp("closed_at", { withTimezone: true }),
+    // what we learned at closing (failed criteria, delays): input for better protocols and estimates
+    lessons: jsonb("lessons").$type<string[]>().notNull().default([]),
+    createdBy: text("created_by").notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index("projects_org_idx").on(t.orgId), index("projects_status_idx").on(t.status)],
+);
+
+export const milestones = pgTable(
+  "milestones",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    projectId: uuid("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+    orgId: uuid("org_id").references(() => organizations.id, { onDelete: "set null" }),
+    seq: integer("seq").notNull(),
+    title: text("title").notNull(),
+    amountEur: integer("amount_eur").notNull(),
+    // open → ready (all tasks accepted; customer asked) → accepted (invoiceable, step 8) | changes
+    status: text("status").notNull().default("open"),
+    approvalId: uuid("approval_id"),
+    readyAt: timestamp("ready_at", { withTimezone: true }),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+    remindedAt: timestamp("reminded_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("milestones_project_idx").on(t.projectId)],
+);
+
+// Every QA look at a delivery: the judge's or a person's, per criterion. Person vs judge on the same delivery = calibration.
+export const qaReviews = pgTable(
+  "qa_reviews",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    deliveryId: uuid("delivery_id").notNull().references(() => deliveries.id, { onDelete: "cascade" }),
+    // judge, rules, user:<id>
+    by: text("by").notNull(),
+    results: jsonb("results").$type<{ idx: number; result: "pass" | "fail" | "unsure"; note?: string }[]>().notNull(),
+    // accept, changes, review (a person must look)
+    verdict: text("verdict").notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index("qa_reviews_delivery_idx").on(t.deliveryId)],
+);
+
+// A scope change: priced and timed, then approved by the customer before any work.
+export const changeRequests = pgTable(
+  "change_requests",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    projectId: uuid("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+    orgId: uuid("org_id").references(() => organizations.id, { onDelete: "set null" }),
+    text: text("text").notNull(),
+    priceEur: integer("price_eur").notNull(),
+    days: integer("days").notNull(),
+    // quoted → approved | rejected
+    status: text("status").notNull().default("quoted"),
+    approvalId: uuid("approval_id"),
+    createdBy: text("created_by").notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index("change_requests_project_idx").on(t.projectId)],
+);
+
+// Actual cost per project: partner pay, model use, people, tools. Price − cost = real margin.
+export const projectCosts = pgTable(
+  "project_costs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    projectId: uuid("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+    // partner, model, human, tool
+    kind: text("kind").notNull(),
+    amountEur: integer("amount_eur").notNull(),
+    note: text("note"),
+    jobId: uuid("job_id"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("project_costs_project_idx").on(t.projectId), uniqueIndex("project_costs_job_idx").on(t.jobId)],
 );

@@ -8,6 +8,7 @@ import { getDb } from "@/db";
 import { LANG_COOKIE, requireCustomer } from "@/lib/portal-auth";
 import type { Actor } from "@/server/actor";
 import { createRequest, decideCustomerApproval, listGoals, nextStep, pendingApprovals, REQUEST_KINDS, type RequestKind, results, saveTurn, setOrgLocale, threadMessages } from "@/server/portal";
+import { createOrder } from "@/server/projects";
 import { type Card, replyFor, scriptedReply } from "@/server/portal-chat";
 
 const actorOf = (userId: string): Actor => ({ type: "user", id: userId });
@@ -52,6 +53,14 @@ export async function sendRequest(kind: string, text: string) {
   await createRequest(getDb(), actorOf(user.id), org.id, user.id, kind as RequestKind, text);
   revalidatePath("/portal", "layout");
   return { ok: true, text: portalCopy(lang).r.sent };
+}
+
+/** The customer starts a catalogue result with one press: an order the team turns into a project (step 7). */
+export async function orderPackage(slug: string) {
+  const { user, org, lang } = await requireCustomer();
+  await createOrder(getDb(), actorOf(user.id), { packageSlug: slug, source: "portal", orgId: org.id, locale: lang });
+  revalidatePath("/portal", "layout");
+  return { ok: true, text: portalCopy(lang).card.ordered };
 }
 
 export async function decide(id: string, decision: "approved" | "changes", note?: string) {

@@ -1,10 +1,11 @@
+import Link from "next/link";
 import { eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { organizations, partnerDocuments, partners } from "@/db/schema";
 import { SKILLS, skillLabel } from "@/server/partner-rules";
 import { duePayouts, listJobs, listPartners, matchesFor, partnerInbox, pendingDeliveries } from "@/server/partners";
 import { PageHead } from "@/ui/Shell";
-import { doc, offer, paid, reply, review } from "./actions";
+import { doc, offer, paid, reply } from "./actions";
 import { DecideForm, JobForm, KeyForm } from "./Forms";
 
 const eur = (n: number) => `€${n.toLocaleString("en-GB")}`;
@@ -46,21 +47,7 @@ export default async function CockpitPartners() {
 
       <div className="card">
         <h3>Deliveries to review ({toReview.length})</h3>
-        {toReview.length === 0 && <p className="muted">None.</p>}
-        {toReview.map(({ delivery: d, job, partner }) => (
-          <form key={d.id} action={review} className="stack" style={{ borderTop: "1px solid var(--line)", paddingTop: 10 }}>
-            <input type="hidden" name="delivery" value={d.id} />
-            <div><b>{job.title}</b> · {partner} · v{d.version} · <a href={d.link} target="_blank" rel="noopener noreferrer">{d.link}</a> · {d.createdAt <= job.dueAt ? "on time" : <span className="badge warn">late</span>}</div>
-            <ul className="small">{job.checklist.map((c, i) => <li key={c}>{d.selfCheck[i] ? "☑" : "☐"} {c}</li>)}</ul>
-            {d.note && <div className="small muted">Note: {d.note}</div>}
-            <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
-              <label className="small">Quality <select name="quality" defaultValue="4">{[5, 4, 3, 2, 1].map((n) => <option key={n}>{n}</option>)}</select></label>
-              <input name="review" placeholder="Note for the partner" style={{ flex: 1, minWidth: 200 }} />
-              <button className="btn sm ok" name="decision" value="accept">Accept → payout</button>
-              <button className="btn sm" name="decision" value="changes">Ask changes</button>
-            </div>
-          </form>
-        ))}
+        <p className="small" style={{ margin: 0 }}>{toReview.length ? <>Checked per criterion in the <Link href="/cockpit/qa">QA queue</Link>.</> : "None."}</p>
       </div>
 
       <div className="card table-wrap">

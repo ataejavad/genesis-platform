@@ -3,6 +3,7 @@ import { telegramConfigFromEnv } from "@/server/telegram";
 import { planEnv } from "@/server/crm";
 import { mailerFromEnv } from "@/server/mailer";
 import { sendDueEmails, startDueAiCalls } from "@/server/outreach";
+import { deliveryWatch } from "@/server/projects";
 import { voiceFromEnv } from "@/server/voice";
 import { dispatchBatch } from "./dispatch";
 
@@ -13,6 +14,7 @@ const mailer = mailerFromEnv();
 const voice = voiceFromEnv();
 let running = true;
 let lastOutbox = 0;
+let lastWatch = 0;
 
 process.on("SIGTERM", () => (running = false));
 process.on("SIGINT", () => (running = false));
@@ -25,6 +27,11 @@ while (running) {
       lastOutbox = Date.now();
       if (mailer) await sendDueEmails(db, mailer);
       if (voice) await startDueAiCalls(db, voice, planEnv());
+    }
+    // Delivery watchdog every hour: milestones waiting on the customer, late tasks.
+    if (Date.now() - lastWatch > 60 * 60_000) {
+      lastWatch = Date.now();
+      await deliveryWatch(db);
     }
     const n = await dispatchBatch(db, deps);
     if (n === 0) await new Promise((r) => setTimeout(r, 2000));

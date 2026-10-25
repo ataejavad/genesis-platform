@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import type { Db } from "@/db";
 import { events } from "@/db/schema";
+import { afterDelivery } from "@/server/projects";
 import { sendAlert, sendApprovalRequest, type TelegramConfig } from "@/server/telegram";
 
 export const MAX_ATTEMPTS = 10;
@@ -54,6 +55,21 @@ async function handle(db: Db, deps: DispatchDeps, event: Event) {
           ? `📦 ${p.partner} delivered "${p.title}" (v${p.version}): review it`
           : `${p.reviewRequest ? "⚖️ Human review requested" : p.flagged ? "🚩 Contact details hidden" : "💬"} ${p.partner}: ${String(p.text ?? "").slice(0, 200)}`;
     await sendAlert(deps.telegram, [line], "/cockpit/partners", fetchImpl);
+  }
+  // Step 7: the QA judge looks at every delivery; low-risk work from trusted partners can pass on its own.
+  if (event.type === "delivery.submitted") await afterDelivery(db, event.subjectId!);
+  // Orders, customer feedback on milestones and waiting approvals reach Javad at once.
+  if (deps.telegram && ["order.created", "milestone.changes", "milestone.reminded", "change_request.decided"].includes(event.type)) {
+    const p = event.payload as { package?: string; source?: string; company?: string | null; setupEur?: number; monthlyEur?: number; code?: string; title?: string; note?: string | null; waitingHours?: number; decision?: string };
+    const line =
+      event.type === "order.created"
+        ? `🛒 New order: ${p.package} (${p.source}) ${p.company ?? ""} · €${p.setupEur} + €${p.monthlyEur}/month`
+        : event.type === "milestone.changes"
+          ? `✏️ ${p.code} ${p.title}: the customer asked for changes${p.note ? ` (${p.note})` : ""}`
+          : event.type === "milestone.reminded"
+            ? `⏳ ${p.code} ${p.title} (${p.company}) waits for the customer's OK for ${p.waitingHours}h`
+            : `📝 Change request ${p.decision}`;
+    await sendAlert(deps.telegram, [line], "/cockpit/projects", fetchImpl);
   }
   // Every event also goes to n8n, where Genesis workflows subscribe to what they need.
   if (deps.n8nWebhookUrl) {
