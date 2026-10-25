@@ -14,6 +14,8 @@ const pg = await PGlite.create("./.localdb");
 const server = new PGLiteSocketServer({ db: pg, port, maxConnections: 10 });
 await server.start();
 
+// every process (server, worker, agents) talks to the same single PGlite session: no named prepared statements
+process.env.DATABASE_PREPARE = "false";
 const env = {
   ...process.env,
   DATABASE_URL: `postgres://postgres@127.0.0.1:${port}/postgres`,

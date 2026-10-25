@@ -3,7 +3,8 @@ import postgres from "postgres";
 import * as schema from "./schema";
 
 export function createDb(url: string, max = 10) {
-  const client = postgres(url, { max });
+  // Local mode shares one PGlite session between processes: named prepared statements would collide there.
+  const client = postgres(url, { max, prepare: process.env.DATABASE_PREPARE !== "false" });
   return Object.assign(drizzle(client, { schema }), { $client: client });
 }
 
