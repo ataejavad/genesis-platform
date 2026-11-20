@@ -4,6 +4,7 @@ import { apiKeys } from "@/db/schema";
 import { connections } from "@/server/systems";
 import { PageHead } from "@/ui/Shell";
 import { NewKey, RevokeKey } from "../systems/Forms";
+import { TestConnections } from "./Forms";
 
 const endpoints = [
   ["POST", "/api/v1/drafts", "Agent sends a page draft (content:draft)"],
@@ -30,6 +31,7 @@ export default async function Api() {
       <section className="grid g4" style={{ marginBottom: 18 }}>
         {conns.map((c) => <div key={c.name} className="card"><div className="row" style={{ justifyContent: "space-between" }}><b>{c.name}</b><span className={`badge ${c.ok ? "ok" : "warn"}`}>{c.ok ? "connected" : "not set"}</span></div><p className="muted small">{c.why}</p><div className="small">Now: <b>{c.provider}</b></div>{c.note && <div className="small" style={{ color: "var(--warn, #b45309)" }}>⚠ {c.note}</div>}{!c.ok && c.keys && <div className="muted small ltr">.env: {c.keys}</div>}{c.options.length > 1 && <div className="muted small ltr">switch: {c.switchEnv} = {c.options.join(" | ")}</div>}</div>)}
       </section>
+      <TestConnections />
       <section className="grid g-2-1" style={{ marginBottom: 18 }}>
         <div className="card table-wrap">
           <h3>Agent keys</h3>

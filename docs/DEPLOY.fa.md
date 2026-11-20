@@ -57,7 +57,6 @@
    | `DATABASE_URL` | آدرس قدم ۴.۵ |
    | `APP_URL` و `BETTER_AUTH_URL` | `https://app.دامنه` |
    | `BETTER_AUTH_SECRET` | یک رشته تصادفی طولانی (دکمه Generate در Coolify یا یک رمز ۴۰ حرفی از Bitwarden) |
-   | `TELEGRAM_WEBHOOK_SECRET` | یک رشته تصادفی دیگر |
    | `SITE_NAME` | نام شرکت |
 
 4. برای سرویس **app** دامنه را بگذار `https://app.دامنه` (پورت ۳۰۰۰). سرویس **worker** دامنه نمی‌خواهد.
@@ -76,13 +75,10 @@ ADMIN_EMAIL=ایمیل-تو ADMIN_PASSWORD='رمز-حداقل-۱۲-حرف' ADMIN
 ## ۷. ربات تلگرام برای تأییدها
 
 1. در تلگرام به **@BotFather** پیام بده ← `/newbot` ← یک نام بده. **توکن** را بگیر.
-2. به ربات تازه یک پیام بده (مثلاً «سلام»).
-3. در مرورگر برو به `https://api.telegram.org/bot<توکن>/getUpdates` و دو عدد را پیدا کن: `chat.id` و `from.id` (معمولاً یکی‌اند).
-4. در Coolify این‌ها را به Environment Variables اضافه کن و دوباره Deploy کن:
-   `TELEGRAM_BOT_TOKEN` = توکن، `TELEGRAM_ADMIN_CHAT_ID` = chat.id، `TELEGRAM_ADMIN_USER_IDS` = from.id
-5. این آدرس را یک بار در مرورگر باز کن (به‌جای عبارت‌های فارسی مقدار خودت را بگذار):
-   `https://api.telegram.org/bot<توکن>/setWebhook?url=https://app.دامنه/api/telegram/webhook&secret_token=<TELEGRAM_WEBHOOK_SECRET>`
-   باید `"ok":true` ببینی.
+2. در ربات تازه **Start** را بزن. سپس **@userinfobot** را باز کن و عدد **Id** را بردار.
+3. این دو را به Environment Variables اضافه کن و دوباره Deploy کن:
+   `TELEGRAM_BOT_TOKEN` = توکن، `TELEGRAM_ADMIN_CHAT_ID` = Id
+4. در کابین ← API & connections ← **Send test phone message** را بزن. پیام آزمایشی می‌آید و دکمه‌های تأیید هم وصل می‌شوند.
 
 ## ۸. آزمایش کامل
 

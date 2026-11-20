@@ -19,6 +19,8 @@ export type AdminChat = {
   askApproval: (a: ApprovalAsk) => Promise<string>;
   /** reads the provider's webhook: "forbidden" (bad secret), null (not a button press) or the press */
   readPress: (headers: Headers, body: unknown) => Promise<ApprovalPress | "forbidden" | null>;
+  /** points the provider's button presses at our webhook (one click in the cockpit instead of a manual API call) */
+  connect?: (webhookUrl: string) => Promise<void>;
 };
 
 export function mockAdminChat(): AdminChat & { sent: { lines: string[]; link?: string }[]; asked: ApprovalAsk[] } {
