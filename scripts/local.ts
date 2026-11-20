@@ -8,6 +8,15 @@ import { apiKeys, contentItems } from "../src/db/schema";
 import { createApiKey } from "../src/server/api-keys";
 import { keepExtendedQueriesTogether } from "./lib/pglite-queue";
 
+// Keys for outside services (GEMINI_API_KEY, LLM_PROVIDER …) from .env.local / .env, never committed (gitignored).
+for (const f of [".env.local", ".env"]) {
+  try {
+    process.loadEnvFile(f);
+  } catch {
+    // no such file: fine
+  }
+}
+
 // `npm run local`: the whole app on this computer with no database to install.
 // Data is kept in ./.localdb between runs. For trying things out only; production uses real Postgres.
 const port = 5444;

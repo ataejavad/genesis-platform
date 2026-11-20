@@ -8,7 +8,8 @@ import { PARTNER_INTENTS, type PartnerIntent } from "@/server/partner-chat";
  * with brief and checklist, offers, pay, level, documents, messages from us) and picks which card to show;
  * accepting, delivering or messaging the team stay buttons the partner presses.
  */
-export const partnerAdvisorEnabled = () => llmEnabled();
+// sees personal data: off on a provider whose terms let it train on prompts (src/providers/registry.ts)
+export const partnerAdvisorEnabled = () => llmEnabled({ personalData: true });
 
 const LANG: Record<string, string> = { it: "Italian", en: "English", fa: "Persian", de: "German" };
 

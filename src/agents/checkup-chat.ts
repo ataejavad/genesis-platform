@@ -7,7 +7,8 @@ import type { LocalizedCheckup } from "@/server/checkup";
  * but it can only fill the same questions with the same option ids, so scoring stays rule-based and auditable.
  * Without a key the browser runs the scripted conversation (chips + typed-answer matching) on the same engine.
  */
-export const chatEnabled = () => llmEnabled();
+// sees personal data: off on a provider whose terms let it train on prompts (src/providers/registry.ts)
+export const chatEnabled = () => llmEnabled({ personalData: true });
 
 const LANG: Record<string, string> = { it: "Italian", en: "English", fa: "Persian", de: "German" };
 

@@ -42,7 +42,7 @@ export default async function Systems() {
               return (
                 <tr key={r.n}>
                   <td className="muted small">{r.n}</td>
-                  <td><b>{r.name}</b><div className="muted small">{r.runs}</div>{r.providers.length > 0 && <div className="small" style={{ marginTop: 4 }}>{r.providers.map((p) => <span key={p.kind} className={`badge ${p.connected ? "ok" : "gray"}`} title={p.label} style={{ marginInlineEnd: 4 }}>{p.label}: {p.provider}</span>)}</div>}</td>
+                  <td><b>{r.name}</b><div className="muted small">{r.runs}</div>{r.providers.length > 0 && <div className="small" style={{ marginTop: 4 }}>{r.providers.map((p) => <span key={p.kind} className={`badge ${p.connected ? "ok" : "gray"}`} title={p.note ?? p.label} style={{ marginInlineEnd: 4 }}>{p.label}: {p.provider}{p.note ? " ⚠" : ""}</span>)}</div>}</td>
                   <td><span className={`badge ${BADGE[r.status][0]}`}>{BADGE[r.status][1]}</span>{r.why && <div className="muted small" style={{ maxWidth: 220 }}>{r.why}</div>}</td>
                   <td className="small">{when(r.lastAt)}</td>
                   <td className="num">{r.costEur === null ? "–" : `€${r.costEur.toFixed(2)}`}</td>

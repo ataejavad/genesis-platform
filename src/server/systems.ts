@@ -8,7 +8,7 @@ import {
   projectInputs, projects, prospects, protocols, subscriptions, supplyGaps, touches,
 } from "@/db/schema";
 import { MAX_ATTEMPTS } from "@/worker/dispatch";
-import { llm } from "@/providers/llm";
+import { llm, llmEnabled } from "@/providers/llm";
 import { type Env, KINDS, type ProviderKind, providerBoard, providerStatus } from "@/providers/registry";
 import { type AgentRow, agentBoard, monthSpend } from "./agents";
 import { jobBoard } from "./orchestrator";
@@ -24,7 +24,7 @@ import { MARGIN_FLOOR, margins, periodOf } from "./service";
 
 const DAY = 864e5;
 export type Status = "live" | "key" | "off" | "paused" | "stopped" | "failing" | "manual";
-export type SystemRow = ModuleDef & { status: Status; why: string; lastAt: Date | null; costEur: number | null; kpiText: string; enabled: boolean | null; providers: { kind: ProviderKind; label: string; provider: string; connected: boolean }[] };
+export type SystemRow = ModuleDef & { status: Status; why: string; lastAt: Date | null; costEur: number | null; kpiText: string; enabled: boolean | null; providers: { kind: ProviderKind; label: string; provider: string; connected: boolean; note: string | null }[] };
 
 const monthStart = (now: Date) => new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
 const n = async (q: Promise<{ n: number }[]>) => Number((await q)[0]?.n ?? 0);
@@ -156,12 +156,13 @@ async function lastActivity(db: Db, m: ModuleDef): Promise<Date | null> {
 function serviceGaps(m: ModuleDef, env: Env) {
   const providers = (m.uses ?? []).map((kind) => {
     const st = providerStatus(kind, env);
-    return { kind, label: KINDS.find((k) => k.kind === kind)!.label, provider: st.label, connected: st.connected };
+    return { kind, label: KINDS.find((k) => k.kind === kind)!.label, provider: st.label, connected: st.connected, note: st.note };
   });
   const waiting = providers.filter((p) => !p.connected).map((p) => {
     const keys = providerBoard(env).find((k) => k.kind === p.kind)!.keysToConnect;
     return `${p.label} (${keys.join(", ") || "choose a provider"})`;
   });
+  if (m.personalData && !waiting.length && m.uses?.includes("llm") && !llmEnabled({ personalData: true }, env)) waiting.push("an AI model allowed to see personal data (paid tier or Claude)");
   if (m.webSearch && !waiting.length && m.uses?.includes("llm") && !llm(env).webSearch) waiting.push("an AI model with web search (LLM_PROVIDER)");
   return { providers, waiting };
 }
@@ -205,7 +206,7 @@ export async function systemsBoard(db: Db, now = new Date(), env = process.env) 
  * the keys it waits for (never their values) and the env switch to change company. From src/providers/registry.ts.
  */
 export function connections(env = process.env) {
-  const extra = [{ name: "n8n", why: "every event to your workflows", ok: Boolean(env.N8N_EVENTS_WEBHOOK_URL), keys: "N8N_EVENTS_WEBHOOK_URL", provider: "n8n webhook", switchEnv: "N8N_EVENTS_WEBHOOK_URL", options: [] as string[] }];
+  const extra = [{ name: "n8n", why: "every event to your workflows", ok: Boolean(env.N8N_EVENTS_WEBHOOK_URL), keys: "N8N_EVENTS_WEBHOOK_URL", provider: "n8n webhook", note: null as string | null, switchEnv: "N8N_EVENTS_WEBHOOK_URL", options: [] as string[] }];
   return [
     ...providerBoard(env).map((k) => ({
       name: k.label,
@@ -213,6 +214,7 @@ export function connections(env = process.env) {
       ok: k.active.connected,
       keys: k.keysToConnect.join(", "),
       provider: k.active.label,
+      note: k.active.note,
       switchEnv: k.env,
       options: k.options.map((o) => `${o.id}${o.state === "planned" ? " (planned)" : ""}`),
     })),

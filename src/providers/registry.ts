@@ -22,6 +22,10 @@ export type ProviderOption = {
   state: "ready" | "planned";
   /** fallback/mock adapters work without any vendor */
   fallback?: boolean;
+  /** a warning shown next to it in the cockpit (data protection, limits) */
+  note?: string;
+  /** personal data may pass only when this env key is "1" (e.g. a paid tier with a DPA); unset = always allowed */
+  personalData?: string;
 };
 
 export type KindDef = { kind: ProviderKind; label: string; why: string; env: string; options: ProviderOption[] };
@@ -34,6 +38,7 @@ export const KINDS: KindDef[] = [
     env: "LLM_PROVIDER",
     options: [
       { id: "anthropic", label: "Claude (Anthropic)", keys: ["ANTHROPIC_API_KEY"], state: "ready" },
+      { id: "gemini", label: "Google Gemini", keys: ["GEMINI_API_KEY"], state: "ready", note: "Free tier: Google may use prompts for training. Agents that see personal data (customer/partner chat, WhatsApp, QA judge, check-up chat) stay off until GEMINI_PAID_TIER=1 or Claude.", personalData: "GEMINI_PAID_TIER" },
       { id: "openai-compatible", label: "OpenAI-compatible API (OpenAI, Mistral, OpenRouter, a local model …)", keys: ["LLM_BASE_URL", "LLM_API_KEY", "LLM_MODEL"], state: "ready" },
       { id: "mock", label: "Mock (tests; agents answer from rules)", keys: [], state: "ready", fallback: true },
     ],
@@ -166,7 +171,7 @@ export function providerStatus(kind: ProviderKind, env: Env = process.env) {
   const id = chosen(kind, env);
   const opt = def.options.find((o) => o.id === id)!;
   const missing = opt.keys.filter((k) => !env[k]);
-  return { kind, id, label: opt.label, connected: !opt.fallback && missing.length === 0, missing, fallback: Boolean(opt.fallback) };
+  return { kind, id, label: opt.label, note: opt.note ?? null, connected: !opt.fallback && missing.length === 0, missing, fallback: Boolean(opt.fallback) };
 }
 
 /** Every kind with its active provider and the alternatives (Cockpit › API & connections). */

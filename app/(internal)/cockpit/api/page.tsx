@@ -28,7 +28,7 @@ export default async function Api() {
     <main>
       <PageHead title="API & connections" crumbs="Cockpit › Machine" sub="Every agent works through the API with its own scoped key; nothing writes to the database directly. Every outside company sits behind our own adapter (src/providers): to change company, set the switch in .env and add its keys; no business code changes. Keys live in .env on the computer or server, never in chat." />
       <section className="grid g4" style={{ marginBottom: 18 }}>
-        {conns.map((c) => <div key={c.name} className="card"><div className="row" style={{ justifyContent: "space-between" }}><b>{c.name}</b><span className={`badge ${c.ok ? "ok" : "warn"}`}>{c.ok ? "connected" : "not set"}</span></div><p className="muted small">{c.why}</p><div className="small">Now: <b>{c.provider}</b></div>{!c.ok && c.keys && <div className="muted small ltr">.env: {c.keys}</div>}{c.options.length > 1 && <div className="muted small ltr">switch: {c.switchEnv} = {c.options.join(" | ")}</div>}</div>)}
+        {conns.map((c) => <div key={c.name} className="card"><div className="row" style={{ justifyContent: "space-between" }}><b>{c.name}</b><span className={`badge ${c.ok ? "ok" : "warn"}`}>{c.ok ? "connected" : "not set"}</span></div><p className="muted small">{c.why}</p><div className="small">Now: <b>{c.provider}</b></div>{c.note && <div className="small" style={{ color: "var(--warn, #b45309)" }}>⚠ {c.note}</div>}{!c.ok && c.keys && <div className="muted small ltr">.env: {c.keys}</div>}{c.options.length > 1 && <div className="muted small ltr">switch: {c.switchEnv} = {c.options.join(" | ")}</div>}</div>)}
       </section>
       <section className="grid g-2-1" style={{ marginBottom: 18 }}>
         <div className="card table-wrap">

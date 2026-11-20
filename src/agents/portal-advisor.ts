@@ -8,7 +8,8 @@ import { INTENTS, type Intent } from "@/server/portal-chat";
  * database, and anything that changes something stays a confirm card the customer presses. It never quotes a
  * number that is not in the context it was given.
  */
-export const advisorEnabled = () => llmEnabled();
+// sees personal data: off on a provider whose terms let it train on prompts (src/providers/registry.ts)
+export const advisorEnabled = () => llmEnabled({ personalData: true });
 
 const LANG: Record<string, string> = { it: "Italian", en: "English", fa: "Persian", de: "German" };
 

@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { mailerFromEnv } from "@/providers/email";
 import { ask, llm, llmEnabled, setLlmForTests } from "@/providers/llm";
 import { mockLlm } from "@/providers/llm/mock";
+import { geminiLlm } from "@/providers/llm/gemini";
 import { openAiCompatibleLlm } from "@/providers/llm/openai-compatible";
 import { chosen, KINDS, providerBoard, providerStatus } from "@/providers/registry";
 import { voiceFromEnv } from "@/providers/voice";
@@ -84,6 +85,26 @@ describe("provider choice", () => {
     const env = { LLM_PROVIDER: "openai-compatible", LLM_BASE_URL: "https://llm.test/v1", LLM_API_KEY: "k", LLM_MODEL: "m" };
     expect(llmEnabled({}, env)).toBe(true);
     expect(llmEnabled({ webSearch: true }, env)).toBe(false);
+  });
+
+  it("Gemini free tier: research runs, agents that see personal data stay off until the paid tier", async () => {
+    const env = { LLM_PROVIDER: "gemini", GEMINI_API_KEY: "k" };
+    expect(chosen("llm", { GEMINI_API_KEY: "k" })).toBe("gemini");
+    expect(llmEnabled({ webSearch: true }, env)).toBe(true);
+    expect(llmEnabled({ personalData: true }, env)).toBe(false);
+    expect(llmEnabled({ personalData: true }, { ...env, GEMINI_PAID_TIER: "1" })).toBe(true);
+    expect(llmEnabled({ personalData: true }, { ANTHROPIC_API_KEY: "k" })).toBe(true);
+
+    const seen: { url: string; headers: Record<string, string>; body: any }[] = [];
+    const f = (async (url: string, init: { body: string; headers: Record<string, string> }) => (
+      seen.push({ url, headers: init.headers, body: JSON.parse(init.body) }),
+      Response.json({ candidates: [{ content: { parts: [{ text: "pensiero", thought: true }, { text: "ciao" }] }, finishReason: "STOP", groundingMetadata: { webSearchQueries: ["a", "b"] } }], usageMetadata: { promptTokenCount: 4, candidatesTokenCount: 2, thoughtsTokenCount: 3 } })
+    )) as unknown as typeof fetch;
+    const r = await geminiLlm(env, f).complete({ system: "be brief", maxTokens: 50, webSearch: { maxUses: 3 }, messages: [{ role: "user", content: "hi" }, { role: "assistant", content: "yes?" }, { role: "user", content: "go" }] });
+    expect(r).toMatchObject({ text: "ciao", stop: "end", usage: { input: 4, output: 5, searches: 2 }, model: "gemini-flash-latest" });
+    expect(seen[0].url).toContain("/models/gemini-flash-latest:generateContent");
+    expect(seen[0].headers["x-goog-api-key"]).toBe("k");
+    expect(seen[0].body).toMatchObject({ systemInstruction: { parts: [{ text: "be brief" }] }, contents: [{ role: "user" }, { role: "model" }, { role: "user" }], tools: [{ google_search: {} }] });
   });
 
   it("agents talk to any model through the same request", async () => {

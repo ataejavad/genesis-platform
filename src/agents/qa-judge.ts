@@ -8,7 +8,8 @@ import type { Criterion } from "@/db/schema";
  * person. Criteria a person must check (method "human") are left to people. Javad's later decisions on the
  * same deliveries are the gold set we measure the judge against (Cockpit › QA shows the agreement).
  */
-export const qaJudgeEnabled = () => llmEnabled();
+// sees personal data: off on a provider whose terms let it train on prompts (src/providers/registry.ts)
+export const qaJudgeEnabled = () => llmEnabled({ personalData: true });
 
 const schema = z.object({
   results: z.array(z.object({ idx: z.number().int().min(0), result: z.enum(["pass", "fail", "unsure"]), note: z.string().max(400).optional() })),

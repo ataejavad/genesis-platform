@@ -35,6 +35,8 @@ export type ModuleDef = {
   uses?: ProviderKind[];
   /** needs a model that can search the web */
   webSearch?: boolean;
+  /** the AI sees personal data: needs a provider whose terms allow it */
+  personalData?: boolean;
   /** events that mark activity (last one = "last activity") */
   events?: string[];
   /** KPI id in src/server/systems.ts */
@@ -58,7 +60,7 @@ export const MODULES: ModuleDef[] = [
   { n: 10, name: "Free check-up engine", system: "acquire", runs: "public /checkup + home chat", events: ["checkup.completed", "checkup.unlocked"], kpi: "checkups", link: "/cockpit/markets" },
   { n: 11, name: "Check-up questions + savings rules", system: "acquire", runs: "Git (data/checkup)", kpi: "unlockRate", link: "/cockpit/experiments" },
   { n: 12, name: "Check-up advisor (AI)", system: "acquire", runs: "at unlock", agent: "checkup-advisor", uses: AI, link: "/cockpit/agents" },
-  { n: 13, name: "Check-up conversation (AI)", system: "acquire", runs: "every check-up turn", agent: "checkup-chat", uses: AI, link: "/cockpit/agents" },
+  { n: 13, name: "Check-up conversation (AI)", system: "acquire", runs: "every check-up turn", agent: "checkup-chat", uses: AI, personalData: true, link: "/cockpit/agents" },
   { n: 14, name: "Company finder + scorer", system: "acquire", runs: "npm run agents:outbound (daily on the server)", script: "outbound", uses: ["company_search"], events: ["prospect.added"], kpi: "prospects", link: "/cockpit/crm" },
   { n: 15, name: "Decision-maker finder", system: "acquire", runs: "with the company finder", uses: ["people_search"], kpi: "contacts", link: "/cockpit/crm" },
   { n: 16, name: "Company research + page + persona", system: "acquire", runs: "per new company", agent: "company-research", events: ["company_page.viewed"], kpi: "pageViews", link: "/cockpit/crm" },
@@ -97,7 +99,7 @@ export const MODULES: ModuleDef[] = [
   { n: 83, name: "Late notice to the customer (new date)", system: "deliver", runs: "hourly with delivery.watch", job: "delivery.watch", events: ["milestone.late"], link: "/cockpit/projects" },
   { n: 74, name: "Free change rounds + rework to the maker", system: "deliver", runs: "customer asks for changes", events: ["milestone.changes", "milestone.revision_cap", "job.rework"], kpi: "reworks", link: "/cockpit/projects" },
   { n: 38, name: "Planner (package → milestones + tasks)", system: "deliver", runs: "on order conversion", events: ["project.created"], kpi: "projects", link: "/cockpit/projects" },
-  { n: 39, name: "QA judge", system: "deliver", runs: "on every delivery", agent: "qa-judge", uses: AI, events: ["qa.judged"], link: "/cockpit/qa" },
+  { n: 39, name: "QA judge", system: "deliver", runs: "on every delivery", agent: "qa-judge", uses: AI, personalData: true, events: ["qa.judged"], link: "/cockpit/qa" },
   { n: 40, name: "Risk-tiered approvals", system: "deliver", runs: "every project and delivery", kpi: "qaQueue", link: "/cockpit/qa" },
   { n: 41, name: "Customer milestone acceptance", system: "deliver", runs: "all tasks of a milestone accepted", events: ["milestone.ready", "milestone.accepted"], kpi: "milestones", link: "/cockpit/projects" },
   { n: 42, name: "Delivery watchdog", system: "deliver", runs: "hourly", job: "delivery.watch", events: ["milestone.reminded"], link: "/cockpit/projects" },

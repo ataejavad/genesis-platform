@@ -1,6 +1,7 @@
 import type { Env } from "../registry";
-import { chosen, providerStatus } from "../registry";
+import { chosen, KINDS, providerStatus } from "../registry";
 import { anthropicLlm } from "./anthropic";
+import { geminiLlm } from "./gemini";
 import { mockLlm } from "./mock";
 import { openAiCompatibleLlm } from "./openai-compatible";
 import type { Llm, LlmRequest } from "./types";
@@ -9,7 +10,7 @@ export type { Llm, LlmMessage, LlmRequest, LlmResult } from "./types";
 
 /*
  * The AI model behind every agent. Agents call `llm().complete({...})` with our own request shape; which company
- * answers is LLM_PROVIDER (anthropic | openai-compatible | mock), picked automatically from the keys when unset.
+ * answers is LLM_PROVIDER (anthropic | gemini | openai-compatible | mock), picked automatically from the keys when unset.
  * Web search is a capability: agents that need it are off when the active provider has none.
  */
 
@@ -24,6 +25,8 @@ export function llm(env: Env = process.env): Llm {
   switch (chosen("llm", env)) {
     case "anthropic":
       return anthropicLlm(env);
+    case "gemini":
+      return geminiLlm(env);
     case "openai-compatible":
       return openAiCompatibleLlm(env);
     default:
@@ -32,10 +35,13 @@ export function llm(env: Env = process.env): Llm {
 }
 
 /** True when a real model is connected (and, if asked, it can search the web). The mock never counts. */
-export function llmEnabled(need: { webSearch?: boolean } = {}, env: Env = process.env) {
+export function llmEnabled(need: { webSearch?: boolean; personalData?: boolean } = {}, env: Env = process.env) {
   if (override) return !need.webSearch || override.webSearch;
   const s = providerStatus("llm", env);
   if (!s.connected) return false;
+  // personal data only where the provider's terms allow it (a free tier that trains on prompts does not)
+  const gate = KINDS.find((k) => k.kind === "llm")!.options.find((o) => o.id === s.id)?.personalData;
+  if (need.personalData && gate && env[gate] !== "1") return false;
   return !need.webSearch || llm(env).webSearch;
 }
 

@@ -8,7 +8,8 @@ import type { Reply } from "@/server/whatsapp";
  * It answers from the approved catalogue, says it is an AI, never promises prices or dates beyond the
  * catalogue, and steers to the check-up or a call with a person.
  */
-export const whatsappAgentEnabled = () => llmEnabled();
+// sees personal data: off on a provider whose terms let it train on prompts (src/providers/registry.ts)
+export const whatsappAgentEnabled = () => llmEnabled({ personalData: true });
 
 const LANG: Record<string, string> = { it: "Italian", de: "German", en: "English", fa: "Persian" };
 
