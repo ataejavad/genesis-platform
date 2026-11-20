@@ -1,0 +1,492 @@
+{
+  "industry": "installers",
+  "version": 1,
+  "minutes": 2,
+  "questions": [
+    {
+      "id": "work",
+      "multi": true,
+      "tags": true,
+      "label": {
+        "it": "Che impianti fai?",
+        "en": "What do you install?",
+        "fa": "چه تأسیساتی نصب می‌کنید؟"
+      },
+      "options": [
+        {
+          "id": "heatpump",
+          "label": {
+            "it": "Pompe di calore",
+            "en": "Heat pumps",
+            "fa": "پمپ حرارتی"
+          },
+          "words": [
+            "pompa di calore",
+            "pompe",
+            "heat pump",
+            "پمپ"
+          ]
+        },
+        {
+          "id": "clima",
+          "label": {
+            "it": "Climatizzatori",
+            "en": "Air conditioning",
+            "fa": "کولر و تهویه"
+          },
+          "words": [
+            "condizion",
+            "aria condizionata",
+            "split",
+            "clima",
+            "کولر",
+            "تهویه"
+          ]
+        },
+        {
+          "id": "solar",
+          "label": {
+            "it": "Fotovoltaico e solare termico",
+            "en": "Solar PV and solar thermal",
+            "fa": "خورشیدی"
+          },
+          "words": [
+            "fotovolt",
+            "pannelli",
+            "solare",
+            "solar",
+            "pv",
+            "خورشید"
+          ]
+        },
+        {
+          "id": "boiler",
+          "label": {
+            "it": "Caldaie",
+            "en": "Boilers",
+            "fa": "دیگ و پکیج"
+          },
+          "words": [
+            "caldaia",
+            "boiler",
+            "پکیج",
+            "دیگ"
+          ]
+        },
+        {
+          "id": "electric",
+          "label": {
+            "it": "Impianti elettrici",
+            "en": "Electrical systems",
+            "fa": "تأسیسات برق"
+          },
+          "words": [
+            "elettric",
+            "electric",
+            "quadri",
+            "برق"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "team",
+      "label": {
+        "it": "Quante persone lavorano nella tua impresa?",
+        "en": "How many people work in your firm?",
+        "fa": "شرکت شما چند نفر است؟"
+      },
+      "options": [
+        {
+          "id": "s",
+          "value": 3,
+          "label": {
+            "it": "1–5",
+            "en": "1–5",
+            "fa": "۱ تا ۵"
+          }
+        },
+        {
+          "id": "m",
+          "value": 12,
+          "label": {
+            "it": "6–19",
+            "en": "6–19",
+            "fa": "۶ تا ۱۹"
+          }
+        },
+        {
+          "id": "l",
+          "value": 30,
+          "label": {
+            "it": "20–49",
+            "en": "20–49",
+            "fa": "۲۰ تا ۴۹"
+          }
+        },
+        {
+          "id": "xl",
+          "value": 60,
+          "label": {
+            "it": "50 o più",
+            "en": "50 or more",
+            "fa": "۵۰ یا بیشتر"
+          }
+        }
+      ]
+    },
+    {
+      "id": "missedCalls",
+      "label": {
+        "it": "Quante chiamate perdi a settimana (in cantiere, fuori orario)?",
+        "en": "How many calls do you miss a week (on site, after hours)?",
+        "fa": "هفته‌ای چند تماس را از دست می‌دهید (سر کار، بعد از ساعت کاری)؟"
+      },
+      "options": [
+        {
+          "id": "low",
+          "value": 3,
+          "label": {
+            "it": "0–5",
+            "en": "0–5",
+            "fa": "۰ تا ۵"
+          }
+        },
+        {
+          "id": "mid",
+          "value": 10,
+          "label": {
+            "it": "5–15",
+            "en": "5–15",
+            "fa": "۵ تا ۱۵"
+          }
+        },
+        {
+          "id": "high",
+          "value": 20,
+          "label": {
+            "it": "Più di 15",
+            "en": "More than 15",
+            "fa": "بیشتر از ۱۵"
+          }
+        }
+      ]
+    },
+    {
+      "id": "jobValue",
+      "label": {
+        "it": "Valore medio di un lavoro?",
+        "en": "Average value of a job?",
+        "fa": "میانگین ارزش هر کار؟"
+      },
+      "options": [
+        {
+          "id": "low",
+          "value": 300,
+          "label": {
+            "it": "Meno di €500",
+            "en": "Under €500",
+            "fa": "کمتر از ۵۰۰ یورو"
+          }
+        },
+        {
+          "id": "mid",
+          "value": 1200,
+          "label": {
+            "it": "€500–2.000",
+            "en": "€500–2,000",
+            "fa": "۵۰۰ تا ۲٬۰۰۰ یورو"
+          }
+        },
+        {
+          "id": "high",
+          "value": 4000,
+          "label": {
+            "it": "Più di €2.000",
+            "en": "Over €2,000",
+            "fa": "بیشتر از ۲٬۰۰۰ یورو"
+          }
+        }
+      ]
+    },
+    {
+      "id": "office",
+      "label": {
+        "it": "Ore d'ufficio a settimana per rapportini, preventivi e fatture?",
+        "en": "Office hours a week on job reports, quotes and invoices?",
+        "fa": "هفته‌ای چند ساعت کار دفتری برای گزارش کار، پیش‌فاکتور و فاکتور؟"
+      },
+      "options": [
+        {
+          "id": "low",
+          "value": 3,
+          "label": {
+            "it": "Meno di 5",
+            "en": "Under 5",
+            "fa": "کمتر از ۵"
+          }
+        },
+        {
+          "id": "mid",
+          "value": 10,
+          "label": {
+            "it": "5–15",
+            "en": "5–15",
+            "fa": "۵ تا ۱۵"
+          }
+        },
+        {
+          "id": "high",
+          "value": 20,
+          "label": {
+            "it": "Più di 15",
+            "en": "Over 15",
+            "fa": "بیشتر از ۱۵"
+          }
+        }
+      ]
+    },
+    {
+      "id": "incentives",
+      "label": {
+        "it": "Quante pratiche per incentivi (Conto Termico, bonus) fai all'anno?",
+        "en": "How many incentive files (Conto Termico, bonuses) a year?",
+        "fa": "سالی چند پرونده مشوق (Conto Termico، بن‌ها) دارید؟"
+      },
+      "options": [
+        {
+          "id": "none",
+          "value": 0,
+          "label": {
+            "it": "Nessuna",
+            "en": "None",
+            "fa": "هیچ"
+          },
+          "words": [
+            "nessuna",
+            "nessun",
+            "none",
+            "هیچ"
+          ]
+        },
+        {
+          "id": "some",
+          "value": 10,
+          "label": {
+            "it": "1–20",
+            "en": "1–20",
+            "fa": "۱ تا ۲۰"
+          }
+        },
+        {
+          "id": "many",
+          "value": 40,
+          "label": {
+            "it": "Più di 20",
+            "en": "More than 20",
+            "fa": "بیشتر از ۲۰"
+          }
+        }
+      ]
+    },
+    {
+      "id": "hourly",
+      "label": {
+        "it": "Costo orario medio di un dipendente (contributi inclusi)?",
+        "en": "Average hourly cost of an employee (all-in)?",
+        "fa": "میانگین هزینه ساعتی هر کارمند (با بیمه و مالیات)؟"
+      },
+      "options": [
+        {
+          "id": "low",
+          "value": 25,
+          "label": {
+            "it": "Circa €25",
+            "en": "About €25",
+            "fa": "حدود ۲۵ یورو"
+          }
+        },
+        {
+          "id": "mid",
+          "value": 35,
+          "label": {
+            "it": "Circa €35",
+            "en": "About €35",
+            "fa": "حدود ۳۵ یورو"
+          }
+        },
+        {
+          "id": "high",
+          "value": 45,
+          "label": {
+            "it": "Circa €45",
+            "en": "About €45",
+            "fa": "حدود ۴۵ یورو"
+          }
+        }
+      ]
+    }
+  ],
+  "leaks": [
+    {
+      "id": "missed-calls",
+      "solution": "phone-agent",
+      "title": {
+        "it": "Lavori persi per chiamate senza risposta",
+        "en": "Jobs lost to unanswered calls",
+        "fa": "کار از دست رفته به خاطر تماس‌های بی‌پاسخ"
+      },
+      "why": {
+        "it": "Chi non ti trova al telefono chiama il prossimo installatore.",
+        "en": "A customer who can't reach you calls the next installer.",
+        "fa": "مشتری که به شما دسترسی ندارد به نصاب بعدی زنگ می‌زند."
+      },
+      "factors": [
+        {
+          "q": "missedCalls",
+          "label": {
+            "it": "chiamate perse a settimana",
+            "en": "missed calls a week",
+            "fa": "تماس از دست رفته در هفته"
+          }
+        },
+        {
+          "const": 0.25,
+          "label": {
+            "it": "quota di richieste di nuovi lavori (ipotesi prudente)",
+            "en": "share that are new job requests (cautious assumption)",
+            "fa": "سهم درخواست کار تازه (فرض محتاطانه)"
+          }
+        },
+        {
+          "q": "jobValue",
+          "label": {
+            "it": "valore medio di un lavoro (€)",
+            "en": "average job value (€)",
+            "fa": "میانگین ارزش کار (یورو)"
+          }
+        },
+        {
+          "fact": "marginPct",
+          "label": {
+            "it": "margine del settore (Eurostat)",
+            "en": "sector margin (Eurostat)",
+            "fa": "حاشیه سود بخش (Eurostat)"
+          }
+        },
+        {
+          "const": 46,
+          "label": {
+            "it": "settimane lavorative",
+            "en": "working weeks",
+            "fa": "هفته کاری"
+          }
+        },
+        {
+          "const": 0.6,
+          "label": {
+            "it": "quota recuperata con risposta 24/7 (ipotesi)",
+            "en": "share won back with 24/7 answering (assumption)",
+            "fa": "سهمی که با پاسخ ۲۴ ساعته برمی‌گردد (فرض)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "office-time",
+      "solution": "field-reports",
+      "title": {
+        "it": "Ore d'ufficio su carta e WhatsApp",
+        "en": "Office hours on paper and WhatsApp",
+        "fa": "ساعت‌های دفتری روی کاغذ و واتس‌اپ"
+      },
+      "why": {
+        "it": "Rapportini ricopiati, preventivi rifatti, fatture emesse in ritardo.",
+        "en": "Job reports retyped, quotes redone, invoices sent late.",
+        "fa": "گزارش‌های کار دوباره تایپ می‌شوند، پیش‌فاکتورها از نو نوشته می‌شوند، فاکتورها دیر می‌روند."
+      },
+      "factors": [
+        {
+          "q": "office",
+          "label": {
+            "it": "ore a settimana",
+            "en": "hours a week",
+            "fa": "ساعت در هفته"
+          }
+        },
+        {
+          "q": "hourly",
+          "label": {
+            "it": "costo orario (€)",
+            "en": "hourly cost (€)",
+            "fa": "هزینه ساعتی (یورو)"
+          }
+        },
+        {
+          "const": 46,
+          "label": {
+            "it": "settimane lavorative",
+            "en": "working weeks",
+            "fa": "هفته کاری"
+          }
+        },
+        {
+          "const": 0.5,
+          "label": {
+            "it": "ore risparmiate con rapportini digitali (ipotesi)",
+            "en": "share saved with digital job reports (assumption)",
+            "fa": "سهم صرفه‌جویی با گزارش کار دیجیتال (فرض)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "incentive-files",
+      "solution": "incentive-docs",
+      "title": {
+        "it": "Tempo sulle pratiche per gli incentivi",
+        "en": "Time on incentive paperwork",
+        "fa": "وقت صرف‌شده برای پرونده مشوق‌ها"
+      },
+      "why": {
+        "it": "Ogni pratica richiede documenti, foto e invii su portali diversi.",
+        "en": "Every file needs documents, photos and filings on different portals.",
+        "fa": "هر پرونده مدرک، عکس و ارسال در سامانه‌های مختلف لازم دارد."
+      },
+      "factors": [
+        {
+          "q": "incentives",
+          "label": {
+            "it": "pratiche all'anno",
+            "en": "files a year",
+            "fa": "پرونده در سال"
+          }
+        },
+        {
+          "const": 6,
+          "label": {
+            "it": "ore per pratica (ipotesi)",
+            "en": "hours per file (assumption)",
+            "fa": "ساعت برای هر پرونده (فرض)"
+          }
+        },
+        {
+          "q": "hourly",
+          "label": {
+            "it": "costo orario (€)",
+            "en": "hourly cost (€)",
+            "fa": "هزینه ساعتی (یورو)"
+          }
+        },
+        {
+          "const": 0.7,
+          "label": {
+            "it": "quota svolta da noi (ipotesi)",
+            "en": "share we take over (assumption)",
+            "fa": "سهمی که ما انجام می‌دهیم (فرض)"
+          }
+        }
+      ]
+    }
+  ]
+}

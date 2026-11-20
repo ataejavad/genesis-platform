@@ -1,0 +1,127 @@
+{
+  "_doc": "Outreach texts for installers (F43.2x). Slots: {greeting} {company} {city} {signal} {checkupUrl} {pageUrl} {hubUrl} {deadline} {sender} {brand} {optoutUrl} {privacyUrl} {opening} {source}. 'fa' is the Persian version Javad reviews; only the country language is sent. The first contact always says where the data came from and how to opt out (GDPR art. 14).",
+  "signals": {
+    "it": {
+      "hiringRepetitiveRoles": "ho visto che state cercando personale per l'ufficio: spesso è il segnale che preventivi e telefonate stanno crescendo più delle persone",
+      "affectedByObligation": "con le nuove regole su incentivi e pratiche, molti installatori passano ore sulle carte invece che in cantiere",
+      "slowServiceReviews": "alcune recensioni parlano di attese al telefono: è il problema più comune nel vostro settore",
+      "growing": "vedo che state crescendo: è il momento in cui le chiamate perse costano di più",
+      "default": "lavoro con installatori come voi su un problema preciso: chiamate perse e preventivi lenti"
+    },
+    "fa": {
+      "hiringRepetitiveRoles": "دیدم برای دفتر نیرو استخدام می‌کنید؛ معمولاً یعنی پیش‌فاکتورها و تماس‌ها از آدم‌ها سریع‌تر زیاد شده",
+      "affectedByObligation": "با قوانین تازه مشوق‌ها و پرونده‌ها، خیلی از نصاب‌ها ساعت‌ها پای کاغذبازی‌اند به جای کارگاه",
+      "slowServiceReviews": "چند نظر مشتری از معطلی پشت تلفن گفته‌اند؛ رایج‌ترین مشکل صنف شماست",
+      "growing": "می‌بینم دارید رشد می‌کنید؛ همین وقت است که تماس‌های بی‌جواب بیشترین هزینه را دارند",
+      "default": "با نصاب‌هایی مثل شما روی یک مشکل مشخص کار می‌کنم: تماس‌های بی‌جواب و پیش‌فاکتور کند"
+    }
+  },
+  "steps": {
+    "li-connect": {
+      "it": {
+        "body": "{greeting} {signal}. Ho preparato un check-up gratuito di 2 minuti che mostra quanto costa a un'impresa come {company}. Le va di collegarci?"
+      },
+      "fa": {
+        "body": "{greeting} {signal}. یک چک‌آپ رایگان ۲ دقیقه‌ای ساخته‌ام که نشان می‌دهد این مشکل برای شرکتی مثل {company} چقدر هزینه دارد. وصل شویم؟"
+      }
+    },
+    "li-message": {
+      "it": {
+        "body": "{greeting} grazie del collegamento. In breve: aiutiamo installatori a non perdere lavori per chiamate senza risposta e preventivi lenti. Ho preparato una pagina solo per {company}: cosa abbiamo trovato, una stima in euro di quanto valgono chiamate perse e preventivi lenti, e un primo assistente della vostra azienda con cui parlare: {pageUrl}\nSe non le interessa, me lo dica e non la disturbo più. {sender}, {brand}"
+      },
+      "fa": {
+        "body": "{greeting} ممنون از اتصال. خلاصه: به نصاب‌ها کمک می‌کنیم کار را به خاطر تماس بی‌جواب و پیش‌فاکتور کند از دست ندهند. یک صفحه فقط برای {company} ساخته‌ام: آنچه پیدا کردیم، برآورد یورویی تماس‌های بی‌جواب و پیش‌فاکتور کند، و یک دستیار اولیه از شرکت شما که می‌توانید با آن حرف بزنید: {pageUrl}\nاگر علاقه ندارید بگویید، دیگر مزاحم نمی‌شوم. {sender}، {brand}"
+      }
+    },
+    "li-followup": {
+      "it": {
+        "body": "{greeting} un'informazione utile anche se non lavoreremo insieme: {deadline}. Le scadenze del vostro settore, aggiornate ogni settimana con le fonti, sono qui: {hubUrl}. {sender}"
+      },
+      "fa": {
+        "body": "{greeting} یک خبر مفید حتی اگر با هم کار نکنیم: {deadline}. مهلت‌های صنف شما، هر هفته به‌روز و با منبع، اینجاست: {hubUrl}. {sender}"
+      }
+    },
+    "email-1": {
+      "it": {
+        "subject": "Il suo check-up: il prossimo passo per {company}",
+        "body": "{greeting}\ngrazie per aver usato il check-up. Il punto più costoso che ha indicato è anche quello che si risolve più in fretta: di solito bastano 3 giorni per attivare la risposta alle chiamate 24/7.\nSe vuole, in 20 minuti al telefono le mostro come funzionerebbe da voi. Basta rispondere a questa email con un orario.\n\n{sender}, {brand}\nRiceve questa email perché ha dato il consenso sul nostro sito. Non desidera più email? {optoutUrl}"
+      },
+      "fa": {
+        "subject": "چک‌آپ شما: قدم بعد برای {company}",
+        "body": "{greeting}\nممنون که چک‌آپ را انجام دادید. پرهزینه‌ترین نقطه‌ای که گفتید، سریع‌ترین راه‌حل را هم دارد: معمولاً ۳ روز برای راه‌اندازی پاسخ‌گویی ۲۴ ساعته کافی است.\nاگر بخواهید، در ۲۰ دقیقه تلفنی نشان می‌دهم پیش شما چطور کار می‌کند. کافی است با یک ساعت جواب بدهید.\n\n{sender}، {brand}\nاین ایمیل را می‌گیرید چون در سایت ما رضایت داده‌اید. لغو: {optoutUrl}"
+      }
+    },
+    "email-2": {
+      "it": {
+        "subject": "Una scadenza che riguarda {company}",
+        "body": "{greeting}\n{deadline}. Le scadenze aggiornate del settore sono qui: {hubUrl}\nSe vuole rifare il check-up con numeri nuovi: {checkupUrl}\n\n{sender}, {brand}\nNon desidera più email? {optoutUrl}"
+      },
+      "fa": {
+        "subject": "مهلتی که به {company} مربوط است",
+        "body": "{greeting}\n{deadline}. مهلت‌های به‌روز صنف اینجاست: {hubUrl}\nاگر بخواهید چک‌آپ را با عددهای تازه دوباره انجام دهید: {checkupUrl}\n\n{sender}، {brand}\nلغو: {optoutUrl}"
+      }
+    },
+    "email-3": {
+      "it": {
+        "subject": "Chiudo il suo fascicolo?",
+        "body": "{greeting}\nnon ho avuto risposta, quindi immagino che ora non sia il momento. Chiudo il fascicolo di {company}; se in futuro le chiamate perse tornano a pesare, basta rispondere a questa email.\n\n{sender}, {brand}\nNon desidera più email? {optoutUrl}"
+      },
+      "fa": {
+        "subject": "پرونده شما را ببندم؟",
+        "body": "{greeting}\nجوابی نگرفتم، پس حدس می‌زنم الان وقتش نیست. پرونده {company} را می‌بندم؛ اگر بعداً تماس‌های بی‌جواب دوباره مشکل شد، کافی است به همین ایمیل جواب دهید.\n\n{sender}، {brand}\nلغو: {optoutUrl}"
+      }
+    },
+    "call-1": {
+      "it": {
+        "body": "APERTURA: {opening}\nPERCHÉ: Chiamo {company} perché {signal}.\nDOMANDA: Quante chiamate vi capita di perdere in una settimana piena, più o meno?\nSE RISPONDE: Il nostro check-up gratuito trasforma quel numero in euro. Posso mandarle il link via SMS o WhatsApp?\nOBIEZIONE 'non ho tempo': Capisco, sono 2 minuti e li fa quando vuole. Glielo mando?\nOBIEZIONE 'non mi interessa': Nessun problema, la tolgo dalla lista. Buona giornata.\nOBIETTIVO: check-up fatto o appuntamento di 20 minuti. Registrare l'esito."
+      },
+      "fa": {
+        "body": "شروع: {opening}\nچرا: به {company} زنگ می‌زنم چون {signal}.\nسؤال: در یک هفته شلوغ تقریباً چند تماس از دست می‌دهید؟\nاگر جواب داد: چک‌آپ رایگان ما همین عدد را به یورو تبدیل می‌کند. لینکش را با پیامک یا واتس‌اپ بفرستم؟\nاعتراض «وقت ندارم»: متوجهم، ۲ دقیقه است و هر وقت خواستید انجامش می‌دهید. بفرستم؟\nاعتراض «علاقه ندارم»: مشکلی نیست، از فهرست حذفتان می‌کنم. روز خوش.\nهدف: چک‌آپ انجام شود یا جلسه ۲۰ دقیقه‌ای. نتیجه را ثبت کنید."
+      }
+    },
+    "call-2": {
+      "it": {
+        "body": "APERTURA: {opening}\nRICHIAMO: Le avevo scritto su LinkedIn a proposito delle chiamate perse. Ha avuto modo di guardare il check-up?\nSE NO: Le dico in 30 secondi cosa ha trovato per imprese simili a {company}: in media il 20-30% delle chiamate resta senza risposta nei picchi.\nOBIETTIVO: appuntamento di 20 minuti. Se dice no, segnare 'non interessato' e chiudere."
+      },
+      "fa": {
+        "body": "شروع: {opening}\nتماس دوم: در لینکدین درباره تماس‌های بی‌جواب برایتان نوشته بودم. فرصت شد چک‌آپ را ببینید؟\nاگر نه: در ۳۰ ثانیه می‌گویم برای شرکت‌های شبیه {company} چه پیدا کرده: به طور میانگین ۲۰ تا ۳۰ درصد تماس‌ها در ساعت‌های شلوغ بی‌جواب می‌ماند.\nهدف: جلسه ۲۰ دقیقه‌ای. اگر گفت نه، «علاقه ندارد» ثبت و تمام."
+      }
+    },
+    "call-now": {
+      "it": {
+        "body": "APERTURA: {opening}\nRICHIESTA: Mi ha chiesto di essere richiamato dopo il check-up di {company}.\nGUIDA: ripercorrere i 3 punti del report (link nella scheda), chiedere quale pesa di più, proporre la soluzione con il ritorno più veloce.\nOBIETTIVO: proposta su misura entro 48 ore o prova gratuita. Registrare l'esito."
+      },
+      "fa": {
+        "body": "شروع: {opening}\nدرخواست: بعد از چک‌آپ {company} خواسته‌اند با آن‌ها تماس بگیریم.\nراهنما: سه نکته گزارش را مرور کنید (لینک در پرونده)، بپرسید کدام سنگین‌تر است، راه‌حلی را پیشنهاد دهید که سریع‌تر پول برمی‌گرداند.\nهدف: پیشنهاد اختصاصی تا ۴۸ ساعت یا دوره آزمایشی رایگان. نتیجه را ثبت کنید."
+      }
+    },
+    "email-cold-1": {
+      "it": {
+        "subject": "{company}: quante chiamate perdete a settimana?",
+        "body": "{greeting}\n{signal}.\nHo preparato una pagina solo per {company}: cosa abbiamo trovato su di voi, una stima in euro di quanto valgono chiamate perse e preventivi lenti e un primo assistente della vostra azienda, gratuito: {pageUrl}\nNessuna chiamata commerciale se non la chiede lei.\n\n{sender}, {brand}\nHo trovato i vostri contatti su fonti pubbliche ({source}). Se non vuole altre email: {optoutUrl} · Privacy: {privacyUrl}"
+      },
+      "fa": {
+        "subject": "{company}: هفته‌ای چند تماس از دست می‌دهید؟",
+        "body": "{greeting}\n{signal}.\nیک صفحه فقط برای {company} ساخته‌ایم: آنچه درباره شما پیدا کردیم، برآورد یورویی تماس‌های بی‌جواب و پیش‌فاکتور کند و یک دستیار اولیه رایگان از شرکت شما: {pageUrl}\nتا خودتان نخواهید، تماس فروش نمی‌گیریم.\n\n{sender}، {brand}\nاطلاعات تماس شما را از منابع عمومی پیدا کردم. لغو: {optoutUrl} · حریم خصوصی: {privacyUrl}"
+      }
+    },
+    "email-cold-2": {
+      "it": {
+        "subject": "Una scadenza per gli installatori",
+        "body": "{greeting}\n{deadline}. Le scadenze del settore, aggiornate ogni settimana con le fonti: {hubUrl}\nÈ l'ultima email che le mando, a meno che non mi risponda.\n\n{sender}, {brand}\nHo trovato i vostri contatti su fonti pubbliche ({source}). Se non vuole altre email: {optoutUrl} · Privacy: {privacyUrl}"
+      },
+      "fa": {
+        "subject": "مهلتی برای نصاب‌ها",
+        "body": "{greeting}\n{deadline}. مهلت‌های صنف، هر هفته به‌روز و با منبع: {hubUrl}\nاین آخرین ایمیل من است، مگر اینکه جواب بدهید.\n\n{sender}، {brand}\nاطلاعات تماس شما را از منابع عمومی پیدا کردم. لغو: {optoutUrl} · حریم خصوصی: {privacyUrl}"
+      }
+    },
+    "call-warm": {
+      "it": {
+        "body": "APERTURA: {opening}\nPERCHÉ: Vedo che avete guardato la pagina che abbiamo preparato per {company}. Ha domande sulla stima?\nGUIDA: chiedere quale numero della stima è più vicino alla realtà, correggerlo insieme, proporre il primo passo con il ritorno più veloce.\nOBIETTIVO: appuntamento di 20 minuti o prova gratuita. Registrare l'esito."
+      },
+      "fa": {
+        "body": "شروع: {opening}\nچرا: دیدم صفحه‌ای را که برای {company} ساختیم دیده‌اید. درباره برآورد سؤالی دارید؟\nراهنما: بپرسید کدام عدد برآورد به واقعیت نزدیک‌تر است، با هم اصلاحش کنید، قدمی را پیشنهاد دهید که سریع‌تر پول برمی‌گرداند.\nهدف: جلسه ۲۰ دقیقه‌ای یا دوره آزمایشی رایگان. نتیجه را ثبت کنید."
+      }
+    }
+  }
+}

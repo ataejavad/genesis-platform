@@ -1,0 +1,18 @@
+# Country agent: ranking (2026-10-23)
+
+Score out of 100 · confidence = share of the weight resting on real data.
+
+| # | Country | Score | Confidence | ai_gap (20) | sme_count (20) | momentum (20) | subsidies (10) | labour_cost (10) | access (10) | legal (10) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | Italy | **70.8** | 100% | 84.3 → 20 | 89,539 → 13.3 | 1 → 12.5 | 9 → 10 | 32 → 0 | 10 → 10 | 4 → 5 |
+| 2 | United Kingdom ⚠ data incomplete, not comparable | **55** | 50% | – | – | 1.2 → 20 | 3 → 0 | – | 8 → 0 | 9 → 10 |
+| 3 | Germany | **54.6** | 100% | 75.07 → 6.7 | 213,889 → 20 | 1 → 12.5 | 6 → 2.5 | 45 → 6.7 | 9 → 5 | 3 → 1.3 |
+| 4 | Austria | **35.4** | 100% | 71.27 → 0 | 20,328 → 6.7 | 0.8 → 5 | 8 → 7.5 | 46.3 → 10 | 9 → 5 | 3 → 1.3 |
+| 5 | Ireland | **34.2** | 100% | 81.66 → 13.3 | 14,814 → 0 | -0.4 → 0 | 7 → 5 | 44.2 → 3.3 | 9 → 5 | 6 → 7.5 |
+
+## Sources
+- **Germany**: ai_gap: Eurostat isoc_eb_ai 2025: 24.93% of 10–249 staff firms use AI; sme_count: Eurostat sbs_sc_ovw 2024: 148708 (20–49) + 65181 (50–249); momentum: Eurostat namq_10_gdp 2026-Q2: real GDP 1% y/y; labour_cost: Eurostat lc_lci_lev 2025: 45 EUR/hour; subsidies: No federal SME digital grant since 'go-digital' ended; state programmes (Digitalbonus Bayern, Digitalisierungsprämie BW etc.) differ by Land; access: German covered (AI + review); EU reverse-charge invoicing from Italy; legal: Cold email effectively banned B2B (UWG §7(2) Nr. 3); phone only with presumed consent
+- **Italy**: ai_gap: Eurostat isoc_eb_ai 2025: 15.7% of 10–249 staff firms use AI; sme_count: Eurostat sbs_sc_ovw 2024: 62605 (20–49) + 26934 (50–249); momentum: Eurostat namq_10_gdp 2026-Q2: real GDP 1% y/y; labour_cost: Eurostat lc_lci_lev 2025: 32 EUR/hour; subsidies: Iperammortamento 2026 (Legge di bilancio 2026) covers 4.0 software; Transizione 5.0 credits; PNRR; access: Italian spoken; Javad registers as Italian freelancer, so invoicing is domestic; legal: Cold email needs prior consent even B2B (Codice privacy art. 130); phone after checking the Registro delle Opposizioni
+- **United Kingdom**: ai_gap: ONS BICS measures AI use differently; not comparable with Eurostat, left neutral; sme_count: ONS 'UK business: activity, size and location' tables by size band not parsed yet; momentum: ONS: Real GDP Q2 2026 vs Q2 2025 (+1.2%); labour_cost: No Eurostat-comparable UK hourly labour cost since 2020; subsidies: Help to Grow: Digital closed in 2023; no national SME software grant found; access: English; non-EU: invoicing from Italy works (B2B services outside scope of IT VAT) but adds admin; legal: PECR: B2B cold email to corporate subscribers allowed with identification + opt-out
+- **Austria**: ai_gap: Eurostat isoc_eb_ai 2025: 28.73% of 10–249 staff firms use AI; sme_count: Eurostat sbs_sc_ovw 2024: 13961 (20–49) + 6367 (50–249); momentum: Eurostat namq_10_gdp 2026-Q2: real GDP 0.8% y/y; labour_cost: Eurostat lc_lci_lev 2025: 46.3 EUR/hour; subsidies: KMU.DIGITAL federal programme funded again in 2026 (consulting + implementation); access: German covered; EU reverse-charge invoicing; legal: TKG 2021 §174: email marketing needs prior consent, also B2B
+- **Ireland**: ai_gap: Eurostat isoc_eb_ai 2025: 18.34% of 10–249 staff firms use AI; sme_count: Eurostat sbs_sc_ovw 2024: 9979 (20–49) + 4835 (50–249); momentum: Eurostat namq_10_gdp 2026-Q2: real GDP -0.4% y/y; labour_cost: Eurostat lc_lci_lev 2025: 44.2 EUR/hour; subsidies: Grow Digital Voucher via Local Enterprise Offices (co-funds digital tools); access: English; EU reverse-charge invoicing; legal: B2B email to corporate addresses possible with opt-out (S.I. 336/2011); to verify with a lawyer

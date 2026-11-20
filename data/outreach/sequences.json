@@ -1,0 +1,95 @@
+{
+  "_doc": "Outreach sequences. day = days after Javad approves. A reply, a check-up or an opt-out stops the rest. Cold email and AI calls wait until Javad switches them on for the country and records a legal basis on the contact; until then those steps stay parked with the reason shown.",
+  "sequences": {
+    "cold": {
+      "when": "found by the company agent, no consent",
+      "steps": [
+        {
+          "id": "li-connect",
+          "channel": "linkedin",
+          "day": 0
+        },
+        {
+          "id": "email-cold-1",
+          "channel": "email",
+          "day": 1
+        },
+        {
+          "id": "call-1",
+          "channel": "phone",
+          "day": 2
+        },
+        {
+          "id": "li-message",
+          "channel": "linkedin",
+          "day": 3
+        },
+        {
+          "id": "email-cold-2",
+          "channel": "email",
+          "day": 7
+        },
+        {
+          "id": "li-followup",
+          "channel": "linkedin",
+          "day": 9
+        },
+        {
+          "id": "call-2",
+          "channel": "phone",
+          "day": 14
+        }
+      ]
+    },
+    "warm": {
+      "when": "left an email with consent (hub hook or check-up)",
+      "steps": [
+        {
+          "id": "email-1",
+          "channel": "email",
+          "day": 0
+        },
+        {
+          "id": "email-2",
+          "channel": "email",
+          "day": 4
+        },
+        {
+          "id": "call-1",
+          "channel": "phone",
+          "day": 6
+        },
+        {
+          "id": "email-3",
+          "channel": "email",
+          "day": 11
+        }
+      ]
+    },
+    "callback": {
+      "when": "asked for a call after the check-up (call within 1 working day)",
+      "steps": [
+        {
+          "id": "call-now",
+          "channel": "phone",
+          "day": 0
+        },
+        {
+          "id": "email-2",
+          "channel": "email",
+          "day": 3
+        }
+      ]
+    },
+    "warm-call": {
+      "when": "a company replied or opened its page and Javad switched warm calls on",
+      "steps": [
+        {
+          "id": "call-warm",
+          "channel": "phone",
+          "day": 0
+        }
+      ]
+    }
+  }
+}

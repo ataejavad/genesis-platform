@@ -1,0 +1,63 @@
+import { costEur } from "./meter";
+import { extractJson, llm, llmEnabled } from "@/providers/llm";
+import { z } from "zod";
+import { researchedPage } from "@/server/company-page-doc";
+
+/*
+ * Company research (research 2026-10-23, Javad: know the customer before the first contact). Claude reads the
+ * firm's public footprint on the web and returns: facts with sources, a starter persona of the company, and
+ * one personal opening line in the country language plus Persian for Javad. Off until an AI model with web search is connected;
+ * then the page is built from the Maps data and the hub research, and the opening line from the signals.
+ */
+
+export const researchEnabled = () => llmEnabled({ webSearch: true });
+
+const resultSchema = researchedPage.extend({ personal: z.object({ local: z.string().max(400), fa: z.string().max(400) }) });
+export type CompanyResearch = z.infer<typeof resultSchema> & { costEur: number };
+
+const LANG: Record<string, string> = { IT: "Italian", DE: "German" };
+
+/**
+ * Where the agent looks, per country (Javad 2026-10-25: website, company registers, LinkedIn and more).
+ * Public pages only, read through web search: no logins, no scraping of LinkedIn (its User Agreement bans it),
+ * company facts only (GDPR: nothing about people's private lives).
+ */
+export const SOURCES: Record<string, string[]> = {
+  ALL: [
+    "the company's own website (services, references, team size, certifications, news)",
+    "Google Maps / Google Business profile and review themes",
+    "LinkedIn company page and public posts as shown in search results (size, hiring, recent projects)",
+    "job ads (Indeed, InfoJobs, the company site): hiring shows growth and where work piles up",
+    "local and trade press, trade-association member lists, trade-fair exhibitor lists",
+    "Facebook / Instagram business pages (recent work, customer questions)",
+  ],
+  IT: [
+    "Registro Imprese via public company-data sites (ufficiocamerale.it, reportaziende.it, registroaziende.it): legal form, ATECO code, founding year, revenue band, employees",
+    "public tenders and awards (ANAC open data, regional procurement portals)",
+    "certifications (Accredia, SOA attestations for construction firms, F-gas register for installers)",
+    "ENEA / Conto Termico and incentive lists where the firm appears as installer",
+  ],
+  DE: [
+    "Handelsregister / Unternehmensregister and North Data: legal form, founding year, management, revenue band",
+    "Handwerkskammer member directory, trade guild (Innung) listings",
+    "public tenders (bund.de, TED)",
+  ],
+};
+export const sourcesFor = (country: string) => [...SOURCES.ALL, ...(SOURCES[country.toUpperCase()] ?? [])];
+
+export async function researchCompany(c: { name: string; website?: string; city?: string; industry: string; country: string; signals: Record<string, unknown> }, lessons: string[] = []): Promise<CompanyResearch> {
+  const lang = LANG[c.country] ?? "English";
+  const prompt = `Research this small company from public sources before we contact it: ${JSON.stringify({ name: c.name, website: c.website, city: c.city, trade: c.industry, country: c.country })}.
+Known signals: ${JSON.stringify(c.signals)}.
+Check these sources, as many as give something: ${sourcesFor(c.country).map((x) => `\n- ${x}`).join("")}
+Find: what they do and for whom, services, size and revenue band, founding year, recent news, hiring, tenders won, certifications, review themes. Only facts you saw, each with its source URL. No guesses about people's private lives; company facts only.
+Then write:
+- persona: how this company would describe itself (summary ≤ 3 sentences in ${lang}), offers (≤ 6), customers (one line or null), 3 likely pains with the evidence that suggests each, 3 questions we should ask them. In ${lang}.
+- personal: one opening sentence for a first message that refers to a real fact you found (no flattery, no invented numbers), in ${lang} ("local") and in Persian ("fa").
+${lessons.length ? `What we learned about first messages (follow it):${lessons.map((l) => `\n- ${l}`).join("")}\n` : ""}Reply with one JSON object only: {"facts":[{"text":string,"source":{"name":string,"url":string}}],"persona":{"summary":string,"offers":[string],"customers":string|null,"pains":[{"text":string,"why":string}],"questions":[string]},"personal":{"local":string,"fa":string}}`;
+  const r = await llm().complete({ maxTokens: 16000, thinking: true, effort: "medium", webSearch: { maxUses: 15 }, timeoutMs: 300_000, messages: [{ role: "user", content: prompt }] });
+  if (r.stop === "refusal") throw new Error("research refused");
+  if (r.stop === "max_tokens") throw new Error("research answer was cut off (max_tokens)");
+  const parsed = resultSchema.parse(extractJson(r.text));
+  return { ...parsed, costEur: Math.round(costEur(r.usage) * 10000) / 10000 };
+}

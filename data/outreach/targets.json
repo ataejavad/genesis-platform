@@ -1,0 +1,23 @@
+{
+  "_doc": "What the company-finder agent searches per industry and country (Google Maps through Apify). One Apify result costs about $0.004; the daily cap is in criteria.ts (AGENT_BUDGETS.company).",
+  "targets": [
+    {
+      "industry": "installers",
+      "country": "IT",
+      "nace": "F43.22",
+      "language": "it",
+      "searches": ["impianti termoidraulici", "installazione pompe di calore", "impianti elettrici e fotovoltaico"],
+      "regions": ["Lombardia", "Veneto", "Emilia-Romagna", "Piemonte"],
+      "decisionMakerTitles": ["Titolare", "Amministratore", "Socio", "Owner", "CEO"]
+    },
+    {
+      "industry": "metal",
+      "country": "IT",
+      "nace": "C25.1",
+      "language": "it",
+      "searches": ["carpenteria metallica", "lavorazioni meccaniche cnc", "taglio laser lamiera"],
+      "regions": ["Lombardia", "Veneto", "Emilia-Romagna", "Piemonte"],
+      "decisionMakerTitles": ["Titolare", "Amministratore Delegato", "Responsabile commerciale", "Direttore tecnico", "Owner", "CEO"]
+    }
+  ]
+}
