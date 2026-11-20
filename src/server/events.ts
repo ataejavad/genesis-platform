@@ -13,6 +13,7 @@ export type EventType =
   | "checkup.unlocked"
   | "checkup.call_requested"
   | "prospect.added"
+  | "outbound.run_finished"
   | "prospect.stage_changed"
   | "prospect.opted_out"
   | "outreach.approved"

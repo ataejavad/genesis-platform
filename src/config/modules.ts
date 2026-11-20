@@ -61,7 +61,7 @@ export const MODULES: ModuleDef[] = [
   { n: 11, name: "Check-up questions + savings rules", system: "acquire", runs: "Git (data/checkup)", kpi: "unlockRate", link: "/cockpit/experiments" },
   { n: 12, name: "Check-up advisor (AI)", system: "acquire", runs: "at unlock", agent: "checkup-advisor", uses: AI, link: "/cockpit/agents" },
   { n: 13, name: "Check-up conversation (AI)", system: "acquire", runs: "every check-up turn", agent: "checkup-chat", uses: AI, personalData: true, link: "/cockpit/agents" },
-  { n: 14, name: "Company finder + scorer", system: "acquire", runs: "npm run agents:outbound (daily on the server)", script: "outbound", uses: ["company_search"], events: ["prospect.added"], kpi: "prospects", link: "/cockpit/crm" },
+  { n: 14, name: "Company finder + scorer", system: "acquire", runs: "Cockpit › Outbound › Find customers (server) or npm run agents:outbound", script: "outbound", uses: ["company_search"], events: ["prospect.added"], kpi: "prospects", link: "/cockpit/crm" },
   { n: 15, name: "Decision-maker finder", system: "acquire", runs: "with the company finder", uses: ["people_search"], kpi: "contacts", link: "/cockpit/crm" },
   { n: 16, name: "Company research + page + persona", system: "acquire", runs: "per new company", agent: "company-research", events: ["company_page.viewed"], kpi: "pageViews", link: "/cockpit/crm" },
   { n: 17, name: "Outreach sequences + approval", system: "acquire", runs: "Javad approves the first message", kpi: "drafts", link: "/cockpit/outreach" },
