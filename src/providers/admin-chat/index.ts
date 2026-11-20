@@ -49,4 +49,4 @@ export function adminChatFromEnv(env: Env = process.env, fetchImpl: typeof fetch
   }
 }
 
-export { telegramChat, type TelegramConfig } from "./telegram";
+export { telegramChat, telegramRecentChats, type TelegramConfig } from "./telegram";
