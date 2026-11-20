@@ -32,7 +32,7 @@ export type OutboundDeps = {
 export type OutboundOptions = { limit: number; regions?: string[]; imported?: Imported[]; dry?: boolean; deadline?: number; concurrency?: number };
 
 export type RunCompany = { name: string; city?: string; website?: string; phone?: string; score: number; status: "added" | "duplicate" | "failed" | "dry"; touches?: number; researched: boolean; error?: string };
-export type RunSummary = { found: number; kept: number; added: number; duplicates: number; failed: number; researched: number; costEur: number; skipped: string[]; companies: RunCompany[] };
+export type RunSummary = { found: number; kept: number; added: number; duplicates: number; failed: number; researched: number; costEur: number; skipped: string[]; companies: RunCompany[]; errors: string[] };
 
 const pausedId = (t: Target) => `filter:${t.country.toUpperCase()}:${t.nace.slice(0, 3).toUpperCase()}`;
 
@@ -55,7 +55,13 @@ export async function runOutbound(targets: Target[], deps: OutboundDeps, o: Outb
   const log = deps.log ?? (() => undefined);
   const n = o.concurrency ?? 4;
   const late = () => o.deadline !== undefined && Date.now() > o.deadline;
-  const sum: RunSummary = { found: 0, kept: 0, added: 0, duplicates: 0, failed: 0, researched: 0, costEur: 0, skipped: [], companies: [] };
+  const sum: RunSummary = { found: 0, kept: 0, added: 0, duplicates: 0, failed: 0, researched: 0, costEur: 0, skipped: [], companies: [], errors: [] };
+  // why a step failed, once per kind of error, so the cockpit can show it next to the result
+  const fail = (where: string, err: unknown) => {
+    const m = `${where}: ${(err instanceof Error ? err.message : String(err)).slice(0, 160)}`;
+    if (sum.errors.length < 5 && !sum.errors.some((e) => e.slice(0, 40) === m.slice(0, 40))) sum.errors.push(m);
+    log(`   ${m}`);
+  };
   for (const t of targets) {
     if (deps.paused.includes(pausedId(t))) {
       sum.skipped.push(`${t.industry}-${t.country}: filter ${t.nace.slice(0, 3)} paused in the cockpit`);
@@ -77,7 +83,7 @@ export async function runOutbound(targets: Target[], deps: OutboundDeps, o: Outb
           spent += places.length * finder.eurPerResult;
           return places.filter((p) => !p.closed).map((p) => toSignals(p, { nace: t.nace, region: q.region }));
         } catch (err) {
-          log(`   ${q.term} / ${q.region}: ${(err as Error).message}`);
+          fail(`search ${q.term} / ${q.region}`, err);
           return [];
         }
       });
@@ -110,7 +116,7 @@ export async function runOutbound(targets: Target[], deps: OutboundDeps, o: Outb
         try {
           contacts.push(...(await deps.people.find(domain, t.decisionMakerTitles)).slice(0, 4));
         } catch (err) {
-          log(`   ${c.name}: ${deps.people.provider} ${(err as Error).message}`);
+          fail(`${deps.people.provider} ${c.name}`, err);
         }
       }
       // no named person yet: the owner's role and the listed phone; the LinkedIn task opens a people search
@@ -121,7 +127,7 @@ export async function runOutbound(targets: Target[], deps: OutboundDeps, o: Outb
           research = await deps.research.run({ name: c.name, website: c.website, city: c.city, industry: t.industry, country: t.country, signals: c as unknown as Record<string, unknown> }, deps.research.lessons);
           cost += research.costEur;
         } catch (err) {
-          log(`   ${c.name}: research ${(err as Error).message}`);
+          fail(`research ${c.name}`, err);
         }
       }
       const signals = { ...c, seenAt: new Date().toISOString().slice(0, 10) } as Record<string, unknown>;
@@ -136,6 +142,7 @@ export async function runOutbound(targets: Target[], deps: OutboundDeps, o: Outb
         cost: { eur: Math.round(cost * 10000) / 10000, meta: { finder: o.imported ? "import" : deps.finder?.provider, people: deps.people?.provider ?? null, research: research ? (deps.researchProvider ?? "ai") : null } },
       };
       const r = await deps.save(body).catch((err: unknown) => ({ ok: false, error: err instanceof Error ? err.message : "failed" }) as SaveResult);
+      if (!r.ok) fail(`save ${c.name}`, r.error);
       return { ...base, status: !r.ok ? "failed" : r.duplicate ? "duplicate" : "added", touches: r.touches, error: r.error };
     });
     for (const r of rows) {
