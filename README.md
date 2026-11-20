@@ -82,10 +82,10 @@ Errors are always `{"error":{"code","message"}}` with a matching HTTP status.
 
 ## Telegram
 
-1. Create a bot with @BotFather, put the token in `TELEGRAM_BOT_TOKEN`.
-2. Send the bot a message, read your chat id and user id from `https://api.telegram.org/bot<token>/getUpdates`, set `TELEGRAM_ADMIN_CHAT_ID` and `TELEGRAM_ADMIN_USER_IDS`.
-3. Register the webhook:
-   `curl "https://api.telegram.org/bot<token>/setWebhook?url=$APP_URL/api/telegram/webhook&secret_token=$TELEGRAM_WEBHOOK_SECRET&allowed_updates=[\"callback_query\"]"`
+1. Create a bot with @BotFather, put the token in `TELEGRAM_BOT_TOKEN`, press Start in the new bot.
+2. Get your id from @userinfobot and put it in `TELEGRAM_ADMIN_CHAT_ID` (a private chat's id is your user id; it is also the default approver).
+3. Redeploy, then Cockpit › API & connections › **Send test phone message**: it sends a test and registers the webhook
+   (secret derived from the token unless `TELEGRAM_WEBHOOK_SECRET` is set).
 
 ## Deploy
 

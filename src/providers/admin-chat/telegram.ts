@@ -1,10 +1,12 @@
 import type { Env } from "../registry";
-import { timingSafeEqual } from "node:crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 import type { AdminChat, ApprovalPress } from ".";
 
 /*
  * Telegram bot: TELEGRAM_BOT_TOKEN, TELEGRAM_ADMIN_CHAT_ID, TELEGRAM_ADMIN_USER_IDS (who may approve),
  * TELEGRAM_WEBHOOK_SECRET (checked on /api/telegram/webhook).
+ * Only the token and the chat id are needed: in a private chat the chat id IS the founder's user id, so it is the
+ * default approver, and the webhook secret defaults to one derived from the token (nobody has to invent one).
  */
 export type TelegramConfig = { botToken: string; adminChatId: string; adminUserIds: string[]; appUrl: string; webhookSecret?: string };
 
@@ -13,11 +15,14 @@ export function telegramConfigFromEnv(env: Env = process.env): TelegramConfig | 
   return {
     botToken: env.TELEGRAM_BOT_TOKEN,
     adminChatId: env.TELEGRAM_ADMIN_CHAT_ID,
-    adminUserIds: (env.TELEGRAM_ADMIN_USER_IDS ?? "").split(",").map((s) => s.trim()).filter(Boolean),
+    adminUserIds: (env.TELEGRAM_ADMIN_USER_IDS || env.TELEGRAM_ADMIN_CHAT_ID).split(",").map((s) => s.trim()).filter(Boolean),
     appUrl: env.APP_URL ?? "",
-    webhookSecret: env.TELEGRAM_WEBHOOK_SECRET,
+    webhookSecret: env.TELEGRAM_WEBHOOK_SECRET && env.TELEGRAM_WEBHOOK_SECRET !== "CHANGE_ME" ? env.TELEGRAM_WEBHOOK_SECRET : derivedSecret(env.TELEGRAM_BOT_TOKEN),
   };
 }
+
+/** Telegram allows A-Z a-z 0-9 _ - in the secret; a hash of the token is stable and never leaves our side. */
+const derivedSecret = (token: string) => createHash("sha256").update(`genesis-webhook:${token}`).digest("hex").slice(0, 48);
 
 const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -66,6 +71,9 @@ export function telegramChat(cfg: TelegramConfig, fetchImpl: typeof fetch = fetc
         reply_markup: { inline_keyboard: [[{ text: "✅ تأیید و انتشار", callback_data: `apr:${a.id}:a` }, { text: "❌ رد", callback_data: `apr:${a.id}:r` }]] },
       });
       return String(msg.message_id);
+    },
+    async connect(webhookUrl) {
+      await call("setWebhook", { url: webhookUrl, secret_token: cfg.webhookSecret, allowed_updates: ["callback_query"] });
     },
     async readPress(headers, body): Promise<ApprovalPress | "forbidden" | null> {
       if (!secretMatches(headers.get("x-telegram-bot-api-secret-token"), cfg.webhookSecret)) return "forbidden";
