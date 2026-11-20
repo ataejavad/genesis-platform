@@ -6,8 +6,9 @@ import type { LockedReport, Report } from "@/server/checkup";
 const euro = (n: number, lang: string) => new Intl.NumberFormat(lang, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
 const num = (n: number, lang: string) => n.toLocaleString(lang, { maximumFractionDigits: 2 });
 
-/** The check-up result, shared by the form, the chat and the report link. Solutions appear only when unlocked. */
-export function CheckupReport({ report, c, locale, compact, only }: { report: LockedReport | Report; c: SiteCopy["checkup"]; locale: string; compact?: boolean; only?: "plan" }) {
+/** The check-up result, shared by the form, the chat and the report link. Solutions appear only when unlocked.
+ *  only="problem" shows the size of the problem without the plan (the chat shows the plan in its own message). */
+export function CheckupReport({ report, c, locale, compact, only }: { report: LockedReport | Report; c: SiteCopy["checkup"]; locale: string; compact?: boolean; only?: "plan" | "problem" }) {
   const lang = locale.slice(0, 2);
   const full = "solution" in (report.leaks[0] ?? {}) ? (report as Report) : null;
   const top = full?.leaks[0];
@@ -48,7 +49,7 @@ export function CheckupReport({ report, c, locale, compact, only }: { report: Lo
         </div>
       )}
       </>}
-      {full && top && (
+      {full && top && only !== "problem" && (
         <div className="card hook">
           <h3 style={{ marginTop: 0 }}>✦ {c.plan}</h3>
           <p>

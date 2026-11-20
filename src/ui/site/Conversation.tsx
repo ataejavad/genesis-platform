@@ -217,7 +217,7 @@ export function Conversation({ defs, industry: initial, locale, entrance, source
         {msgs.map((m, i) => (
           <div key={i} className={`msg ${m.role === "user" ? "me" : "them"} fade-in`} style={m.node && m.node !== "other" ? { maxWidth: "100%", width: "100%" } : undefined}>
             {m.text}
-            {m.node === "report" && result && <CheckupReport report={result.report} c={k} locale={locale} compact={entrance === "home"} />}
+            {m.node === "report" && result && <CheckupReport report={result.report} c={k} locale={locale} compact={entrance === "home"} only="problem" />}
             {m.node === "plan" && result && <CheckupReport report={result.report} c={k} locale={locale} only="plan" />}
             {m.node === "other" && <Link className="btn sm primary" href={`/${locale}/explore`}>{k.explore}</Link>}
           </div>
