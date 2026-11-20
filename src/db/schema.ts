@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
   bigserial,
   boolean,
+  customType,
   index,
   integer,
   jsonb,
@@ -1423,3 +1424,25 @@ export const supplyGaps = pgTable(
   },
   (t) => [index("supply_gaps_status_idx").on(t.status, t.skill)],
 );
+
+/* ───────────── Hosting without a server disk or worker (Vercel test phase, 2026-11-20) ───────────── */
+
+const bytea = customType<{ data: Uint8Array; driverData: Buffer }>({
+  dataType: () => "bytea",
+  toDriver: (v) => Buffer.from(v),
+  fromDriver: (v) => new Uint8Array(v),
+});
+
+/** File bytes for STORAGE_PROVIDER=database (src/providers/storage/database.ts): hosts without a disk. */
+export const fileBlobs = pgTable("file_blobs", {
+  key: text("key").primaryKey(),
+  bytes: bytea("bytes").notNull(),
+  createdAt: createdAt(),
+});
+
+/** Short leases so only one copy of the background tick runs at a time (src/server/tick.ts). */
+export const leases = pgTable("leases", {
+  name: text("name").primaryKey(),
+  until: timestamp("until", { withTimezone: true }).notNull(),
+  holder: text("holder").notNull(),
+});

@@ -1,6 +1,7 @@
 import type { Env } from "../registry";
 import { randomUUID } from "node:crypto";
 import { chosen } from "../registry";
+import { databaseStore } from "./database";
 import { localDisk } from "./local";
 
 /*
@@ -17,6 +18,8 @@ export type FileStore = {
 
 export function storageFromEnv(env: Env = process.env): FileStore {
   switch (chosen("storage", env)) {
+    case "database":
+      return databaseStore();
     default:
       return localDisk(env);
   }

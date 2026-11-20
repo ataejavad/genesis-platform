@@ -113,6 +113,13 @@
       "when": 1795185023160,
       "tag": "0015_subscription-supplier",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1795190139435,
+      "tag": "0016_hosting-without-disk",
+      "breakpoints": true
     }
   ]
 }
