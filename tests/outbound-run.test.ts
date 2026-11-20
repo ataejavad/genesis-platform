@@ -7,7 +7,8 @@ import { apifyMaps } from "@/providers/company-search/apify";
 import { setLlmForTests } from "@/providers/llm";
 import { auditLog, events, prospects, touches } from "@/db/schema";
 import { decideFilter } from "@/server/market-filters";
-import { findCustomers } from "@/server/outbound-run";
+import { findCustomers, researchBacklog, researchWaiting } from "@/server/outbound-run";
+import { approveSequence } from "@/server/outreach";
 import { useTestDb } from "./helpers";
 
 const javad = { type: "user", id: "javad" } as const;
@@ -119,5 +120,42 @@ describe("Maps listings as they really come", () => {
     } finally {
       setLlmForTests(null);
     }
+  });
+});
+
+describe("research later, when the free AI quota is back", () => {
+  const db = useTestDb();
+  const research = { facts: [{ text: "Installa pompe di calore dal 2005", source: { name: "sito", url: "https://rossi.it" } }], persona: { summary: "Impiantista a Milano.", offers: ["Pompe di calore"], customers: null, pains: [{ text: "Telefonate perse", why: "recensioni" }], questions: ["Quante chiamate perdete?"] }, personal: { local: "Ho visto che installate pompe di calore dal 2005.", fa: "دیدم از ۲۰۰۵ پمپ حرارتی نصب می‌کنید." }, costEur: 0.01 };
+  const rows = [{ title: "ROSSI IMPIANTI ❄️ Climatizzatori Milano", city: "Milano", website: "https://rossi.it", phone: "+39 02 9" }, { title: "Bianchi Termo Srl", city: "Monza", website: "https://bianchi.it", phone: "+39 039 1" }];
+  const finder = () => apifyMaps("t", (async () => new Response(JSON.stringify(rows))) as unknown as typeof fetch);
+
+  it("rewrites the drafts with the personal line, cleans old names, and stops on a quota error", async () => {
+    await findCustomers(db, javad, { industry: "installers", region: "Lombardia", limit: 5 }, { finder: finder(), people: null, research: false });
+    // a company saved before names were cleaned
+    await db.update(prospects).set({ name: "BIANCHI TERMO SRL ❄️ Caldaie" }).where(eq(prospects.website, "https://bianchi.it"));
+    let calls = 0;
+    const first = await researchBacklog(db, javad, { run: async () => (++calls === 1 ? research : Promise.reject(new Error("gemini 429: You exceeded your current quota"))) });
+    expect(first.researched).toBe(1);
+    expect(first.stopped).toContain("429");
+    expect(first.waiting).toBe(1);
+    const done = (await db.select().from(prospects)).find((p) => (p.signals as Record<string, unknown>).researched);
+    const t = await db.select().from(touches).where(eq(touches.prospectId, done!.id));
+    expect(t.some((x) => x.body.includes("pompe di calore dal 2005"))).toBe(true);
+    expect(t.some((x) => x.status === "approved")).toBe(false);
+
+    const second = await researchBacklog(db, javad, { run: async () => research });
+    expect(second.researched).toBe(1);
+    expect(second.waiting).toBe(0);
+    expect((await db.select().from(prospects)).map((p) => p.name).sort()).toEqual(["Bianchi Termo Srl", "Rossi Impianti"]);
+    expect(await researchWaiting(db)).toBe(0);
+  });
+
+  it("leaves a company alone once Javad approved its messages", async () => {
+    await findCustomers(db, javad, { industry: "installers", region: "Lombardia", limit: 5 }, { finder: finder(), people: null, research: false });
+    const [p] = await db.select().from(prospects).limit(1);
+    await approveSequence(db, javad, p.id);
+    const r = await researchBacklog(db, javad, { run: async () => research });
+    expect(r.researched).toBe(1);
+    expect(r.waiting).toBe(0);
   });
 });

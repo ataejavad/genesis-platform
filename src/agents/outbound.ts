@@ -58,8 +58,10 @@ export async function runOutbound(targets: Target[], deps: OutboundDeps, o: Outb
   const sum: RunSummary = { found: 0, kept: 0, added: 0, duplicates: 0, failed: 0, researched: 0, costEur: 0, skipped: [], companies: [], errors: [] };
   // why a step failed, once per kind of error, so the cockpit can show it next to the result
   const fail = (where: string, err: unknown) => {
-    const m = `${where}: ${(err instanceof Error ? err.message : String(err)).slice(0, 160)}`;
-    if (sum.errors.length < 5 && !sum.errors.some((e) => e.slice(0, 40) === m.slice(0, 40))) sum.errors.push(m);
+    const why = (err instanceof Error ? err.message : String(err)).slice(0, 300);
+    const m = `${where}: ${why}`;
+    // the same reason for many companies is shown once
+    if (sum.errors.length < 5 && !sum.errors.some((e) => e.endsWith(why))) sum.errors.push(m);
     log(`   ${m}`);
   };
   for (const t of targets) {
@@ -132,6 +134,8 @@ export async function runOutbound(targets: Target[], deps: OutboundDeps, o: Outb
       }
       const signals = { ...c, seenAt: new Date().toISOString().slice(0, 10) } as Record<string, unknown>;
       for (const k of ["name", "website", "phone", "nace", "region", "city", "contacts", "industry"]) delete signals[k];
+      // marks the company as done for the research backlog (src/server/outbound-run.ts#researchBacklog)
+      if (research) signals.researched = signals.seenAt;
       const base = { name: c.name, city: c.city, website: c.website, phone: c.phone, score: Math.round(total * 10) / 10, researched: Boolean(research) };
       if (research) sum.costEur += research.costEur;
       if (o.dry) return { ...base, status: "dry" };
