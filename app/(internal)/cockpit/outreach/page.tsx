@@ -11,7 +11,7 @@ import { PageHead } from "@/ui/Shell";
 import { approve, done, edit, reject, rpo, toggle } from "./actions";
 import { FindCustomers } from "./FindCustomers";
 import { companySearchFromEnv } from "@/providers/company-search";
-import { RUN_MAX, TARGETS } from "@/server/outbound-run";
+import { RUN_MAX, TARGETS, researchWaiting } from "@/server/outbound-run";
 
 export const dynamic = "force-dynamic";
 // a company-finder run waits for Google Maps results and research (Vercel allows 300 s)
@@ -25,7 +25,7 @@ const LABEL: Record<string, string> = { "email-cold": "Cold email", "voice-ai": 
 export default async function Outreach() {
   const db = getDb();
   const now = new Date();
-  const [q, switches] = await Promise.all([outreachQueue(db, now), allSwitches(db)]);
+  const [q, switches, waiting] = await Promise.all([outreachQueue(db, now), allSwitches(db), researchWaiting(db)]);
   const on = (cc: string, ch: string) => switches.some((s) => s.country === cc && s.channel === ch && s.enabled);
   const mailer = mailerFromEnv();
   const voice = voiceFromEnv();
@@ -42,7 +42,7 @@ export default async function Outreach() {
         <div className="card stat"><div className="label">Connections</div><div className="small">AI caller: <b>{voice ? voice.provider : "off"}</b><br />WhatsApp agent: <b>{wa ? wa.provider : "off"}</b></div></div>
       </section>
 
-      <FindCustomers markets={TARGETS.map((t) => ({ industry: t.industry, country: t.country, regions: t.regions }))} max={RUN_MAX} ready={companySearchFromEnv() ? null : "No company search set: add APIFY_TOKEN, then redeploy"} />
+      <FindCustomers markets={TARGETS.map((t) => ({ industry: t.industry, country: t.country, regions: t.regions }))} max={RUN_MAX} ready={companySearchFromEnv() ? null : "No company search set: add APIFY_TOKEN, then redeploy"} waiting={waiting} />
 
       <div className="card" style={{ marginBottom: 18 }}>
         <div className="card-head"><h3>Channel switches</h3><span className="more muted small">Off by default. When on, each contact still needs a recorded legal basis (CRM › contact).</span></div>

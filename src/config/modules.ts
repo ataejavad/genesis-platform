@@ -64,6 +64,7 @@ export const MODULES: ModuleDef[] = [
   { n: 14, name: "Company finder + scorer", system: "acquire", runs: "Cockpit › Outbound › Find customers (server) or npm run agents:outbound", script: "outbound", uses: ["company_search"], events: ["prospect.added"], kpi: "prospects", link: "/cockpit/crm" },
   { n: 15, name: "Decision-maker finder", system: "acquire", runs: "with the company finder", uses: ["people_search"], kpi: "contacts", link: "/cockpit/crm" },
   { n: 16, name: "Company research + page + persona", system: "acquire", runs: "per new company", agent: "company-research", events: ["company_page.viewed"], kpi: "pageViews", link: "/cockpit/crm" },
+  { n: 85, name: "Research backlog (companies saved without research)", system: "acquire", runs: "daily 09:30 + Cockpit › Outbound", job: "outbound.research", kpi: "pageViews", link: "/cockpit/outreach" },
   { n: 17, name: "Outreach sequences + approval", system: "acquire", runs: "Javad approves the first message", kpi: "drafts", link: "/cockpit/outreach" },
   { n: 18, name: "Channel switches + legal basis", system: "acquire", runs: "Javad per country", events: ["outreach.switch_changed"], kpi: "blockedTouches", link: "/cockpit/outreach" },
   { n: 19, name: "Outbox: email + AI calls", system: "acquire", runs: "every 10 min", job: "outreach.send", uses: MAIL, kpi: "touchesSent", link: "/cockpit/outreach" },

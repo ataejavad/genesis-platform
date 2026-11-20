@@ -1,13 +1,14 @@
 "use client";
 
 import { useActionState } from "react";
-import { type FindResult, findNow } from "./find";
+import { type FindResult, findNow, researchNow } from "./find";
 
 type Market = { industry: string; country: string; regions: string[] };
 
 /** Cockpit › Outbound: one run of the company finder on the server; every company arrives as drafts below. */
-export function FindCustomers({ markets, max, ready }: { markets: Market[]; max: number; ready: string | null }) {
+export function FindCustomers({ markets, max, ready, waiting }: { markets: Market[]; max: number; ready: string | null; waiting: number }) {
   const [state, action, pending] = useActionState<FindResult, FormData>(findNow, null);
+  const [rState, research, rPending] = useActionState<FindResult, FormData>(researchNow, null);
   return (
     <div className="card" style={{ marginBottom: 18 }}>
       <div className="card-head"><h3>Find customers</h3><span className="more muted small">Google Maps search → score → research → company page + drafts. Nothing is sent before you approve.</span></div>
@@ -21,6 +22,13 @@ export function FindCustomers({ markets, max, ready }: { markets: Market[]; max:
         </select>
         <button className="btn sm primary" disabled={pending || Boolean(ready)}>{pending ? "Searching… (up to 4 min)" : "Find customers now"}</button>
       </form>
+      {waiting > 0 && (
+        <form action={research} className="row small" style={{ gap: 8, marginTop: 10 }}>
+          <span className="muted">{waiting} saved without research (AI quota or error); the daily job at 09:30 retries.</span>
+          <button className="btn sm" disabled={rPending}>{rPending ? "Researching… (up to 3 min)" : "Research 4 now"}</button>
+          {rState && <span className={`badge ${rState.ok ? "ok" : "warn"}`} role="status" style={{ whiteSpace: "normal" }}>{rState.message}</span>}
+        </form>
+      )}
       {state && (
         <div className="small" role="status" style={{ marginTop: 10 }}>
           <span className={`badge ${state.ok ? "ok" : "warn"}`} style={{ whiteSpace: "normal" }}>{state.message}</span>
