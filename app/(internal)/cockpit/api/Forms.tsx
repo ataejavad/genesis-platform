@@ -17,7 +17,7 @@ export function TestConnections() {
   return (
     <div className="card" style={{ marginBottom: 18 }}>
       <h3>Test a connection</h3>
-      <p className="muted small">After adding keys and redeploying: one real message each. The phone test also connects the approve/reject buttons.</p>
+      <p className="muted small">After adding keys and redeploying: one real message each. The phone test also connects the approve/reject buttons; with only the bot token set, it shows your chat id after you write to the bot.</p>
       <div className="stack" style={{ gap: 8 }}>
         <TestButton label="Send test email to me" run={testEmail} />
         <TestButton label="Send test phone message (Telegram)" run={testAdminChat} />

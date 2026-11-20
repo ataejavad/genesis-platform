@@ -1,6 +1,7 @@
 "use server";
 
 import { requireAdmin } from "@/lib/auth";
+import { telegramRecentChats } from "@/providers/admin-chat";
 import { adminChatFromEnv } from "@/server/admin-chat";
 import { mailerFromEnv } from "@/server/mailer";
 
@@ -25,6 +26,18 @@ export async function testEmail(): Promise<Result> {
 export async function testAdminChat(): Promise<Result> {
   await requireAdmin();
   const chat = adminChatFromEnv();
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!chat && token && !process.env.TELEGRAM_ADMIN_CHAT_ID) {
+    // first setup: the founder has written to the bot; show his chat id to paste into TELEGRAM_ADMIN_CHAT_ID
+    try {
+      const chats = await telegramRecentChats(token);
+      return chats.length
+        ? { ok: false, message: `Almost: set TELEGRAM_ADMIN_CHAT_ID = ${chats.map((c) => `${c.id} (${c.name})`).join(" or ")}, then redeploy and press again` }
+        : { ok: false, message: "Send any message to your bot in Telegram, then press again" };
+    } catch (err) {
+      return fail(err);
+    }
+  }
   if (!chat) return { ok: false, message: "No phone channel set: add TELEGRAM_BOT_TOKEN and TELEGRAM_ADMIN_CHAT_ID, then redeploy" };
   try {
     const appUrl = (process.env.APP_URL ?? "").replace(/\/$/, "");

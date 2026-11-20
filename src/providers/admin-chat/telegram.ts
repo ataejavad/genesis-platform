@@ -24,6 +24,19 @@ export function telegramConfigFromEnv(env: Env = process.env): TelegramConfig | 
 /** Telegram allows A-Z a-z 0-9 _ - in the secret; a hash of the token is stable and never leaves our side. */
 const derivedSecret = (token: string) => createHash("sha256").update(`genesis-webhook:${token}`).digest("hex").slice(0, 48);
 
+/** Setup helper: private chats that recently wrote to the bot (needs no chat id yet, and no webhook set). */
+export async function telegramRecentChats(botToken: string, fetchImpl: typeof fetch = fetch) {
+  const res = await fetchImpl(`https://api.telegram.org/bot${botToken}/getUpdates`, { signal: AbortSignal.timeout(15_000) });
+  const json = (await res.json()) as { ok: boolean; description?: string; result?: { message?: { chat: { id: number; type: string; first_name?: string; username?: string } } }[] };
+  if (!json.ok) throw new Error(`telegram getUpdates: ${json.description ?? res.status}`);
+  const chats = new Map<string, string>();
+  for (const u of json.result ?? []) {
+    const c = u.message?.chat;
+    if (c?.type === "private") chats.set(String(c.id), c.first_name ?? c.username ?? "");
+  }
+  return [...chats].map(([id, name]) => ({ id, name }));
+}
+
 const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 function secretMatches(given: string | null, expected: string | undefined) {

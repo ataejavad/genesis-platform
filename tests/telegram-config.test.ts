@@ -23,3 +23,11 @@ describe("Telegram setup from two values", () => {
     expect(await chat.readPress(new Headers({ "x-telegram-bot-api-secret-token": "wrong" }), {})).toBe("forbidden");
   });
 });
+
+describe("finding the founder's chat id", () => {
+  it("lists private chats that wrote to the bot", async () => {
+    const { telegramRecentChats } = await import("@/providers/admin-chat");
+    const f = vi.fn(async () => Response.json({ ok: true, result: [{ message: { chat: { id: 42, type: "private", first_name: "Javad" } } }, { message: { chat: { id: -5, type: "group" } } }, { message: { chat: { id: 42, type: "private", first_name: "Javad" } } }] })) as unknown as typeof fetch;
+    expect(await telegramRecentChats("T", f)).toEqual([{ id: "42", name: "Javad" }]);
+  });
+});
