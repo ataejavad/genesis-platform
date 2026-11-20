@@ -17,7 +17,7 @@ export async function findNow(_prev: FindResult, f: FormData): Promise<FindResul
     const s = await findCustomers(getDb(), { type: "user", id: user.id }, { industry, region: region || undefined, limit: Number(f.get("limit") ?? 10) }, { adminChat: adminChatFromEnv() });
     revalidatePath("/cockpit/outreach");
     revalidatePath("/cockpit/crm", "layout");
-    const parts = [`${s.found} found`, `${s.added} new with drafts`, s.duplicates ? `${s.duplicates} already in CRM` : "", s.failed ? `${s.failed} failed` : "", `${s.researched} researched`, `about €${s.costEur}`, ...s.skipped];
+    const parts = [`${s.found} found`, `${s.added} new with drafts`, s.duplicates ? `${s.duplicates} already in CRM` : "", s.failed ? `${s.failed} failed` : "", `${s.researched} researched`, `about €${s.costEur}`, ...s.skipped, ...s.errors.map((e) => `⚠ ${e}`)];
     return { ok: s.added > 0 || s.duplicates > 0, message: parts.filter(Boolean).join(" · "), companies: s.companies };
   } catch (err) {
     return { ok: false, message: err instanceof Error ? err.message.slice(0, 300) : "failed" };

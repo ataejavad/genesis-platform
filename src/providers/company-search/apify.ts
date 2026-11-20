@@ -13,9 +13,11 @@ export function apifyMaps(token: string, fetchImpl: typeof fetch = fetch): Compa
         signal: AbortSignal.timeout(280_000),
       });
       if (!res.ok) throw new Error(`apify ${res.status}: ${(await res.text()).slice(0, 200)}`);
-      const rows = (await res.json()) as { title: string; categoryName?: string; city?: string; state?: string; website?: string; phone?: string; totalScore?: number; reviewsCount?: number; url?: string; permanentlyClosed?: boolean }[];
+      const rows = (await res.json()) as { title: string; categoryName?: string | null; city?: string | null; state?: string | null; website?: string | null; phone?: string | null; totalScore?: number | null; reviewsCount?: number | null; url?: string | null; permanentlyClosed?: boolean | null }[];
+      // Apify sends null for missing fields; our types (and the CRM's input check) want them absent
+      const v = <T>(x: T | null | undefined) => (x === null ? undefined : x);
       return rows.map(
-        (p): Place => ({ name: p.title, category: p.categoryName, city: p.city, region: p.state, website: p.website, phone: p.phone, rating: p.totalScore, reviews: p.reviewsCount, mapsUrl: p.url, closed: p.permanentlyClosed }),
+        (p): Place => ({ name: p.title, category: v(p.categoryName), city: v(p.city), region: v(p.state), website: v(p.website), phone: v(p.phone), rating: v(p.totalScore), reviews: v(p.reviewsCount), mapsUrl: v(p.url), closed: v(p.permanentlyClosed) }),
       );
     },
   };

@@ -1,3 +1,4 @@
+import { ZodError } from "zod";
 import type { Db } from "@/db";
 import { type Imported, type RunSummary, runOutbound, type Target } from "@/agents/outbound";
 import { researchCompany, researchEnabled } from "@/agents/company-research";
@@ -51,12 +52,18 @@ export async function findCustomers(db: Db, actor: Actor, req: RunRequest, deps:
     researchProvider: research ? llm().provider : undefined,
     paused: await pausedFilters(db),
     save: async (body) => {
-      const r = await addProspect(db, actor, body, env);
-      return { ok: true, duplicate: r.duplicate, touches: r.touches };
+      try {
+        const r = await addProspect(db, actor, body, env);
+        return { ok: true, duplicate: r.duplicate, touches: r.touches };
+      } catch (err) {
+        // one bad listing must not stop the run; zod names the field
+        const m = err instanceof ZodError ? err.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ") : err instanceof Error ? err.message : "failed";
+        return { ok: false, error: m.slice(0, 200) };
+      }
     },
-  }, { limit, regions: req.region ? [req.region] : undefined, imported, deadline: started + (deps.budgetMs ?? 200_000), concurrency: 4 });
+  }, { limit, regions: req.region ? [req.region] : undefined, imported, deadline: started + (deps.budgetMs ?? 200_000), concurrency: 3 });
 
-  const facts = { industry: target.industry, country: target.country, region: req.region ?? null, found: summary.found, added: summary.added, duplicates: summary.duplicates, failed: summary.failed, researched: summary.researched, costEur: summary.costEur, ms: Date.now() - started };
+  const facts = { errors: summary.errors, industry: target.industry, country: target.country, region: req.region ?? null, found: summary.found, added: summary.added, duplicates: summary.duplicates, failed: summary.failed, researched: summary.researched, costEur: summary.costEur, ms: Date.now() - started };
   await db.transaction(async (tx) => {
     await emit(tx, actor, "outbound.run_finished", { type: "market", id: `${target.country}:${target.industry}` }, facts);
     await audit(tx, actor, "outbound.run_finished", { type: "market", id: `${target.country}:${target.industry}` }, null, facts);

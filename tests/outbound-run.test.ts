@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import { pool } from "@/agents/outbound";
 import { mockAdminChat } from "@/providers/admin-chat";
 import type { CompanySearch } from "@/providers/company-search";
+import { apifyMaps } from "@/providers/company-search/apify";
+import { setLlmForTests } from "@/providers/llm";
 import { auditLog, events, prospects, touches } from "@/db/schema";
 import { decideFilter } from "@/server/market-filters";
 import { findCustomers } from "@/server/outbound-run";
@@ -88,5 +90,34 @@ describe("first real customer search from the cockpit", () => {
     });
     expect(out).toEqual([2, 4, 6, 8, 10]);
     expect(peak).toBe(2);
+  });
+});
+
+describe("Maps listings as they really come", () => {
+  const db = useTestDb();
+
+  it("null fields from Apify do not fail the save, and keyword titles become business names", async () => {
+    const rows = [
+      { title: "TERMOIDRAULICA TRISCARI SRL", city: null, website: null, phone: "+39 02 1", state: "Lombardia", totalScore: null, reviewsCount: null, url: null, permanentlyClosed: false },
+      { title: "CONDIZIONATORI BRESCIA ❄️ Installazione Climatizzatori", city: "Brescia", website: "https://cb.it", phone: null, state: null },
+      { title: "Impianti fotovoltaici pavia - Elettronica Pavese", city: "Pavia", website: "https://ep.it", phone: "+39 0382 1" },
+    ];
+    const finder = apifyMaps("t", (async () => new Response(JSON.stringify(rows))) as unknown as typeof fetch);
+    const s = await findCustomers(db, javad, { industry: "installers", region: "Lombardia", limit: 10 }, { finder, people: null, research: false });
+    expect(s.failed).toBe(0);
+    expect(s.errors).toEqual([]);
+    expect((await db.select().from(prospects)).map((p) => p.name).sort()).toEqual(["Condizionatori Brescia", "Elettronica Pavese", "Termoidraulica Triscari Srl"]);
+  });
+
+  it("a failed research shows its reason in the result", async () => {
+    const finder = apifyMaps("t", (async () => new Response(JSON.stringify([{ title: "Rossi Impianti Srl", city: "Milano", website: "https://rossi.it", phone: "+39 02 9" }]))) as unknown as typeof fetch);
+    setLlmForTests({ provider: "fake", model: "fake", webSearch: true, complete: async () => { throw new Error("gemini 429: quota"); } });
+    try {
+      const s = await findCustomers(db, javad, { industry: "installers", region: "Lombardia", limit: 3 }, { finder, people: null, research: true });
+      expect(s.added).toBe(1);
+      expect(s.errors[0]).toContain("gemini 429");
+    } finally {
+      setLlmForTests(null);
+    }
   });
 });
