@@ -902,6 +902,10 @@ export const orders = pgTable(
     company: text("company"),
     email: text("email"),
     vat: text("vat"),
+    // EU VIES check of the VAT number: true/false, null = not checked or VIES unavailable (reverse charge only when not false)
+    vatValid: boolean("vat_valid"),
+    vatName: text("vat_name"),
+    vatCheckedAt: timestamp("vat_checked_at", { withTimezone: true }),
     country: text("country"),
     industry: text("industry"),
     locale: text("locale").notNull().default("en"),
@@ -1007,6 +1011,8 @@ export const milestones = pgTable(
     // reminders sent for the current approval (day 1, 3, 6), and rounds of changes used
     reminders: integer("reminders").notNull().default(0),
     revisions: integer("revisions").notNull().default(0),
+    // times the customer was told this milestone runs late (each notice moves dueAt to the new date)
+    lateNotices: integer("late_notices").notNull().default(0),
     // the customer's 1-5 after the hand-over (feeds partner level and customer health; partners stay hidden)
     rating: integer("rating"),
     ratingNote: text("rating_note"),

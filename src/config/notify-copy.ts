@@ -15,6 +15,7 @@ export type Template =
   | "issued"
   | "approval"
   | "approvalReminder"
+  | "milestoneLate"
   | "offer"
   | "accepted"
   | "changes"
@@ -33,6 +34,7 @@ type T = Record<Template, { subject: string; body: string }>;
 const sign = "\n\n— {company}";
 
 const it: T = {
+  milestoneLate: { subject: "{title}: nuova data {due}", body: "Buongiorno {name},\n\n{title} doveva essere pronto il {was}: siamo in ritardo, ce ne scusiamo. La nuova data è il {due}. Seguiamo il lavoro ogni giorno e vi scriviamo appena è pronto.\n{link}\n\nDomande? Rispondete pure a questa email." + sign },
   invite: { subject: "La vostra area {company} è pronta", body: "Buongiorno {name},\n\nla vostra area è pronta. Scegliete la password qui (valido 7 giorni):\n{link}" + sign },
   contract: { subject: "Contratto pronto da firmare: {title}", body: "Buongiorno {name},\n\nil contratto per «{title}» è pronto. Lo leggete e firmate qui con un codice che vi mandiamo per email:\n{link}\n\nDopo la firma vi inviamo la richiesta di anticipo ({deposit}) e partiamo." + sign },
   code: { subject: "Codice di firma: {code}", body: "Il vostro codice per {what} è {code}.\nVale 15 minuti. Se non l'avete chiesto voi, ignorate questa email." + sign },
@@ -59,6 +61,7 @@ const it: T = {
 };
 
 const en: T = {
+  milestoneLate: { subject: "{title}: new date {due}", body: "Hello {name},\n\n{title} was due on {was}: we are late, and we are sorry. The new date is {due}. We follow the work every day and write as soon as it is ready.\n{link}\n\nQuestions? Just reply to this email." + sign },
   invite: { subject: "Your {company} area is ready", body: "Hello {name},\n\nyour area is ready. Choose your password here (valid 7 days):\n{link}" + sign },
   contract: { subject: "Contract ready to sign: {title}", body: "Hello {name},\n\nthe contract for \"{title}\" is ready. Read and sign it here with a code we email you:\n{link}\n\nAfter signing we send the deposit request ({deposit}) and start." + sign },
   code: { subject: "Signing code: {code}", body: "Your code to {what} is {code}.\nIt is valid for 15 minutes. If you did not ask for it, ignore this email." + sign },
@@ -85,6 +88,7 @@ const en: T = {
 };
 
 const de: T = {
+  milestoneLate: { subject: "{title}: neuer Termin {due}", body: "Guten Tag {name},\n\n{title} war für den {was} geplant: wir sind im Verzug, das tut uns leid. Der neue Termin ist der {due}. Wir verfolgen die Arbeit täglich und melden uns, sobald sie fertig ist.\n{link}\n\nFragen? Antworten Sie einfach auf diese E-Mail." + sign },
   invite: { subject: "Ihr {company}-Bereich ist bereit", body: "Guten Tag {name},\n\nIhr Bereich ist bereit. Wählen Sie hier Ihr Passwort (7 Tage gültig):\n{link}" + sign },
   contract: { subject: "Vertrag zur Unterschrift: {title}", body: "Guten Tag {name},\n\nder Vertrag für „{title}“ ist bereit. Lesen und unterschreiben Sie ihn hier mit einem Code per E-Mail:\n{link}\n\nNach der Unterschrift senden wir die Anzahlungsanforderung ({deposit}) und starten." + sign },
   code: { subject: "Signaturcode: {code}", body: "Ihr Code für {what} lautet {code}.\nEr gilt 15 Minuten. Falls Sie ihn nicht angefordert haben, ignorieren Sie diese E-Mail." + sign },
@@ -111,6 +115,7 @@ const de: T = {
 };
 
 const fa: T = {
+  milestoneLate: { subject: "{title}: تاریخ جدید {due}", body: "سلام {name}،\n\n{title} قرار بود {was} آماده شود: دیر شده و عذر می‌خواهیم. تاریخ جدید {due} است. کار را هر روز پیگیری می‌کنیم و به محض آماده شدن خبر می‌دهیم.\n{link}\n\nسؤالی دارید؟ همین ایمیل را جواب دهید." + sign },
   invite: { subject: "فضای شما در {company} آماده است", body: "سلام {name}،\n\nفضای شما آماده است. رمز عبورتان را اینجا انتخاب کنید (۷ روز اعتبار):\n{link}" + sign },
   contract: { subject: "قرارداد آماده امضا: {title}", body: "سلام {name}،\n\nقرارداد «{title}» آماده است. اینجا بخوانید و با کدی که ایمیل می‌کنیم امضا کنید:\n{link}\n\nبعد از امضا درخواست پیش‌پرداخت ({deposit}) را می‌فرستیم و شروع می‌کنیم." + sign },
   code: { subject: "کد امضا: {code}", body: "کد شما برای {what}: {code}\n۱۵ دقیقه اعتبار دارد. اگر شما درخواست نکرده‌اید، این ایمیل را نادیده بگیرید." + sign },

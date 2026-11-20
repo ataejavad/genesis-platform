@@ -44,6 +44,8 @@ export type EventType =
   | "milestone.accepted"
   | "milestone.changes"
   | "milestone.reminded"
+  | "milestone.late"
+  | "order.vat_checked"
   | "change_request.quoted"
   | "change_request.decided"
   | "protocol.approved"

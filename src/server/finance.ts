@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { and, asc, desc, eq, inArray, isNotNull, lte, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNotNull, isNull, lte, or, sql } from "drizzle-orm";
 import QRCode from "qrcode";
 import { z } from "zod";
 import { EU, packFor } from "@/config/jurisdictions";
@@ -65,7 +65,8 @@ export function vatFor(customerCountry: string | null, customerVat: string | nul
 
 async function customerTax(db: DbOrTx, orgId: string) {
   const [org] = await db.select().from(organizations).where(eq(organizations.id, orgId));
-  const [o] = await db.select({ vat: orders.vat }).from(orders).where(and(eq(orders.orgId, orgId), isNotNull(orders.vat))).orderBy(desc(orders.createdAt)).limit(1);
+  // a number VIES rejected gives no reverse charge (Italian VAT); unchecked ones count until checked
+  const [o] = await db.select({ vat: orders.vat }).from(orders).where(and(eq(orders.orgId, orgId), isNotNull(orders.vat), or(isNull(orders.vatValid), eq(orders.vatValid, true)))).orderBy(desc(orders.createdAt)).limit(1);
   return { country: org?.country ?? "IT", vat: o?.vat ?? null, lang: (org?.locale ?? "en").slice(0, 2) };
 }
 

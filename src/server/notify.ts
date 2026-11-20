@@ -131,6 +131,11 @@ export async function notifyEvent(db: Db, e: Event) {
       for (const r of await customerPeople(db, target)) await queue(db, r, e.type === "milestone.reminded" ? "approvalReminder" : "approval", { title: String(p.title ?? ""), hours: Number(p.waitingHours ?? 24), auto: p.autoOn ? day(new Date(String(p.autoOn)), r.locale) : "", link: `${appUrl()}/portal` }, e.id);
       return;
     }
+    case "milestone.late": {
+      if (!p.orgId) return;
+      for (const r of await customerPeople(db, String(p.orgId))) await queue(db, r, "milestoneLate", { title: String(p.title ?? ""), was: day(new Date(String(p.was)), r.locale), due: day(new Date(String(p.due)), r.locale), link: `${appUrl()}/portal` }, e.id);
+      return;
+    }
     case "milestone.auto_accepted": {
       if (!p.orgId) return;
       for (const r of await customerPeople(db, String(p.orgId))) await queue(db, r, "autoAccepted", { title: String(p.title ?? ""), link: `${appUrl()}/portal` }, e.id);

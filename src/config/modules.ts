@@ -66,6 +66,7 @@ export const MODULES: ModuleDef[] = [
 
   // convert
   { n: 37, name: "Orders inbox", system: "convert", runs: "marketplace, dashboard, CRM won", events: ["order.created"], kpi: "orders", link: "/cockpit/projects" },
+  { n: 84, name: "VAT number check (EU VIES)", system: "convert", runs: "on every order with a VAT number; again at Send contract", events: ["order.vat_checked"], link: "/cockpit/projects" },
   { n: 59, name: "CRM won → order", system: "convert", runs: "Javad on the prospect page", events: ["order.created"], kpi: "orders", link: "/cockpit/crm" },
   { n: 72, name: "Brief card + 24h price promise", system: "convert", runs: "customer describes a problem in the chat", events: ["order.created", "customer_request.created"], kpi: "quotes", link: "/cockpit/customers" },
   { n: 52, name: "Contract factory", system: "convert", runs: "Send contract / partner activation", events: ["contract.sent", "contract.signed"], kpi: "contracts", link: "/cockpit/contracts" },
@@ -86,6 +87,7 @@ export const MODULES: ModuleDef[] = [
 
   // deliver
   { n: 73, name: "Deemed acceptance (reminders day 1/3/6, accepted day 7)", system: "deliver", runs: "hourly with delivery.watch", job: "delivery.watch", events: ["milestone.reminded", "milestone.auto_accepted"], kpi: "autoAccepted", link: "/cockpit/projects" },
+  { n: 83, name: "Late notice to the customer (new date)", system: "deliver", runs: "hourly with delivery.watch", job: "delivery.watch", events: ["milestone.late"], link: "/cockpit/projects" },
   { n: 74, name: "Free change rounds + rework to the maker", system: "deliver", runs: "customer asks for changes", events: ["milestone.changes", "milestone.revision_cap", "job.rework"], kpi: "reworks", link: "/cockpit/projects" },
   { n: 38, name: "Planner (package → milestones + tasks)", system: "deliver", runs: "on order conversion", events: ["project.created"], kpi: "projects", link: "/cockpit/projects" },
   { n: 39, name: "QA judge", system: "deliver", runs: "on every delivery", agent: "qa-judge", needs: CLAUDE, events: ["qa.judged"], link: "/cockpit/qa" },

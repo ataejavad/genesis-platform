@@ -12,6 +12,7 @@ import { mailerFromEnv } from "./mailer";
 import { money, ourName, queueCode } from "./notify";
 import { createCustomer } from "./portal";
 import { convertOrder } from "./projects";
+import { checkOrderVat } from "./vies";
 
 /*
  * Contract factory (step 8, doc 15 §6ج). Contracts are assembled from the clause library of the country pack
@@ -47,7 +48,9 @@ function assemble(kind: "customer" | "partner", lang: Lang, country: string | nu
  * Javad presses "Send contract" on an order: the customer account is created if new, the contract is built from
  * the package and its milestones, and the customer is asked to sign. The deposit is the first milestone's share.
  */
-export async function sendContract(db: Db, actor: Actor, orderId: string) {
+export async function sendContract(db: Db, actor: Actor, orderId: string, fetchImpl: typeof fetch = fetch) {
+  // the VAT number is checked in VIES first if the worker could not (it decides reverse charge on every invoice)
+  await checkOrderVat(db, orderId, fetchImpl);
   return db.transaction(async (tx) => {
     const [o] = await tx.select().from(orders).where(eq(orders.id, orderId)).for("update");
     if (!o) throw notFound("order");
@@ -81,7 +84,7 @@ export async function sendContract(db: Db, actor: Actor, orderId: string) {
       give: [`${pkg.title}: ${pkg.milestones.map((m) => m.title).join(" → ")}`, `Monthly service after the last milestone (€${pkg.monthlyEur}/month, cancel with 30 days)`, "DPA annex (we are processor), EU data"],
       get: [`€${pkg.setupEur} set-up + €${pkg.monthlyEur}/month (+ VAT where due)`, `First milestone €${deposit} before any work starts`],
       money: [`Each next milestone paid before it starts, ${pack.paymentDays} days`, `${pkg.revisions} rounds of changes per milestone; more is quoted`, "Deemed acceptance after 7 silent days (reminders day 1, 3, 6)", "Late interest D.Lgs 231/2002 + €40", "Pause after 14 days late"],
-      risks: [...(built.pack.reviewed ? [] : [`${built.pack.name} template ${built.pack.templateVersion} not reviewed by a lawyer yet`]), `${built.onerous.length} onerous clauses need the customer's separate code`],
+      risks: [...(o.vat && o.vatValid === false ? [`VAT number ${o.vat} not valid in VIES: Italian VAT is charged, not reverse charge`] : o.vat && o.vatValid == null ? [`VAT number ${o.vat} not checked in VIES yet (service down)`] : []), ...(built.pack.reviewed ? [] : [`${built.pack.name} template ${built.pack.templateVersion} not reviewed by a lawyer yet`]), `${built.onerous.length} onerous clauses need the customer's separate code`],
     };
     const [c] = await tx
       .insert(contracts)

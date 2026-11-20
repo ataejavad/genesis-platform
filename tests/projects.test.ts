@@ -156,6 +156,26 @@ describe("order to closed project", () => {
     expect(subs).toMatchObject([{ product: "followup-agent", monthlyEur: 190 }]);
   });
 
+  it("tells the customer when a running milestone is late, with a new date, and again if that passes", async () => {
+    await seedDelivery(db);
+    await partner("luca@example.com");
+    const order = await createOrder(db, sys, { packageSlug: "lead-crm", source: "market", company: "Gialli Srl", email: "gialli@example.com", country: "IT", industry: "installers" });
+    const { projectId } = await startOrder(db, javad, order.id);
+    const [m0] = await db.select().from(milestones).where(eq(milestones.projectId, projectId));
+    expect(m0.status).toBe("open");
+    const late = new Date(m0.dueAt!.getTime() + 36e5);
+    expect(await deliveryWatch(db, late)).toMatchObject({ lateNotices: 1 });
+    expect(await deliveryWatch(db, late)).toMatchObject({ lateNotices: 0 });
+    const [m1] = await db.select().from(milestones).where(eq(milestones.id, m0.id));
+    // the tasks are late too: the new date is a few days out
+    expect(m1.dueAt!.getTime()).toBe(late.getTime() + 3 * 864e5);
+    expect(m1.lateNotices).toBe(1);
+    expect(await deliveryWatch(db, new Date(m1.dueAt!.getTime() + 1000))).toMatchObject({ lateNotices: 1 });
+    const evs = await db.select().from(events).where(eq(events.type, "milestone.late"));
+    expect(evs.map((e) => e.payload.notice)).toEqual([1, 2]);
+    expect(evs[0].payload).toMatchObject({ orgId: m0.orgId, was: m0.dueAt!.toISOString(), due: m1.dueAt!.toISOString() });
+  });
+
   it("queues deliveries for a person without the judge, reminds on day 1, 3, 6 and accepts on day 7", async () => {
     await seedDelivery(db);
     const pid = await partner("sara@example.com");

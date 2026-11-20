@@ -762,7 +762,40 @@ export async function deliveryWatch(db: Db, now = new Date()) {
     reminded++;
   }
   const late = await db.select({ id: jobs.id }).from(jobs).where(and(sql`${jobs.projectId} is not null`, inArray(jobs.status, ["open", "offered", "assigned"]), lt(jobs.dueAt, now)));
-  return { reminded, autoAccepted, lateTasks: late.length };
+  const lateNotices = await lateMilestones(db, actor, now);
+  return { reminded, autoAccepted, lateTasks: late.length, lateNotices };
+}
+
+/** Days a late milestone is moved by when its open tasks are already past their own dates. */
+export const LATE_GRACE_DAYS = 3;
+
+/**
+ * Running milestones past their date: the customer hears it from us first (marketplace lesson: the countdown is
+ * public, so is the delay) with a new date, and Javad gets a line. The new date is the last open task's date, or
+ * a few days from now when the tasks are late too; when that passes again, another notice goes out.
+ */
+async function lateMilestones(db: Db, actor: Actor, now: Date) {
+  const running = await db
+    .select({ m: milestones, p: projects, company: organizations.name })
+    .from(milestones)
+    .innerJoin(projects, eq(projects.id, milestones.projectId))
+    .leftJoin(organizations, eq(organizations.id, milestones.orgId))
+    .where(and(eq(milestones.status, "open"), lt(milestones.dueAt, now)));
+  let n = 0;
+  for (const r of running) {
+    const open = await db.select({ dueAt: jobs.dueAt }).from(jobs).where(and(eq(jobs.milestoneId, r.m.id), sql`${jobs.status} not in ('accepted', 'cancelled')`));
+    const last = Math.max(0, ...open.map((j) => j.dueAt?.getTime() ?? 0));
+    const due = new Date(last > now.getTime() ? last : now.getTime() + LATE_GRACE_DAYS * DAY);
+    await db.transaction(async (tx) => {
+      const [m] = await tx.select().from(milestones).where(eq(milestones.id, r.m.id)).for("update");
+      if (m.status !== "open" || !m.dueAt || m.dueAt >= now) return;
+      await tx.update(milestones).set({ dueAt: due, lateNotices: m.lateNotices + 1 }).where(eq(milestones.id, m.id));
+      await emit(tx, actor, "milestone.late", { type: "milestone", id: m.id }, { orgId: m.orgId, code: r.p.code, title: `${r.p.title}: ${m.title}`, company: r.company, was: m.dueAt.toISOString(), due: due.toISOString(), notice: m.lateNotices + 1 });
+      await audit(tx, actor, "milestone.late", { type: "milestone", id: m.id }, { dueAt: m.dueAt }, { dueAt: due });
+    });
+    n++;
+  }
+  return n;
 }
 
 /* ───────────── Customer material: intake, identity removed, shared with the project's partners ───────────── */

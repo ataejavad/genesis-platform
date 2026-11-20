@@ -7,6 +7,7 @@ import { askForStory } from "@/server/health";
 import { notifyEvent } from "@/server/notify";
 import { offerJob } from "@/server/partners";
 import { afterDelivery } from "@/server/projects";
+import { checkOrderVat } from "@/server/vies";
 import { sendAlert, sendApprovalRequest, type TelegramConfig } from "@/server/telegram";
 
 export const MAX_ATTEMPTS = 10;
@@ -75,6 +76,17 @@ async function handle(db: Db, deps: DispatchDeps, event: Event) {
             ? `⏳ ${p.code} ${p.title} (${p.company}) waits for the customer's OK for ${p.waitingHours}h`
             : `📝 Change request ${p.decision}`;
     await sendAlert(deps.telegram, [line], "/cockpit/projects", fetchImpl);
+  }
+  // A running milestone passed its date: the customer was told the new date; Javad sees it too.
+  if (deps.telegram && event.type === "milestone.late") {
+    const p = event.payload as { code?: string; title?: string; company?: string; due?: string; notice?: number };
+    await sendAlert(deps.telegram, [`🐢 ${p.code} ${p.title} (${p.company}) is late${Number(p.notice) > 1 ? ` again (${p.notice}x)` : ""}; customer told new date ${String(p.due).slice(0, 10)}`], "/cockpit/projects", fetchImpl);
+  }
+  // New order with a VAT number: checked in VIES (reverse charge only for valid numbers); an invalid one reaches Javad.
+  if (event.type === "order.created") await checkOrderVat(db, event.subjectId!, fetchImpl);
+  if (deps.telegram && event.type === "order.vat_checked" && event.payload.valid === false) {
+    const p = event.payload as { company?: string; vat?: string };
+    await sendAlert(deps.telegram, [`🧾 ${p.company}: VAT number ${p.vat} is not valid in VIES. Italian VAT will be charged; ask them for the right number`], "/cockpit/projects", fetchImpl);
   }
   // Customer journey: complaints, low ratings and the price cap on changes reach Javad at once.
   if (deps.telegram && ["complaint.opened", "complaint.escalated", "milestone.rated", "milestone.revision_cap", "milestone.auto_accepted"].includes(event.type) && !(event.type === "milestone.rated" && Number(event.payload.rating) > 2)) {
