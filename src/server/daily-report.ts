@@ -46,6 +46,9 @@ export async function buildBrief(db: Db, now = new Date()): Promise<Brief> {
   const decisions: { text: string; link: string }[] = [];
   const pendingApprovals = await count(db.select({ n }).from(approvals).where(eq(approvals.status, "pending")));
   if (pendingApprovals) decisions.push({ text: `${pendingApprovals} draft(s) to approve before they go public`, link: "/cockpit/approvals" });
+  // an order waits for Javad's "Send contract" (order.convert, 1-day promise to the buyer); listed from the first minute
+  const newOrdersWaiting = await count(db.select({ n }).from(orders).where(eq(orders.status, "new")));
+  if (newOrdersWaiting) decisions.push({ text: `${newOrdersWaiting} order(s) wait for you to send the contract`, link: "/cockpit/projects" });
   const drafts = await count(db.select({ n }).from(touches).where(eq(touches.status, "draft")));
   if (drafts) decisions.push({ text: `${drafts} outreach message(s) wait for your OK`, link: "/cockpit/outreach" });
   for (const e of await db.select().from(experiments).where(eq(experiments.status, "ready"))) {

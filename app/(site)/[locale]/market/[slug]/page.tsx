@@ -6,6 +6,7 @@ import { tx } from "@/config/tx";
 import { factsFor, industries, pick, products } from "@/mock/site";
 import { getDb } from "@/db";
 import { listPackages } from "@/server/projects";
+import { visitorCountries } from "@/ui/site/country";
 import { OrderBox } from "@/ui/site/OrderBox";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
@@ -22,7 +23,9 @@ export default async function ProductPage({ params, searchParams }: { params: Pr
   const c = copyFor(locale);
   const t = (fa: string, en: string) => tx(locale, fa, en);
   const ind = industries.find((x) => x.slug === industry && p.industries.includes(x.slug)) ?? industries.find((x) => x.slug === p.industries[0])!;
-  const cc = factsFor(ind, country ?? p.countries?.[0]).country.toLowerCase();
+  // the buyer's country decides VAT on the order: link → saved choice / site language / IP → the product's first country
+  const mine = (await visitorCountries(locale)).find((c) => ind.countries.some((x) => x.country === c));
+  const cc = factsFor(ind, country ?? mine ?? p.countries?.[0]).country.toLowerCase();
   // only catalogue packages can be ordered online (no protocol, no sale)
   const pkg = (await listPackages(getDb()).catch(() => [])).find((x) => x.slug === p.slug);
   const delivery = { native: t("داخل داشبورد شما (ساخت خودمان)", "Inside your dashboard (built by us)"), embedded: t("داخل داشبورد شما، با برند ما", "Inside your dashboard, our branding"), sso: t("ورود یک‌کلیکی از داشبورد", "One-click launch from your dashboard") }[p.delivery];
