@@ -114,6 +114,7 @@ export const KINDS: KindDef[] = [
     env: "STORAGE_PROVIDER",
     options: [
       { id: "local", label: "Server disk (FILES_DIR)", keys: [], state: "ready", fallback: true },
+      { id: "database", label: "Our Postgres database (hosts without a disk, e.g. Vercel; small files)", keys: [], state: "ready", fallback: true },
       { id: "s3", label: "EU object storage (S3-compatible, e.g. Hetzner)", keys: [], state: "planned" },
     ],
   },

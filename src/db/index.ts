@@ -1,8 +1,11 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import { applyPlatformDefaults } from "@/lib/platform";
 import * as schema from "./schema";
 
 export function createDb(url: string, max = 10) {
+  // Vercel: pooled connections (no named prepared statements); a no-op elsewhere
+  applyPlatformDefaults();
   // Local mode shares one PGlite session between processes: named prepared statements would collide there.
   const client = postgres(url, { max, prepare: process.env.DATABASE_PREPARE !== "false" });
   return Object.assign(drizzle(client, { schema }), { $client: client });
@@ -17,6 +20,7 @@ const globalForDb = globalThis as unknown as { db?: Db };
 // One pool per process; survives Next.js hot reload in dev.
 export function getDb(): Db {
   if (!globalForDb.db) {
+    applyPlatformDefaults();
     const url = process.env.DATABASE_URL;
     if (!url) throw new Error("DATABASE_URL is not set");
     // Local mode (npm run local) runs on PGlite, which needs one connection per process.

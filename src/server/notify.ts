@@ -1,4 +1,5 @@
 import { createHash, createHmac, randomBytes } from "node:crypto";
+import { requestTick } from "./tick-soon";
 import { hashPassword } from "better-auth/crypto";
 import { and, asc, eq, isNull, lt, sql } from "drizzle-orm";
 import { CODE_WHAT, render, type Template } from "@/config/notify-copy";
@@ -37,6 +38,8 @@ export async function queue(db: DbOrTx, to: Recipient, template: Template, vars:
     .insert(notifications)
     .values({ audience: to.audience, orgId: to.orgId ?? null, partnerId: to.partnerId ?? null, email: to.email, locale: to.locale.slice(0, 2), template, subject, body, kind, eventId: eventId ?? null, unsubscribeUrl: unsubscribeUrl ?? null })
     .onConflictDoNothing();
+  // hosts without an always-on worker send it right after this request (src/server/tick-soon.ts)
+  requestTick();
 }
 
 /** The people of a customer who get its messages (owners first). */

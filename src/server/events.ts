@@ -1,6 +1,7 @@
 import type { DbOrTx } from "@/db";
 import { auditLog, events } from "@/db/schema";
 import { type Actor, actorRef } from "./actor";
+import { requestTick } from "./tick-soon";
 
 export type EventType =
   | "approval.requested"
@@ -98,6 +99,8 @@ export async function emit(
     payload,
     actor: actorRef(actor),
   });
+  // hosts without an always-on worker process the event right after this request (src/server/tick-soon.ts)
+  requestTick();
 }
 
 export async function audit(
