@@ -3,7 +3,7 @@
 // Page content itself (hubs, products, articles) comes from the database per locale.
 
 const en = {
-  nav: { market: "Solutions", hubs: "Industries", myIndustry: "My industry", explore: "Explore", change: "Change industry", signup: "Create account", tools: "Free tools", media: "Insights", partners: "Work with us", login: "Client login", checkup: "Free check-up" },
+  nav: { market: "Solutions", hubs: "Industries", myIndustry: "My industry", explore: "Explore", change: "Change industry", signup: "Create account", tools: "Free tools", media: "Insights", partners: "Work with us", login: "Client login", partnerLogin: "Partner login", checkup: "Free check-up" },
   hero: {
     kicker: "We fix what costs European SMEs time and money",
     title: ["You don't need AI.", "You need the problem gone."],
@@ -72,7 +72,7 @@ const en = {
 export type SiteCopy = typeof en;
 
 const fa: SiteCopy = {
-  nav: { market: "راه‌حل‌ها", hubs: "صنایع", myIndustry: "صنعت من", explore: "کاوش صنایع", change: "تغییر صنعت", signup: "ساخت حساب", tools: "ابزار رایگان", media: "رسانه", partners: "همکاری با ما", login: "ورود مشتریان", checkup: "چک‌آپ رایگان" },
+  nav: { market: "راه‌حل‌ها", hubs: "صنایع", myIndustry: "صنعت من", explore: "کاوش صنایع", change: "تغییر صنعت", signup: "ساخت حساب", tools: "ابزار رایگان", media: "رسانه", partners: "همکاری با ما", login: "ورود مشتریان", partnerLogin: "ورود همکاران", checkup: "چک‌آپ رایگان" },
   hero: {
     kicker: "حل مشکلاتی که وقت و پول شرکت‌های کوچک و متوسط اروپا را می‌گیرد",
     title: ["شما AI لازم ندارید.", "لازم دارید مشکلتان حل شود."],
@@ -140,7 +140,7 @@ const fa: SiteCopy = {
 
 const de: SiteCopy = {
   ...en,
-  nav: { market: "Lösungen", hubs: "Branchen", myIndustry: "Meine Branche", explore: "Branchen entdecken", change: "Branche ändern", signup: "Konto erstellen", tools: "Gratis-Tools", media: "Wissen", partners: "Mit uns arbeiten", login: "Kunden-Login", checkup: "Gratis-Check" },
+  nav: { market: "Lösungen", hubs: "Branchen", myIndustry: "Meine Branche", explore: "Branchen entdecken", change: "Branche ändern", signup: "Konto erstellen", tools: "Gratis-Tools", media: "Wissen", partners: "Mit uns arbeiten", login: "Kunden-Login", partnerLogin: "Partner-Login", checkup: "Gratis-Check" },
   hero: { kicker: "Wir lösen, was den Mittelstand Zeit und Geld kostet", title: ["Sie brauchen keine KI.", "Sie brauchen, dass das Problem verschwindet."], lead: "Hören Sie auf, Software zu kaufen. Kaufen Sie Ergebnisse. Wir finden, richten ein und betreiben, was es für Ihre Branche am besten löst, und berichten jeden Monat die Ersparnis.", proof: ["Bezahlt wird für Ergebnisse", "Daten bleiben in der EU", "Kein Langzeitvertrag"] },
   ladder: { title: "Lösungsleiter", sub: "Kostenlos starten; den nächsten Schritt erst, wenn sich der letzte gelohnt hat.", cta: "Start", items: [
     { n: 1, title: "Gratis-Check", desc: "Wo Ihr Betrieb Zeit und Geld verliert und was zuerst hilft.", price: "Kostenlos", free: true },
@@ -192,7 +192,7 @@ const de: SiteCopy = {
 
 const it: SiteCopy = {
   ...en,
-  nav: { market: "Soluzioni", hubs: "Settori", myIndustry: "Il mio settore", explore: "Esplora settori", change: "Cambia settore", signup: "Crea account", tools: "Strumenti gratuiti", media: "Approfondimenti", partners: "Lavora con noi", login: "Area clienti", checkup: "Check-up gratuito" },
+  nav: { market: "Soluzioni", hubs: "Settori", myIndustry: "Il mio settore", explore: "Esplora settori", change: "Cambia settore", signup: "Crea account", tools: "Strumenti gratuiti", media: "Approfondimenti", partners: "Lavora con noi", login: "Area clienti", partnerLogin: "Area partner", checkup: "Check-up gratuito" },
   hero: { kicker: "Risolviamo ciò che fa perdere tempo e soldi alle PMI europee", title: ["Non vi serve l'IA.", "Vi serve che il problema sparisca."], lead: "Smettete di comprare software. Iniziate a comprare risultati. Troviamo, configuriamo e gestiamo ciò che lo risolve meglio nel vostro settore e ogni mese riportiamo i risparmi.", proof: ["Pagate i risultati", "Dati nell'UE", "Nessun contratto lungo"] },
   ladder: { title: "La scala delle soluzioni", sub: "Si parte gratis; il passo successivo solo quando il precedente ha reso.", cta: "Inizia", items: [
     { n: 1, title: "Check-up gratuito", desc: "Dove la tua azienda perde tempo e denaro, e cosa risolve prima.", price: "Gratis", free: true },

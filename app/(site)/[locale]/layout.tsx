@@ -80,6 +80,7 @@ export default async function SiteLayout({ children, params }: { children: React
               <Link href={`${home}/about`}>{c.about.title}</Link>
               <Link href={`${home}/partners`}>{c.nav.partners}</Link>
               <Link href="/portal">{c.nav.login}</Link>
+              <Link href="/partner">{c.nav.partnerLogin}</Link>
               <Link href={`${home}/signup`}>{c.nav.signup}</Link>
               <Link href={`${home}/legal`}>{c.footer.legal}</Link>
               <span className="small">🎁 {c.footer.referral}</span>
