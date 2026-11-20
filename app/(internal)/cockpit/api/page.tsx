@@ -18,6 +18,9 @@ const endpoints = [
   ["POST", "/api/v1/orders", "Order from the marketplace, dashboard or chat"],
   ["GET", "/llms.txt · /sitemap.xml", "Machine-readable site for agents and search engines"],
 ];
+// the lead-search test waits for Apify (Google Maps), which can take a minute
+export const maxDuration = 120;
+
 const day = (d: Date | null) => (d ? d.toISOString().slice(0, 16).replace("T", " ") : "never");
 
 // API & connections (step 10): real keys (only the hash is stored), and which services are connected (never the key itself).
