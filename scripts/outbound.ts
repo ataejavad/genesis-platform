@@ -1,11 +1,11 @@
 import { existsSync, readFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 import { researchCompany, researchEnabled } from "../src/agents/company-research";
-import { companySearchFromEnv, type Found, toSignals } from "../src/agents/company-finder";
+import { companySearchFromEnv } from "../src/agents/company-finder";
+import { type Imported, runOutbound, type Target } from "../src/agents/outbound";
 import { peopleSearchFromEnv } from "../src/agents/decision-maker";
 import { llm } from "../src/providers/llm";
 import { AGENT_BUDGETS } from "../src/server/market-selection/criteria";
-import { scoreCompany } from "../src/server/market-selection/company-agent";
 
 /*
  * Outbound agents, one run (doc 15 §6ب گام ۴). npm run agents:outbound -- [--industry metal] [--limit 20] [--import list.json] [--dry]
@@ -28,92 +28,30 @@ const key = process.env.OUTBOUND_AGENT_KEY ?? (existsSync(".localdb/outbound-age
 if (!values.dry && !key) throw new Error("OUTBOUND_AGENT_KEY is not set (npm run apikey:create -- --name company-finder --scopes crm:write)");
 const limit = Math.min(Number(values.limit ?? AGENT_BUDGETS.company.maxCompaniesPerDay), AGENT_BUDGETS.company.maxCompaniesPerDay);
 
-type Target = { industry: string; country: string; nace: string; language: string; searches: string[]; regions: string[]; decisionMakerTitles: string[] };
-type Imported = Found & { industry?: string; contacts?: { name?: string; role?: string; email?: string; phone?: string; linkedinUrl?: string; legalBasis?: string; basisSource?: string }[] };
 const targets = (JSON.parse(readFileSync("data/outreach/targets.json", "utf8")) as { targets: Target[] }).targets.filter((t) => !values.industry || t.industry === values.industry);
 
 const finder = companySearchFromEnv();
 const people = peopleSearchFromEnv();
 console.log(`outbound: finder ${finder?.provider ?? (values.import ? "import" : "off")}, people ${people?.provider ?? "off"}, research ${researchEnabled() ? llm().provider : "template"}`);
+const auth = { authorization: `Bearer ${key}` };
 // hard gate: a market filter Javad paused in Cockpit › Markets stops the finder for that division
-const paused = values.dry || !key ? [] : await fetch(`${appUrl}/api/v1/market-filters`, { headers: { authorization: `Bearer ${key}` } }).then((r) => r.json() as Promise<{ paused?: string[] }>).then((r) => r.paused ?? []).catch(() => [] as string[]);
-let added = 0;
-for (const t of targets) {
-  if (paused.includes(`filter:${t.country.toUpperCase()}:${t.nace.slice(0, 3).toUpperCase()}`)) {
-    console.log(`${t.industry}-${t.country}: filter ${t.nace.slice(0, 3)} paused in the cockpit, skipped`);
-    continue;
-  }
-  let found: Imported[] = [];
-  let spent = 0;
-  if (values.import) {
-    if (!existsSync(values.import)) throw new Error(`no file ${values.import}`);
-    found = (JSON.parse(readFileSync(values.import, "utf8")) as Imported[]).filter((c) => (c.industry ?? t.industry) === t.industry);
-  } else if (finder) {
-    const per = Math.max(5, Math.ceil((limit * 2) / (t.searches.length * t.regions.length)));
-    for (const s of t.searches)
-      for (const r of t.regions) {
-        try {
-          const places = await finder.search({ term: s, region: r, country: t.country, max: per });
-          spent += places.length * finder.eurPerResult;
-          found.push(...places.filter((p) => !p.closed).map((p) => toSignals(p, { nace: t.nace, region: r })));
-        } catch (err) {
-          console.error(`   ${s} / ${r}: ${(err as Error).message}`);
-        }
-      }
-  } else {
-    console.log(`${t.industry}-${t.country}: skipped (no company-search provider key and no --import file)`);
-    continue;
-  }
-  const seen = new Set<string>();
-  const best = found
-    .filter((c) => !seen.has((c.website ?? c.name).toLowerCase()) && seen.add((c.website ?? c.name).toLowerCase()))
-    .map((c) => ({ c, ...scoreCompany({ ...c, nace: c.nace ?? t.nace }, { nace: [t.nace.split(".")[0]], regions: t.regions }) }))
-    .filter((x) => x.criterionScores.fit >= 5)
-    .sort((a, b) => b.total - a.total)
-    .slice(0, limit);
-  console.log(`${t.industry}-${t.country}: ${found.length} found, ${best.length} kept`);
+const paused = values.dry || !key ? [] : await fetch(`${appUrl}/api/v1/market-filters`, { headers: auth }).then((r) => r.json() as Promise<{ paused?: string[] }>).then((r) => r.paused ?? []).catch(() => [] as string[]);
+// company research spends AI-model money: only while the agent is on and under its monthly budget (cockpit)
+const gate = values.dry ? { allowed: true, lessons: [] } : await fetch(`${appUrl}/api/v1/agents/runs?agent=company-research`, { headers: auth }).then((r) => r.json() as Promise<{ allowed?: boolean; lessons?: string[] }>).catch(() => ({ allowed: true, lessons: [] as string[] }));
+if (values.import && !existsSync(values.import)) throw new Error(`no file ${values.import}`);
+const imported = values.import ? (JSON.parse(readFileSync(values.import, "utf8")) as Imported[]) : undefined;
 
-  for (const { c, total, criterionScores } of best) {
-    // the whole finder run is spread over the companies we keep: that is what finding one really cost
-    let cost = spent / best.length;
-    const contacts = [...(c.contacts ?? []).map((x) => ({ ...x, source: values.import ? "list" : "manual" }))];
-    const domain = c.website?.replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0];
-    if (!contacts.length && people && domain) {
-      try {
-        contacts.push(...(await people.find(domain, t.decisionMakerTitles)));
-      } catch (err) {
-        console.error(`   ${c.name}: ${people.provider} ${(err as Error).message}`);
-      }
-    }
-    if (!contacts.length) contacts.push({ role: t.decisionMakerTitles[0], phone: c.phone, source: "maps" } as never);
-    let research: Awaited<ReturnType<typeof researchCompany>> | null = null;
-    // company research spends AI-model money: only while the agent is on and under its monthly budget (cockpit)
-    const gate = values.dry ? { allowed: true } : await fetch(`${appUrl}/api/v1/agents/runs?agent=company-research`, { headers: { authorization: `Bearer ${key}` } }).then((r) => r.json() as Promise<{ allowed?: boolean; lessons?: string[] }>).catch(() => ({ allowed: true }) as { allowed?: boolean; lessons?: string[] });
-    if (researchEnabled() && gate.allowed !== false) {
-      try {
-        research = await researchCompany({ name: c.name, website: c.website, city: c.city, industry: t.industry, country: t.country, signals: c as unknown as Record<string, unknown> }, gate.lessons ?? []);
-        cost += research.costEur;
-      } catch (err) {
-        console.error(`   ${c.name}: research ${(err as Error).message}`);
-      }
-    }
-    const signals = { ...c, seenAt: new Date().toISOString().slice(0, 10) } as Record<string, unknown>;
-    for (const k of ["name", "website", "phone", "nace", "region", "city", "contacts", "industry"]) delete signals[k];
-    const body = {
-      name: c.name, website: c.website, phone: c.phone, industry: t.industry, country: t.country, region: c.region, city: c.city, nace: c.nace ?? t.nace,
-      staff: c.staff, source: values.import ? "import" : "maps", signals, score: total, criterionScores, contacts,
-      ...(research ? { page: { facts: research.facts, persona: research.persona }, personal: research.personal } : {}),
-      cost: { eur: Math.round(cost * 10000) / 10000, meta: { finder: values.import ? "import" : finder?.provider, people: people?.provider ?? null, research: research ? llm().provider : null } },
-    };
-    if (values.dry) {
-      console.log(`   ${total.toFixed(1)} ${c.name} (${c.city ?? "?"}) fit ${criterionScores.fit} need ${criterionScores.need}`);
-      continue;
-    }
-    const res = await fetch(`${appUrl}/api/v1/prospects`, { method: "POST", headers: { authorization: `Bearer ${key}`, "content-type": "application/json" }, body: JSON.stringify(body) });
+const summary = await runOutbound(targets, {
+  finder, people, paused,
+  research: researchEnabled() && gate.allowed !== false ? { lessons: gate.lessons ?? [], run: researchCompany } : null,
+  researchProvider: llm().provider,
+  // agents never write to the database: each company goes to the CRM through the API (scope crm:write)
+  save: async (body) => {
+    const res = await fetch(`${appUrl}/api/v1/prospects`, { method: "POST", headers: { ...auth, "content-type": "application/json" }, body: JSON.stringify(body) });
     const out = (await res.json()) as { duplicate?: boolean; touches?: number; error?: { message: string } };
-    if (!res.ok) console.error(`   ${c.name}: ${res.status} ${out.error?.message}`);
-    else if (!out.duplicate) added++;
-    console.log(`   ${c.name}: ${res.ok ? (out.duplicate ? "already in CRM" : `added, ${out.touches} steps waiting for approval`) : "failed"}`);
-  }
-}
-console.log(`done: ${added} new companies`);
+    return res.ok ? { ok: true, duplicate: out.duplicate, touches: out.touches } : { ok: false, error: `${res.status} ${out.error?.message}` };
+  },
+  log: console.log,
+}, { limit, imported, dry: values.dry, concurrency: 2 });
+for (const s of summary.skipped) console.log(s);
+console.log(`done: ${summary.added} new companies, ${summary.duplicates} already in CRM, ${summary.failed} failed, about €${summary.costEur}`);

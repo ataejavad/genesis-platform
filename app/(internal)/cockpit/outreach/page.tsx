@@ -9,8 +9,13 @@ import { voiceFromEnv } from "@/server/voice";
 import { whatsappFromEnv } from "@/providers/whatsapp";
 import { PageHead } from "@/ui/Shell";
 import { approve, done, edit, reject, rpo, toggle } from "./actions";
+import { FindCustomers } from "./FindCustomers";
+import { companySearchFromEnv } from "@/providers/company-search";
+import { RUN_MAX, TARGETS } from "@/server/outbound-run";
 
 export const dynamic = "force-dynamic";
+// a company-finder run waits for Google Maps results and research (Vercel allows 300 s)
+export const maxDuration = 300;
 
 const CH: Record<string, string> = { linkedin: "💼 LinkedIn", email: "✉️ Email", phone: "📞 Call" };
 const RISK: Record<string, string> = { low: "ok", medium: "warn", high: "bad" };
@@ -37,6 +42,8 @@ export default async function Outreach() {
         <div className="card stat"><div className="label">Connections</div><div className="small">AI caller: <b>{voice ? voice.provider : "off"}</b><br />WhatsApp agent: <b>{wa ? wa.provider : "off"}</b></div></div>
       </section>
 
+      <FindCustomers markets={TARGETS.map((t) => ({ industry: t.industry, country: t.country, regions: t.regions }))} max={RUN_MAX} ready={companySearchFromEnv() ? null : "No company search set: add APIFY_TOKEN, then redeploy"} />
+
       <div className="card" style={{ marginBottom: 18 }}>
         <div className="card-head"><h3>Channel switches</h3><span className="more muted small">Off by default. When on, each contact still needs a recorded legal basis (CRM › contact).</span></div>
         <table className="table"><thead><tr><th>Country</th><th>Channel</th><th>Risk</th><th>Why</th><th /></tr></thead>
@@ -51,7 +58,7 @@ export default async function Outreach() {
       </div>
 
       <h2>Approve first messages</h2>
-      {q.approvals.length === 0 && <div className="card empty small">Nothing waiting. New companies arrive from the company agent (npm run agents:outbound) or the check-up.</div>}
+      {q.approvals.length === 0 && <div className="card empty small">Nothing waiting. New companies arrive from Find customers above, the company agent (npm run agents:outbound) or the check-up.</div>}
       {q.approvals.map(({ p, touches }) => {
         const pr = priority(p, now);
         return (
