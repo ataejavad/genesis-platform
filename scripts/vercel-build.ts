@@ -8,17 +8,16 @@ const run = (cmd: string) => {
   if (r.status !== 0) process.exit(r.status ?? 1);
 };
 
+// Missing settings only warn, so the app itself still builds (and a failing build always means a real code error).
+const warn = (m: string) => console.warn(`\n⚠ ${m}\n`);
+if (!process.env.BETTER_AUTH_SECRET) warn("BETTER_AUTH_SECRET is missing: logins will not work. Vercel › Settings › Environment Variables, add a long random text, then redeploy.");
 if (!process.env.DATABASE_URL) {
-  console.error("DATABASE_URL is missing. In Vercel: Storage › Create Database › Neon (region Frankfurt) › Connect to this project, then redeploy.");
-  process.exit(1);
+  warn("DATABASE_URL is missing: no database yet, pages that need data will fail. Vercel › Storage › Create Database › Neon (Frankfurt) › Connect, then redeploy.");
+} else {
+  run("npm run db:migrate");
+  if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) run("npm run seed");
+  else console.log("ADMIN_EMAIL / ADMIN_PASSWORD not set: no cockpit login created yet");
+  // fictional demo customer, partner, projects and pages, so every door can be tried (SEED_DEMO=1; test phase only)
+  if (process.env.SEED_DEMO === "1") for (const s of ["demo", "demo:portal", "demo:partner", "demo:delivery"]) run(`npm run ${s}`);
 }
-if (!process.env.BETTER_AUTH_SECRET) {
-  console.error("BETTER_AUTH_SECRET is missing. In Vercel: Settings › Environment Variables, add a long random text, then redeploy.");
-  process.exit(1);
-}
-run("npm run db:migrate");
-if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) run("npm run seed");
-else console.log("ADMIN_EMAIL / ADMIN_PASSWORD not set: no cockpit login created yet");
-// fictional demo customer, partner, projects and pages, so every door can be tried (SEED_DEMO=1; test phase only)
-if (process.env.SEED_DEMO === "1") for (const s of ["demo", "demo:portal", "demo:partner", "demo:delivery"]) run(`npm run ${s}`);
 run("npx next build");
