@@ -27,3 +27,8 @@ export function applyPlatformDefaults(env: Env = process.env) {
 export function extraOrigins(env: Env = process.env) {
   return [env.VERCEL_URL, env.VERCEL_BRANCH_URL].filter(Boolean).map((h) => `https://${h}`);
 }
+
+/** Search engines may index the public site. Off on Vercel (test phase, demo data) unless SITE_INDEXABLE=1. */
+export function siteIndexable(env: Env = process.env) {
+  return env.SITE_INDEXABLE === "1" || (!env.VERCEL && env.SITE_INDEXABLE !== "0");
+}

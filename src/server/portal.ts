@@ -155,6 +155,13 @@ export async function listServices(db: Db, orgId: string, lang: string, now = ne
         .where(and(inArray(outcomes.subscriptionId, ids), gte(outcomes.at, monthStart(now))))
         .groupBy(outcomes.subscriptionId, outcomes.metric)
     : [];
+  // a catalogue package that has no marketplace page (yet) still shows its own name, not its slug
+  const missing = subs.map((s) => s.product).filter((slug) => !products.some((x) => x.slug === slug));
+  const pkgs = missing.length ? await db.select({ slug: servicePackages.slug, title: servicePackages.title, titles: servicePackages.titles }).from(servicePackages).where(inArray(servicePackages.slug, missing)) : [];
+  const pkgName = (slug: string) => {
+    const k = pkgs.find((x) => x.slug === slug);
+    return k ? (k.titles[lang] ?? k.titles.en ?? k.title) : null;
+  };
   return subs.map((s) => {
     const p = products.find((x) => x.slug === s.product);
     const mine = month.filter((m) => m.sub === s.id);
@@ -162,7 +169,7 @@ export async function listServices(db: Db, orgId: string, lang: string, now = ne
       id: s.id,
       product: s.product,
       icon: p?.icon ?? "✓",
-      name: tl(p?.name, lang) || s.product,
+      name: tl(p?.name, lang) || pkgName(s.product) || s.product,
       promise: tl(p?.outcome, lang),
       plan: s.plan,
       monthlyEur: s.monthlyEur,

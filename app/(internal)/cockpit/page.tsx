@@ -13,19 +13,19 @@ import { RefreshBrief } from "./agents/Forms";
 
 const TONE = { green: "", yellow: "warn", red: "warn" } as const;
 
-// Today: the morning brief (built 08:00 Rome, also sent to Telegram): verdict, five numbers, decisions, stuck items.
+// Today: the brief as of now (verdict, five numbers, decisions, stuck items); the 08:00 Rome copy goes to Telegram.
 export default async function Today() {
   const db = getDb();
   const now = new Date();
   const report = await latestReport(db);
-  // before the first 08:00 run there is no stored brief: show a live one
-  const brief = (report?.body as Brief | undefined) ?? (await buildBrief(db, now));
+  // the cockpit always shows the brief as of now (an order at 17:00 is a decision at 17:00); the stored 08:00 one goes to Telegram
+  const brief: Brief = await buildBrief(db, now);
   const [jobs, systems, [mrrRow]] = await Promise.all([jobBoard(db, now), systemsBoard(db, now), db.select({ v: sum(subscriptions.monthlyEur) }).from(subscriptions).where(eq(subscriptions.status, "active"))]);
   const failed = jobs.filter((j) => j.ok === false);
   const mrr = Number(mrrRow?.v ?? 0);
   return (
     <main>
-      <PageHead title="Today" crumbs="Cockpit" sub={report ? `Brief of ${report.day}${report.sentAt ? " · sent to Telegram" : ""}` : "Live brief (the stored one is built at 08:00)"} actions={<RefreshBrief />} />
+      <PageHead title="Today" crumbs="Cockpit" sub={`Live brief${report?.sentAt ? ` · morning brief of ${report.day} sent to Telegram` : ""}`} actions={<RefreshBrief />} />
       <div className="card" style={{ marginBottom: 18 }}>
         <div className="row" style={{ justifyContent: "space-between" }}><b>North star: {NORTH_STAR.label}</b><span className="num"><b>€{mrr.toLocaleString("en-GB")}</b> <span className="muted">of €{NORTH_STAR.goalEur.toLocaleString("en-GB")}</span></span></div>
         <Progress value={Math.min(100, Math.round((mrr / NORTH_STAR.goalEur) * 100))} />

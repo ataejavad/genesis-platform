@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createDraft } from "@/server/content";
-import { applyPlatformDefaults, extraOrigins } from "@/lib/platform";
+import { applyPlatformDefaults, extraOrigins, siteIndexable } from "@/lib/platform";
 import { storageFromEnv } from "@/providers/storage";
 import { chosen } from "@/providers/registry";
 import { releaseLease, runTick, takeLease } from "@/server/tick";
@@ -74,5 +74,14 @@ describe("background tick without a worker", () => {
     setTickScheduler(null);
     requestTick();
     expect(calls).toBe(2);
+  });
+});
+
+describe("search engines on test hosting", () => {
+  it("keep out of the demo site on Vercel unless SITE_INDEXABLE=1; a laptop or own server stays indexable", () => {
+    expect(siteIndexable({ VERCEL: "1" })).toBe(false);
+    expect(siteIndexable({ VERCEL: "1", SITE_INDEXABLE: "1" })).toBe(true);
+    expect(siteIndexable({})).toBe(true);
+    expect(siteIndexable({ SITE_INDEXABLE: "0" })).toBe(false);
   });
 });

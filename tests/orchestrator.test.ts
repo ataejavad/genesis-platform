@@ -13,6 +13,7 @@ import { leadReminders } from "@/server/lead-reminders";
 import { leadUnsubscribeUrl, notifyEvent, unsubscribeLeadLink } from "@/server/notify";
 import { isDue, JOBS, lastSlot, romeInstant, runDue } from "@/server/orchestrator";
 import { addSubscription, createCustomer } from "@/server/portal";
+import { createOrder, seedDelivery } from "@/server/projects";
 import { retention } from "@/server/retention";
 import { agent, draft, javad, useTestDb } from "./helpers";
 
@@ -218,6 +219,13 @@ describe("leads: reminders and retention", () => {
 });
 
 describe("daily brief", () => {
+  it("lists a new order as Javad's decision from the first minute (he sends the contract)", async () => {
+    await seedDelivery(db);
+    await createOrder(db, sys, { packageSlug: "phone-agent", source: "market", company: "Bianchi Impianti", email: "info@bianchi.example", country: "IT", industry: "installers", locale: "it" });
+    const b = await buildBrief(db, new Date());
+    expect(b.decisions.some((d) => d.text.includes("1 order(s)") && d.link === "/cockpit/projects")).toBe(true);
+  });
+
   it("is stored once per Rome day, refreshed on a re-run, and is short", async () => {
     const now = new Date("2026-10-26T07:00:00Z");
     const r = await dailyReport(db, now);

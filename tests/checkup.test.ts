@@ -32,6 +32,13 @@ describe("check-up engine", () => {
     expect(r.deadlines[0].url).toMatch(/^\/it-it\/hub\/installers\/it#d-/);
   });
 
+  it("shows no deadline that has passed (also not the ones for every trade), soonest first", () => {
+    const late = computeReport(loadCheckupDef("installers")!, installers, { ...ctx, now: new Date("2026-11-20T12:00:00Z") });
+    const dated = late.deadlines.filter((d) => d.date).map((d) => d.date!);
+    expect(dated.every((d) => d >= "2026-11-20")).toBe(true);
+    expect(dated).toEqual([...dated].sort());
+  });
+
   it("drops leaks that are zero and rejects unanswered questions", () => {
     const r = computeReport(loadCheckupDef("installers")!, { ...installers, incentives: "none" }, ctx);
     expect(r.leaks.map((l) => l.id)).not.toContain("incentive-files");

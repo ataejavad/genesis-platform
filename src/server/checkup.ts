@@ -140,7 +140,9 @@ export function computeReport(def: CheckupDef, answers: Answers, ctx: { country:
   const tags = new Set(def.questions.filter((q) => q.tags).flatMap((q) => [answers[q.id] ?? []].flat()));
   const today = (ctx.now ?? new Date()).toISOString().slice(0, 10);
   const deadlines = (research?.deadlines ?? [])
-    .filter((d) => (d.tags.includes("all") || d.tags.some((t) => tags.has(t))) && (!d.date || d.date >= today || d.tags.includes("all")))
+    .filter((d) => (d.tags.includes("all") || d.tags.some((t) => tags.has(t))) && (!d.date || d.date >= today))
+    // dated first, soonest on top; a deadline that has passed is no longer one
+    .sort((a, b) => (a.date ?? "9999").localeCompare(b.date ?? "9999"))
     .map((d) => ({ id: d.id, title: tr(d.title, ctx.lang), date: d.date, url: `/${ctx.locale}/${hubSlug(def.industry, ctx.country)}#d-${d.id}` }));
   return {
     industry: def.industry,
@@ -201,12 +203,17 @@ export async function getCheckup(db: Db, id: string) {
   return row ? { ...row, report: row.report as unknown as Report } : null;
 }
 
+const ADVICE_WAIT_MS = 6_000;
+const withTimeout = <T>(p: Promise<T>, ms: number) =>
+  Promise.race([p, new Promise<null>((resolve) => setTimeout(() => resolve(null), ms).unref?.())]);
+
 /** Email + explicit consent unlock the plan; the visitor becomes a lead tied to this check-up. */
 export async function unlockCheckup(db: Db, actor: Actor, id: string, raw: Record<string, unknown>, advice?: (r: Report) => Promise<string | null>) {
   const found = await getCheckup(db, id);
   if (!found) throw notFound("check-up");
-  // Optional Claude-written summary; outside the transaction because it can take seconds.
-  const extra = !found.unlockedAt && advice ? await advice(found.report).catch(() => null) : null;
+  // Optional AI-written summary; outside the transaction because it can take seconds. The visitor is waiting
+  // in the chat, so after ADVICE_WAIT_MS the fixed template sentence is used instead (the AI call keeps no lock).
+  const extra = !found.unlockedAt && advice ? await withTimeout(advice(found.report), ADVICE_WAIT_MS).catch(() => null) : null;
   return db.transaction(async (tx) => {
     const [row] = await tx.select().from(checkups).where(eq(checkups.id, id)).for("update");
     const report = { ...(row.report as unknown as Report), ...(extra ? { advice: extra } : {}) };

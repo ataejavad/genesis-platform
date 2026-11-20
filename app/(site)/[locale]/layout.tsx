@@ -1,3 +1,4 @@
+import { siteIndexable } from "@/lib/platform";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -13,6 +14,8 @@ const siteName = process.env.SITE_NAME ?? "Legend Partner";
 
 export const metadata: Metadata = {
   title: { default: siteName, template: `%s · ${siteName}` },
+  // test hosting shows demo data (sample companies, ratings): keep it out of search until SITE_INDEXABLE=1
+  ...(siteIndexable() ? {} : { robots: { index: false, follow: false } }),
 };
 
 export default async function SiteLayout({ children, params }: { children: React.ReactNode; params: Promise<{ locale: string }> }) {
@@ -77,6 +80,7 @@ export default async function SiteLayout({ children, params }: { children: React
               <Link href={`${home}/about`}>{c.about.title}</Link>
               <Link href={`${home}/partners`}>{c.nav.partners}</Link>
               <Link href="/portal">{c.nav.login}</Link>
+              <Link href="/partner">{c.nav.partnerLogin}</Link>
               <Link href={`${home}/signup`}>{c.nav.signup}</Link>
               <Link href={`${home}/legal`}>{c.footer.legal}</Link>
               <span className="small">🎁 {c.footer.referral}</span>

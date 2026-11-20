@@ -1,4 +1,4 @@
-import { and, countDistinct, eq, gte, lt, or, sql, sum } from "drizzle-orm";
+import { and, countDistinct, desc, eq, gte, lt, or, sql, sum } from "drizzle-orm";
 import { costEur, metered } from "@/agents/meter";
 import { AGENTS, type AgentDef, agentDef, type KpiId } from "@/config/agents";
 import type { Db, DbOrTx } from "@/db";
@@ -135,7 +135,7 @@ async function measure(db: Db, a: AgentDef, w: Window): Promise<Measure> {
 
 const meets = (a: AgentDef, v: number | null) => v === null || (a.kpi.better === "lower" ? v <= a.kpi.target : v >= a.kpi.target);
 
-export type AgentRow = Awaited<ReturnType<typeof agentStatus>> & { kpi: Measure & { met: boolean }; prevKpi: Measure & { met: boolean }; runs30: number; failed30: number; lastRun: Date | null; decision: string | null };
+export type AgentRow = Awaited<ReturnType<typeof agentStatus>> & { kpi: Measure & { met: boolean }; prevKpi: Measure & { met: boolean }; runs30: number; failed30: number; lastRun: Date | null; lastError: string | null; decision: string | null };
 
 /** The board for the cockpit and the brief: status, money, KPI now and two weeks earlier, and a decision when both miss. */
 export async function agentBoard(db: Db, now = new Date()): Promise<AgentRow[]> {
@@ -145,11 +145,14 @@ export async function agentBoard(db: Db, now = new Date()): Promise<AgentRow[]> 
     const cur = await measure(db, a, { from: new Date(now.getTime() - 14 * DAY), to: now });
     const prev = await measure(db, a, { from: new Date(now.getTime() - 28 * DAY), to: new Date(now.getTime() - 14 * DAY) });
     const [r] = await db.select({ n: sql<number>`count(*)::int`, failed: sql<number>`count(*) filter (where not ${agentRuns.ok})::int`, last: sql<Date | null>`max(${agentRuns.createdAt})` }).from(agentRuns).where(and(spendFilter(a.id), gte(agentRuns.createdAt, new Date(now.getTime() - 30 * DAY))));
+    // the reason of the latest failure, so a red "failed" badge can be acted on without reading logs
+    const [bad] = r.failed ? await db.select({ meta: agentRuns.meta }).from(agentRuns).where(and(spendFilter(a.id), eq(agentRuns.ok, false))).orderBy(desc(agentRuns.createdAt)).limit(1) : [];
+    const lastError = typeof bad?.meta?.error === "string" ? bad.meta.error : null;
     const kpi = { ...cur, met: meets(a, cur.value) };
     const prevKpi = { ...prev, met: meets(a, prev.value) };
     // value filter: two weeks in a row under target while spending money → keep or stop is Javad's call
     const decision = !kpi.met && !prevKpi.met && cur.spentEur > 0 && prev.spentEur > 0 ? `${a.name}: ${a.kpi.label} ${kpi.value}${a.kpi.unit} vs target ${a.kpi.target}${a.kpi.unit} for 2 weeks (€${cur.spentEur + prev.spentEur} spent). Keep, change or stop?` : null;
-    rows.push({ ...st, kpi, prevKpi, runs30: r.n, failed30: r.failed, lastRun: r.last ? new Date(r.last) : null, decision });
+    rows.push({ ...st, kpi, prevKpi, runs30: r.n, failed30: r.failed, lastRun: r.last ? new Date(r.last) : null, lastError, decision });
   }
   return rows;
 }

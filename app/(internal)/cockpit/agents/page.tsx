@@ -35,7 +35,7 @@ export default async function AgentCenter() {
               <td className="small"><span className={`badge ${a.kpi.value === null ? "gray" : a.kpi.met ? "ok" : "bad"}`}>{val(a.kpi.value, a.def.kpi.unit)}</span><div className="muted">{a.def.kpi.label}, target {a.def.kpi.better === "lower" ? "≤" : "≥"} {val(a.def.kpi.target, a.def.kpi.unit)} · n {a.kpi.n}</div></td>
               <td className="small">{val(a.prevKpi.value, a.def.kpi.unit)}</td>
               <td className="num">€{a.spentEur.toFixed(2)} <span className="muted small">/ €{a.budgetEur}</span><Progress value={a.budgetEur ? Math.min(100, Math.round((a.spentEur / a.budgetEur) * 100)) : 0} /></td>
-              <td className="num">{a.runs30}{a.failed30 ? <span className="badge bad" style={{ marginLeft: 4 }}>{a.failed30} failed</span> : null}</td>
+              <td className="num">{a.runs30}{a.failed30 ? <span className="badge bad" style={{ marginLeft: 4 }} title={a.lastError ?? undefined}>{a.failed30} failed</span> : null}{a.lastError ? <div className="small muted" style={{ maxWidth: 260, wordBreak: "break-word" }}>{a.lastError}</div> : null}</td>
               <td className="small">{when(a.lastRun)}</td>
               <td><AgentControls id={a.def.id} enabled={a.enabled} paused={a.paused} budget={a.budgetEur} /></td>
             </tr>

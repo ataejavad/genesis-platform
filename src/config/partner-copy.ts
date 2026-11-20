@@ -59,7 +59,7 @@ const en = {
     agree: "I agree", next: "Next", skip: "Skip", sent: "Thank you! We got your application. You'll hear from us within 3 working days; if it's a fit you get your login to the partner portal.", error: "Something went wrong; please try again.",
     placeholder: "Type your answer…",
   },
-  login: { title: "Partner sign-in", email: "Email", password: "Password", go: "Sign in", bad: "Wrong email or password" },
+  login: { title: "Partner sign-in", email: "Email", password: "Password", go: "Sign in", bad: "Wrong email or password", wrongDoor: "This account is not a partner account. Sign in with your partner account." },
 };
 export type PartnerCopy = typeof en;
 
@@ -122,7 +122,7 @@ const it: PartnerCopy = {
     agree: "Accetto", next: "Avanti", skip: "Salta", sent: "Grazie! Abbiamo ricevuto la candidatura. Ti rispondiamo entro 3 giorni lavorativi; se c'è affinità ricevi l'accesso al portale partner.", error: "Qualcosa è andato storto; riprova.",
     placeholder: "Scrivi la risposta…",
   },
-  login: { title: "Accesso partner", email: "Email", password: "Password", go: "Accedi", bad: "Email o password errati" },
+  login: { title: "Accesso partner", email: "Email", password: "Password", go: "Accedi", bad: "Email o password errati", wrongDoor: "Questo account non è un account partner. Accedi con il tuo account partner." },
 };
 
 const de: PartnerCopy = {
@@ -184,7 +184,7 @@ const de: PartnerCopy = {
     agree: "Ich stimme zu", next: "Weiter", skip: "Überspringen", sent: "Danke! Ihre Bewerbung ist da. Sie hören innerhalb von 3 Arbeitstagen von uns; wenn es passt, bekommen Sie Ihren Zugang zum Partnerportal.", error: "Etwas ist schiefgelaufen; bitte erneut versuchen.",
     placeholder: "Antwort eingeben…",
   },
-  login: { title: "Partner-Anmeldung", email: "E-Mail", password: "Passwort", go: "Anmelden", bad: "E-Mail oder Passwort falsch" },
+  login: { title: "Partner-Anmeldung", email: "E-Mail", password: "Passwort", go: "Anmelden", bad: "E-Mail oder Passwort falsch", wrongDoor: "Dieses Konto ist kein Partnerkonto. Bitte mit dem Partnerkonto anmelden." },
 };
 
 const fa: PartnerCopy = {
@@ -246,7 +246,7 @@ const fa: PartnerCopy = {
     agree: "موافقم", next: "بعدی", skip: "رد شدن", sent: "ممنون! درخواست شما رسید. تا ۳ روز کاری خبر می‌دهیم؛ اگر مناسب باشد، دسترسی پورتال همکاران را می‌گیرید.", error: "مشکلی پیش آمد؛ دوباره امتحان کنید.",
     placeholder: "جوابتان را بنویسید…",
   },
-  login: { title: "ورود همکاران", email: "ایمیل", password: "رمز", go: "ورود", bad: "ایمیل یا رمز اشتباه است" },
+  login: { title: "ورود همکاران", email: "ایمیل", password: "رمز", go: "ورود", bad: "ایمیل یا رمز اشتباه است", wrongDoor: "این حساب، حساب همکار نیست. با حساب همکار وارد شوید." },
 };
 
 const COPY: Record<string, PartnerCopy> = { en, it, de, fa };

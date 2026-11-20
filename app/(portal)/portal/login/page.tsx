@@ -3,6 +3,7 @@ import { portalCopy } from "@/config/portal-copy";
 import { guestLang } from "@/lib/portal-auth";
 import { BRAND } from "@/mock/data";
 import { LoginForm } from "@/ui/shared/LoginForm";
+import { OtherLogins } from "@/ui/shared/OtherLogins";
 
 export default async function PortalLogin() {
   const lang = await guestLang((await headers()).get("accept-language"));
@@ -14,6 +15,7 @@ export default async function PortalLogin() {
         <h1 style={{ margin: 0 }}>{t.title}</h1>
       </div>
       <LoginForm t={t} next="/portal" />
+      <OtherLogins lang={lang} here="client" />
       <p className="muted small" style={{ marginTop: 12 }}>{BRAND}</p>
     </main>
   );

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { requireAdmin } from "@/lib/auth";
 import { BRAND } from "@/mock/data";
 
 // Index of every door and screen of the prototype, so the founders can click through everything.
@@ -78,7 +79,9 @@ const doors = [
   },
 ];
 
-export default function MapPage() {
+// On a public host the map (internal structure, demo logins) is for the founders only; on a laptop it stays open.
+export default async function MapPage() {
+  if (process.env.VERCEL) await requireAdmin();
   return (
     <main style={{ maxWidth: 1180, margin: "0 auto", padding: "32px 20px 64px" }}>
       <div className="row" style={{ marginBottom: 8 }}>
