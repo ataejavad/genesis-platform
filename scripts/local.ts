@@ -91,11 +91,11 @@ async function localWorker() {
   const { isStopped } = await import("../src/server/switches");
   const { sendQueued } = await import("../src/server/notify");
   const { mailerFromEnv } = await import("../src/server/mailer");
-  const { telegramConfigFromEnv } = await import("../src/server/telegram");
+  const { adminChatFromEnv } = await import("../src/server/admin-chat");
   const { voiceFromEnv } = await import("../src/server/voice");
   const wdb = createDb(env.DATABASE_URL, 1);
-  const deps = { telegram: telegramConfigFromEnv(), n8nWebhookUrl: process.env.N8N_EVENTS_WEBHOOK_URL || undefined };
-  const jobDeps = { mailer: mailerFromEnv(), voice: voiceFromEnv(), telegram: deps.telegram };
+  const deps = { adminChat: adminChatFromEnv(), n8nWebhookUrl: process.env.N8N_EVENTS_WEBHOOK_URL || undefined };
+  const jobDeps = { mailer: mailerFromEnv(), voice: voiceFromEnv(), adminChat: deps.adminChat };
   let lastJobs = 0;
   for (;;) {
     try {

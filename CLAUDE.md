@@ -3,6 +3,11 @@
 - Read `README.md` first. The product design lives in the project's `business-plan/15-web-app-design.md`.
 - Modular monolith: business logic goes in `src/server/<module>.ts`, takes `db` as its first argument, and is called from routes, server actions and the worker. Routes stay thin.
 - Every state change that other parts of the company care about emits an event with `emit()` **in the same transaction**, and writes `audit()`.
+- **Every outside company sits behind our own adapter** (Javad 2026-11-20): vendor SDKs and vendor API calls live only in
+  `src/providers/<kind>/`; business code uses that kind's `index.ts` interface, the company is picked by `<KIND>_PROVIDER`,
+  and each kind has a fallback/mock. A new vendor = one adapter file + a registry entry (`src/providers/registry.ts`).
+  `tests/providers.test.ts` enforces it. Suppliers that deliver a customer's service are recorded per subscription and
+  swapped with `switchSupplier` without changing what the customer bought.
 - Nothing public changes without an approval. Agents write drafts through the API with scoped keys; they never write to the database directly.
 - Private (customer) tables must carry `org_id`; RLS policies arrive with the customer portal (slice D).
 - Content and data live in Postgres; code, prompts and templates live in Git.

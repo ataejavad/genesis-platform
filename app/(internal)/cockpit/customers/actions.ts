@@ -7,7 +7,7 @@ import { AppError } from "@/server/errors";
 import { eraseCustomer } from "@/server/privacy";
 import { quoteRequest } from "@/server/brief";
 import { escalate, resolveComplaint } from "@/server/complaints";
-import { cancelSubscription, keepSubscription, recordCost } from "@/server/service";
+import { cancelSubscription, keepSubscription, recordCost, switchSupplier } from "@/server/service";
 import { addGoal, addOutcome, addSubscription, answerRequest, askCustomerApproval, createCustomer } from "@/server/portal";
 
 // Cockpit actions for customer accounts (step 5). Each acts as the signed-in admin and is audited in the module.
@@ -71,6 +71,9 @@ export async function cancelFor(f: FormData) {
 }
 export async function keep(f: FormData) {
   await run((a) => keepSubscription(getDb(), a, str(f, "id")));
+}
+export async function supplier(f: FormData) {
+  await run((a) => switchSupplier(getDb(), a, str(f, "id"), str(f, "supplier"), str(f, "why")));
 }
 export async function goal(f: FormData) {
   await run((a) => addGoal(getDb(), a, { orgId: str(f, "org"), metric: str(f, "metric"), title: { [str(f, "lang") || "en"]: str(f, "title"), en: str(f, "title") }, baseline: num(f, "baseline"), target: num(f, "target"), unit: str(f, "unit") }));

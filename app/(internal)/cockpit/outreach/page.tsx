@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { linkedinSearch } from "@/agents/decision-maker";
+import { linkedinSearch } from "@/providers/people-search";
 import { getDb } from "@/db";
 import { outreachQueue, priority } from "@/server/crm";
 import { mailerFromEnv } from "@/server/mailer";
 import { OUTCOMES, allSwitches } from "@/server/outreach";
 import { COUNTRY_RULES, SWITCHES } from "@/server/outreach-rules";
 import { voiceFromEnv } from "@/server/voice";
-import { whatsappFromEnv } from "@/server/whatsapp";
+import { whatsappFromEnv } from "@/providers/whatsapp";
 import { PageHead } from "@/ui/Shell";
 import { approve, done, edit, reject, rpo, toggle } from "./actions";
 
@@ -34,7 +34,7 @@ export default async function Outreach() {
         <div className="card stat"><div className="label">Waiting for your approval</div><div className="value num">{q.approvals.length}</div><div className="delta muted">companies</div></div>
         <div className="card stat"><div className="label">Tasks due now</div><div className="value num">{q.tasks.length}</div><div className="delta muted">LinkedIn {q.linkedin.invitesLeft} invites / {q.linkedin.messagesLeft} messages left today{q.linkedin.held ? ` · ${q.linkedin.held} held for tomorrow` : ""}</div></div>
         <div className="card stat"><div className="label">Emails due</div><div className="value num">{q.emails.length}</div><div className="delta muted">{mailer ? `sending via ${mailer.provider}` : "no email provider yet (Brevo key)"}{parked.length ? ` · ${parked.length} parked` : ""}</div></div>
-        <div className="card stat"><div className="label">Connections</div><div className="small">AI caller: <b>{voice ? voice.provider : "off"}</b><br />WhatsApp agent: <b>{wa ? "on" : "off"}</b></div></div>
+        <div className="card stat"><div className="label">Connections</div><div className="small">AI caller: <b>{voice ? voice.provider : "off"}</b><br />WhatsApp agent: <b>{wa ? wa.provider : "off"}</b></div></div>
       </section>
 
       <div className="card" style={{ marginBottom: 18 }}>

@@ -1,9 +1,12 @@
 /*
  * Module registry (step 10): every part of the machine built in steps 1–9, one row each in Cockpit › Systems.
  * `n` is the row in docs/cockpit-wiring.md. A module is controlled through its agent (registry in agents.ts),
- * its orchestrator job, or the page in `link`; `needs` are the .env keys without which it waits (never their values).
+ * its orchestrator job, or the page in `link`; `uses` are the outside services it waits for (src/providers/registry.ts:
+ * Systems shows which company serves each one and its .env keys, never their values).
  * Add a row whenever you build something that runs on its own or produces numbers (CLAUDE.md gap check).
  */
+
+import type { ProviderKind } from "@/providers/registry";
 
 export type SystemId = "acquire" | "convert" | "retain" | "deliver" | "partner" | "money" | "data" | "machine";
 
@@ -28,7 +31,10 @@ export type ModuleDef = {
   job?: string;
   /** a script started by hand or by GitHub Actions (not the orchestrator) */
   script?: string;
-  needs?: string[];
+  /** outside services (provider kinds) it cannot run without */
+  uses?: ProviderKind[];
+  /** needs a model that can search the web */
+  webSearch?: boolean;
   /** events that mark activity (last one = "last activity") */
   events?: string[];
   /** KPI id in src/server/systems.ts */
@@ -36,30 +42,31 @@ export type ModuleDef = {
   link: string;
 };
 
-const CLAUDE = ["ANTHROPIC_API_KEY"];
-const MAIL = ["BREVO_API_KEY", "MAIL_FROM"];
+const AI: ProviderKind[] = ["llm"];
+const MAIL: ProviderKind[] = ["email"];
+const CHAT: ProviderKind[] = ["admin_chat"];
 
 export const MODULES: ModuleDef[] = [
   // acquire
   { n: 1, name: "Market-selection agents", system: "acquire", runs: "GitHub Actions, monthly", script: "market-selection", kpi: "filters", link: "/cockpit/markets" },
   { n: 2, name: "Hub builder", system: "acquire", runs: "every local start; weekly on the server", script: "hub-builder", events: ["content.published"], kpi: "hubPages", link: "/cockpit/markets" },
-  { n: 3, name: "Hub research (Claude + web)", system: "acquire", runs: "hub builder --research", agent: "hub-research", needs: CLAUDE, link: "/cockpit/agents" },
+  { n: 3, name: "Hub research (AI + web)", system: "acquire", runs: "hub builder --research", agent: "hub-research", uses: AI, webSearch: true, link: "/cockpit/agents" },
   { n: 4, name: "Hub KPI: leads per hub", system: "acquire", runs: "on every view", kpi: "leadsMonth", link: "/cockpit/markets" },
   { n: 5, name: "Leads + consent", system: "acquire", runs: "hub hooks", events: ["lead.captured"], kpi: "leadsMonth", link: "/cockpit/leads" },
-  { n: 6, name: "Deadline reminders", system: "acquire", runs: "daily 07:00", job: "lead.reminders", needs: MAIL, events: ["lead.reminder_due"], kpi: "reminders", link: "/cockpit/leads" },
+  { n: 6, name: "Deadline reminders", system: "acquire", runs: "daily 07:00", job: "lead.reminders", uses: MAIL, events: ["lead.reminder_due"], kpi: "reminders", link: "/cockpit/leads" },
   { n: 7, name: "Hub freshness", system: "acquire", runs: "rules on every view", kpi: "hubIssues", link: "/cockpit/markets" },
   { n: 10, name: "Free check-up engine", system: "acquire", runs: "public /checkup + home chat", events: ["checkup.completed", "checkup.unlocked"], kpi: "checkups", link: "/cockpit/markets" },
   { n: 11, name: "Check-up questions + savings rules", system: "acquire", runs: "Git (data/checkup)", kpi: "unlockRate", link: "/cockpit/experiments" },
-  { n: 12, name: "Check-up advisor (Claude)", system: "acquire", runs: "at unlock", agent: "checkup-advisor", needs: CLAUDE, link: "/cockpit/agents" },
-  { n: 13, name: "Check-up conversation (Claude)", system: "acquire", runs: "every check-up turn", agent: "checkup-chat", needs: CLAUDE, link: "/cockpit/agents" },
-  { n: 14, name: "Company finder + scorer", system: "acquire", runs: "npm run agents:outbound (daily on the server)", script: "outbound", needs: ["APIFY_TOKEN"], events: ["prospect.added"], kpi: "prospects", link: "/cockpit/crm" },
-  { n: 15, name: "Decision-maker finder (Apollo)", system: "acquire", runs: "with the company finder", needs: ["APOLLO_API_KEY"], kpi: "contacts", link: "/cockpit/crm" },
+  { n: 12, name: "Check-up advisor (AI)", system: "acquire", runs: "at unlock", agent: "checkup-advisor", uses: AI, link: "/cockpit/agents" },
+  { n: 13, name: "Check-up conversation (AI)", system: "acquire", runs: "every check-up turn", agent: "checkup-chat", uses: AI, link: "/cockpit/agents" },
+  { n: 14, name: "Company finder + scorer", system: "acquire", runs: "npm run agents:outbound (daily on the server)", script: "outbound", uses: ["company_search"], events: ["prospect.added"], kpi: "prospects", link: "/cockpit/crm" },
+  { n: 15, name: "Decision-maker finder", system: "acquire", runs: "with the company finder", uses: ["people_search"], kpi: "contacts", link: "/cockpit/crm" },
   { n: 16, name: "Company research + page + persona", system: "acquire", runs: "per new company", agent: "company-research", events: ["company_page.viewed"], kpi: "pageViews", link: "/cockpit/crm" },
   { n: 17, name: "Outreach sequences + approval", system: "acquire", runs: "Javad approves the first message", kpi: "drafts", link: "/cockpit/outreach" },
   { n: 18, name: "Channel switches + legal basis", system: "acquire", runs: "Javad per country", events: ["outreach.switch_changed"], kpi: "blockedTouches", link: "/cockpit/outreach" },
-  { n: 19, name: "Outbox: email + AI calls", system: "acquire", runs: "every 10 min", job: "outreach.send", needs: MAIL, kpi: "touchesSent", link: "/cockpit/outreach" },
-  { n: 20, name: "WhatsApp agent", system: "acquire", runs: "Meta webhook", agent: "whatsapp-agent", needs: ["WHATSAPP_TOKEN", "WHATSAPP_PHONE_NUMBER_ID"], events: ["whatsapp.received"], link: "/cockpit/agents" },
-  { n: 21, name: "Speed-to-lead alerts", system: "convert", runs: "on every inbound event", needs: ["TELEGRAM_BOT_TOKEN", "TELEGRAM_ADMIN_CHAT_ID"], events: ["checkup.call_requested", "company_page.viewed", "prospect.stage_changed"], kpi: "inbound", link: "/cockpit/crm" },
+  { n: 19, name: "Outbox: email + AI calls", system: "acquire", runs: "every 10 min", job: "outreach.send", uses: MAIL, kpi: "touchesSent", link: "/cockpit/outreach" },
+  { n: 20, name: "WhatsApp agent", system: "acquire", runs: "WhatsApp provider webhook", agent: "whatsapp-agent", uses: ["whatsapp"], events: ["whatsapp.received"], link: "/cockpit/agents" },
+  { n: 21, name: "Speed-to-lead alerts", system: "convert", runs: "on every inbound event", uses: CHAT, events: ["checkup.call_requested", "company_page.viewed", "prospect.stage_changed"], kpi: "inbound", link: "/cockpit/crm" },
   { n: 22, name: "CRM funnel + channel KPI", system: "convert", runs: "on every CRM view", events: ["prospect.stage_changed"], kpi: "replies", link: "/cockpit/crm" },
   { n: 58, name: "Lead double opt-in → CRM", system: "acquire", runs: "on the confirmation link", events: ["lead.confirmed"], kpi: "confirmRate", link: "/cockpit/leads" },
   { n: 61, name: "Opening-line experiment", system: "acquire", runs: "on every researched company", kpi: "experiments", link: "/cockpit/experiments" },
@@ -82,7 +89,7 @@ export const MODULES: ModuleDef[] = [
   { n: 79, name: "Monthly service (check-ups per subscription)", system: "retain", runs: "day 1 06:00", job: "service.monthly", events: ["service.checked"], kpi: "monthlyService", link: "/cockpit/projects" },
   { n: 81, name: "Notice + loss reasons", system: "retain", runs: "customer cancels in the chat; deal lost; order rejected", events: ["subscription.cancelled", "subscription.kept", "subscription.ended", "loss.recorded"], kpi: "churn", link: "/cockpit/customers#notices" },
   { n: 62, name: "Customer health (weekly)", system: "retain", runs: "Monday 07:00", job: "customer.health", events: ["customer.at_risk"], kpi: "atRisk", link: "/cockpit/customers" },
-  { n: 63, name: "Monthly results email", system: "retain", runs: "day 1 09:00", job: "results.monthly", needs: MAIL, events: ["results.reported"], link: "/cockpit/customers" },
+  { n: 63, name: "Monthly results email", system: "retain", runs: "day 1 09:00", job: "results.monthly", uses: MAIL, events: ["results.reported"], link: "/cockpit/customers" },
   { n: 64, name: "Success story + referral ask", system: "retain", runs: "when a project closes", events: ["project.closed"], kpi: "stories", link: "/cockpit/customers" },
 
   // deliver
@@ -90,7 +97,7 @@ export const MODULES: ModuleDef[] = [
   { n: 83, name: "Late notice to the customer (new date)", system: "deliver", runs: "hourly with delivery.watch", job: "delivery.watch", events: ["milestone.late"], link: "/cockpit/projects" },
   { n: 74, name: "Free change rounds + rework to the maker", system: "deliver", runs: "customer asks for changes", events: ["milestone.changes", "milestone.revision_cap", "job.rework"], kpi: "reworks", link: "/cockpit/projects" },
   { n: 38, name: "Planner (package → milestones + tasks)", system: "deliver", runs: "on order conversion", events: ["project.created"], kpi: "projects", link: "/cockpit/projects" },
-  { n: 39, name: "QA judge", system: "deliver", runs: "on every delivery", agent: "qa-judge", needs: CLAUDE, events: ["qa.judged"], link: "/cockpit/qa" },
+  { n: 39, name: "QA judge", system: "deliver", runs: "on every delivery", agent: "qa-judge", uses: AI, events: ["qa.judged"], link: "/cockpit/qa" },
   { n: 40, name: "Risk-tiered approvals", system: "deliver", runs: "every project and delivery", kpi: "qaQueue", link: "/cockpit/qa" },
   { n: 41, name: "Customer milestone acceptance", system: "deliver", runs: "all tasks of a milestone accepted", events: ["milestone.ready", "milestone.accepted"], kpi: "milestones", link: "/cockpit/projects" },
   { n: 42, name: "Delivery watchdog", system: "deliver", runs: "hourly", job: "delivery.watch", events: ["milestone.reminded"], link: "/cockpit/projects" },
@@ -122,7 +129,7 @@ export const MODULES: ModuleDef[] = [
 
   // data
   { n: 9, name: "Agent API keys", system: "data", runs: "Cockpit › API", kpi: "apiKeys", link: "/cockpit/api" },
-  { n: 55, name: "Notification layer (email)", system: "data", runs: "every event → queue → mailer", needs: MAIL, kpi: "outbox", link: "/cockpit/outbox" },
+  { n: 55, name: "Notification layer (email)", system: "data", runs: "every event → queue → mailer", uses: MAIL, kpi: "outbox", link: "/cockpit/outbox" },
   { n: 56, name: "Invites (set your password)", system: "data", runs: "new customer or partner", kpi: "invites", link: "/cockpit/outbox" },
   { n: 60, name: "GDPR erasure", system: "data", runs: "customer request data_delete", events: ["data.erased"], link: "/cockpit/customers" },
   { n: 65, name: "Data retention", system: "data", runs: "day 1 03:00", job: "data.retention", link: "/cockpit/agents#jobs" },
@@ -131,10 +138,10 @@ export const MODULES: ModuleDef[] = [
   { n: 50, name: "Ops watchdog", system: "machine", runs: "hourly", job: "ops.watch", events: ["ops.flagged"], kpi: "stuck", link: "/cockpit" },
   { n: 51, name: "Process auditor", system: "machine", runs: "CI on every push", kpi: "gaps", link: "/cockpit/systems#audit" },
   { n: 66, name: "Orchestrator", system: "machine", runs: "worker / local mode, every minute", kpi: "jobsFailed", link: "/cockpit/agents#jobs" },
-  { n: 67, name: "Daily brief", system: "machine", runs: "daily 08:00", job: "daily.report", needs: ["TELEGRAM_BOT_TOKEN", "TELEGRAM_ADMIN_CHAT_ID"], link: "/cockpit" },
+  { n: 67, name: "Daily brief", system: "machine", runs: "daily 08:00", job: "daily.report", uses: CHAT, link: "/cockpit" },
   { n: 68, name: "Agent budgets", system: "machine", runs: "hourly", job: "agents.budget", events: ["agent.paused"], kpi: "aiSpend", link: "/cockpit/agents" },
   { n: 69, name: "Experiments + lessons", system: "machine", runs: "daily 07:30", job: "experiments", events: ["experiment.ready", "experiment.decided"], kpi: "lessonsActive", link: "/cockpit/experiments" },
   { n: 71, name: "Emergency stop + switches", system: "machine", runs: "Cockpit › Systems", events: ["switch.changed"], link: "/cockpit/systems" },
-  { n: 78, name: "AI scout", system: "machine", runs: "day 3 06:00", agent: "ai-scout", job: "ai.scout", needs: CLAUDE, link: "/cockpit/experiments" },
-  { n: 70, name: "Event outbox → Telegram + n8n", system: "machine", runs: "worker, continuous", needs: ["TELEGRAM_BOT_TOKEN"], kpi: "deadEvents", link: "/cockpit/systems" },
+  { n: 78, name: "AI scout", system: "machine", runs: "day 3 06:00", agent: "ai-scout", job: "ai.scout", uses: AI, webSearch: true, link: "/cockpit/experiments" },
+  { n: 70, name: "Event outbox → founder chat + n8n", system: "machine", runs: "worker, continuous", uses: CHAT, kpi: "deadEvents", link: "/cockpit/systems" },
 ];

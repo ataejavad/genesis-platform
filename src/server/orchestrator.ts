@@ -17,7 +17,7 @@ import { deliveryWatch } from "./projects";
 import { retention } from "./retention";
 import { endSubscriptions, monthlyService } from "./service";
 import { isStopped, switchesLike } from "./switches";
-import type { TelegramConfig } from "./telegram";
+import type { AdminChat } from "./admin-chat";
 import type { VoiceCaller } from "./voice";
 
 /*
@@ -26,7 +26,7 @@ import type { VoiceCaller } from "./voice";
  * time. A job that fails is retried on the next loop after 15 minutes and shows red in Cockpit › Today.
  */
 
-export type JobDeps = { mailer: Mailer | null; voice: VoiceCaller | null; telegram: TelegramConfig | null };
+export type JobDeps = { mailer: Mailer | null; voice: VoiceCaller | null; adminChat: AdminChat | null };
 type Schedule = { every: number } | { daily: string } | { weekly: number; at: string } | { monthly: number; at: string };
 export type JobDef = { id: string; what: string; schedule: Schedule; /** reaches people outside: held by the emergency stop */ outward?: boolean; run: (db: Db, deps: JobDeps, now: Date) => Promise<unknown> };
 
@@ -38,7 +38,7 @@ export const JOBS: JobDef[] = [
   { id: "agents.budget", what: "Pause agents over their monthly budget", schedule: { every: 60 }, run: (db, _d, now) => checkBudgets(db, now) },
   { id: "lead.reminders", what: "Deadline reminders the hub leads asked for (30 days before)", schedule: { daily: "07:00" }, outward: true, run: (db, _d, now) => leadReminders(db, now) },
   { id: "experiments", what: "Close experiment windows; mark winners ready for Javad", schedule: { daily: "07:30" }, run: (db, _d, now) => checkExperiments(db, now) },
-  { id: "daily.report", what: "Javad's morning brief (Telegram + Cockpit › Today)", schedule: { daily: "08:00" }, run: async (db, d, now) => { const r = await dailyReport(db, now, d.telegram); return { verdict: r.verdict, sent: Boolean(r.sentAt) }; } },
+  { id: "daily.report", what: "Javad's morning brief (phone chat + Cockpit › Today)", schedule: { daily: "08:00" }, run: async (db, d, now) => { const r = await dailyReport(db, now, d.adminChat); return { verdict: r.verdict, sent: Boolean(r.sentAt) }; } },
   { id: "customer.health", what: "Weekly health score per customer; at-risk alert", schedule: { weekly: 1, at: "07:00" }, run: (db, _d, now) => customerHealthWeek(db, now) },
   { id: "results.monthly", what: "Each customer's results of last month by email", schedule: { monthly: 1, at: "09:00" }, outward: true, run: (db, _d, now) => monthlyResults(db, now) },
   { id: "service.monthly", what: "Monthly service: each subscription's check-up tasks to partners + its expected running costs", schedule: { monthly: 1, at: "06:00" }, run: (db, _d, now) => monthlyService(db, now) },

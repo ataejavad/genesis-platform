@@ -1,18 +1,15 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
-import { meter } from "./meter";
+import { ask, extractJson, llmEnabled } from "@/providers/llm";
 
 /*
  * AI-capability scout (monthly). The AI wave moves faster than our plans: each month Claude searches the web for
  * models and tools released in the last ~45 days that could (1) take over a step a person does today, (2) do a
  * partner task in one of our packages for less, or (3) become a new packaged product for our industries.
  * Candidates are proposals only: they land as inactive lessons (area "ai-scout") that Javad switches on to adopt.
- * Off until ANTHROPIC_API_KEY is set.
+ * Off until an AI model with web search is connected (src/providers/llm).
  */
 
-export const scoutEnabled = () => Boolean(process.env.ANTHROPIC_API_KEY);
-
-const MODEL = "claude-opus-5-5";
+export const scoutEnabled = () => llmEnabled({ webSearch: true });
 
 export const candidateSchema = z.object({
   name: z.string().min(2).max(120),
@@ -58,34 +55,10 @@ Reply with one JSON array in a \`\`\`json block, each item:
 {"name","url","released" (YYYY-MM-DD),"kind" ("step"|"partner_task"|"new_product"),"replaces" (step id, package slug + task, or industry),
 "what" (one or two sentences: what it does for us),"costEurMonth","savesEurMonth","risk","confidence" ("low"|"medium"|"high")}`;
 
-function extractJson(text: string): unknown {
-  const fenced = [...text.matchAll(/```json\s*([\s\S]*?)```/g)].at(-1)?.[1];
-  return JSON.parse(fenced ?? text.slice(text.indexOf("["), text.lastIndexOf("]") + 1));
-}
-
 export async function scout(input: ScoutInput, now = new Date()): Promise<Candidate[]> {
-  const client = new Anthropic();
-  const messages: Anthropic.MessageParam[] = [{ role: "user", content: instructions(input, now.toISOString().slice(0, 10)) }];
-  // Server-side web search can pause a long turn; resume it a few times before giving up.
-  for (let turn = 0; turn < 6; turn++) {
-    const message = await client.messages
-      .stream({
-        model: MODEL,
-        max_tokens: 32000,
-        thinking: { type: "adaptive" },
-        tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 20 }],
-        messages,
-      })
-      .finalMessage();
-    meter(message.usage);
-    if (message.stop_reason === "pause_turn") {
-      messages.push({ role: "assistant", content: message.content });
-      continue;
-    }
-    if (message.stop_reason === "refusal") throw new Error("scout refused by the model");
-    if (message.stop_reason === "max_tokens") throw new Error("scout answer was cut off (max_tokens)");
-    const text = message.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
-    return z.array(candidateSchema).max(5).parse(extractJson(text));
-  }
-  throw new Error("scout did not finish after 6 turns");
+  const text = await ask(
+    { maxTokens: 32000, thinking: true, webSearch: { maxUses: 20 }, messages: [{ role: "user", content: instructions(input, now.toISOString().slice(0, 10)) }] },
+    "scout answer",
+  );
+  return z.array(candidateSchema).max(5).parse(extractJson(text, "["));
 }

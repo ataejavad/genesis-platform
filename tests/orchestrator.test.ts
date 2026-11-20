@@ -19,7 +19,7 @@ import { agent, draft, javad, useTestDb } from "./helpers";
 const db = useTestDb();
 const sys = { type: "system", id: "test" } as const;
 const DAY = 864e5;
-const deps = { mailer: null, voice: null, telegram: null };
+const deps = { mailer: null, voice: null, adminChat: null };
 
 async function customer(name = "Rossi Impianti", email = "m@rossi.test") {
   const c = await db.transaction((tx) => createCustomer(tx, sys, { name, country: "IT", industry: "installers", locale: "it", baselineEur: 4000, email, contactName: "Marco" }, "a-long-test-password"));

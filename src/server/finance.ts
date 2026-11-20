@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import { einvoiceFromEnv } from "@/providers/einvoice";
 import { and, asc, desc, eq, inArray, isNotNull, isNull, lte, or, sql } from "drizzle-orm";
 import QRCode from "qrcode";
 import { z } from "zod";
@@ -122,7 +123,7 @@ async function issue(tx: Tx, actor: Actor, i: typeof invoices.$inferSelect, now:
   const year = now.getUTCFullYear();
   const [{ n }] = await tx.select({ n: sql<number>`count(*)::int` }).from(invoices).where(sql`${invoices.number} like ${`${year}/%`}`);
   const number = `${year}/${String(n + 1).padStart(4, "0")}`;
-  await tx.update(invoices).set({ status: "issued", number, issuedAt: now, provider: process.env.EINVOICE_PROVIDER ?? "manual" }).where(eq(invoices.id, i.id));
+  await tx.update(invoices).set({ status: "issued", number, issuedAt: now, provider: einvoiceFromEnv().provider }).where(eq(invoices.id, i.id));
   await emit(tx, actor, "invoice.issued", { type: "invoice", id: i.id }, { orgId: i.orgId, number, totalEur: i.totalEur });
   await audit(tx, actor, "invoice.issued", { type: "invoice", id: i.id }, { status: "paid" }, { status: "issued", number });
   return number;
@@ -206,10 +207,7 @@ export async function dunning(db: Db, now = new Date()) {
 
 /* ───────────── Paying by phone: EPC QR (SEPA credit transfer) ───────────── */
 
-export function epcPayload(co: { legalName: string | null; iban: string | null; bic: string | null }, i: { totalEur: number; reference: string }) {
-  if (!co.iban || !co.legalName) return null;
-  return ["BCD", "002", "1", "SCT", co.bic ?? "", co.legalName.slice(0, 70), co.iban, `EUR${i.totalEur.toFixed(2)}`, "", "", i.reference].join("\n");
-}
+export { epcPayload } from "@/providers/payments";
 
 export async function qrSvg(payload: string) {
   return QRCode.toString(payload, { type: "svg", margin: 1, errorCorrectionLevel: "M" });

@@ -5,8 +5,8 @@ import { listCustomers, listServices, openRequests } from "@/server/portal";
 import { METRICS } from "@/server/portal-metrics";
 import { PageHead } from "@/ui/Shell";
 import { LOSS_REASONS } from "@/config/loss-reasons";
-import { MARGIN_FLOOR, margins, notices, periodOf } from "@/server/service";
-import { askApproval, cancelFor, complaint, cost, goal, keep, quote, recordResult, reply } from "./actions";
+import { MARGIN_FLOOR, margins, notices, periodOf, suppliersBoard } from "@/server/service";
+import { askApproval, cancelFor, complaint, cost, goal, keep, quote, recordResult, reply, supplier } from "./actions";
 import { listComplaints } from "@/server/complaints";
 import { listPackages } from "@/server/projects";
 import { EraseForm } from "./EraseForm";
@@ -20,6 +20,7 @@ export default async function CockpitCustomers() {
   const db = getDb();
   const period = periodOf(new Date());
   const [customers, requests, health, open, packages, margin, leaving] = await Promise.all([listCustomers(db), openRequests(db), latestHealth(db), listComplaints(db), listPackages(db), margins(db, period), notices(db)]);
+  const delivering = await suppliersBoard(db);
   const now = Date.now();
   const costLabels = [...new Set(packages.flatMap((p) => [...p.monthly.costs.map((c) => c.label), ...p.monthly.tasks.map((t) => t.title)]))];
   const healthOf = new Map(health.map((h) => [h.h.orgId, h.h]));
@@ -56,6 +57,23 @@ export default async function CockpitCustomers() {
               <input type="hidden" name="id" value={s.id} />
               <div className="grow"><b>{company}</b> <span className="muted small">{s.product} · {eur(s.monthlyEur)}/month · ends {s.endsAt!.toISOString().slice(0, 10)}</span> <span className="badge warn">{s.cancelReason ?? "no reason"}</span>{s.cancelNote && <div className="small">&quot;{s.cancelNote}&quot;</div>}</div>
               <button className="btn sm ok">Stays (withdraw notice)</button>
+            </form>
+          ))}
+        </div>
+      </div>
+
+      <div className="card">
+        <h3>Who delivers each service ({delivering.length})</h3>
+        <p className="muted small">The outside tool or partner company behind each running service. Change it here when a supplier gets worse or a cheaper one appears: the customer keeps the same product, fee and results under our name, so nobody outside is told. Record the new supplier&apos;s cost below.</p>
+        {delivering.length === 0 && <p className="muted">No running services.</p>}
+        <div className="list">
+          {delivering.map(({ s, company }) => (
+            <form key={s.id} action={supplier} className="item row" style={{ flexWrap: "wrap", gap: 8 }}>
+              <input type="hidden" name="id" value={s.id} />
+              <div className="grow"><b>{company}</b> <span className="muted small">{s.product} · {eur(s.monthlyEur)}/month · now: <b>{s.supplier ?? "not recorded"}</b>{s.supplierSince && ` since ${s.supplierSince.toISOString().slice(0, 10)}`}</span></div>
+              <input name="supplier" placeholder="New supplier" required minLength={2} maxLength={120} style={{ width: 160 }} />
+              <input name="why" placeholder="Why (cost, quality …)" required minLength={3} maxLength={500} style={{ width: 200 }} />
+              <button className="btn sm">Switch</button>
             </form>
           ))}
         </div>

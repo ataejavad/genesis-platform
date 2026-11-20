@@ -504,6 +504,10 @@ export const subscriptions = pgTable(
     endsAt: timestamp("ends_at", { withTimezone: true }),
     cancelReason: text("cancel_reason"),
     cancelNote: text("cancel_note"),
+    // who delivers it behind our name (an outside tool or a partner company); swapped without the customer
+    // noticing: the product, fee and results the customer sees stay the same (Javad 2026-11-20)
+    supplier: text("supplier"),
+    supplierSince: timestamp("supplier_since", { withTimezone: true }),
     createdAt: createdAt(),
   },
   (t) => [index("subscriptions_org_idx").on(t.orgId)],

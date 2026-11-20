@@ -178,6 +178,35 @@ export async function keepSubscription(db: Db, actor: Actor, subscriptionId: str
   });
 }
 
+/**
+ * Another supplier delivers the service from now on (an outside tool or partner company we resell or deliver
+ * through). Behind our name: the customer's product, fee, results and contract stay the same, so nobody outside
+ * is told. The old supplier's cost lines stop by themselves (costs are recorded per month and label).
+ */
+export async function switchSupplier(db: Db, actor: Actor, subscriptionId: string, supplier: string, why: string, now = new Date()) {
+  const next = z.string().trim().min(2).max(120).parse(supplier);
+  const reason = z.string().trim().min(3).max(500).parse(why);
+  return db.transaction(async (tx) => {
+    const [s] = await tx.select().from(subscriptions).where(eq(subscriptions.id, subscriptionId)).for("update");
+    if (!s || s.status !== "active") throw notFound("subscription");
+    if (s.supplier === next) return s;
+    const [row] = await tx.update(subscriptions).set({ supplier: next, supplierSince: now }).where(eq(subscriptions.id, s.id)).returning();
+    await emit(tx, actor, "subscription.supplier_changed", { type: "subscription", id: s.id }, { orgId: s.orgId, product: s.product, from: s.supplier, to: next, why: reason });
+    await audit(tx, actor, "subscription.supplier_changed", { type: "subscription", id: s.id }, { supplier: s.supplier }, { supplier: next, why: reason });
+    return row;
+  });
+}
+
+/** Running services with who delivers each (Cockpit › Customers). */
+export async function suppliersBoard(db: DbOrTx) {
+  return db
+    .select({ s: subscriptions, company: organizations.name })
+    .from(subscriptions)
+    .innerJoin(organizations, eq(organizations.id, subscriptions.orgId))
+    .where(eq(subscriptions.status, "active"))
+    .orderBy(organizations.name);
+}
+
 /** Notices that ran out: the subscription ends (no more fees, no more check-ups). */
 export async function endSubscriptions(db: Db, now = new Date()) {
   const actor: Actor = { type: "system", id: "monthly-service" };

@@ -13,7 +13,7 @@ import { connections, systemsBoard } from "@/server/systems";
 import { javad, useTestDb } from "./helpers";
 
 const db = useTestDb();
-const deps = { mailer: null, voice: null, telegram: null };
+const deps = { mailer: null, voice: null, adminChat: null };
 
 describe("cockpit wiring", () => {
   it("every row of docs/cockpit-wiring.md is a module, and every module points at a real agent or job", () => {
@@ -36,10 +36,11 @@ describe("cockpit wiring", () => {
     const rows = board.systems.flatMap((s) => s.rows);
     expect(rows.length).toBe(MODULES.length);
     expect(rows.filter((r) => r.kpiText.startsWith("error"))).toEqual([]);
-    expect(rows.find((r) => r.n === 39)).toMatchObject({ status: "key", why: "waiting for ANTHROPIC_API_KEY" });
+    expect(rows.find((r) => r.n === 39)).toMatchObject({ status: "key", why: "waiting for AI model (ANTHROPIC_API_KEY)" });
+    expect(rows.find((r) => r.n === 39)?.providers).toEqual([{ kind: "llm", label: "AI model", provider: "Mock (tests; agents answer from rules)", connected: false }]);
     const withKeys = await systemsBoard(db, new Date(), { ANTHROPIC_API_KEY: "x" } as unknown as NodeJS.ProcessEnv);
     expect(withKeys.systems.flatMap((s) => s.rows).find((r) => r.n === 39)?.status).toBe("live");
-    expect(connections({ BREVO_API_KEY: "k" } as unknown as NodeJS.ProcessEnv).find((c) => c.name.startsWith("Brevo"))?.ok).toBe(false);
+    expect(connections({ BREVO_API_KEY: "k" } as unknown as NodeJS.ProcessEnv).find((c) => c.name === "Email")).toMatchObject({ ok: false, keys: "MAIL_FROM" });
   });
 });
 

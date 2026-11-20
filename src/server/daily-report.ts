@@ -5,12 +5,12 @@ import { approvals, experiments, invoices, leads, orders, prospects, reports, su
 import { agentBoard, monthSpend } from "./agents";
 import { latestHealth } from "./health";
 import { type OpsItem, opsWatch } from "./ops-watch";
-import { sendAlert, type TelegramConfig } from "./telegram";
+import { type AdminChat, sendAlert } from "./admin-chat";
 
 /*
  * Javad's morning brief (step 9, reporting rule 2026-10-22): verdict first, five numbers, what is stuck, what
  * needs his decision. At most 5 items per list, about 200 words, readable in a minute. Stored in `reports`
- * (Cockpit › Today) and sent to Telegram. Stuck items come from the ops watchdog, not a second collector.
+ * (Cockpit › Today) and sent to the founder chat (Telegram today). Stuck items come from the ops watchdog, not a second collector.
  */
 
 const DAY = 864e5;
@@ -97,7 +97,7 @@ export function briefText(b: Brief) {
 }
 
 /** Builds today's brief (Rome day), stores it and sends it once. Running it again the same day refreshes it. */
-export async function dailyReport(db: Db, now = new Date(), telegram: TelegramConfig | null = null) {
+export async function dailyReport(db: Db, now = new Date(), adminChat: AdminChat | null = null) {
   const day = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Rome" }).format(now);
   const brief = await buildBrief(db, now);
   const text = briefText(brief);
@@ -106,8 +106,8 @@ export async function dailyReport(db: Db, now = new Date(), telegram: TelegramCo
     .values({ kind: "daily", day, verdict: brief.verdict, body: brief, text })
     .onConflictDoUpdate({ target: [reports.kind, reports.day], set: { verdict: brief.verdict, body: brief, text } })
     .returning();
-  if (telegram && !row.sentAt) {
-    await sendAlert(telegram, text.split("\n"), "/cockpit");
+  if (adminChat && !row.sentAt) {
+    await sendAlert(adminChat, text.split("\n"), "/cockpit");
     const [sent] = await db.update(reports).set({ sentAt: new Date() }).where(eq(reports.id, row.id)).returning();
     return sent;
   }

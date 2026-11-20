@@ -8,6 +8,8 @@ import {
   projectInputs, projects, prospects, protocols, subscriptions, supplyGaps, touches,
 } from "@/db/schema";
 import { MAX_ATTEMPTS } from "@/worker/dispatch";
+import { llm } from "@/providers/llm";
+import { type Env, KINDS, type ProviderKind, providerBoard, providerStatus } from "@/providers/registry";
 import { type AgentRow, agentBoard, monthSpend } from "./agents";
 import { jobBoard } from "./orchestrator";
 import { lastMarketRun } from "./market-filters";
@@ -17,12 +19,12 @@ import { MARGIN_FLOOR, margins, periodOf } from "./service";
 /*
  * Cockpit › Systems (step 10): every module of the machine in one table — status light, last activity, cost,
  * KPI and the control that belongs to it (agent switch, job switch, page). Status comes from the agent registry,
- * the orchestrator's job log, missing .env keys and the event log. Nothing here is typed by hand.
+ * the orchestrator's job log, the outside services it uses (src/providers: which company, connected or not) and the event log. Nothing here is typed by hand.
  */
 
 const DAY = 864e5;
 export type Status = "live" | "key" | "off" | "paused" | "stopped" | "failing" | "manual";
-export type SystemRow = ModuleDef & { status: Status; why: string; lastAt: Date | null; costEur: number | null; kpiText: string; enabled: boolean | null };
+export type SystemRow = ModuleDef & { status: Status; why: string; lastAt: Date | null; costEur: number | null; kpiText: string; enabled: boolean | null; providers: { kind: ProviderKind; label: string; provider: string; connected: boolean }[] };
 
 const monthStart = (now: Date) => new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
 const n = async (q: Promise<{ n: number }[]>) => Number((await q)[0]?.n ?? 0);
@@ -150,7 +152,19 @@ async function lastActivity(db: Db, m: ModuleDef): Promise<Date | null> {
   return dates.sort((a, b) => b.getTime() - a.getTime())[0] ?? null;
 }
 
-const missing = (keys: string[] = [], env = process.env) => keys.filter((k) => !env[k]);
+/** The outside services a module uses: which company serves each and what it still waits for. */
+function serviceGaps(m: ModuleDef, env: Env) {
+  const providers = (m.uses ?? []).map((kind) => {
+    const st = providerStatus(kind, env);
+    return { kind, label: KINDS.find((k) => k.kind === kind)!.label, provider: st.label, connected: st.connected };
+  });
+  const waiting = providers.filter((p) => !p.connected).map((p) => {
+    const keys = providerBoard(env).find((k) => k.kind === p.kind)!.keysToConnect;
+    return `${p.label} (${keys.join(", ") || "choose a provider"})`;
+  });
+  if (m.webSearch && !waiting.length && m.uses?.includes("llm") && !llm(env).webSearch) waiting.push("an AI model with web search (LLM_PROVIDER)");
+  return { providers, waiting };
+}
 
 /** Every module with its status, last activity, cost and KPI (Cockpit › Systems). */
 export async function systemsBoard(db: Db, now = new Date(), env = process.env) {
@@ -162,20 +176,20 @@ export async function systemsBoard(db: Db, now = new Date(), env = process.env) 
   for (const m of MODULES) {
     const a = m.agent ? agents.find((x) => x.def.id === m.agent) : undefined;
     const j = m.job ? jobsNow.find((x) => x.id === m.job) : undefined;
-    const keys = missing(m.needs, env);
+    const svc = serviceGaps(m, env);
     let status: Status = "live";
     let why = "";
     if (a && !a.enabled) [status, why] = ["off", "agent switched off"];
     else if (j && !j.enabled) [status, why] = ["off", "job switched off"];
     else if (stopped && (a || j?.outward)) [status, why] = ["stopped", "emergency stop"];
-    else if (keys.length) [status, why] = ["key", `waiting for ${keys.join(", ")}`];
+    else if (svc.waiting.length) [status, why] = ["key", `waiting for ${svc.waiting.join("; ")}`];
     else if (a?.paused) [status, why] = ["paused", `budget reached, paused to ${a.pausedUntil?.toISOString().slice(0, 10)}`];
     else if (j?.ok === false) [status, why] = ["failing", j.error?.slice(0, 120) ?? "last run failed"];
     else if (a && a.failed30 > 0 && a.failed30 * 2 >= a.runs30) [status, why] = ["failing", `${a.failed30} of ${a.runs30} runs failed`];
     else if (m.script && m.script !== "market-selection" && m.script !== "hub-builder") [status, why] = ["manual", "started by hand until the server scheduler (step 11)"];
     const lastAt = [a?.lastRun ?? null, j?.lastAt ?? null, await lastActivity(db, m)].filter((d): d is Date => Boolean(d)).sort((x, y) => y.getTime() - x.getTime())[0] ?? null;
     const kpiText = a ? `${a.kpi.value === null ? "–" : a.def.kpi.unit === "€" ? `€${a.kpi.value}` : `${a.kpi.value}%`} ${a.def.kpi.label}` : m.kpi ? await KPI[m.kpi](ctx).catch((e: Error) => `error: ${e.message.slice(0, 60)}`) : "–";
-    rows.push({ ...m, status, why, lastAt, costEur: a ? a.spentEur : null, kpiText, enabled: a ? a.enabled : j ? j.enabled : null });
+    rows.push({ ...m, status, why, lastAt, costEur: a ? a.spentEur : null, kpiText, enabled: a ? a.enabled : j ? j.enabled : null, providers: svc.providers });
   }
   const bySystem = SYSTEMS.map((s) => {
     const mine = rows.filter((r) => r.system === s.id);
@@ -186,17 +200,22 @@ export async function systemsBoard(db: Db, now = new Date(), env = process.env) 
   return { stopped, systems: bySystem, counts, total: rows.length };
 }
 
-/** Which keys are set (never their values): Cockpit › API & connections. */
+/**
+ * Outside services per kind (Cockpit › API & connections): the company serving it now, whether it is connected,
+ * the keys it waits for (never their values) and the env switch to change company. From src/providers/registry.ts.
+ */
 export function connections(env = process.env) {
-  const set = (...k: string[]) => k.every((x) => Boolean(env[x]));
+  const extra = [{ name: "n8n", why: "every event to your workflows", ok: Boolean(env.N8N_EVENTS_WEBHOOK_URL), keys: "N8N_EVENTS_WEBHOOK_URL", provider: "n8n webhook", switchEnv: "N8N_EVENTS_WEBHOOK_URL", options: [] as string[] }];
   return [
-    { name: "Claude API", why: "agents think: research, chat, QA judge, advisors", ok: set("ANTHROPIC_API_KEY"), keys: "ANTHROPIC_API_KEY" },
-    { name: "Brevo (email)", why: "every email: invites, contracts, invoices, reminders, outreach", ok: set("BREVO_API_KEY", "MAIL_FROM"), keys: "BREVO_API_KEY, MAIL_FROM" },
-    { name: "Telegram", why: "approvals, alerts, daily brief on your phone", ok: set("TELEGRAM_BOT_TOKEN", "TELEGRAM_ADMIN_CHAT_ID"), keys: "TELEGRAM_BOT_TOKEN, TELEGRAM_ADMIN_CHAT_ID" },
-    { name: "Apify (Google Maps)", why: "company finder", ok: set("APIFY_TOKEN"), keys: "APIFY_TOKEN" },
-    { name: "Apollo", why: "decision-makers' names", ok: set("APOLLO_API_KEY"), keys: "APOLLO_API_KEY" },
-    { name: "Vapi (AI calls)", why: "AI voice calls where allowed", ok: set("VAPI_API_KEY", "VAPI_ASSISTANT_ID", "VAPI_PHONE_NUMBER_ID"), keys: "VAPI_API_KEY, VAPI_ASSISTANT_ID, VAPI_PHONE_NUMBER_ID" },
-    { name: "WhatsApp Business", why: "WhatsApp agent", ok: set("WHATSAPP_TOKEN", "WHATSAPP_PHONE_NUMBER_ID"), keys: "WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID" },
-    { name: "n8n", why: "every event to your workflows", ok: set("N8N_EVENTS_WEBHOOK_URL"), keys: "N8N_EVENTS_WEBHOOK_URL" },
+    ...providerBoard(env).map((k) => ({
+      name: k.label,
+      why: k.why,
+      ok: k.active.connected,
+      keys: k.keysToConnect.join(", "),
+      provider: k.active.label,
+      switchEnv: k.env,
+      options: k.options.map((o) => `${o.id}${o.state === "planned" ? " (planned)" : ""}`),
+    })),
+    ...extra,
   ];
 }

@@ -2,7 +2,9 @@ import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 import { agentRuns, companyPages, contacts, events, inbox, leads, prospects, touches } from "@/db/schema";
 import { getLivePage, recordView } from "@/server/company-pages";
-import { handleWhatsApp, parseWebhook, validSignature } from "@/server/whatsapp";
+import { metaWhatsApp } from "@/providers/whatsapp";
+import { parseWebhook, validSignature } from "@/providers/whatsapp/meta";
+import { handleWhatsApp } from "@/server/whatsapp";
 import { startCheckup, requestCall, unlockCheckup } from "@/server/checkup";
 import { addProspect, channelStats, crmFunnel, lookalike, outreachQueue, priority, prospectKey, setLegalBasis, setRpo, setStage } from "@/server/crm";
 import { approveSequence, completeTouch, loadSequences, loadTemplates, optOut, sendDueEmails, setSwitch } from "@/server/outreach";
@@ -199,9 +201,9 @@ describe("outbound CRM", () => {
     expect(parseWebhook(body)).toEqual([{ from: "39021234567", id: "wamid.1", text: "Ciao, ho visto il vostro messaggio", name: "Marco" }]);
     const calls: { url: string; body: string }[] = [];
     const fakeFetch = (async (url: string, init: { body: string }) => (calls.push({ url, body: init.body }), new Response(JSON.stringify({ messages: [{ id: "wamid.out" }] })))) as unknown as typeof fetch;
-    const cfg = { token: "t", phoneNumberId: "123", verifyToken: "v", appSecret: null };
-    expect(await handleWhatsApp(db, cfg, body, null, fakeFetch)).toEqual({ answered: 1 });
-    expect(await handleWhatsApp(db, cfg, body, null, fakeFetch)).toEqual({ answered: 0 }); // same delivery twice
+    const wa = metaWhatsApp({ token: "t", phoneNumberId: "123", verifyToken: "v", appSecret: null }, fakeFetch);
+    expect(await handleWhatsApp(db, wa, body, null)).toEqual({ answered: 1 });
+    expect(await handleWhatsApp(db, wa, body, null)).toEqual({ answered: 0 }); // same delivery twice
     expect(JSON.parse(calls[0].body)).toMatchObject({ to: "39021234567", text: { body: expect.stringContaining("assistente virtuale") } });
     const rows = await db.select().from(inbox);
     expect(rows.map((m) => [m.direction, m.prospectId])).toEqual([["in", r.id], ["out", r.id]]);

@@ -1,15 +1,14 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { meter } from "./meter";
+import { extractJson, llm, llmEnabled } from "@/providers/llm";
 import { z } from "zod";
 import { INTENTS, type Intent } from "@/server/portal-chat";
 
 /*
- * The dashboard advisor with Claude (only with ANTHROPIC_API_KEY; otherwise the word rules in portal-chat.ts).
+ * The dashboard advisor with the AI model (only when one is connected; otherwise the word rules in portal-chat.ts).
  * Claude writes the sentence and chooses which approved card to show; the card data always comes from the
  * database, and anything that changes something stays a confirm card the customer presses. It never quotes a
  * number that is not in the context it was given.
  */
-export const advisorEnabled = () => Boolean(process.env.ANTHROPIC_API_KEY);
+export const advisorEnabled = () => llmEnabled();
 
 const LANG: Record<string, string> = { it: "Italian", en: "English", fa: "Persian", de: "German" };
 
@@ -22,22 +21,19 @@ const turnSchema = z.object({
 export type AdvisorTurn = { reply: string; intent: Intent; request: string | null };
 
 export async function advisorTurn(input: { lang: string; company: string; context: Record<string, unknown>; transcript: { role: "user" | "assistant"; text: string }[] }): Promise<AdvisorTurn> {
-  const client = new Anthropic({ timeout: 30_000, maxRetries: 1 });
   const system = `You are the advisor in the customer dashboard of ${input.company}, in ${LANG[input.lang] ?? "English"}. Be warm and brief (1–3 sentences).
 We sell results, not tools: talk about calls answered, quotes sent, jobs won, hours and € back, never about software, AI models, tokens or usage.
 Facts you may use (the customer's own data): ${JSON.stringify(input.context)}. Never invent numbers, prices, dates or promises outside these facts; for anything else, offer to pass it to the team.
 Pick the card to show with "intent": one of ${INTENTS.join(", ")}. Use "cancel" only when they clearly want to end a monthly service (the card asks why and shows the notice); "complaint" when they are unhappy with work. Use "materials" when they ask what we need from them or want to send information or files for a project. Use "problem" when they describe something that costs them time or money, "support" when something we deliver does not work; then put their request in their own words in "request" so they can confirm sending it to the team. Disclose you are an AI if asked.
 Reply with one JSON object only: {"reply": string, "intent": string, "request": string|null}`;
-  const message = await client.messages.create({
-    model: "claude-opus-5-5",
-    max_tokens: 4000,
-    output_config: { effort: "low" },
+  const r = await llm().complete({
+    maxTokens: 4000,
+    effort: "low",
+    timeoutMs: 30_000,
     system,
-    messages: [{ role: "user", content: input.transcript.slice(-20).map((m) => `${m.role}: ${m.text}`).join("\n") }],
+      messages: [{ role: "user", content: input.transcript.slice(-20).map((m) => `${m.role}: ${m.text}`).join("\n") }],
   });
-  meter(message.usage);
-  if (message.stop_reason === "refusal") throw new Error("refused");
-  const text = message.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
-  const t = turnSchema.parse(JSON.parse(text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1)));
+  if (r.stop === "refusal") throw new Error("refused");
+  const t = turnSchema.parse(extractJson(r.text));
   return { reply: t.reply, intent: t.intent, request: t.request ?? null };
 }

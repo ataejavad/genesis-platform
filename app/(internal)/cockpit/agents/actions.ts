@@ -8,7 +8,7 @@ import { dailyReport } from "@/server/daily-report";
 import { decideExperiment, setLessonActive } from "@/server/improve";
 import { mailerFromEnv } from "@/server/mailer";
 import { runNow } from "@/server/orchestrator";
-import { telegramConfigFromEnv } from "@/server/telegram";
+import { adminChatFromEnv } from "@/server/admin-chat";
 import { voiceFromEnv } from "@/server/voice";
 
 // Machine actions (step 9): agent switches and budgets, jobs, the brief, experiments and lessons.
@@ -43,7 +43,7 @@ export async function agentSwitch(_: Result, f: FormData): Promise<Result> {
 }
 
 export async function runJobNow(_: Result, f: FormData): Promise<Result> {
-  return act(async () => ((await runNow(getDb(), { mailer: mailerFromEnv(), voice: voiceFromEnv(), telegram: telegramConfigFromEnv() }, str(f, "job"))) ? "Done" : "Failed: see the error in the list"));
+  return act(async () => ((await runNow(getDb(), { mailer: mailerFromEnv(), voice: voiceFromEnv(), adminChat: adminChatFromEnv() }, str(f, "job"))) ? "Done" : "Failed: see the error in the list"));
 }
 
 export async function refreshBrief(): Promise<Result> {

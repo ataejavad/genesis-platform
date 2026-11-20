@@ -9,7 +9,7 @@ import { addDocument, applyPartner, checkDocument, decideApplication, deliver, o
 import { addSubscription, createCustomer } from "@/server/portal";
 import { detectIntent, scriptedReply } from "@/server/portal-chat";
 import { createOrder, humanReview, rejectOrder, seedDelivery } from "@/server/projects";
-import { cancelSubscription, endSubscriptions, keepSubscription, lowMargins, margins, monthlyService, recordCost, recordLoss } from "@/server/service";
+import { cancelSubscription, endSubscriptions, keepSubscription, lowMargins, margins, monthlyService, recordCost, recordLoss, suppliersBoard, switchSupplier } from "@/server/service";
 import { inviteCandidates } from "@/server/supply";
 import { signPartner, useTestDb } from "./helpers";
 
@@ -151,5 +151,20 @@ describe("leaving and losing", () => {
     expect(ls).toHaveLength(1);
     expect(ls[0]).toMatchObject({ area: "sales" });
     expect(ls[0].text).toContain("price");
+  });
+});
+
+describe("supplier behind a service", () => {
+  it("swaps the supplier without touching what the customer bought or telling them", async () => {
+    const { sub } = await customerWith("phone-agent", 390);
+    await switchSupplier(db, javad, sub.id, "VoiceTool A", "first supplier");
+    const now = new Date("2026-11-20T10:00:00Z");
+    const row = await switchSupplier(db, javad, sub.id, "VoiceTool B", "half the cost, same quality", now);
+    expect(row).toMatchObject({ supplier: "VoiceTool B", supplierSince: now, product: "phone-agent", monthlyEur: 390, status: "active" });
+    const changed = (await db.select().from(events)).filter((e) => e.type === "subscription.supplier_changed");
+    expect(changed.at(-1)?.payload).toMatchObject({ from: "VoiceTool A", to: "VoiceTool B" });
+    for (const e of changed) await notifyEvent(db, e);
+    expect(await db.select().from(notifications)).toEqual([]);
+    expect((await suppliersBoard(db)).map((r) => r.s.supplier)).toEqual(["VoiceTool B"]);
   });
 });

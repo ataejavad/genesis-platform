@@ -78,6 +78,7 @@ export type EventType =
   | "subscription.cancelled"
   | "subscription.kept"
   | "subscription.ended"
+  | "subscription.supplier_changed"
   | "loss.recorded"
   | "supply.gap"
   | "supply.invited";

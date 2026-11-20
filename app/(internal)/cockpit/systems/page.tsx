@@ -22,7 +22,7 @@ export default async function Systems() {
   const gaps = STEPS.filter((s) => s.gap).sort((a, b) => (a.impact ?? 3) - (b.impact ?? 3));
   return (
     <main>
-      <PageHead title="Systems" crumbs="Cockpit › Machine" sub={`${board.total} modules from steps 1–9. Status comes from the agents, the job log, the events and the .env keys; nothing is typed by hand.`} actions={<EmergencyStop stopped={board.stopped} />} />
+      <PageHead title="Systems" crumbs="Cockpit › Machine" sub={`${board.total} modules from steps 1–9. Status comes from the agents, the job log, the events and the outside services each module uses (which company, connected or not); nothing is typed by hand. Change a company in API & connections.`} actions={<EmergencyStop stopped={board.stopped} />} />
       {board.stopped && <div className="callout warn" style={{ marginBottom: 18 }}>⛔ <b>Emergency stop is on.</b> Agents and everything that reaches people outside (outreach, reminders, emails) are held. Watchdogs and billing keep running.</div>}
       <section className="grid g4" style={{ marginBottom: 18 }}>
         {board.systems.map((s) => (
@@ -42,7 +42,7 @@ export default async function Systems() {
               return (
                 <tr key={r.n}>
                   <td className="muted small">{r.n}</td>
-                  <td><b>{r.name}</b><div className="muted small">{r.runs}</div></td>
+                  <td><b>{r.name}</b><div className="muted small">{r.runs}</div>{r.providers.length > 0 && <div className="small" style={{ marginTop: 4 }}>{r.providers.map((p) => <span key={p.kind} className={`badge ${p.connected ? "ok" : "gray"}`} title={p.label} style={{ marginInlineEnd: 4 }}>{p.label}: {p.provider}</span>)}</div>}</td>
                   <td><span className={`badge ${BADGE[r.status][0]}`}>{BADGE[r.status][1]}</span>{r.why && <div className="muted small" style={{ maxWidth: 220 }}>{r.why}</div>}</td>
                   <td className="small">{when(r.lastAt)}</td>
                   <td className="num">{r.costEur === null ? "–" : `€${r.costEur.toFixed(2)}`}</td>

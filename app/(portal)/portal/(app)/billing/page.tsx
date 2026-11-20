@@ -3,7 +3,8 @@ import { fmtEur, portalCopy } from "@/config/portal-copy";
 import { getDb } from "@/db";
 import { requireCustomer } from "@/lib/portal-auth";
 import { contractsFor } from "@/server/contracts";
-import { epcPayload, getCompany, invoicesFor, qrSvg } from "@/server/finance";
+import { paymentsFromEnv } from "@/providers/payments";
+import { getCompany, invoicesFor, qrSvg } from "@/server/finance";
 import { listServices } from "@/server/portal";
 import { PageHead } from "@/ui/Shell";
 
@@ -20,8 +21,9 @@ export default async function PortalBilling() {
   const [services, invoices, contracts, co] = await Promise.all([listServices(db, org.id, lang), invoicesFor(db, org.id), contractsFor(db, { orgId: org.id }), getCompany(db)]);
   const active = services.filter((s) => s.status === "active");
   const open = invoices.filter((i) => i.status === "requested");
+  const pay = paymentsFromEnv();
   const qr = await Promise.all(open.map(async (i) => {
-    const p = co ? epcPayload(co, i) : null;
+    const p = co ? (await pay.howToPay(co, i)).qrPayload : null;
     return p ? qrSvg(p) : null;
   }));
   const day = (d: Date) => d.toLocaleDateString(lang);

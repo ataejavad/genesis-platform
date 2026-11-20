@@ -1,7 +1,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 
 /*
- * Token metering for Claude calls. An agent reports `message.usage` after each call; the server's runAgent()
+ * Token metering for AI model calls (any provider in src/providers/llm). An agent reports `message.usage` after each call; the server's runAgent()
  * collects it and writes one agent_runs row with the € cost. Outside runAgent (tests, scripts) it is a no-op.
  */
 
@@ -24,6 +24,8 @@ export async function metered<T>(fn: () => Promise<T>, usage: Usage = { input: 0
   return { result, usage };
 }
 
-// € per million tokens (Opus 5.5 list price; override with env when prices change) and per web search.
-const PRICE = { in: Number(process.env.CLAUDE_EUR_PER_MTOK_IN ?? 5), out: Number(process.env.CLAUDE_EUR_PER_MTOK_OUT ?? 25), search: 0.01 };
+// € per million tokens and per web search of the active model (default: Claude Opus 5.5 list price). Set
+// LLM_EUR_PER_MTOK_IN/OUT when the provider or its prices change (old CLAUDE_EUR_PER_MTOK_* still read).
+const env = process.env;
+const PRICE = { in: Number(env.LLM_EUR_PER_MTOK_IN ?? env.CLAUDE_EUR_PER_MTOK_IN ?? 5), out: Number(env.LLM_EUR_PER_MTOK_OUT ?? env.CLAUDE_EUR_PER_MTOK_OUT ?? 25), search: 0.01 };
 export const costEur = (u: Usage) => (u.input * PRICE.in + u.output * PRICE.out) / 1e6 + u.searches * PRICE.search;
