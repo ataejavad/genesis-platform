@@ -19,7 +19,7 @@ export function geminiLlm(env: Env = process.env, fetchImpl: typeof fetch = fetc
     webSearch: true,
     async complete(req: LlmRequest): Promise<LlmResult> {
       const budget = req.thinking ? (THINKING[req.effort ?? "medium"] ?? 2048) : req.effort === "low" ? 0 : undefined;
-      const res = await fetchImpl(`${BASE}/models/${encodeURIComponent(model)}:generateContent`, {
+      const send = () => fetchImpl(`${BASE}/models/${encodeURIComponent(model)}:generateContent`, {
         method: "POST",
         headers: { "x-goog-api-key": env.GEMINI_API_KEY ?? "", "content-type": "application/json" },
         body: JSON.stringify({
@@ -30,6 +30,13 @@ export function geminiLlm(env: Env = process.env, fetchImpl: typeof fetch = fetc
         }),
         signal: AbortSignal.timeout(req.timeoutMs ?? 600_000),
       });
+      // the free tier answers 503 (busy) or 429 (rate limit) often: try again twice, 2 s then 6 s later
+      let res = await send();
+      for (const wait of [2000, 6000]) {
+        if (res.status !== 503 && res.status !== 429) break;
+        await new Promise((r) => setTimeout(r, wait));
+        res = await send();
+      }
       const body = (await res.json().catch(() => ({}))) as {
         candidates?: { content?: { parts?: { text?: string; thought?: boolean }[] }; finishReason?: string; groundingMetadata?: { webSearchQueries?: string[] } }[];
         promptFeedback?: { blockReason?: string };
