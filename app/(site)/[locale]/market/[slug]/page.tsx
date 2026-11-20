@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { copyFor } from "@/config/site-copy";
@@ -6,6 +7,12 @@ import { factsFor, industries, pick, products } from "@/mock/site";
 import { getDb } from "@/db";
 import { listPackages } from "@/server/projects";
 import { OrderBox } from "@/ui/site/OrderBox";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
+  const { locale, slug } = await params;
+  const p = products.find((x) => x.slug === slug);
+  return p ? { title: pick(p.name, locale), description: pick(p.outcome, locale), alternates: { canonical: `/${locale}/market/${slug}` } } : {};
+}
 
 export default async function ProductPage({ params, searchParams }: { params: Promise<{ locale: string; slug: string }>; searchParams: Promise<{ industry?: string; country?: string }> }) {
   const { locale, slug } = await params;
