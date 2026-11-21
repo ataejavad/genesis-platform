@@ -122,6 +122,15 @@ describe("provider choice", () => {
 });
 
 describe("Gemini free-tier quota", () => {
+  it("a model that does not answer in time hands over to the next one", async () => {
+    const f = (async (url: string) => {
+      if (url.includes("gemini-flash-latest")) throw Object.assign(new Error("The operation was aborted due to timeout"), { name: "TimeoutError" });
+      return Response.json({ candidates: [{ content: { parts: [{ text: "ok" }] }, finishReason: "STOP" }] });
+    }) as unknown as typeof fetch;
+    const r = await geminiLlm({ GEMINI_API_KEY: "k" }, f).complete({ maxTokens: 10, timeoutMs: 1000, messages: [{ role: "user", content: "hi" }] });
+    expect(r.model).toBe("gemini-flash-lite-latest");
+  });
+
   it("asks again without a thinking budget when a model refuses it", async () => {
     const bodies: { generationConfig: { thinkingConfig?: unknown } }[] = [];
     const f = (async (_url: string, init: RequestInit) => {

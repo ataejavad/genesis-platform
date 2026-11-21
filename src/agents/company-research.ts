@@ -71,7 +71,7 @@ ${lessons.length ? `What we learned about first messages (follow it):${lessons.m
     // no quota words here: the backlog must not take an unreadable site for "the AI quota is gone"
     if (!site.text) throw new Error(`website could not be read (${(site.why ?? "empty").slice(0, 120)}); web search not available`);
     // no thinking settings: the free models differ in what they accept, and the answer only restates the site
-    out = await ask({ maxTokens: 8000, timeoutMs: 90_000, messages: [{ role: "user", content: sitePrompt(c, lang, site, lessons) }] });
+    out = await ask({ maxTokens: 8000, timeoutMs: 45_000, messages: [{ role: "user", content: sitePrompt(c, lang, site, lessons) }] });
   }
   const { r, parsed } = out;
   return { ...parsed, costEur: Math.round(costEur(r.usage) * 10000) / 10000 };

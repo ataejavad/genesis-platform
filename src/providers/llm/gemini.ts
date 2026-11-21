@@ -43,20 +43,29 @@ export function geminiLlm(env: Env = process.env, fetchImpl: typeof fetch = fetc
         signal: AbortSignal.timeout(req.timeoutMs ?? 600_000),
       });
       // the free tier answers 503 (busy) or 429 (rate limit) often: try again twice, 2 s then 6 s later
+      // a model too busy to answer in time counts like a 503: the next model is tried
+      const timed = async (m: string, think = true) => {
+        try {
+          return await send(m, think);
+        } catch (err) {
+          if (err instanceof Error && /timeout|aborted/i.test(`${err.name} ${err.message}`)) return Response.json({ error: { message: `no answer within ${Math.round((req.timeoutMs ?? 600_000) / 1000)} s` } }, { status: 504 });
+          throw err;
+        }
+      };
       const attempt = async (m: string) => {
         let think = true;
-        let r = await send(m);
+        let r = await timed(m);
         // some models refuse a thinking budget (400 invalid argument): ask without it from here on
         if (r.status === 400 && budget !== undefined) {
           think = false;
-          r = await send(m, think);
+          r = await timed(m, think);
         }
         for (const wait of [2000, 6000]) {
           if (r.status !== 503 && r.status !== 429) break;
           // "exceeded your current quota" does not clear in seconds: no point waiting
           if (r.status === 429 && /current quota/i.test(await r.clone().text().catch(() => ""))) break;
           await new Promise((ok) => setTimeout(ok, wait));
-          r = await send(m, think);
+          r = await timed(m, think);
         }
         return r;
       };
@@ -65,7 +74,7 @@ export function geminiLlm(env: Env = process.env, fetchImpl: typeof fetch = fetc
       let res = await attempt(model);
       const tried: string[] = [];
       for (const next of models.slice(1)) {
-        if (res.status !== 429 && res.status !== 404 && res.status !== 503) break;
+        if (![429, 404, 503, 504].includes(res.status)) break;
         tried.push(`${used}: ${res.status}${quotaLine(((await res.clone().json().catch(() => ({}))) as { error?: GeminiError }).error)}`);
         used = next;
         res = await attempt(next);
