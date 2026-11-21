@@ -106,7 +106,8 @@ export async function researchBacklog(db: Db, actor: Actor, o: { max?: number; b
     : [];
   // never tried before failed ones (they are tried again, last), and companies with a website first: without web
   // search (free AI tiers) research can only read their own site
-  const rank = (r: (typeof rows)[number]) => (r.signals.researched === "failed" ? 2 : 0) + (r.website ? 0 : 1);
+  // without a website only web search can help, so those come last
+  const rank = (r: (typeof rows)[number]) => (r.website ? 0 : 2) + (r.signals.researched === "failed" ? 1 : 0);
   const todo = rows.filter((r) => !open.some((t) => t.prospectId === r.id)).sort((a, b) => rank(a) - rank(b));
   const lessons = (await lessonsFor(db, "outreach")).map((l) => l.text);
   const env = planEnv();
@@ -117,8 +118,12 @@ export async function researchBacklog(db: Db, actor: Actor, o: { max?: number; b
   let failed = 0;
   // why research failed, once per reason, so the cockpit and the job log show it
   const errors: string[] = [];
-  for (const p of todo.slice(0, o.max ?? 4)) {
+  let tried = 0;
+  for (const p of todo) {
+    // a company skipped for having no website does not use up one of the batch's places
+    if (tried - noSite >= (o.max ?? 4)) break;
     if (Date.now() - started > (o.budgetMs ?? 150_000)) break;
+    tried++;
     let r: Awaited<ReturnType<typeof researchCompany>>;
     try {
       r = await run({ name: cleanName(p.name), website: p.website ?? undefined, city: p.city ?? undefined, industry: p.industry, country: p.country, signals: p.signals }, lessons);
