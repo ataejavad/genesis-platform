@@ -68,7 +68,8 @@ ${lessons.length ? `What we learned about first messages (follow it):${lessons.m
     // free tiers without web search (Gemini free, 2026-11-21): read the company's own website instead
     if (!c.website || !/\b(429|404)\b|quota/i.test(err instanceof Error ? err.message : "")) throw err;
     const site = await readSite(c.website);
-    if (!site.text) throw new Error(`web search unavailable (${(err as Error).message.slice(0, 80)}) and the website could not be read`);
+    // no quota words here: the backlog must not take an unreadable site for "the AI quota is gone"
+    if (!site.text) throw new Error(`website could not be read (${(site.why ?? "empty").slice(0, 120)}); web search not available`);
     out = await ask({ maxTokens: 8000, thinking: true, effort: "low", timeoutMs: 120_000, messages: [{ role: "user", content: sitePrompt(c, lang, site, lessons) }] });
   }
   const { r, parsed } = out;
@@ -76,18 +77,35 @@ ${lessons.length ? `What we learned about first messages (follow it):${lessons.m
 }
 
 /** The company's own pages as plain text (home + an "about" page when linked), for research without web search. */
-export async function readSite(website: string, fetchImpl: typeof fetch = fetch): Promise<{ text: string; urls: string[] }> {
-  const home = website.startsWith("http") ? website : `https://${website}`;
+export async function readSite(website: string, fetchImpl: typeof fetch = fetch): Promise<{ text: string; urls: string[]; why?: string }> {
+  const start = website.startsWith("http") ? website : `https://${website}`;
+  let why = "";
   const get = async (url: string) => {
     try {
-      const res = await fetchImpl(url, { headers: { "user-agent": "Mozilla/5.0 (compatible; LegendPartnerBot/1.0)", accept: "text/html" }, signal: AbortSignal.timeout(10_000), redirect: "follow" });
-      return res.ok && (res.headers.get("content-type") ?? "text/html").includes("html") ? await res.text() : "";
-    } catch {
+      // a plain browser request: many small-company sites behind a firewall refuse unknown bots
+      const res = await fetchImpl(url, { headers: { "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36", accept: "text/html,application/xhtml+xml", "accept-language": "it,en;q=0.8" }, signal: AbortSignal.timeout(10_000), redirect: "follow" });
+      const type = res.headers.get("content-type") ?? "text/html";
+      if (!res.ok || !type.includes("html")) {
+        why = `${url}: ${res.ok ? type : `HTTP ${res.status}`}`;
+        return "";
+      }
+      return await res.text();
+    } catch (err) {
+      why = `${url}: ${err instanceof Error ? err.message : "unreachable"}`;
       return "";
     }
   };
-  const html = await get(home);
-  if (!html) return { text: "", urls: [] };
+  // the listed address, then the plain-http and www variants (old small-company sites often have only one of them)
+  let html = "";
+  let home = start;
+  for (const url of [start, start.replace(/^https:/, "http:"), start.replace(/^(https?:\/\/)(?!www\.)/, "$1www.")].filter((u, i, a) => a.indexOf(u) === i)) {
+    html = await get(url);
+    if (html) {
+      home = url;
+      break;
+    }
+  }
+  if (!html) return { text: "", urls: [], why };
   const about = [...html.matchAll(/href=["']([^"'#]+)["']/gi)].map((m) => m[1]).find((h) => /chi-siamo|chisiamo|azienda|about|storia|ueber-uns|uber-uns/i.test(h));
   const aboutUrl = about ? new URL(about, home).toString() : null;
   const more = aboutUrl && aboutUrl !== home ? await get(aboutUrl) : "";

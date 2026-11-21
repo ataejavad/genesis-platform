@@ -13,6 +13,8 @@ const THINKING: Record<string, number> = { low: 0, medium: 2048, high: 8192 };
 // Free tier (2026-11-21): Google Search grounding answered 429 "exceeded your current quota" on the default model all
 // day, so web-search calls try these next when a model has no free quota left. GEMINI_SEARCH_MODELS overrides the list.
 const SEARCH_FALLBACK = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-flash-lite-latest"];
+// plain calls: the free default model answers 503 "high demand" at busy hours; the lite model usually still answers
+const PLAIN_FALLBACK = ["gemini-flash-lite-latest"];
 
 type GeminiError = { message?: string; details?: { "@type"?: string; violations?: { quotaMetric?: string; quotaId?: string; quotaValue?: string }[] }[] };
 /** The quota Google names in a 429 (metric, limit), so the cockpit says which limit was hit. */
@@ -52,12 +54,12 @@ export function geminiLlm(env: Env = process.env, fetchImpl: typeof fetch = fetc
         }
         return r;
       };
-      const models = req.webSearch ? [model, ...(env.GEMINI_SEARCH_MODELS?.split(",").map((x) => x.trim()).filter(Boolean) ?? SEARCH_FALLBACK)].filter((m, i, a) => a.indexOf(m) === i) : [model];
+      const models = [model, ...(req.webSearch ? (env.GEMINI_SEARCH_MODELS?.split(",").map((x) => x.trim()).filter(Boolean) ?? SEARCH_FALLBACK) : PLAIN_FALLBACK)].filter((m, i, a) => a.indexOf(m) === i);
       let used = model;
       let res = await attempt(model);
       const tried: string[] = [];
       for (const next of models.slice(1)) {
-        if (res.status !== 429 && res.status !== 404) break;
+        if (res.status !== 429 && res.status !== 404 && res.status !== 503) break;
         tried.push(`${used}: ${res.status}${quotaLine(((await res.clone().json().catch(() => ({}))) as { error?: GeminiError }).error)}`);
         used = next;
         res = await attempt(next);

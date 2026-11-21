@@ -23,6 +23,21 @@ describe("company research without web search (free tier)", () => {
     expect(r.text).not.toContain("x()");
   });
 
+  it("tries plain http and www when the listed address does not answer, and says why it failed", async () => {
+    const seen: string[] = [];
+    const f = (async (u: string) => {
+      seen.push(u);
+      if (u.startsWith("http://")) return site(u);
+      return new Response("blocked", { status: 403 });
+    }) as unknown as typeof fetch;
+    const r = await readSite("https://rossi.it", f);
+    expect(r.urls[0]).toBe("http://rossi.it");
+    const none = await readSite("https://rossi.it", (async () => new Response("no", { status: 403 })) as unknown as typeof fetch);
+    expect(none.text).toBe("");
+    expect(none.why).toContain("HTTP 403");
+    expect(seen[0]).toBe("https://rossi.it");
+  });
+
   it("falls back to the website when web search answers 429, and cites only the site", async () => {
     vi.stubGlobal("fetch", (async (u: string) => site(String(u))) as unknown as typeof fetch);
     const prompts: { search: boolean; text: string }[] = [];
