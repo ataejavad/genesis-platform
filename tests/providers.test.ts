@@ -122,6 +122,12 @@ describe("provider choice", () => {
 });
 
 describe("Gemini free-tier quota", () => {
+  it("reads model JSON with a trailing comma", async () => {
+    const { extractJson } = await import("@/providers/llm");
+    expect(extractJson('Here: {"a": [1, 2,], "b": "x",\n}')).toEqual({ a: [1, 2], b: "x" });
+    expect(() => extractJson("{a: 1}")).toThrow();
+  });
+
   it("a model that does not answer in time hands over to the next one", async () => {
     const f = (async (url: string) => {
       if (url.includes("gemini-flash-latest")) throw Object.assign(new Error("The operation was aborted due to timeout"), { name: "TimeoutError" });

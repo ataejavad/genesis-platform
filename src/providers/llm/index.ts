@@ -49,7 +49,15 @@ export function llmEnabled(need: { webSearch?: boolean; personalData?: boolean }
 export function extractJson(text: string, open: "{" | "[" = "{"): unknown {
   const fenced = [...text.matchAll(/```json\s*([\s\S]*?)```/g)].at(-1)?.[1];
   const close = open === "{" ? "}" : "]";
-  return JSON.parse(fenced ?? text.slice(text.indexOf(open), text.lastIndexOf(close) + 1));
+  const raw = fenced ?? text.slice(text.indexOf(open), text.lastIndexOf(close) + 1);
+  try {
+    return JSON.parse(raw);
+  } catch (err) {
+    // small models often leave a trailing comma before } or ]: the one repair that cannot change a value
+    const fixed = raw.replace(/,(\s*[}\]])/g, "$1");
+    if (fixed === raw) throw err;
+    return JSON.parse(fixed);
+  }
 }
 
 /** One call that must end normally; refusals and cut-off answers become errors. Returns the text. */
