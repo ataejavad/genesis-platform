@@ -1,6 +1,6 @@
 import { and, eq, gte, inArray, isNotNull, isNull, lt } from "drizzle-orm";
 import type { Db } from "@/db";
-import { changeRequests, contracts, customerApprovals, customerRequests, deliveries, events, jobOffers, jobs, orders, partnerDocuments, partners, payouts, projectInputs } from "@/db/schema";
+import { approvals, changeRequests, contracts, customerApprovals, customerRequests, deliveries, events, jobOffers, jobs, orders, partnerDocuments, partners, payouts, projectInputs, touches } from "@/db/schema";
 import { MAX_ATTEMPTS } from "@/worker/dispatch";
 import type { Actor } from "./actor";
 import { emit } from "./events";
@@ -27,6 +27,8 @@ export const WATCH = {
   contractHours: 72, // a contract sent and not signed: nothing starts until it is (call them)
   payoutLeadHours: 24, // payout due tomorrow or overdue
   documentDays: 14, // partner document expires soon
+  outboundDraftHours: 48, // first messages to companies wait for Javad's approval: prospects go cold
+  draftApprovalHours: 72, // content drafts from agents wait for Javad's approve/reject
   repeatHours: 24, // the same item is flagged at most once a day
 };
 
@@ -105,7 +107,13 @@ export async function opsWatch(db: Db, now = new Date()) {
   const docs = await db.select({ id: partnerDocuments.id, kind: partnerDocuments.kind, name: partners.name, exp: partnerDocuments.expiresAt }).from(partnerDocuments).innerJoin(partners, eq(partners.id, partnerDocuments.partnerId)).where(and(isNotNull(partnerDocuments.expiresAt), lt(partnerDocuments.expiresAt, new Date(now.getTime() + WATCH.documentDays * 24 * HOUR)), eq(partners.status, "active")));
   for (const d of docs) items.push({ key: `doc:${d.id}`, kind: "document", text: `${d.name}: ${d.kind} ${d.exp! < now ? "expired" : "expires"} ${d.exp!.toISOString().slice(0, 10)}`, link: "/cockpit/partners" });
 
-  // 7. The system itself: events that failed every retry never reached Telegram or n8n.
+  // 7. Javad's own queues: outbound first messages and agents' content drafts (one line each, once a day).
+  const outbound = await db.selectDistinct({ id: touches.prospectId }).from(touches).where(and(eq(touches.status, "draft"), lt(touches.createdAt, before(WATCH.outboundDraftHours))));
+  if (outbound.length) items.push({ key: `outbound:${now.toISOString().slice(0, 10)}`, kind: "outbound", text: `${outbound.length} ${outbound.length === 1 ? "company waits" : "companies wait"} over ${WATCH.outboundDraftHours}h for your approval of the first message: approve or reject`, link: "/cockpit/outreach" });
+  const drafts = await db.select({ id: approvals.id }).from(approvals).where(and(eq(approvals.status, "pending"), lt(approvals.createdAt, before(WATCH.draftApprovalHours))));
+  if (drafts.length) items.push({ key: `drafts:${now.toISOString().slice(0, 10)}`, kind: "draft", text: `${drafts.length} content ${drafts.length === 1 ? "draft waits" : "drafts wait"} over ${WATCH.draftApprovalHours}h for approve/reject`, link: "/cockpit/approvals" });
+
+  // 8. The system itself: events that failed every retry never reached Telegram or n8n.
   const dead = await db.select({ id: events.id, type: events.type, err: events.lastError }).from(events).where(and(isNull(events.dispatchedAt), gte(events.attempts, MAX_ATTEMPTS)));
   for (const e of dead) items.push({ key: `dead:${e.id}`, kind: "system", text: `Event ${e.type} #${e.id} failed ${MAX_ATTEMPTS}×: ${String(e.err ?? "").slice(0, 80)}`, link: "/cockpit" });
 

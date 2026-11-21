@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
-import { events, jobOffers, jobs, payouts } from "@/db/schema";
+import { approvals, events, jobOffers, jobs, payouts, prospects, touches } from "@/db/schema";
+import { createDraft } from "@/server/content";
 import { opsWatch } from "@/server/ops-watch";
 import { addDocument, applyPartner, checkDocument, decideApplication, offersFor, respondOffer } from "@/server/partners";
 import { createOrder, seedDelivery } from "@/server/projects";
@@ -62,5 +63,19 @@ describe("ops watchdog", () => {
     await db.insert(payouts).values({ partnerId: anna, amountEur: 300, dueAt: new Date(Date.now() - HOUR) });
     const r = await opsWatch(db);
     expect(r.counts.payout).toBe(1);
+  });
+
+  it("reminds Javad of outbound first messages and content drafts that wait too long, once a day", async () => {
+    const [p] = await db.insert(prospects).values({ key: "rossi.it", name: "Rossi", industry: "installers", country: "IT", source: "maps" }).returning();
+    await db.insert(touches).values({ prospectId: p.id, step: "linkedin-1", position: 0, channel: "linkedin", locale: "it-it", body: "b", dueAt: new Date() });
+    await createDraft(db, sys, { locale: "en-gb", slug: "test/wait", title: "Wait", summary: "s", body: "b" });
+    expect((await opsWatch(db)).counts.outbound).toBeUndefined(); // fresh: not yet
+    const old = new Date(Date.now() - 80 * HOUR);
+    await db.update(touches).set({ createdAt: old });
+    await db.update(approvals).set({ createdAt: old });
+    const r = await opsWatch(db);
+    expect(r.counts).toMatchObject({ outbound: 1, draft: 1 });
+    expect(r.items.find((i) => i.kind === "outbound")?.text).toMatch(/^1 company waits/);
+    expect((await opsWatch(db)).flagged).toBe(0); // not repeated the same day
   });
 });
