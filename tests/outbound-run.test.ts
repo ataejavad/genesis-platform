@@ -159,6 +159,16 @@ describe("research later, when the free AI quota is back", () => {
     expect(r.stopped).toBeNull();
   });
 
+  it("a failed research names its reason and is tried again next time", async () => {
+    await findCustomers(db, javad, { industry: "installers", region: "Lombardia", limit: 5 }, { finder: finder(), people: null, research: false });
+    const r = await researchBacklog(db, javad, { run: async () => Promise.reject(new Error("research answer was cut off (max_tokens)")) });
+    expect(r.failed).toBe(2);
+    expect(r.errors).toEqual(["research answer was cut off (max_tokens)"]);
+    const again = await researchBacklog(db, javad, { run: async () => research });
+    expect(again.researched).toBe(2);
+    expect(await researchWaiting(db)).toBe(0);
+  });
+
   it("leaves a company alone once Javad approved its messages", async () => {
     await findCustomers(db, javad, { industry: "installers", region: "Lombardia", limit: 5 }, { finder: finder(), people: null, research: false });
     const [p] = await db.select().from(prospects).limit(1);

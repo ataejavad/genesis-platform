@@ -121,7 +121,7 @@ export async function runDue(db: Db, deps: JobDeps, now = new Date(), only?: str
     const ok = await runJob(db, deps, job, now);
     // a short result next to each job, so the hourly tick's log (GitHub Actions) shows what happened without the cockpit
     const [done] = await db.select({ result: jobRuns.result, error: jobRuns.error }).from(jobRuns).where(eq(jobRuns.job, job.id)).orderBy(desc(jobRuns.startedAt)).limit(1);
-    const short = JSON.stringify(ok ? (done?.result ?? null) : done?.error ?? null)?.slice(0, 300);
+    const short = JSON.stringify(ok ? (done?.result ?? null) : done?.error ?? null)?.slice(0, 800);
     ran.push({ job: job.id, ok, ...(short && short !== "null" ? { result: short } : {}) });
   }
   return ran;
