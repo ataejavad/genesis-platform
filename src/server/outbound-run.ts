@@ -87,7 +87,8 @@ export async function findCustomers(db: Db, actor: Actor, req: RunRequest, deps:
  * Research backlog (2026-11-20: the free Gemini quota ran out during the first runs). Companies saved without
  * research get it later: once a day after the quota resets, and from the cockpit. Only companies whose messages
  * are all still drafts are touched; their page and drafts are rebuilt with the researched facts and the personal
- * opening line. A 429 (quota) stops the batch; the rest waits for the next day.
+ * opening line. A 429 (quota) stops the batch; the rest waits for the next day. A company without a website is skipped
+ * instead (it needs web search), so the ones with a site can still be read.
  */
 export async function researchBacklog(db: Db, actor: Actor, o: { max?: number; budgetMs?: number; run?: typeof researchCompany; adminChat?: AdminChat | null } = {}, now = new Date()) {
   const run = o.run ?? researchCompany;
@@ -103,12 +104,14 @@ export async function researchBacklog(db: Db, actor: Actor, o: { max?: number; b
   const open = rows.length
     ? await db.select({ prospectId: touches.prospectId }).from(touches).where(and(inArray(touches.prospectId, rows.map((r) => r.id)), eq(touches.status, "approved")))
     : [];
-  const todo = rows.filter((r) => !open.some((t) => t.prospectId === r.id));
+  // companies with a website first: without web search (free AI tiers) research can only read their own site
+  const todo = rows.filter((r) => !open.some((t) => t.prospectId === r.id)).sort((a, b) => Number(Boolean(b.website)) - Number(Boolean(a.website)));
   const lessons = (await lessonsFor(db, "outreach")).map((l) => l.text);
   const env = planEnv();
   const started = Date.now();
   let researched = 0;
   let stopped: string | null = null;
+  let noSite = 0;
   for (const p of todo.slice(0, o.max ?? 4)) {
     if (Date.now() - started > (o.budgetMs ?? 150_000)) break;
     let r: Awaited<ReturnType<typeof researchCompany>>;
@@ -117,6 +120,11 @@ export async function researchBacklog(db: Db, actor: Actor, o: { max?: number; b
     } catch (err) {
       const m = err instanceof Error ? err.message : String(err);
       if (/\b429\b|quota/i.test(m)) {
+        // no website to fall back on: this company waits for web search, the others can still be read
+        if (!p.website) {
+          noSite++;
+          continue;
+        }
         stopped = m.slice(0, 300);
         break;
       }
@@ -148,7 +156,7 @@ export async function researchBacklog(db: Db, actor: Actor, o: { max?: number; b
     ];
     await o.adminChat.alert(lines, `${env.appUrl}/cockpit/outreach`).catch(() => null);
   }
-  return { researched, waiting, stopped };
+  return { researched, waiting, stopped, noSite };
 }
 
 /** How many saved companies still wait for research (cockpit). */

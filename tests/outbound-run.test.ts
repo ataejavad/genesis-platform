@@ -150,6 +150,15 @@ describe("research later, when the free AI quota is back", () => {
     expect(await researchWaiting(db)).toBe(0);
   });
 
+  it("a company without a website does not stop the others when web search has no quota", async () => {
+    await findCustomers(db, javad, { industry: "installers", region: "Lombardia", limit: 5 }, { finder: finder(), people: null, research: false });
+    await db.update(prospects).set({ website: null, score: "99" }).where(eq(prospects.website, "https://rossi.it"));
+    const r = await researchBacklog(db, javad, { run: async (c) => (c.website ? research : Promise.reject(new Error("gemini 429: You exceeded your current quota"))) });
+    expect(r.researched).toBe(1);
+    expect(r.noSite).toBe(1);
+    expect(r.stopped).toBeNull();
+  });
+
   it("leaves a company alone once Javad approved its messages", async () => {
     await findCustomers(db, javad, { industry: "installers", region: "Lombardia", limit: 5 }, { finder: finder(), people: null, research: false });
     const [p] = await db.select().from(prospects).limit(1);
