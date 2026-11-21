@@ -152,7 +152,7 @@ export default async function Hub({ params }: Props) {
         </table>
       </section>
 
-      <Newsletter c={c} hub={pick(industry.name, locale)} />
+      <Newsletter c={c} hub={pick(industry.name, locale)} locale={locale} industry={industry.slug} country={hub.country} brand={process.env.SITE_NAME ?? "Legend Partner"} />
     </main>
   );
 }

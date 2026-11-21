@@ -1,7 +1,8 @@
 import { and, eq, gte, inArray, isNotNull, isNull, lt } from "drizzle-orm";
 import type { Db } from "@/db";
-import { changeRequests, contracts, customerApprovals, customerRequests, deliveries, events, jobOffers, jobs, orders, partnerDocuments, partners, payouts, projectInputs } from "@/db/schema";
+import { changeRequests, contracts, customerApprovals, customerRequests, deliveries, events, jobOffers, jobs, mediaPosts, orders, partnerDocuments, partners, payouts, projectInputs } from "@/db/schema";
 import { MAX_ATTEMPTS } from "@/worker/dispatch";
+import { MEDIA } from "@/config/media";
 import type { Actor } from "./actor";
 import { emit } from "./events";
 import { overdueComplaints } from "./complaints";
@@ -75,6 +76,12 @@ export async function opsWatch(db: Db, now = new Date()) {
 
   // complaint steps past their deadline (free fix 3 days, new partner 7 days, Javad 1 working day)
   for (const c of await overdueComplaints(db, now)) items.push({ key: `complaint:${c.c.id}:${c.c.step}`, kind: "complaint", text: `Complaint of ${c.company} past its ${c.c.step} deadline: ${c.c.step === "founder" ? "call them today" : "escalate or resolve"}`, link: "/cockpit/customers" });
+
+  // media: a week of drafts nobody decided loses its slots; a post handed over and never confirmed may not be live
+  const mediaDrafts = await db.select({ id: mediaPosts.id }).from(mediaPosts).where(and(eq(mediaPosts.status, "draft"), lt(mediaPosts.createdAt, before(MEDIA.draftHours))));
+  if (mediaDrafts.length) items.push({ key: `media_drafts:${now.toISOString().slice(0, 10)}`, kind: "media", text: `${mediaDrafts.length} media drafts wait for your OK for over ${MEDIA.draftHours / 24} days (this week's posts and newsletter)`, link: "/cockpit/media" });
+  const handed = await db.select({ id: mediaPosts.id, title: mediaPosts.title, channel: mediaPosts.channel }).from(mediaPosts).where(and(eq(mediaPosts.status, "handed"), lt(mediaPosts.updatedAt, before(MEDIA.handedHours))));
+  for (const h of handed) items.push({ key: `media_handed:${h.id}`, kind: "media", text: `${h.channel === "linkedin" ? "LinkedIn post" : "Video"} "${h.title}" not confirmed as posted for ${MEDIA.handedHours / 24} days: post it or skip it`, link: `/cockpit/media#${h.id}` });
 
   const apps = await db.select({ id: partners.id, name: partners.name, at: partners.createdAt }).from(partners).where(and(eq(partners.status, "applied"), lt(partners.createdAt, before(WATCH.applicationHours))));
   for (const a of apps) items.push({ key: `application:${a.id}`, kind: "application", text: `Partner application from ${a.name} waits ${Math.round(age(now, a.at) / 24)} days`, link: "/cockpit/partners" });

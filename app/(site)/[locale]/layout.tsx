@@ -6,7 +6,7 @@ import { isLocale, LOCALES } from "@/config/locales";
 import { copyFor } from "@/config/site-copy";
 import { pick } from "@/mock/site";
 import { visitorIndustry } from "@/ui/site/country";
-import { CookieBanner, Newsletter } from "@/ui/site/SiteClient";
+import { CookieBanner, Newsletter, RememberFrom } from "@/ui/site/SiteClient";
 import { LanguageSuggest, LanguageSwitcher } from "@/ui/site/Language";
 import "../../ui.css";
 
@@ -62,7 +62,7 @@ export default async function SiteLayout({ children, params }: { children: React
         </header>
         <div id="main">{children}</div>
         <footer className="site-footer">
-          <div className="wrap-site"><Newsletter c={c} /></div>
+          <div className="wrap-site"><Newsletter c={c} locale={locale} brand={siteName} /><RememberFrom /></div>
           <div className="wrap-site cols">
             <div>
               <div style={{ fontWeight: 800, color: "var(--fg)", marginBottom: 6 }}>{siteName}</div>

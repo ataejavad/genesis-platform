@@ -7,6 +7,7 @@ import type { Actor } from "./actor";
 import { AppError } from "./errors";
 import { audit, emit } from "./events";
 import { isStopped } from "./switches";
+import { newSubscribers } from "./media";
 
 /*
  * Agents as employees (doc 15 §6ز, value filter): each Claude call goes through runAgent(), which checks the switch
@@ -128,6 +129,7 @@ async function measure(db: Db, a: AgentDef, w: Window): Promise<Measure> {
       return { value: both ? Math.round((agree / both) * 100) : null, n: both, spentEur: spent };
     },
     costPerAdoption: async () => per((await db.select({ n: sql<number>`count(*)::int` }).from(lessons).where(and(eq(lessons.area, "ai-scout"), eq(lessons.active, true), inWin(lessons.createdAt))))[0].n),
+    costPerSubscriber: async () => per(await newSubscribers(db, w.from, w.to)),
     costPerConversation: async () => per((await db.select({ n: countDistinct(inbox.party) }).from(inbox).where(and(eq(inbox.channel, "whatsapp"), inWin(inbox.createdAt))))[0].n),
   };
   return kpi[a.kpi.id]();

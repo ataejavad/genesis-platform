@@ -1468,3 +1468,50 @@ export const leases = pgTable("leases", {
   until: timestamp("until", { withTimezone: true }).notNull(),
   holder: text("holder").notNull(),
 });
+
+/* ───────────── Media engine (doc 11: newsletter as the hub, LinkedIn + YouTube feed it) ───────────── */
+
+// One piece of our own media: a LinkedIn post for Javad's profile, a short YouTube script he records, or a weekly
+// newsletter issue. Written by the media agent each Monday, approved by Javad (phone or cockpit), then published at
+// its slot: through a posting provider, or handed to Javad as a one-tap post when the channel has no free API.
+// Our own marketing text, no personal data and no org_id.
+export const mediaPosts = pgTable(
+  "media_posts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    // linkedin | youtube | newsletter
+    channel: text("channel").notNull(),
+    // ISO week the agent wrote it for, e.g. 2026-W48; position orders the week's pieces per channel
+    week: text("week").notNull(),
+    position: integer("position").notNull().default(0),
+    // news (source + our impact take) | pain (a sector problem) | build (building the company with agents, in public) | digest
+    theme: text("theme").notNull(),
+    lang: text("lang").notNull(),
+    industry: text("industry"),
+    country: text("country"),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    // Persian translation for Javad's review; never published
+    bodyFa: text("body_fa"),
+    sourceUrl: text("source_url"),
+    sourceTitle: text("source_title"),
+    // where the piece sends people: newsletter | checkup
+    cta: text("cta").notNull().default("newsletter"),
+    // draft → approved → handed (waits for Javad to post) → posted | sent (newsletter) ; rejected | skipped
+    status: text("status").notNull().default("draft"),
+    scheduledFor: timestamp("scheduled_for", { withTimezone: true }),
+    // provider that published it, its id or the one-tap link, and when
+    publisher: text("publisher"),
+    publishedRef: text("published_ref"),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    recipients: integer("recipients").notNull().default(0),
+    decidedBy: text("decided_by"),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    note: text("note"),
+    // written by the AI model or by the rule-based fallback (hub research)
+    writer: text("writer").notNull().default("ai"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [uniqueIndex("media_posts_week_idx").on(t.week, t.channel, t.lang, t.position), index("media_posts_status_idx").on(t.status, t.scheduledFor)],
+);

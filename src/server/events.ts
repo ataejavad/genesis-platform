@@ -83,7 +83,8 @@ export type EventType =
   | "subscription.supplier_changed"
   | "loss.recorded"
   | "supply.gap"
-  | "supply.invited";
+  | "supply.invited"
+  | "media.published";
 
 // Call inside the same transaction as the change it describes (transactional outbox).
 export async function emit(
