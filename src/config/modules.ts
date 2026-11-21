@@ -72,6 +72,9 @@ export const MODULES: ModuleDef[] = [
   { n: 21, name: "Speed-to-lead alerts", system: "convert", runs: "on every inbound event", uses: CHAT, events: ["checkup.call_requested", "company_page.viewed", "prospect.stage_changed"], kpi: "inbound", link: "/cockpit/crm" },
   { n: 22, name: "CRM funnel + channel KPI", system: "convert", runs: "on every CRM view", events: ["prospect.stage_changed"], kpi: "replies", link: "/cockpit/crm" },
   { n: 58, name: "Lead double opt-in → CRM", system: "acquire", runs: "on the confirmation link", events: ["lead.confirmed"], kpi: "confirmRate", link: "/cockpit/leads" },
+  { n: 86, name: "Media writer (LinkedIn, video script, newsletter)", system: "acquire", runs: "Monday 07:00", agent: "media-writer", job: "media.drafts", uses: AI, webSearch: true, kpi: "mediaQueue", link: "/cockpit/media" },
+  { n: 87, name: "Media approvals + publishing (one-tap LinkedIn, newsletter email)", system: "acquire", runs: "every 10 min", job: "media.publish", uses: ["social", "email", "admin_chat"], events: ["media.published"], kpi: "mediaReach", link: "/cockpit/media" },
+  { n: 88, name: "Newsletter sign-up (double opt-in)", system: "acquire", runs: "every page footer + hubs", events: ["lead.captured", "lead.confirmed"], kpi: "mediaReach", link: "/cockpit/media" },
   { n: 61, name: "Opening-line experiment", system: "acquire", runs: "on every researched company", kpi: "experiments", link: "/cockpit/experiments" },
 
   // convert

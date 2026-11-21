@@ -1,4 +1,5 @@
 import { and, count, desc, eq, gte, inArray, gt, isNotNull, isNull, lt, sql, sum } from "drizzle-orm";
+import { mediaKpi } from "./media";
 import { MODULES, type ModuleDef, SYSTEMS } from "@/config/modules";
 import { STEPS } from "@/config/process-map";
 import type { Db } from "@/db";
@@ -57,6 +58,14 @@ const KPI: Record<string, (c: Ctx) => Promise<string>> = {
   supplyGaps: async ({ db, month }) => `${await n(db.select({ n: count() }).from(supplyGaps).where(eq(supplyGaps.status, "open")))} skills missing, ${await n(db.select({ n: count() }).from(supplyGaps).where(and(eq(supplyGaps.status, "closed"), gte(supplyGaps.closedAt, month))))} filled this month`,
   unpaidMilestones: async ({ db }) => `${await n(db.select({ n: count() }).from(milestones).where(eq(milestones.status, "unpaid")))} milestones waiting for payment`,
   hubPages: async ({ db }) => `${await n(db.select({ n: count() }).from(contentItems).where(eq(contentItems.status, "published")))} pages live`,
+  mediaReach: async ({ db }) => {
+    const k = await mediaKpi(db);
+    return `${k.subscribers}/${k.subscribersGoal} subscribers, ${k.checkupsFromMedia}/${k.checkupsGoal} check-ups from media this month`;
+  },
+  mediaQueue: async ({ db }) => {
+    const k = await mediaKpi(db);
+    return `${k.drafts} drafts to decide, ${k.approved} scheduled, ${k.handed} waiting for you to post, ${k.publishedMonth} published this month`;
+  },
   leadsMonth: async ({ db, month }) => `${await n(db.select({ n: count() }).from(leads).where(gte(leads.createdAt, month)))} leads this month`,
   reminders: async ({ db, month }) => `${await n(db.select({ n: count() }).from(events).where(and(eq(events.type, "lead.reminder_due"), gte(events.createdAt, month))))} reminders this month`,
   hubIssues: async () => "see Markets › Live hubs",

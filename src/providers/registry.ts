@@ -11,7 +11,7 @@
  * Cockpit › Systems and › API & connections show the active provider per kind from `providerBoard()`.
  */
 
-export type ProviderKind = "llm" | "email" | "voice" | "admin_chat" | "whatsapp" | "company_search" | "people_search" | "storage" | "payments" | "einvoice" | "vat_check";
+export type ProviderKind = "llm" | "email" | "voice" | "admin_chat" | "whatsapp" | "company_search" | "people_search" | "storage" | "payments" | "einvoice" | "vat_check" | "social";
 
 export type ProviderOption = {
   id: string;
@@ -136,6 +136,17 @@ export const KINDS: KindDef[] = [
     options: [
       { id: "manual", label: "Numbered here, sent by hand / accountant", keys: [], state: "ready", fallback: true },
       { id: "sdi-provider", label: "SdI intermediary (chosen after registration)", keys: [], state: "planned" },
+    ],
+  },
+  {
+    kind: "social",
+    label: "Social posting",
+    why: "approved LinkedIn posts and video scripts reach the network",
+    env: "SOCIAL_PROVIDER",
+    options: [
+      { id: "manual", label: "One-tap hand-over: the phone gets a link that opens LinkedIn with the post written; you press Post", keys: [], state: "ready", fallback: true },
+      { id: "linkedin", label: "LinkedIn API (Share on LinkedIn, personal profile)", keys: ["LINKEDIN_ACCESS_TOKEN", "LINKEDIN_PERSON_URN"], state: "planned", note: "Needs a LinkedIn developer app linked to a company page; the token expires every 60 days." },
+      { id: "mock", label: "Mock (tests)", keys: [], state: "ready", fallback: true },
     ],
   },
   {

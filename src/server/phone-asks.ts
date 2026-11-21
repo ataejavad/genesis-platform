@@ -1,12 +1,13 @@
 import { createHash } from "node:crypto";
 import { and, asc, eq, inArray, ne, sql } from "drizzle-orm";
 import type { Db } from "@/db";
-import { experiments, partners, phoneAsks, prospects, touches } from "@/db/schema";
+import { experiments, mediaPosts, partners, phoneAsks, prospects, touches } from "@/db/schema";
 import type { AdminChat, ApprovalPress, DecisionAsk } from "@/providers/admin-chat";
 import { type Actor, actorRef } from "./actor";
 import { conflict, AppError } from "./errors";
 import { audit } from "./events";
 import { decideExperiment } from "./improve";
+import { confirmMediaPosted, ctaLink, decideMedia } from "./media";
 import { approveSequence, rejectSequence } from "./outreach";
 import { decideApplication } from "./partners";
 
@@ -165,7 +166,78 @@ const experimentKind: Kind = {
   },
 };
 
-export const PHONE_KINDS: Record<string, Kind> = { outreach, partner: partnerKind, experiment: experimentKind };
+
+/* ───────────── media: drafts to approve, posts to put on LinkedIn ───────────── */
+
+const CHANNEL_FA: Record<string, string> = { linkedin: "💼 لینکدین", youtube: "🎬 ویدیو یوتیوب", newsletter: "📬 خبرنامه" };
+const THEME_FA: Record<string, string> = { news: "خبر + تحلیل ما", pain: "درد صنف", build: "ساختن شرکت با ایجنت‌ها", digest: "شماره هفتگی" };
+const romeTime = (d: Date | null) => (d ? new Intl.DateTimeFormat("fa-IR", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Rome" }).format(d) : "—");
+type MediaRow = typeof mediaPosts.$inferSelect;
+const mediaPrint = (p: MediaRow) => (p.status === "handed" ? `handed:${hash([p.publishedRef])}` : hash([p.title, p.body]));
+
+function mediaAsk(p: MediaRow): Omit<DecisionAsk, "ref"> {
+  if (p.status === "handed" && p.channel === "linkedin") {
+    return {
+      title: `⏰ وقت پست لینکدین: ${p.title}`,
+      lines: [
+        "۱) «📲 باز کردن لینکدین» را بزن؛ متن آماده است، فقط Post را بزن.",
+        "۲) بعد اینجا «✅ پست کردم» را بزن.",
+        `اگر لینکدین متن را پر نکرد، این را کپی کن:\n\n${cut(p.body, 2600)}\n\n👉 ${ctaLink(p)}`,
+      ],
+      approveLabel: "✅ پست کردم",
+      rejectLabel: "⏭ این یکی را نمی‌گذارم",
+      link: p.publishedRef?.startsWith("https://") ? `/api/media/${p.id}/share` : `/cockpit/media#${p.id}`,
+      linkLabel: "📲 باز کردن لینکدین",
+    };
+  }
+  if (p.status === "handed") {
+    return {
+      title: `🎬 اسکریپت ویدیوی این هفته: ${p.title}`,
+      lines: [cut(p.body, 2600), `لینک توضیحات ویدیو: ${ctaLink(p)}`, "ضبط با گوشی (حدود ۳۰ دقیقه)، بعد «✅ منتشر کردم»."],
+      approveLabel: "✅ ضبط و منتشر کردم",
+      rejectLabel: "⏭ این هفته نه",
+      link: `/cockpit/media#${p.id}`,
+    };
+  }
+  const isIssue = p.channel === "newsletter";
+  return {
+    title: `${CHANNEL_FA[p.channel] ?? p.channel} (${p.lang}) · ${THEME_FA[p.theme] ?? p.theme}: ${p.title}`,
+    lines: [
+      isIssue ? `موضوع ایمیل: ${p.title}\n\n${cut(p.body, 1500)}` : cut(p.body, 1500),
+      p.bodyFa ? `${isIssue ? "خلاصه" : "ترجمه"} فارسی:\n${cut(p.bodyFa, 1200)}` : "",
+      p.sourceUrl ? `منبع: ${p.sourceTitle ?? ""} ${p.sourceUrl}` : "",
+      `زمان انتشار: ${romeTime(p.scheduledFor)} (اگر گذشته باشد، اولین وقت آزاد)`,
+      `لینک انتهای پست: ${p.cta === "checkup" ? "چک‌آپ رایگان" : "عضویت خبرنامه"}`,
+      p.writer === "rules" ? "⚠️ نسخه ساده از تحقیق هاب (مدل هوش مصنوعی در دسترس نبود)" : "",
+    ],
+    approveLabel: isIssue ? "✅ تأیید، ارسال سر وقت" : "✅ تأیید",
+    rejectLabel: "❌ رد",
+    link: `/cockpit/media#${p.id}`,
+    linkLabel: "✏️ ویرایش متن در کابین",
+  };
+}
+
+const mediaKind: Kind = {
+  async pending(db) {
+    const rows = await db.select().from(mediaPosts).where(inArray(mediaPosts.status, ["draft", "handed"])).orderBy(asc(mediaPosts.scheduledFor), asc(mediaPosts.createdAt));
+    return rows.map((p) => ({ subjectId: p.id, fingerprint: mediaPrint(p), ask: mediaAsk(p) }));
+  },
+  async current(db, id) {
+    const [p] = await db.select().from(mediaPosts).where(eq(mediaPosts.id, id));
+    return p && ["draft", "handed"].includes(p.status) ? mediaPrint(p) : null;
+  },
+  async decide(db, actor, id, approve) {
+    const [p] = await db.select({ status: mediaPosts.status }).from(mediaPosts).where(eq(mediaPosts.id, id));
+    if (p?.status === "handed") {
+      await confirmMediaPosted(db, actor, id, approve);
+      return approve ? "✅ ثبت شد. ممنون!" : "⏭ رد شد؛ این یکی منتشر نمی‌شود.";
+    }
+    const row = await decideMedia(db, actor, id, approve, approve ? undefined : "rejected in Telegram");
+    return approve ? `✅ تأیید شد؛ انتشار: ${romeTime(row.scheduledFor)}` : "❌ رد شد؛ ایجنت هفته بعد از آن یاد می‌گیرد.";
+  },
+};
+
+export const PHONE_KINDS: Record<string, Kind> = { outreach, partner: partnerKind, experiment: experimentKind, media: mediaKind };
 
 /** Sends asks for everything that waits and was not asked in this version yet (worker tick; cockpit button). */
 export async function sendWaitingAsks(db: Db, chat: AdminChat, max = 10) {

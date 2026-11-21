@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import type { SiteCopy } from "@/config/site-copy";
 
 // Consent first (doc 15 §6ه.4): analytics load only after "accept". Choice kept in this browser.
@@ -23,25 +23,77 @@ export function CookieBanner({ c }: { c: SiteCopy }) {
   );
 }
 
-export function Newsletter({ c, hub }: { c: SiteCopy; hub?: string }) {
-  const [done, setDone] = useState(false);
+/**
+ * Newsletter sign-up (doc 11: the email list is the media's hub). Consent box unticked by default (Italy needs prior
+ * consent even for B2B), double opt-in email, honeypot. A `?from=media-…` in the address (links in our LinkedIn posts)
+ * is kept as a tag so Cockpit › Media can count what the media brings.
+ */
+export function Newsletter({ c, hub, locale, industry = "general", country, brand }: { c: SiteCopy; hub?: string; locale: string; industry?: string; country?: string; brand: string }) {
+  const [state, setState] = useState<"idle" | "busy" | "done" | "error">("idle");
+  const [consent, setConsent] = useState(false);
+  const [msg, setMsg] = useState("");
+  const consentText = c.newsletter.consent.replace("{brand}", brand);
+  const inputId = useId();
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!consent) return setMsg(c.newsletter.consentNeeded);
+    const form = new FormData(e.currentTarget);
+    let from = "";
+    try {
+      from = new URLSearchParams(window.location.search).get("from") ?? sessionStorage.getItem("from") ?? "";
+    } catch {}
+    setState("busy");
+    const res = await fetch("/api/v1/leads", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: form.get("email"),
+        industry,
+        country: country ?? locale.slice(3, 5).toUpperCase(),
+        locale,
+        hook: "newsletter",
+        tags: ["newsletter", ...(from ? [`from:${from.slice(0, 34)}`] : [])],
+        consent: true,
+        consentText,
+        website: String(form.get("website") ?? ""),
+      }),
+    }).catch(() => null);
+    setState(res?.ok ? "done" : "error");
+    setMsg(res?.ok ? "" : c.newsletter.error);
+  }
   return (
-    <div className="newsletter">
+    <div className="newsletter" id="newsletter">
       <div style={{ flex: 1, minWidth: 220 }}>
         <b>📬 {c.newsletter.title}{hub ? ` · ${hub}` : ""}</b>
         <div className="muted small">{c.newsletter.sub}</div>
       </div>
-      {done ? (
+      {state === "done" ? (
         <span className="badge ok" role="status">✓ {c.newsletter.ok}</span>
       ) : (
-        <form className="row" onSubmit={(e) => { e.preventDefault(); setDone(true); }}>
-          <label className="sr-only" htmlFor="nl-email">{c.newsletter.placeholder}</label>
-          <input id="nl-email" type="email" required placeholder={c.newsletter.placeholder} className="ltr" style={{ width: 230 }} />
-          <button className="btn primary">{c.newsletter.cta}</button>
+        <form className="stack" style={{ gap: 6 }} onSubmit={submit}>
+          <div className="row">
+            <label className="sr-only" htmlFor={inputId}>{c.newsletter.placeholder}</label>
+            <input id={inputId} name="email" type="email" required placeholder={c.newsletter.placeholder} className="ltr" style={{ width: 230 }} />
+            <input name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: "absolute", left: -9999, width: 1, height: 1 }} />
+            <button className="btn primary" disabled={state === "busy"}>{c.newsletter.cta}</button>
+          </div>
+          <label className="small check" style={{ maxWidth: 420 }}><input type="checkbox" checked={consent} onChange={(e) => { setConsent(e.target.checked); setMsg(""); }} /> {consentText}</label>
+          {msg && <span className="small" role="alert" style={{ color: "var(--danger, #b42318)" }}>{msg}</span>}
         </form>
       )}
     </div>
   );
+}
+
+/** Keeps `?from=…` for this visit, so a sign-up on a later page still counts for the post that brought the visitor. */
+export function RememberFrom() {
+  useEffect(() => {
+    try {
+      const f = new URLSearchParams(window.location.search).get("from");
+      if (f) sessionStorage.setItem("from", f.slice(0, 40));
+    } catch {}
+  }, []);
+  return null;
 }
 
 export function ActionButton({ label, done, className = "btn" }: { label: string; done: string; className?: string }) {
