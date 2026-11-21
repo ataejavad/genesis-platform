@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { and, asc, eq, inArray, ne, sql } from "drizzle-orm";
+import { and, asc, eq, gte, inArray, ne, sql } from "drizzle-orm";
 import type { Db } from "@/db";
 import { experiments, partners, phoneAsks, prospects, touches } from "@/db/schema";
 import type { AdminChat, ApprovalPress, DecisionAsk } from "@/providers/admin-chat";
@@ -243,7 +243,7 @@ export async function phoneAskStats(db: Db, now = new Date()) {
   const rows = await db
     .select({ status: phoneAsks.status, n: sql<number>`count(*)::int` })
     .from(phoneAsks)
-    .where(sql`${phoneAsks.createdAt} >= ${since}`)
+    .where(gte(phoneAsks.createdAt, since))
     .groupBy(phoneAsks.status);
   const by = Object.fromEntries(rows.map((r) => [r.status, Number(r.n)]));
   return { sent: rows.reduce((s, r) => s + Number(r.n), 0), waiting: by.sent ?? 0, approved: by.approved ?? 0, rejected: by.rejected ?? 0 };

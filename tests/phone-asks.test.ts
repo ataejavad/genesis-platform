@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { describe, expect, it, vi } from "vitest";
 import { auditLog, companyPages, partners, phoneAsks, touches } from "@/db/schema";
 import { mockAdminChat, telegramChat, type ApprovalPress, type TelegramConfig } from "@/providers/admin-chat";
-import { handlePress, sendWaitingAsks } from "@/server/admin-chat";
+import { handlePress, phoneAskStats, sendWaitingAsks } from "@/server/admin-chat";
 import { addProspect } from "@/server/crm";
 import { approveSequence, editTouch, sendDueEmails } from "@/server/outreach";
 import { applyPartner } from "@/server/partners";
@@ -57,6 +57,7 @@ describe("approve and reject on the phone", () => {
     const [row] = await db.select().from(phoneAsks);
     expect(row).toMatchObject({ status: "approved", decidedBy: "telegram:7" });
     expect(row.decidedAt).not.toBeNull();
+    expect(await phoneAskStats(db)).toMatchObject({ sent: 1, approved: 1, waiting: 0 }); // the cockpit card
     expect((await db.select().from(auditLog)).some((a) => a.action === "outreach.approved" && a.actor === "telegram:7")).toBe(true);
     // approval from the phone never sends a cold email in Italy: the send step re-checks the law and keeps it waiting
     const mailer = { provider: "mock", send: vi.fn(async () => "id") };
