@@ -39,7 +39,7 @@ export const JOBS: JobDef[] = [
   { id: "agents.budget", what: "Pause agents over their monthly budget", schedule: { every: 60 }, run: (db, _d, now) => checkBudgets(db, now) },
   { id: "lead.reminders", what: "Deadline reminders the hub leads asked for (30 days before)", schedule: { daily: "07:00" }, outward: true, run: (db, _d, now) => leadReminders(db, now) },
   // after the free AI quota resets (midnight Pacific = 09:00 Rome): companies saved without research get it
-  { id: "outbound.research", what: "Research companies saved without it; rewrite their drafts with the personal line", schedule: { daily: "09:30" }, run: (db, _d, now) => researchBacklog(db, { type: "system", id: "research-backlog" }, {}, now) },
+  { id: "outbound.research", what: "Research companies saved without it; rewrite their drafts with the personal line", schedule: { daily: "09:30" }, run: (db, d, now) => researchBacklog(db, { type: "system", id: "research-backlog" }, { adminChat: d.adminChat }, now) },
   { id: "experiments", what: "Close experiment windows; mark winners ready for Javad", schedule: { daily: "07:30" }, run: (db, _d, now) => checkExperiments(db, now) },
   { id: "daily.report", what: "Javad's morning brief (phone chat + Cockpit › Today)", schedule: { daily: "08:00" }, run: async (db, d, now) => { const r = await dailyReport(db, now, d.adminChat); return { verdict: r.verdict, sent: Boolean(r.sentAt) }; } },
   { id: "customer.health", what: "Weekly health score per customer; at-risk alert", schedule: { weekly: 1, at: "07:00" }, run: (db, _d, now) => customerHealthWeek(db, now) },
@@ -113,12 +113,16 @@ export async function runDue(db: Db, deps: JobDeps, now = new Date(), only?: str
   const last = await lastRuns(db);
   const off = await switchesLike(db, "job:");
   const stopped = await isStopped(db);
-  const ran: { job: string; ok: boolean }[] = [];
+  const ran: { job: string; ok: boolean; result?: string }[] = [];
   for (const job of JOBS) {
     if (only ? !only.includes(job.id) : !isDue(job, last.get(job.id), now)) continue;
     // Javad switched it off, or the emergency stop holds everything that reaches people outside
     if (off.get(`job:${job.id}`)?.enabled === false || (stopped && job.outward)) continue;
-    ran.push({ job: job.id, ok: await runJob(db, deps, job, now) });
+    const ok = await runJob(db, deps, job, now);
+    // a short result next to each job, so the hourly tick's log (GitHub Actions) shows what happened without the cockpit
+    const [done] = await db.select({ result: jobRuns.result, error: jobRuns.error }).from(jobRuns).where(eq(jobRuns.job, job.id)).orderBy(desc(jobRuns.startedAt)).limit(1);
+    const short = JSON.stringify(ok ? (done?.result ?? null) : done?.error ?? null)?.slice(0, 300);
+    ran.push({ job: job.id, ok, ...(short && short !== "null" ? { result: short } : {}) });
   }
   return ran;
 }

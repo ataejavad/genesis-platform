@@ -6,6 +6,11 @@ on:
   schedule:
     - cron: "17 * * * *"
   workflow_dispatch:
+    inputs:
+      job:
+        description: "Run this job now even if not due (e.g. outbound.research); empty = only what is due"
+        required: false
+        default: ""
 
 jobs:
   tick:
@@ -16,6 +21,9 @@ jobs:
         env:
           APP_URL: ${{ secrets.APP_URL }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          JOB: ${{ github.event.inputs.job }}
         run: |
           if [ -z "$APP_URL" ] || [ -z "$CRON_SECRET" ]; then echo "APP_URL / CRON_SECRET not set: skipped"; exit 0; fi
-          curl -fsS --max-time 300 -H "Authorization: Bearer $CRON_SECRET" "${APP_URL%/}/api/cron/tick"
+          # job names are letters, dots and dashes only
+          case "$JOB" in *[!a-z.,-]*) echo "bad job name"; exit 1;; esac
+          curl -fsS --max-time 300 -H "Authorization: Bearer $CRON_SECRET" "${APP_URL%/}/api/cron/tick${JOB:+?run=$JOB}"
