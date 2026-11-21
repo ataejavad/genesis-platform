@@ -4,7 +4,7 @@ import { auditLog, companyPages, partners, phoneAsks, touches } from "@/db/schem
 import { mockAdminChat, telegramChat, type ApprovalPress, type TelegramConfig } from "@/providers/admin-chat";
 import { handlePress, sendWaitingAsks } from "@/server/admin-chat";
 import { addProspect } from "@/server/crm";
-import { approveSequence, editTouch } from "@/server/outreach";
+import { approveSequence, editTouch, sendDueEmails } from "@/server/outreach";
 import { applyPartner } from "@/server/partners";
 import { javad, useTestDb } from "./helpers";
 
@@ -45,6 +45,7 @@ describe("approve and reject on the phone", () => {
     expect(ask.title).toContain("Impianti Bianchi Srl");
     expect(ask.link).toBe(`/cockpit/crm/${r.id}`);
     expect(ask.lines.join("\n")).toContain("ترجمه فارسی");
+    expect(ask.lines.join("\n")).toContain("email: cold email is switched off for IT"); // Javad sees what will not go out
 
     const { press, said } = pressOf(ask.ref, "approved");
     expect(await handlePress(db, press)).toBe("approved");
@@ -57,6 +58,10 @@ describe("approve and reject on the phone", () => {
     expect(row).toMatchObject({ status: "approved", decidedBy: "telegram:7" });
     expect(row.decidedAt).not.toBeNull();
     expect((await db.select().from(auditLog)).some((a) => a.action === "outreach.approved" && a.actor === "telegram:7")).toBe(true);
+    // approval from the phone never sends a cold email in Italy: the send step re-checks the law and keeps it waiting
+    const mailer = { provider: "mock", send: vi.fn(async () => "id") };
+    expect((await sendDueEmails(db, mailer, new Date(now.getTime() + 30 * 864e5))).sent).toBe(0);
+    expect(mailer.send).not.toHaveBeenCalled();
 
     // a second press (double tap, or the reject button afterwards) changes nothing
     const again = pressOf(ask.ref, "rejected");

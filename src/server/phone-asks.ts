@@ -44,6 +44,11 @@ async function draftsOf(db: Db, prospectIds: string[]) {
   if (!prospectIds.length) return [];
   return db.select().from(touches).where(and(inArray(touches.prospectId, prospectIds), eq(touches.status, "draft"))).orderBy(asc(touches.prospectId), asc(touches.position));
 }
+/** Steps the law or a switch holds back right now, so the founder sees what an approval will NOT send. */
+const held = (list: (typeof touches.$inferSelect)[]) => {
+  const reasons = [...new Set(list.filter((t) => t.blockedReason).map((t) => `${t.channel}: ${t.blockedReason}`))];
+  return reasons.length ? `⏸ فعلاً نمی‌رود:\n${reasons.join("\n")}` : "";
+};
 const outreachPrint = (list: (typeof touches.$inferSelect)[]) => hash(list.map((t) => [t.id, t.subject, t.body]));
 
 const outreach: Kind = {
@@ -73,9 +78,10 @@ const outreach: Kind = {
             `برنامه: ${list.length} قدم (${plan})`,
             first ? `${first.channel === "email" ? "✉️" : first.channel === "phone" ? "📞" : "💼"} ${first.subject ? `${first.subject}\n` : ""}${cut(first.body, 1400)}` : "",
             first?.bodyFa ? `ترجمه فارسی:\n${cut(first.bodyFa, 1000)}` : "",
-            "با تأیید، صفحه شرکت آنلاین می‌شود و قدم‌ها سر وقت خود می‌روند، با همان کنترل‌های قانونی کابین (سوئیچ کشور، لغو اشتراک، Registro).",
+            held(list),
+            "با تأیید، صفحه شرکت آنلاین می‌شود. هر قدم سر وقت خودش دوباره با قانون همان کشور چک می‌شود: ایمیل یا تماس خودکار بدون رضایت قبلی هرگز خودکار نمی‌رود (در ایتالیا خاموش است). LinkedIn و تماس انسانی کارهایی برای یک نفر می‌شوند.",
           ],
-          approveLabel: "✅ تأیید و ارسال",
+          approveLabel: "✅ تأیید",
           rejectLabel: "❌ رد",
           link: `/cockpit/crm/${p.id}`,
           linkLabel: "✏️ ویرایش متن در کابین",
