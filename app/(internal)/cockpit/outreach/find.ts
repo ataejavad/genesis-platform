@@ -30,7 +30,7 @@ export async function researchNow(_prev: FindResult): Promise<FindResult> {
   try {
     const r = await researchBacklog(getDb(), { type: "user", id: user.id }, { max: 4 });
     revalidatePath("/cockpit/outreach");
-    return { ok: !r.stopped, message: [`${r.researched} researched`, `${r.waiting} still waiting`, r.stopped ? `⚠ ${r.stopped}` : "", ...("errors" in r ? r.errors.map((e) => `⚠ ${e}`) : [])].filter(Boolean).join(" · ") };
+    return { ok: !r.stopped, message: [`${r.researched} researched`, `${r.waiting} still waiting`, r.stopped ? `⚠ ${r.stopped}` : "", ...(("errors" in r && r.errors) || []).map((e) => `⚠ ${e}`)].filter(Boolean).join(" · ") };
   } catch (err) {
     return { ok: false, message: err instanceof Error ? err.message.slice(0, 300) : "failed" };
   }
