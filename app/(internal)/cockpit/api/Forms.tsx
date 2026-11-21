@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { type Result, testAdminChat, testCompanySearch, testEmail, testPeopleSearch } from "./actions";
+import { type Result, sendAsksNow, testAdminChat, testCompanySearch, testEmail, testPeopleSearch } from "./actions";
 
 function TestButton({ label, run, input }: { label: string; run: (prev: Result, form: FormData) => Promise<Result>; input?: { name: string; placeholder: string } }) {
   const [state, action, pending] = useActionState<Result, FormData>(run, null);
@@ -27,4 +27,8 @@ export function TestConnections() {
       </div>
     </div>
   );
+}
+
+export function SendAsksNow() {
+  return <TestButton label="Send waiting approvals to my phone now" run={sendAsksNow} />;
 }

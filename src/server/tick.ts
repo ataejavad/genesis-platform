@@ -3,7 +3,7 @@ import { and, eq, lt } from "drizzle-orm";
 import type { Db } from "@/db";
 import { leases } from "@/db/schema";
 import { dispatchBatch, type DispatchDeps } from "@/worker/dispatch";
-import { adminChatFromEnv } from "./admin-chat";
+import { adminChatFromEnv, sendWaitingAsks } from "./admin-chat";
 import { mailerFromEnv } from "./mailer";
 import { sendQueued } from "./notify";
 import { type JobDeps, runDue } from "./orchestrator";
@@ -44,7 +44,7 @@ export async function runTick(db: Db, deps: TickDeps, opts: { jobs: boolean; bud
   // the lease outlives the budget a little, so a crashed pass frees it on its own
   const holder = await takeLease(db, "tick", opts.budgetMs + 30_000);
   if (!holder) return { skipped: true as const };
-  const out = { skipped: false as const, jobs: [] as { job: string; ok: boolean; result?: string }[], events: 0, emails: 0 };
+  const out = { skipped: false as const, jobs: [] as { job: string; ok: boolean; result?: string }[], events: 0, emails: 0, asks: 0 };
   try {
     if (opts.jobs) out.jobs = await runDue(db, deps, new Date(), opts.only);
     while (Date.now() - started < opts.budgetMs) {
@@ -54,6 +54,8 @@ export async function runTick(db: Db, deps: TickDeps, opts: { jobs: boolean; bud
       out.emails += m;
       if (n === 0 && m === 0) break;
     }
+    // yes/no decisions that wait on Javad go to his phone with approve/reject buttons (once per text version)
+    if (deps.adminChat) out.asks = (await sendWaitingAsks(db, deps.adminChat).catch(() => ({ sent: 0 }))).sent;
   } finally {
     await releaseLease(db, "tick", holder);
   }

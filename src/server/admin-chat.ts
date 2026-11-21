@@ -4,6 +4,7 @@ import { approvals } from "@/db/schema";
 import type { AdminChat, ApprovalAsk, ApprovalPress } from "@/providers/admin-chat";
 import { decideApproval } from "./content";
 import { AppError } from "./errors";
+import { handleAskPress } from "./phone-asks";
 
 /*
  * Approvals and alerts on the founder's phone. Which app carries them (Telegram today) is the AdminChat adapter
@@ -29,7 +30,7 @@ export async function handleApprovalPress(db: Db, press: ApprovalPress, onDecide
   }
   let answer: string;
   try {
-    const result = await decideApproval(db, { type: "telegram", id: press.by }, press.approvalId, press.decision);
+    const result = await decideApproval(db, { type: "telegram", id: press.by }, press.id, press.decision);
     await onDecided?.(result);
     answer = press.decision === "approved" ? "منتشر شد ✅" : "رد شد ❌";
   } catch (err) {
@@ -39,3 +40,10 @@ export async function handleApprovalPress(db: Db, press: ApprovalPress, onDecide
   await press.ack(answer);
   return press.decision;
 }
+
+/** Any button press from the founder's chat: content approvals here, every other decision in phone-asks.ts. */
+export async function handlePress(db: Db, press: ApprovalPress, onDecided?: Parameters<typeof handleApprovalPress>[2]) {
+  return press.target === "ask" ? handleAskPress(db, press) : handleApprovalPress(db, press, onDecided);
+}
+
+export { sendWaitingAsks, phoneAskStats } from "./phone-asks";

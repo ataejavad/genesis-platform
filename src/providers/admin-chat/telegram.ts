@@ -37,6 +37,9 @@ export async function telegramRecentChats(botToken: string, fetchImpl: typeof fe
   return [...chats].map(([id, name]) => ({ id, name }));
 }
 
+/** Telegram messages hold at most 4096 characters. */
+const clip = (s: string) => (s.length > 3300 ? `${s.slice(0, 3300)}…` : s);
+
 const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 function secretMatches(given: string | null, expected: string | undefined) {
@@ -85,18 +88,38 @@ export function telegramChat(cfg: TelegramConfig, fetchImpl: typeof fetch = fetc
       });
       return String(msg.message_id);
     },
+    async askDecision(a) {
+      // cut before escaping, so a cut never splits an HTML entity
+      const text = `🟡 <b>${escapeHtml(a.title.slice(0, 200))}</b>\n\n${escapeHtml(clip(a.lines.filter(Boolean).join("\n\n")))}`;
+      const rows: { text: string; callback_data?: string; url?: string }[][] = [
+        [
+          { text: a.approveLabel, callback_data: `d:${a.ref}:a` },
+          { text: a.rejectLabel, callback_data: `d:${a.ref}:r` },
+        ],
+      ];
+      // a link button needs a public https address; without one the cockpit is still one tap away in the alerts
+      if (a.link && cfg.appUrl.startsWith("https://")) rows.push([{ text: a.linkLabel ?? "✏️ باز کردن در کابین", url: `${cfg.appUrl}${a.link}` }]);
+      const msg = await call("sendMessage", { chat_id: cfg.adminChatId, text, parse_mode: "HTML", disable_web_page_preview: true, reply_markup: { inline_keyboard: rows } });
+      return String(msg.message_id);
+    },
+    async status() {
+      const info = (await call("getWebhookInfo", {})) as { url?: string; pending_update_count?: number; last_error_message?: string };
+      return { connected: Boolean(info.url), url: info.url || undefined, pending: info.pending_update_count ?? 0, lastError: info.last_error_message ?? null };
+    },
     async connect(webhookUrl) {
       await call("setWebhook", { url: webhookUrl, secret_token: cfg.webhookSecret, allowed_updates: ["callback_query"] });
     },
     async readPress(headers, body): Promise<ApprovalPress | "forbidden" | null> {
       if (!secretMatches(headers.get("x-telegram-bot-api-secret-token"), cfg.webhookSecret)) return "forbidden";
       const cq = (body as { callback_query?: CallbackQuery })?.callback_query;
-      const match = cq?.data?.match(/^apr:([0-9a-f-]{36}):([ar])$/);
+      const match = cq?.data?.match(/^(apr|d):([0-9a-f-]{36}):([ar])$/);
       if (!cq || !match) return null;
-      const allowed = cfg.adminUserIds.includes(String(cq.from.id));
+      // the chat must be the founder's chat AND the person one of the approvers (a bot added to a group can't approve)
+      const allowed = cfg.adminUserIds.includes(String(cq.from.id)) && (!cq.message || String(cq.message.chat.id) === cfg.adminChatId);
       return {
-        approvalId: match[1],
-        decision: match[2] === "a" ? "approved" : "rejected",
+        target: match[1] === "apr" ? "approval" : "ask",
+        id: match[2],
+        decision: match[3] === "a" ? "approved" : "rejected",
         by: String(cq.from.id),
         allowed,
         async ack(text) {

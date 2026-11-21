@@ -1,10 +1,11 @@
 import { desc } from "drizzle-orm";
 import { getDb } from "@/db";
 import { apiKeys } from "@/db/schema";
+import { adminChatFromEnv, phoneAskStats } from "@/server/admin-chat";
 import { connections } from "@/server/systems";
 import { PageHead } from "@/ui/Shell";
 import { NewKey, RevokeKey } from "../systems/Forms";
-import { TestConnections } from "./Forms";
+import { SendAsksNow, TestConnections } from "./Forms";
 
 const endpoints = [
   ["POST", "/api/v1/drafts", "Agent sends a page draft (content:draft)"],
@@ -28,6 +29,9 @@ export default async function Api() {
   const db = getDb();
   const keys = await db.select().from(apiKeys).orderBy(desc(apiKeys.createdAt)).limit(100);
   const conns = connections();
+  const chat = adminChatFromEnv();
+  const hook = chat?.status ? await chat.status().catch((e: unknown) => ({ connected: false, lastError: e instanceof Error ? e.message.slice(0, 160) : "unreachable" })) : null;
+  const asks = await phoneAskStats(db);
   return (
     <main>
       <PageHead title="API & connections" crumbs="Cockpit › Machine" sub="Every agent works through the API with its own scoped key; nothing writes to the database directly. Every outside company sits behind our own adapter (src/providers): to change company, set the switch in .env and add its keys; no business code changes. Keys live in .env on the computer or server, never in chat." />
@@ -35,6 +39,17 @@ export default async function Api() {
         {conns.map((c) => <div key={c.name} className="card"><div className="row" style={{ justifyContent: "space-between" }}><b>{c.name}</b><span className={`badge ${c.ok ? "ok" : "warn"}`}>{c.ok ? "connected" : "not set"}</span></div><p className="muted small">{c.why}</p><div className="small">Now: <b>{c.provider}</b></div>{c.note && <div className="small" style={{ color: "var(--warn, #b45309)" }}>⚠ {c.note}</div>}{!c.ok && c.keys && <div className="muted small ltr">.env: {c.keys}</div>}{c.options.length > 1 && <div className="muted small ltr">switch: {c.switchEnv} = {c.options.join(" | ")}</div>}</div>)}
       </section>
       <TestConnections />
+      <div className="card" style={{ marginBottom: 18 }}>
+        <div className="row" style={{ justifyContent: "space-between" }}>
+          <h3>Approve on the phone</h3>
+          <span className={`badge ${hook?.connected && !hook.lastError ? "ok" : "warn"}`}>{!chat ? "no phone channel" : !chat.status ? chat.provider : hook?.connected ? (hook.lastError ? "button error" : "buttons connected") : "buttons not connected"}</span>
+        </div>
+        <p className="muted small">First messages to companies, partner applications, finished tests and website drafts arrive with ✅ / ❌ buttons. A press does exactly what the cockpit button does (same send path and legal checks); only you can press, each item is decided once, and a press on an edited text does nothing. Items that need a closer look (QA checklist, orders, customer files) stay here with a link.</p>
+        <div className="small">Last 7 days: <b>{asks.sent}</b> sent · <b>{asks.waiting}</b> waiting · <b>{asks.approved}</b> approved · <b>{asks.rejected}</b> rejected on the phone</div>
+        {hook?.lastError && <div className="small" style={{ color: "var(--warn, #b45309)" }}>⚠ {hook.lastError}</div>}
+        {chat && hook && !hook.connected && <div className="muted small">Press “Send test phone message” above once to connect the buttons.</div>}
+        <div style={{ marginTop: 8 }}><SendAsksNow /></div>
+      </div>
       <section className="grid g-2-1" style={{ marginBottom: 18 }}>
         <div className="card table-wrap">
           <h3>Agent keys</h3>

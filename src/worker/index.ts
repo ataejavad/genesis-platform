@@ -3,7 +3,7 @@ import { mailerFromEnv } from "@/server/mailer";
 import { sendQueued } from "@/server/notify";
 import { runDue } from "@/server/orchestrator";
 import { isStopped } from "@/server/switches";
-import { adminChatFromEnv } from "@/server/admin-chat";
+import { adminChatFromEnv, sendWaitingAsks } from "@/server/admin-chat";
 import { voiceFromEnv } from "@/server/voice";
 import { dispatchBatch } from "./dispatch";
 
@@ -24,6 +24,8 @@ while (running) {
     if (Date.now() - lastJobs > 60_000) {
       lastJobs = Date.now();
       await runDue(db, jobDeps);
+      // yes/no decisions waiting on Javad go to his phone with approve/reject buttons
+      if (deps.adminChat) await sendWaitingAsks(db, deps.adminChat).catch((e) => console.error("phone asks failed", e));
     }
     // messages to customers, partners and leads (stay queued in Cockpit › Outbox without a mailer)
     if (jobDeps.mailer && !(await isStopped(db))) await sendQueued(db, jobDeps.mailer);

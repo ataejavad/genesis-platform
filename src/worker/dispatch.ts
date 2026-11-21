@@ -47,15 +47,14 @@ async function handle(db: Db, deps: DispatchDeps, event: Event) {
     const line = event.type === "customer_request.created" ? `📨 ${p.company} (${p.kind}): ${String(p.text ?? "").slice(0, 200)}` : `${p.decision === "approved" ? "✅" : "✏️"} ${p.company}: ${p.title}${p.note ? ` (${p.note})` : ""}`;
     await sendAlert(deps.adminChat, [line], "/cockpit/customers");
   }
-  // Partner portal: new applications, work to review, and messages (review requests and hidden contacts first).
-  if (deps.adminChat && ["partner.applied", "delivery.submitted", "partner.message"].includes(event.type)) {
-    const p = event.payload as { name?: string; kind?: string; country?: string; score?: number; title?: string; partner?: string; version?: number; text?: string; flagged?: boolean; reviewRequest?: boolean };
+  // Partner portal: work to review and messages (review requests and hidden contacts first). New applications come
+  // as approve/reject buttons instead (src/server/phone-asks.ts).
+  if (deps.adminChat && ["delivery.submitted", "partner.message"].includes(event.type)) {
+    const p = event.payload as { title?: string; partner?: string; version?: number; text?: string; flagged?: boolean; reviewRequest?: boolean };
     const line =
-      event.type === "partner.applied"
-        ? `🤝 New partner application: ${p.name} (${p.kind}, ${p.country}), score ${p.score}`
-        : event.type === "delivery.submitted"
-          ? `📦 ${p.partner} delivered "${p.title}" (v${p.version}): review it`
-          : `${p.reviewRequest ? "⚖️ Human review requested" : p.flagged ? "🚩 Contact details hidden" : "💬"} ${p.partner}: ${String(p.text ?? "").slice(0, 200)}`;
+      event.type === "delivery.submitted"
+        ? `📦 ${p.partner} delivered "${p.title}" (v${p.version}): review it`
+        : `${p.reviewRequest ? "⚖️ Human review requested" : p.flagged ? "🚩 Contact details hidden" : "💬"} ${p.partner}: ${String(p.text ?? "").slice(0, 200)}`;
     await sendAlert(deps.adminChat, [line], "/cockpit/partners");
   }
   // Step 7: the QA judge looks at every delivery; low-risk work from trusted partners can pass on its own.
@@ -137,15 +136,14 @@ async function handle(db: Db, deps: DispatchDeps, event: Event) {
           : `⏰ ${p.title}: €${p.totalEur} is ${p.daysLate} days late${p.level === 4 ? " (pause warning sent)" : ""}`;
     await sendAlert(deps.adminChat, [line], event.type === "contract.signed" ? "/cockpit/contracts" : "/cockpit/finance");
   }
-  // Step 9: agents over budget, finished experiments and customers at risk reach Javad at once (and the brief).
-  if (deps.adminChat && ["agent.paused", "experiment.ready", "customer.at_risk"].includes(event.type)) {
-    const p = event.payload as { name?: string; spentEur?: number; budgetEur?: number; until?: string; key?: string; recommended?: string; why?: string; company?: string; score?: number; reasons?: string[] };
+  // Step 9: agents over budget and customers at risk reach Javad at once (and the brief). Finished experiments come
+  // as approve/reject buttons instead (src/server/phone-asks.ts).
+  if (deps.adminChat && ["agent.paused", "customer.at_risk"].includes(event.type)) {
+    const p = event.payload as { name?: string; spentEur?: number; budgetEur?: number; until?: string; company?: string; score?: number; reasons?: string[] };
     const [line, link] =
       event.type === "agent.paused"
         ? [`⏸️ ${p.name} paused until ${p.until}: €${p.spentEur} of €${p.budgetEur} budget spent`, "/cockpit/agents"]
-        : event.type === "experiment.ready"
-          ? [`🧪 Test "${p.key}" finished: ${p.why}. Recommended: ${p.recommended}`, "/cockpit/experiments"]
-          : [`🚩 ${p.company} at risk (${p.score}/100): ${(p.reasons ?? []).join("; ")}`, "/cockpit/customers"];
+        : [`🚩 ${p.company} at risk (${p.score}/100): ${(p.reasons ?? []).join("; ")}`, "/cockpit/customers"];
     await sendAlert(deps.adminChat, [line], link);
   }
   // Emergency stop and its release reach Javad's phone (he may have pressed it from someone else's laptop).

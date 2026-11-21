@@ -201,6 +201,28 @@ export const approvals = pgTable(
   (t) => [index("approvals_status_idx").on(t.status)],
 );
 
+// Approve/reject asks sent to the founder's phone (Telegram today) for items outside the content flow: outbound
+// first messages, partner applications, finished tests. One row per item and text version, so each version is asked
+// once, a button pressed on an older text can't approve newer text, and who decided when stays on record.
+export const phoneAsks = pgTable(
+  "phone_asks",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    // outreach (subject = prospect), partner (partner application), experiment
+    kind: text("kind").notNull(),
+    subjectId: text("subject_id").notNull(),
+    // hash of what Javad saw; a different text gets a new ask
+    fingerprint: text("fingerprint").notNull(),
+    messageId: text("message_id"),
+    // sent → deciding → approved | rejected; stale (text changed), elsewhere (decided in the cockpit first)
+    status: text("status").notNull().default("sent"),
+    decidedBy: text("decided_by"),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex("phone_asks_subject_idx").on(t.kind, t.subjectId, t.fingerprint), index("phone_asks_status_idx").on(t.status)],
+);
+
 // Transactional outbox: written in the same transaction as the change, dispatched by the worker.
 export const events = pgTable(
   "events",
