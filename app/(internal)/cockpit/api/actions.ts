@@ -2,7 +2,8 @@
 
 import { requireAdmin } from "@/lib/auth";
 import { telegramRecentChats } from "@/providers/admin-chat";
-import { adminChatFromEnv } from "@/server/admin-chat";
+import { getDb } from "@/db";
+import { adminChatFromEnv, sendWaitingAsks } from "@/server/admin-chat";
 import { companySearchFromEnv } from "@/providers/company-search";
 import { peopleSearchFromEnv } from "@/providers/people-search";
 import { mailerFromEnv } from "@/server/mailer";
@@ -47,6 +48,20 @@ export async function testAdminChat(): Promise<Result> {
     if (chat.connect && appUrl.startsWith("https://")) await chat.connect(`${appUrl}/api/telegram/webhook`);
     await chat.alert(["✅ Genesis: test message", "Alerts, the 08:00 brief and approvals will arrive here."], "/cockpit");
     return { ok: true, message: `Sent through ${chat.provider}${chat.connect ? "; approval buttons connected" : ""}` };
+  } catch (err) {
+    return fail(err);
+  }
+}
+
+/** Sends every yes/no decision that waits on Javad to his phone now (otherwise the next background pass does it). */
+export async function sendAsksNow(): Promise<Result> {
+  await requireAdmin();
+  const chat = adminChatFromEnv();
+  if (!chat) return { ok: false, message: "No phone channel set: add TELEGRAM_BOT_TOKEN and TELEGRAM_ADMIN_CHAT_ID, then redeploy" };
+  try {
+    const r = await sendWaitingAsks(getDb(), chat, 25);
+    if (r.errors.length) return { ok: false, message: `Sent ${r.sent}; stopped: ${r.errors[0]}` };
+    return { ok: true, message: r.sent ? `Sent ${r.sent} to your phone${r.more ? " (more follow on the next pass)" : ""}` : "Nothing new to send: everything waiting was already sent" };
   } catch (err) {
     return fail(err);
   }
