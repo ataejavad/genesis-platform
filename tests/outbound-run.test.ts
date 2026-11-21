@@ -112,11 +112,12 @@ describe("Maps listings as they really come", () => {
 
   it("a failed research shows its reason in the result", async () => {
     const finder = apifyMaps("t", (async () => new Response(JSON.stringify([{ title: "Rossi Impianti Srl", city: "Milano", website: "https://rossi.it", phone: "+39 02 9" }]))) as unknown as typeof fetch);
-    setLlmForTests({ provider: "fake", model: "fake", webSearch: true, complete: async () => { throw new Error("gemini 429: quota"); } });
+    // not a quota error: a 429 would make research read the (real) website instead, which tests must not fetch
+    setLlmForTests({ provider: "fake", model: "fake", webSearch: true, complete: async () => { throw new Error("gemini 500: internal"); } });
     try {
       const s = await findCustomers(db, javad, { industry: "installers", region: "Lombardia", limit: 3 }, { finder, people: null, research: true });
       expect(s.added).toBe(1);
-      expect(s.errors[0]).toContain("gemini 429");
+      expect(s.errors[0]).toContain("gemini 500");
     } finally {
       setLlmForTests(null);
     }
@@ -157,6 +158,16 @@ describe("research later, when the free AI quota is back", () => {
     expect(r.researched).toBe(1);
     expect(r.noSite).toBe(1);
     expect(r.stopped).toBeNull();
+  });
+
+  it("a failed research names its reason and is tried again next time", async () => {
+    await findCustomers(db, javad, { industry: "installers", region: "Lombardia", limit: 5 }, { finder: finder(), people: null, research: false });
+    const r = await researchBacklog(db, javad, { run: async () => Promise.reject(new Error("research answer was cut off (max_tokens)")) });
+    expect(r.failed).toBe(2);
+    expect(r.errors).toEqual(["research answer was cut off (max_tokens)"]);
+    const again = await researchBacklog(db, javad, { run: async () => research });
+    expect(again.researched).toBe(2);
+    expect(await researchWaiting(db)).toBe(0);
   });
 
   it("leaves a company alone once Javad approved its messages", async () => {

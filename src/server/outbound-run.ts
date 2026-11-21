@@ -98,20 +98,25 @@ export async function researchBacklog(db: Db, actor: Actor, o: { max?: number; b
   const rows = await db
     .select()
     .from(prospects)
-    .where(and(eq(prospects.source, "maps"), eq(prospects.stage, "new"), eq(prospects.sequence, "cold"), sql`coalesce(${prospects.signals}->>'researched', '') = ''`))
+    .where(and(eq(prospects.source, "maps"), eq(prospects.stage, "new"), eq(prospects.sequence, "cold"), sql`coalesce(${prospects.signals}->>'researched', '') in ('', 'failed')`))
     .orderBy(desc(prospects.score))
     .limit(50);
   const open = rows.length
     ? await db.select({ prospectId: touches.prospectId }).from(touches).where(and(inArray(touches.prospectId, rows.map((r) => r.id)), eq(touches.status, "approved")))
     : [];
-  // companies with a website first: without web search (free AI tiers) research can only read their own site
-  const todo = rows.filter((r) => !open.some((t) => t.prospectId === r.id)).sort((a, b) => Number(Boolean(b.website)) - Number(Boolean(a.website)));
+  // never tried before failed ones (they are tried again, last), and companies with a website first: without web
+  // search (free AI tiers) research can only read their own site
+  const rank = (r: (typeof rows)[number]) => (r.signals.researched === "failed" ? 2 : 0) + (r.website ? 0 : 1);
+  const todo = rows.filter((r) => !open.some((t) => t.prospectId === r.id)).sort((a, b) => rank(a) - rank(b));
   const lessons = (await lessonsFor(db, "outreach")).map((l) => l.text);
   const env = planEnv();
   const started = Date.now();
   let researched = 0;
   let stopped: string | null = null;
   let noSite = 0;
+  let failed = 0;
+  // why research failed, once per reason, so the cockpit and the job log show it
+  const errors: string[] = [];
   for (const p of todo.slice(0, o.max ?? 4)) {
     if (Date.now() - started > (o.budgetMs ?? 150_000)) break;
     let r: Awaited<ReturnType<typeof researchCompany>>;
@@ -128,6 +133,8 @@ export async function researchBacklog(db: Db, actor: Actor, o: { max?: number; b
         stopped = m.slice(0, 300);
         break;
       }
+      failed++;
+      if (errors.length < 3 && !errors.includes(m.slice(0, 200))) errors.push(m.slice(0, 200));
       await db.update(prospects).set({ signals: { ...p.signals, researched: "failed", researchError: m.slice(0, 200) } }).where(eq(prospects.id, p.id));
       continue;
     }
@@ -149,18 +156,19 @@ export async function researchBacklog(db: Db, actor: Actor, o: { max?: number; b
   }
   const waiting = todo.length - researched;
   // the founder hears the result on his phone, so nobody has to open the cockpit to know it ran
-  if (o.adminChat && (researched || stopped)) {
+  if (o.adminChat && (researched || stopped || failed)) {
     const lines = [
       researched ? `🔬 ${researched} شرکت تحقیق شد و پیش‌نویس پیام‌هایشان با جمله شخصی به‌روز شد.` : "🔬 تحقیق شرکت‌ها امروز انجام نشد.",
       waiting ? `${waiting} شرکت هنوز منتظر تحقیق است${stopped ? " (سهمیه رایگان AI تمام شد؛ فردا دوباره)" : ""}.` : "همه شرکت‌ها تحقیق دارند و منتظر تأیید تو هستند.",
+      ...(failed ? [`⚠️ تحقیق ${failed} شرکت خطا داد (دلیل در Cockpit › Outbound)؛ دفعه بعد دوباره امتحان می‌شود.`] : []),
     ];
     await o.adminChat.alert(lines, `${env.appUrl}/cockpit/outreach`).catch(() => null);
   }
-  return { researched, waiting, stopped, noSite };
+  return { researched, waiting, stopped, noSite, failed, errors };
 }
 
 /** How many saved companies still wait for research (cockpit). */
 export async function researchWaiting(db: Db) {
-  const [r] = await db.select({ n: count() }).from(prospects).where(and(eq(prospects.source, "maps"), eq(prospects.stage, "new"), sql`coalesce(${prospects.signals}->>'researched', '') = ''`));
+  const [r] = await db.select({ n: count() }).from(prospects).where(and(eq(prospects.source, "maps"), eq(prospects.stage, "new"), sql`coalesce(${prospects.signals}->>'researched', '') in ('', 'failed')`));
   return r?.n ?? 0;
 }
