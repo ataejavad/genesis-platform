@@ -39,14 +39,14 @@ export async function releaseLease(db: Db, name: string, holder: string) {
   await db.delete(leases).where(and(eq(leases.name, name), eq(leases.holder, holder)));
 }
 
-export async function runTick(db: Db, deps: TickDeps, opts: { jobs: boolean; budgetMs: number }) {
+export async function runTick(db: Db, deps: TickDeps, opts: { jobs: boolean; budgetMs: number; only?: string[] }) {
   const started = Date.now();
   // the lease outlives the budget a little, so a crashed pass frees it on its own
   const holder = await takeLease(db, "tick", opts.budgetMs + 30_000);
   if (!holder) return { skipped: true as const };
-  const out = { skipped: false as const, jobs: [] as { job: string; ok: boolean }[], events: 0, emails: 0 };
+  const out = { skipped: false as const, jobs: [] as { job: string; ok: boolean; result?: string }[], events: 0, emails: 0 };
   try {
-    if (opts.jobs) out.jobs = await runDue(db, deps);
+    if (opts.jobs) out.jobs = await runDue(db, deps, new Date(), opts.only);
     while (Date.now() - started < opts.budgetMs) {
       const n = await dispatchBatch(db, deps);
       const m = deps.mailer && !(await isStopped(db)) ? await sendQueued(db, deps.mailer) : 0;

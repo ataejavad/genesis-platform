@@ -89,7 +89,7 @@ export async function findCustomers(db: Db, actor: Actor, req: RunRequest, deps:
  * are all still drafts are touched; their page and drafts are rebuilt with the researched facts and the personal
  * opening line. A 429 (quota) stops the batch; the rest waits for the next day.
  */
-export async function researchBacklog(db: Db, actor: Actor, o: { max?: number; budgetMs?: number; run?: typeof researchCompany } = {}, now = new Date()) {
+export async function researchBacklog(db: Db, actor: Actor, o: { max?: number; budgetMs?: number; run?: typeof researchCompany; adminChat?: AdminChat | null } = {}, now = new Date()) {
   const run = o.run ?? researchCompany;
   if (!o.run && !researchEnabled()) return { researched: 0, waiting: 0, stopped: "no AI model with web search connected" };
   const gate = await agentStatus(db, "company-research");
@@ -139,7 +139,16 @@ export async function researchBacklog(db: Db, actor: Actor, o: { max?: number; b
     });
     researched++;
   }
-  return { researched, waiting: todo.length - researched, stopped };
+  const waiting = todo.length - researched;
+  // the founder hears the result on his phone, so nobody has to open the cockpit to know it ran
+  if (o.adminChat && (researched || stopped)) {
+    const lines = [
+      researched ? `🔬 ${researched} شرکت تحقیق شد و پیش‌نویس پیام‌هایشان با جمله شخصی به‌روز شد.` : "🔬 تحقیق شرکت‌ها امروز انجام نشد.",
+      waiting ? `${waiting} شرکت هنوز منتظر تحقیق است${stopped ? " (سهمیه رایگان AI تمام شد؛ فردا دوباره)" : ""}.` : "همه شرکت‌ها تحقیق دارند و منتظر تأیید تو هستند.",
+    ];
+    await o.adminChat.alert(lines, `${env.appUrl}/cockpit/outreach`).catch(() => null);
+  }
+  return { researched, waiting, stopped };
 }
 
 /** How many saved companies still wait for research (cockpit). */
