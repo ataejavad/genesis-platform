@@ -120,3 +120,23 @@ describe("provider choice", () => {
     expect(seen[0]).toMatchObject({ model: "m", messages: [{ role: "system", content: "be brief" }, { role: "user", content: "hi" }] });
   });
 });
+
+describe("Gemini free-tier quota", () => {
+  it("a web-search call moves to a model with free quota left, and names the quota it hit", async () => {
+    const quota = { error: { code: 429, message: "You exceeded your current quota, please check your plan and billing details.", details: [{ "@type": "type.googleapis.com/google.rpc.QuotaFailure", violations: [{ quotaId: "GenerateRequestsPerDayPerProjectPerModel-FreeTier", quotaValue: "0" }] }] } };
+    const urls: string[] = [];
+    const f = (async (url: string) => {
+      urls.push(url);
+      return url.includes("gemini-flash-latest") ? Response.json(quota, { status: 429 }) : Response.json({ candidates: [{ content: { parts: [{ text: "ok" }] }, finishReason: "STOP" }] });
+    }) as unknown as typeof fetch;
+    const r = await geminiLlm({ GEMINI_API_KEY: "k" }, f).complete({ maxTokens: 10, webSearch: { maxUses: 1 }, messages: [{ role: "user", content: "hi" }] });
+    expect(r.model).toBe("gemini-2.5-flash");
+    // no 2 s / 6 s retries on a quota that does not clear in seconds
+    expect(urls.filter((u) => u.includes("gemini-flash-latest"))).toHaveLength(1);
+
+    const all429 = (async () => Response.json(quota, { status: 429 })) as unknown as typeof fetch;
+    await expect(geminiLlm({ GEMINI_API_KEY: "k" }, all429).complete({ maxTokens: 10, webSearch: { maxUses: 1 }, messages: [{ role: "user", content: "hi" }] })).rejects.toThrow(/FreeTier limit 0/);
+    // plain calls stay on the chosen model
+    await expect(geminiLlm({ GEMINI_API_KEY: "k" }, all429).complete({ maxTokens: 10, messages: [{ role: "user", content: "hi" }] })).rejects.toThrow(/gemini 429 \(gemini-flash-latest\)/);
+  });
+});
