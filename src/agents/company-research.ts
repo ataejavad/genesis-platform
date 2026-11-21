@@ -70,7 +70,8 @@ ${lessons.length ? `What we learned about first messages (follow it):${lessons.m
     const site = await readSite(c.website);
     // no quota words here: the backlog must not take an unreadable site for "the AI quota is gone"
     if (!site.text) throw new Error(`website could not be read (${(site.why ?? "empty").slice(0, 120)}); web search not available`);
-    out = await ask({ maxTokens: 8000, thinking: true, effort: "low", timeoutMs: 120_000, messages: [{ role: "user", content: sitePrompt(c, lang, site, lessons) }] });
+    // no thinking settings: the free models differ in what they accept, and the answer only restates the site
+    out = await ask({ maxTokens: 8000, timeoutMs: 90_000, messages: [{ role: "user", content: sitePrompt(c, lang, site, lessons) }] });
   }
   const { r, parsed } = out;
   return { ...parsed, costEur: Math.round(costEur(r.usage) * 10000) / 10000 };
@@ -78,7 +79,8 @@ ${lessons.length ? `What we learned about first messages (follow it):${lessons.m
 
 /** The company's own pages as plain text (home + an "about" page when linked), for research without web search. */
 export async function readSite(website: string, fetchImpl: typeof fetch = fetch): Promise<{ text: string; urls: string[]; why?: string }> {
-  const start = website.startsWith("http") ? website : `https://${website}`;
+  // Maps links carry tracking (?utm_source=...): the site itself is the address without query and fragment
+  const start = (website.startsWith("http") ? website : `https://${website}`).replace(/[?#].*$/, "");
   let why = "";
   const get = async (url: string) => {
     try {
@@ -86,12 +88,12 @@ export async function readSite(website: string, fetchImpl: typeof fetch = fetch)
       const res = await fetchImpl(url, { headers: { "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36", accept: "text/html,application/xhtml+xml", "accept-language": "it,en;q=0.8" }, signal: AbortSignal.timeout(10_000), redirect: "follow" });
       const type = res.headers.get("content-type") ?? "text/html";
       if (!res.ok || !type.includes("html")) {
-        why = `${url}: ${res.ok ? type : `HTTP ${res.status}`}`;
+        why = `${res.ok ? type : `HTTP ${res.status}`} at ${url}`;
         return "";
       }
       return await res.text();
     } catch (err) {
-      why = `${url}: ${err instanceof Error ? err.message : "unreachable"}`;
+      why = `${err instanceof Error ? err.message : "unreachable"} at ${url}`;
       return "";
     }
   };

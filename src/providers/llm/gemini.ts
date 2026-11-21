@@ -31,26 +31,32 @@ export function geminiLlm(env: Env = process.env, fetchImpl: typeof fetch = fetc
     webSearch: true,
     async complete(req: LlmRequest): Promise<LlmResult> {
       const budget = req.thinking ? (THINKING[req.effort ?? "medium"] ?? 2048) : req.effort === "low" ? 0 : undefined;
-      const send = (m: string) => fetchImpl(`${BASE}/models/${encodeURIComponent(m)}:generateContent`, {
+      const send = (m: string, think = true) => fetchImpl(`${BASE}/models/${encodeURIComponent(m)}:generateContent`, {
         method: "POST",
         headers: { "x-goog-api-key": env.GEMINI_API_KEY ?? "", "content-type": "application/json" },
         body: JSON.stringify({
           ...(req.system ? { systemInstruction: { parts: [{ text: req.system }] } } : {}),
           contents: req.messages.map((msg) => ({ role: msg.role === "assistant" ? "model" : "user", parts: [{ text: msg.content }] })),
-          generationConfig: { maxOutputTokens: req.maxTokens, ...(budget !== undefined ? { thinkingConfig: { thinkingBudget: budget } } : {}) },
+          generationConfig: { maxOutputTokens: req.maxTokens, ...(budget !== undefined && think ? { thinkingConfig: { thinkingBudget: budget } } : {}) },
           ...(req.webSearch ? { tools: [{ google_search: {} }] } : {}),
         }),
         signal: AbortSignal.timeout(req.timeoutMs ?? 600_000),
       });
       // the free tier answers 503 (busy) or 429 (rate limit) often: try again twice, 2 s then 6 s later
       const attempt = async (m: string) => {
+        let think = true;
         let r = await send(m);
+        // some models refuse a thinking budget (400 invalid argument): ask without it from here on
+        if (r.status === 400 && budget !== undefined) {
+          think = false;
+          r = await send(m, think);
+        }
         for (const wait of [2000, 6000]) {
           if (r.status !== 503 && r.status !== 429) break;
           // "exceeded your current quota" does not clear in seconds: no point waiting
           if (r.status === 429 && /current quota/i.test(await r.clone().text().catch(() => ""))) break;
           await new Promise((ok) => setTimeout(ok, wait));
-          r = await send(m);
+          r = await send(m, think);
         }
         return r;
       };

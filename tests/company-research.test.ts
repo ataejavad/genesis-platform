@@ -30,7 +30,7 @@ describe("company research without web search (free tier)", () => {
       if (u.startsWith("http://")) return site(u);
       return new Response("blocked", { status: 403 });
     }) as unknown as typeof fetch;
-    const r = await readSite("https://rossi.it", f);
+    const r = await readSite("https://rossi.it?utm_source=google&utm_medium=maps", f);
     expect(r.urls[0]).toBe("http://rossi.it");
     const none = await readSite("https://rossi.it", (async () => new Response("no", { status: 403 })) as unknown as typeof fetch);
     expect(none.text).toBe("");

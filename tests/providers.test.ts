@@ -122,6 +122,18 @@ describe("provider choice", () => {
 });
 
 describe("Gemini free-tier quota", () => {
+  it("asks again without a thinking budget when a model refuses it", async () => {
+    const bodies: { generationConfig: { thinkingConfig?: unknown } }[] = [];
+    const f = (async (_url: string, init: RequestInit) => {
+      const b = JSON.parse(String(init.body));
+      bodies.push(b);
+      return b.generationConfig.thinkingConfig ? Response.json({ error: { code: 400, message: "Request contains an invalid argument." } }, { status: 400 }) : Response.json({ candidates: [{ content: { parts: [{ text: "ok" }] }, finishReason: "STOP" }] });
+    }) as unknown as typeof fetch;
+    const r = await geminiLlm({ GEMINI_API_KEY: "k" }, f).complete({ maxTokens: 10, thinking: true, effort: "low", messages: [{ role: "user", content: "hi" }] });
+    expect(r.text).toBe("ok");
+    expect(bodies).toHaveLength(2);
+  });
+
   it("a web-search call moves to a model with free quota left, and names the quota it hit", async () => {
     const quota = { error: { code: 429, message: "You exceeded your current quota, please check your plan and billing details.", details: [{ "@type": "type.googleapis.com/google.rpc.QuotaFailure", violations: [{ quotaId: "GenerateRequestsPerDayPerProjectPerModel-FreeTier", quotaValue: "0" }] }] } };
     const urls: string[] = [];
