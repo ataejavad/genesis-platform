@@ -55,9 +55,56 @@ Then write:
 - persona: how this company would describe itself (summary ≤ 3 sentences in ${lang}), offers (≤ 6), customers (one line or null), 3 likely pains with the evidence that suggests each, 3 questions we should ask them. In ${lang}.
 - personal: one opening sentence for a first message that refers to a real fact you found (no flattery, no invented numbers), in ${lang} ("local") and in Persian ("fa").
 ${lessons.length ? `What we learned about first messages (follow it):${lessons.map((l) => `\n- ${l}`).join("")}\n` : ""}Reply with one JSON object only: {"facts":[{"text":string,"source":{"name":string,"url":string}}],"persona":{"summary":string,"offers":[string],"customers":string|null,"pains":[{"text":string,"why":string}],"questions":[string]},"personal":{"local":string,"fa":string}}`;
-  const r = await llm().complete({ maxTokens: 16000, thinking: true, effort: "medium", webSearch: { maxUses: 15 }, timeoutMs: 300_000, messages: [{ role: "user", content: prompt }] });
-  if (r.stop === "refusal") throw new Error("research refused");
-  if (r.stop === "max_tokens") throw new Error("research answer was cut off (max_tokens)");
-  const parsed = resultSchema.parse(extractJson(r.text));
+  const ask = async (req: Parameters<ReturnType<typeof llm>["complete"]>[0]) => {
+    const r = await llm().complete(req);
+    if (r.stop === "refusal") throw new Error("research refused");
+    if (r.stop === "max_tokens") throw new Error("research answer was cut off (max_tokens)");
+    return { r, parsed: resultSchema.parse(extractJson(r.text)) };
+  };
+  let out: Awaited<ReturnType<typeof ask>>;
+  try {
+    out = await ask({ maxTokens: 16000, thinking: true, effort: "medium", webSearch: { maxUses: 15 }, timeoutMs: 300_000, messages: [{ role: "user", content: prompt }] });
+  } catch (err) {
+    // free tiers without web search (Gemini free, 2026-11-21): read the company's own website instead
+    if (!c.website || !/\b(429|404)\b|quota/i.test(err instanceof Error ? err.message : "")) throw err;
+    const site = await readSite(c.website);
+    if (!site.text) throw new Error(`web search unavailable (${(err as Error).message.slice(0, 80)}) and the website could not be read`);
+    out = await ask({ maxTokens: 8000, thinking: true, effort: "low", timeoutMs: 120_000, messages: [{ role: "user", content: sitePrompt(c, lang, site, lessons) }] });
+  }
+  const { r, parsed } = out;
   return { ...parsed, costEur: Math.round(costEur(r.usage) * 10000) / 10000 };
+}
+
+/** The company's own pages as plain text (home + an "about" page when linked), for research without web search. */
+export async function readSite(website: string, fetchImpl: typeof fetch = fetch): Promise<{ text: string; urls: string[] }> {
+  const home = website.startsWith("http") ? website : `https://${website}`;
+  const get = async (url: string) => {
+    try {
+      const res = await fetchImpl(url, { headers: { "user-agent": "Mozilla/5.0 (compatible; LegendPartnerBot/1.0)", accept: "text/html" }, signal: AbortSignal.timeout(10_000), redirect: "follow" });
+      return res.ok && (res.headers.get("content-type") ?? "text/html").includes("html") ? await res.text() : "";
+    } catch {
+      return "";
+    }
+  };
+  const html = await get(home);
+  if (!html) return { text: "", urls: [] };
+  const about = [...html.matchAll(/href=["']([^"'#]+)["']/gi)].map((m) => m[1]).find((h) => /chi-siamo|chisiamo|azienda|about|storia|ueber-uns|uber-uns/i.test(h));
+  const aboutUrl = about ? new URL(about, home).toString() : null;
+  const more = aboutUrl && aboutUrl !== home ? await get(aboutUrl) : "";
+  const plain = (h: string) => h.replace(/<(script|style|noscript|svg)[\s\S]*?<\/\1>/gi, " ").replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
+  const text = [plain(html).slice(0, 5000), more ? plain(more).slice(0, 3000) : ""].filter(Boolean).join("\n\n---\n\n");
+  return { text, urls: [home, ...(more && aboutUrl ? [aboutUrl] : [])] };
+}
+
+function sitePrompt(c: { name: string; city?: string; industry: string; country: string }, lang: string, site: { text: string; urls: string[] }, lessons: string[]) {
+  return `Below is the text of the website of a small company (${JSON.stringify({ name: c.name, city: c.city, trade: c.industry, country: c.country })}), pages: ${site.urls.join(", ")}.
+Use ONLY this text: no outside knowledge, no guesses. Each fact cites the page it came from (one of those URLs).
+Write:
+- facts (≤ 8): what they do and for whom, services, area, founding year, certifications, team, anything concrete the site says.
+- persona: summary ≤ 3 sentences in ${lang}, offers (≤ 6), customers (one line or null), 3 likely pains with the evidence from the text, 3 questions we should ask them. In ${lang}.
+- personal: one opening sentence for a first message that refers to a real fact from the site (no flattery, no invented numbers), in ${lang} ("local") and in Persian ("fa").
+${lessons.length ? `What we learned about first messages (follow it):${lessons.map((l) => `\n- ${l}`).join("")}\n` : ""}Reply with one JSON object only: {"facts":[{"text":string,"source":{"name":string,"url":string}}],"persona":{"summary":string,"offers":[string],"customers":string|null,"pains":[{"text":string,"why":string}],"questions":[string]},"personal":{"local":string,"fa":string}}
+
+WEBSITE TEXT:
+${site.text}`;
 }
