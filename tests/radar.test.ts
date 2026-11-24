@@ -79,6 +79,7 @@ describe("solutions radar", () => {
     expect((await db.select().from(agentRuns)).some((x) => x.agent === "solutions-radar" && x.ok)).toBe(true);
 
     expect(await dailyRadar(db, new Date(now.getTime() + HOUR), { feed, analyse: a.analyse })).toEqual({ skipped: "radar already ran for 2026-11-24" });
+    expect(r).toMatchObject({ picked: 3 });
     // next day: what was read before is not read again
     const next = await dailyRadar(db, new Date(now.getTime() + 24 * HOUR), { feed: mockFeed([item(1), item(6)]), analyse: a.analyse });
     expect(next).toMatchObject({ fresh: 1 });
@@ -91,6 +92,9 @@ describe("solutions radar", () => {
     expect(r).toMatchObject({ analyzer: "rules", error: "quota", proposed: 0 });
     expect((await db.select().from(radarItems))[0].status).toBe("unreviewed");
     expect(chat.sent[0].lines[0]).toContain("quota");
+    // started again the same day (Cockpit "Run now"): the unanalysed items get their analysis
+    const again = await dailyRadar(db, new Date(now.getTime() + HOUR), { feed: mockFeed([item(1)]), analyse: agent(() => [pick(0)]).analyse });
+    expect(again).toMatchObject({ fresh: 1, proposed: 1, analyzer: "ai" });
   });
 
   it("✅ on the phone keeps it: LinkedIn post approved for its slot, event, hub news; ❌ dismisses with a note", async () => {
@@ -128,7 +132,7 @@ describe("solutions radar", () => {
     const [first] = await db.select().from(radarItems).where(eq(radarItems.maker, "Maker 0"));
     const row = await decideRadar(db, javad, first.id, "keep", undefined, now);
     expect(row).toMatchObject({ status: "shortlisted", mediaPostId: null });
-    const ops = await opsWatch(db, new Date(now.getTime() + 80 * HOUR));
+    const ops = await opsWatch(db, new Date(Date.now() + 80 * HOUR)); // rows carry the real creation time
     expect(ops.items.some((i) => i.kind === "radar" && i.text.startsWith("1 new solutions"))).toBe(true);
   });
 });
