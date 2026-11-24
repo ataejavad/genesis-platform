@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { PortalCopy } from "@/config/portal-copy";
 import { authClient } from "@/lib/auth-client";
+import { PasswordInput } from "@/ui/shared/PasswordInput";
 
 export function LoginForm({ t, next }: { t: PortalCopy["login"]; next: string }) {
   const [error, setError] = useState(false);
@@ -22,7 +23,7 @@ export function LoginForm({ t, next }: { t: PortalCopy["login"]; next: string })
   return (
     <form onSubmit={onSubmit} className="card stack">
       <label className="field">{t.email}<input name="email" type="email" required autoComplete="email" dir="ltr" /></label>
-      <label className="field">{t.password}<input name="password" type="password" required autoComplete="current-password" dir="ltr" /></label>
+      <label className="field">{t.password}<PasswordInput name="password" required autoComplete="current-password" showLabel={t.show} hideLabel={t.hide} /></label>
       <button className="btn primary" disabled={busy}>{busy ? "…" : t.go}</button>
       {error && <p role="alert" style={{ color: "var(--bad)", margin: 0 }}>{t.bad}</p>}
       {!error && wrongDoor && <p role="alert" style={{ color: "var(--warn, var(--bad))", margin: 0 }}>{t.wrongDoor}</p>}

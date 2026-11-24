@@ -56,7 +56,7 @@ const en = {
     data: { title: "My data", sub: "Everything we hold about your company is yours.", export: "Download all data (JSON)", del: "Ask us to delete my company's data", delText: "Please delete all data about our company.", delSent: "Request sent. We confirm within 30 days as GDPR requires." },
     settings: { title: "Settings & team", sub: "People with access and the dashboard language.", members: "Team", lang: "Dashboard language", save: "Save", invite: "Invite a colleague", inviteText: "Please give dashboard access to: ", roles: { owner: "Owner", admin: "Admin", member: "User", accounting: "Accounting" } as Record<string, string> },
   },
-  login: { title: "Sign in to your dashboard", email: "Email", password: "Password", go: "Sign in", bad: "Wrong email or password", wrongDoor: "This account has no client dashboard. Sign in with a client account." },
+  login: { title: "Sign in to your dashboard", email: "Email", password: "Password", go: "Sign in", bad: "Wrong email or password", wrongDoor: "This account has no client dashboard. Sign in with a client account.", show: "Show password", hide: "Hide password" },
   units: { count: "", hours: "h", eur: "€" } as Record<string, string>,
 };
 
@@ -117,7 +117,7 @@ const it: PortalCopy = {
     data: { title: "I miei dati", sub: "Tutto ciò che abbiamo sulla vostra impresa è vostro.", export: "Scarica tutti i dati (JSON)", del: "Chiedi la cancellazione dei dati della mia impresa", delText: "Per favore cancellate tutti i dati sulla nostra impresa.", delSent: "Richiesta inviata. Confermiamo entro 30 giorni come previsto dal GDPR." },
     settings: { title: "Impostazioni e team", sub: "Chi ha accesso e la lingua dell'area clienti.", members: "Team", lang: "Lingua", save: "Salva", invite: "Invita un collega", inviteText: "Per favore date accesso all'area clienti a: ", roles: { owner: "Titolare", admin: "Admin", member: "Utente", accounting: "Contabilità" } },
   },
-  login: { title: "Accedi alla tua area clienti", email: "Email", password: "Password", go: "Accedi", bad: "Email o password errati", wrongDoor: "Questo account non ha un'area clienti. Accedi con un account cliente." },
+  login: { title: "Accedi alla tua area clienti", email: "Email", password: "Password", go: "Accedi", bad: "Email o password errati", wrongDoor: "Questo account non ha un'area clienti. Accedi con un account cliente.", show: "Mostra password", hide: "Nascondi password" },
   units: { count: "", hours: "h", eur: "€" },
 };
 
@@ -176,7 +176,7 @@ const de: PortalCopy = {
     data: { title: "Meine Daten", sub: "Alles, was wir über Ihren Betrieb haben, gehört Ihnen.", export: "Alle Daten herunterladen (JSON)", del: "Löschung der Daten meines Betriebs beantragen", delText: "Bitte löschen Sie alle Daten über unseren Betrieb.", delSent: "Anfrage gesendet. Wir bestätigen innerhalb von 30 Tagen gemäß DSGVO." },
     settings: { title: "Einstellungen & Team", sub: "Wer Zugang hat und die Sprache des Kundenbereichs.", members: "Team", lang: "Sprache", save: "Speichern", invite: "Kollegen einladen", inviteText: "Bitte geben Sie Zugang zum Kundenbereich für: ", roles: { owner: "Inhaber", admin: "Admin", member: "Nutzer", accounting: "Buchhaltung" } },
   },
-  login: { title: "Anmeldung Kundenbereich", email: "E-Mail", password: "Passwort", go: "Anmelden", bad: "E-Mail oder Passwort falsch", wrongDoor: "Dieses Konto hat keinen Kundenbereich. Bitte mit einem Kundenkonto anmelden." },
+  login: { title: "Anmeldung Kundenbereich", email: "E-Mail", password: "Passwort", go: "Anmelden", bad: "E-Mail oder Passwort falsch", wrongDoor: "Dieses Konto hat keinen Kundenbereich. Bitte mit einem Kundenkonto anmelden.", show: "Passwort anzeigen", hide: "Passwort verbergen" },
   units: { count: "", hours: "Std.", eur: "€" },
 };
 
@@ -235,7 +235,7 @@ const fa: PortalCopy = {
     data: { title: "داده من", sub: "هر چه از شرکت شما داریم مال شماست.", export: "دانلود همه‌ی داده‌ها (JSON)", del: "درخواست حذف داده‌های شرکتم", delText: "لطفاً همه‌ی داده‌های شرکت ما را حذف کنید.", delSent: "درخواست فرستاده شد. طبق GDPR ظرف ۳۰ روز تأیید می‌کنیم." },
     settings: { title: "تنظیمات و تیم", sub: "چه کسانی دسترسی دارند و زبان داشبورد.", members: "تیم", lang: "زبان داشبورد", save: "ذخیره", invite: "دعوت همکار", inviteText: "لطفاً به این فرد دسترسی داشبورد بدهید: ", roles: { owner: "مالک", admin: "مدیر", member: "کاربر", accounting: "حسابداری" } },
   },
-  login: { title: "ورود به داشبورد", email: "ایمیل", password: "رمز", go: "ورود", bad: "ایمیل یا رمز اشتباه است", wrongDoor: "این حساب داشبورد مشتری ندارد. با حساب مشتری وارد شوید." },
+  login: { title: "ورود به داشبورد", email: "ایمیل", password: "رمز", go: "ورود", bad: "ایمیل یا رمز اشتباه است", wrongDoor: "این حساب داشبورد مشتری ندارد. با حساب مشتری وارد شوید.", show: "نمایش رمز", hide: "پنهان کردن رمز" },
   units: { count: "", hours: "ساعت", eur: "€" },
 };
 
