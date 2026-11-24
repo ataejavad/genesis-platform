@@ -136,3 +136,11 @@ describe("solutions radar", () => {
     expect(ops.items.some((i) => i.kind === "radar" && i.text.startsWith("1 new solutions"))).toBe(true);
   });
 });
+
+describe("radar agent answer", () => {
+  it("accepts numbers and choices written as strings by small models", async () => {
+    const { pickSchema } = await import("@/agents/solutions-radar");
+    const p = pickSchema.parse({ ...pick(0), index: "2", fit: "4", decision: "Resell", effort: "Low", processes: "9.0 Manage Financial Resources" });
+    expect(p).toMatchObject({ index: 2, fit: 4, decision: "resell", effort: "low", processes: ["9.0 Manage Financial Resources"] });
+  });
+});

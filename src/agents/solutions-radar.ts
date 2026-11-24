@@ -15,16 +15,17 @@ export const radarEnabled = () => llmEnabled();
 
 const text = (min: number, max: number) => z.string().min(min).max(max);
 export const pickSchema = z.object({
-  index: z.number().int().min(0).max(500),
+  // small models often write numbers and choices as strings ("3", "Resell"): accept them
+  index: z.coerce.number().int().min(0).max(500),
   maker: text(1, 120),
   problem: text(10, 400),
   useCase: text(10, 500),
   industries: z.array(z.object({ nace: text(1, 12), name: text(2, 80) })).min(1).max(6),
-  processes: z.array(text(3, 80)).min(1).max(4),
-  decision: z.enum(["resell", "build", "ignore"]),
+  processes: z.preprocess((v) => (typeof v === "string" ? [v] : v), z.array(text(3, 80)).min(1).max(4)),
+  decision: z.preprocess((v) => (typeof v === "string" ? v.trim().toLowerCase() : v), z.enum(["resell", "build", "ignore"])),
   why: text(10, 500),
-  fit: z.number().int().min(1).max(5),
-  effort: z.enum(["low", "medium", "high"]),
+  fit: z.coerce.number().int().min(1).max(5),
+  effort: z.preprocess((v) => (typeof v === "string" ? v.trim().toLowerCase() : v), z.enum(["low", "medium", "high"])),
   takeaway: z.object({ en: text(20, 600), it: text(20, 700).optional(), de: text(20, 700).optional() }),
   linkedin: text(200, 2000),
   summaryFa: text(20, 1500),
@@ -96,6 +97,6 @@ export async function analyse(input: RadarInput): Promise<RadarPick[]> {
     const p = pickSchema.safeParse(r);
     return p.success ? [p.data] : [];
   });
-  if (raw.length && !picks.length) throw new Error(`radar answer had ${raw.length} picks, none valid: ${pickSchema.safeParse(raw[0]).error?.issues[0]?.message ?? ""}`);
+  if (raw.length && !picks.length) throw new Error(`radar answer had ${raw.length} picks, none valid: ${((i) => (i ? `${i.path.join(".")}: ${i.message}` : ""))(pickSchema.safeParse(raw[0]).error?.issues[0])}`);
   return picks.filter((p) => p.index < input.items.length).slice(0, input.maxPicks);
 }
