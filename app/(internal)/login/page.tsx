@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { OtherLogins } from "@/ui/shared/OtherLogins";
@@ -23,7 +24,7 @@ export default function LoginPage() {
     setError(null);
     const form = new FormData(e.currentTarget);
     const { error } = await authClient.signIn.email({
-      email: String(form.get("email")),
+      email: String(form.get("email")).trim().toLowerCase(),
       password: String(form.get("password")),
     });
     setBusy(false);
@@ -42,6 +43,7 @@ export default function LoginPage() {
         <label className="field">Password<PasswordInput name="password" required autoComplete="current-password" showLabel="Show password" hideLabel="Hide password" /></label>
         <button className="btn primary" disabled={busy}>{busy ? "…" : "Sign in"}</button>
         {error && <p style={{ color: "var(--bad)", margin: 0 }}>{error}</p>}
+        <Link href="/login/forgot" className="small">Forgot password?</Link>
         {local && <p className="muted small" style={{ margin: 0 }}>Local copy: admin@local.test / local-demo-password</p>}
       </form>
       <OtherLogins lang="en" here="team" />

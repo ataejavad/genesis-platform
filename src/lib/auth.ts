@@ -5,6 +5,9 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getDb, schema } from "@/db";
 import { extraOrigins } from "@/lib/platform";
+import { adminChatFromEnv } from "@/providers/admin-chat";
+import { mailerFromEnv } from "@/providers/email";
+import { passwordWasReset, sendResetLink } from "@/server/team-login";
 
 function createAuth() {
   return betterAuth({
@@ -16,6 +19,13 @@ function createAuth() {
       // Accounts are created by scripts/seed.ts (team) and, later, by the customer onboarding flow.
       disableSignUp: true,
       minPasswordLength: 12,
+      // "Forgot password?" on the login pages: a one-hour, one-time link by email (founder: also on the phone)
+      resetPasswordTokenExpiresIn: 3600,
+      revokeSessionsOnPasswordReset: true,
+      sendResetPassword: async ({ user, url }) => {
+        await sendResetLink(getDb(), user as { id: string; email: string; role?: string }, url, { mailer: mailerFromEnv(), adminChat: adminChatFromEnv() });
+      },
+      onPasswordReset: async ({ user }) => passwordWasReset(getDb(), user.id),
     },
     user: {
       additionalFields: { role: { type: "string", input: false, defaultValue: "member" } },
