@@ -8,6 +8,7 @@ import { tx } from "@/config/tx";
 import { companies, factsFor, hubKey, industries, news, pick, posts, productsFor, tenders } from "@/mock/site";
 import { BRAND } from "@/mock/data";
 import { getHubDoc } from "@/server/hubs";
+import { radarForHub } from "@/server/radar";
 import { visitorCountries } from "@/ui/site/country";
 import { HubView } from "@/ui/site/HubView";
 import { CountrySwitch } from "@/ui/site/CountrySwitch";
@@ -60,11 +61,14 @@ export default async function Hub({ params }: Props) {
   // Live hubs show the approved hub-builder page; the sample layout below is only the fallback until then.
   const approved = industry.live ? await getHubDoc(getDb(), locale, industry.slug, hub.country).catch(() => null) : null;
   if (approved) {
+    // solutions Javad kept from the daily radar for this industry, with our take, next to the approved hub news
+    const kept = await radarForHub(getDb(), approved.doc.nace, locale.slice(0, 2)).catch(() => []);
+    const doc = kept.length ? { ...approved.doc, news: [...kept, ...approved.doc.news.filter((n) => !kept.some((k) => k.url === n.url))] } : approved.doc;
     return (
       <main className="wrap-site section">
         <RememberIndustry slug={industry.slug} />
         {crumbs}
-        <HubView doc={approved.doc} c={c} locale={locale} brand={BRAND} country={countrySwitch} />
+        <HubView doc={doc} c={c} locale={locale} brand={BRAND} country={countrySwitch} />
       </main>
     );
   }

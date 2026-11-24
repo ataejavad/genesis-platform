@@ -1,5 +1,6 @@
 import { and, count, desc, eq, gte, inArray, gt, isNotNull, isNull, lt, sql, sum } from "drizzle-orm";
 import { mediaKpi } from "./media";
+import { radarKpi } from "./radar";
 import { MODULES, type ModuleDef, SYSTEMS } from "@/config/modules";
 import { STEPS } from "@/config/process-map";
 import type { Db } from "@/db";
@@ -65,6 +66,10 @@ const KPI: Record<string, (c: Ctx) => Promise<string>> = {
   mediaQueue: async ({ db }) => {
     const k = await mediaKpi(db);
     return `${k.drafts} drafts to decide, ${k.approved} scheduled, ${k.handed} waiting for you to post, ${k.publishedMonth} published this month`;
+  },
+  radar: async ({ db }) => {
+    const k = await radarKpi(db);
+    return `${k.readMonth} read, ${k.keptMonth} kept this month, ${k.waiting} waiting for you, ${k.candidates} marketplace candidates${k.lastDay ? ` · last run ${k.lastDay}` : ""}`;
   },
   leadsMonth: async ({ db, month }) => `${await n(db.select({ n: count() }).from(leads).where(gte(leads.createdAt, month)))} leads this month`,
   reminders: async ({ db, month }) => `${await n(db.select({ n: count() }).from(events).where(and(eq(events.type, "lead.reminder_due"), gte(events.createdAt, month))))} reminders this month`,

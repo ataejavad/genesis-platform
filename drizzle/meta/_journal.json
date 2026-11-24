@@ -134,6 +134,13 @@
       "when": 1795281604590,
       "tag": "0018_media_posts",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1795526553421,
+      "tag": "0019_radar_items",
+      "breakpoints": true
     }
   ]
 }
