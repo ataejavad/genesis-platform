@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { OtherLogins } from "@/ui/shared/OtherLogins";
+import { PasswordInput } from "@/ui/shared/PasswordInput";
 
 // Team (cockpit) login. The cockpit is English (Javad's choice). The demo password hint shows only on a laptop.
 export default function LoginPage() {
@@ -38,7 +39,7 @@ export default function LoginPage() {
       </div>
       <form onSubmit={onSubmit} className="card stack">
         <label className="field">Email<input name="email" type="email" required autoComplete="email" dir="ltr" /></label>
-        <label className="field">Password<input name="password" type="password" required autoComplete="current-password" dir="ltr" /></label>
+        <label className="field">Password<PasswordInput name="password" required autoComplete="current-password" showLabel="Show password" hideLabel="Hide password" /></label>
         <button className="btn primary" disabled={busy}>{busy ? "…" : "Sign in"}</button>
         {error && <p style={{ color: "var(--bad)", margin: 0 }}>{error}</p>}
         {local && <p className="muted small" style={{ margin: 0 }}>Local copy: admin@local.test / local-demo-password</p>}

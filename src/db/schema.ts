@@ -1517,3 +1517,51 @@ export const mediaPosts = pgTable(
   },
   (t) => [uniqueIndex("media_posts_week_idx").on(t.week, t.channel, t.lang, t.position), index("media_posts_status_idx").on(t.status, t.scheduledFor)],
 );
+
+/* ───────────── Solutions radar (Javad 2026-11-24: daily new products → problem, industries, resell / build / ignore) ───────────── */
+
+// One new product or technology news item the radar read. The agent says what problem it solves, for which industries
+// (NACE) and processes (APQC), and whether we should resell it, build our own, or ignore it. Javad keeps or dismisses
+// the proposals; a kept one feeds a LinkedIn post, the matching hubs' news and the marketplace candidate list.
+// Public information and our own analysis only: no personal data, no org_id.
+export const radarItems = pgTable(
+  "radar_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    // Rome date of the run that found it
+    day: text("day").notNull(),
+    source: text("source").notNull(),
+    url: text("url").notNull().unique(),
+    title: text("title").notNull(),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    // the feed's own short description (analysis input only, never published)
+    summary: text("summary").notNull().default(""),
+    // analysis (null until the agent looked at it)
+    maker: text("maker"),
+    problem: text("problem"),
+    useCase: text("use_case"),
+    industries: jsonb("industries").$type<{ nace: string; name: string }[]>().notNull().default([]),
+    processes: jsonb("processes").$type<string[]>().notNull().default([]),
+    // resell (partner / white-label / reseller) | build (our own version with partners) | ignore
+    decision: text("decision"),
+    why: text("why"),
+    // 1–5: how well it fits what our customers need and what we can sell
+    fit: integer("fit"),
+    effort: text("effort"),
+    // our impact take per language (en always; it, de, fa when written) for hubs and the newsletter
+    takeaway: jsonb("takeaway").$type<Record<string, string>>().notNull().default({}),
+    // an English LinkedIn post about it, and a Persian summary for Javad
+    linkedin: text("linkedin"),
+    summaryFa: text("summary_fa"),
+    // ai | rules (no model: listed but not analysed)
+    analyzer: text("analyzer"),
+    // new → proposed (asks Javad) | ignored (agent) | unreviewed (no model) → shortlisted | dismissed
+    status: text("status").notNull().default("new"),
+    mediaPostId: uuid("media_post_id"),
+    decidedBy: text("decided_by"),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    note: text("note"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("radar_items_status_idx").on(t.status, t.day)],
+);

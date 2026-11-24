@@ -5,7 +5,7 @@
  * Change the week's mix here; the agent, the schedule and the cockpit read it.
  */
 
-export type MediaTheme = "news" | "pain" | "build";
+export type MediaTheme = "news" | "pain" | "build" | "solution";
 export type MediaChannel = "linkedin" | "youtube" | "newsletter";
 export type Cta = "newsletter" | "checkup";
 
@@ -42,6 +42,7 @@ export const THEME_LABEL: Record<MediaTheme | "digest", string> = {
   news: "industry news + our impact take",
   pain: "sector pain point",
   build: "building the company with agents, in public",
+  solution: "new solution from the radar (problem + our take)",
   digest: "weekly newsletter",
 };
 

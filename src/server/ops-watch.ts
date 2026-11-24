@@ -1,8 +1,9 @@
 import { and, eq, gte, inArray, isNotNull, isNull, lt } from "drizzle-orm";
 import type { Db } from "@/db";
-import { changeRequests, contracts, customerApprovals, customerRequests, deliveries, events, jobOffers, jobs, mediaPosts, orders, partnerDocuments, partners, payouts, projectInputs } from "@/db/schema";
+import { changeRequests, contracts, customerApprovals, customerRequests, deliveries, events, jobOffers, jobs, mediaPosts, orders, radarItems, partnerDocuments, partners, payouts, projectInputs } from "@/db/schema";
 import { MAX_ATTEMPTS } from "@/worker/dispatch";
 import { MEDIA } from "@/config/media";
+import { RADAR } from "@/config/radar";
 import type { Actor } from "./actor";
 import { emit } from "./events";
 import { overdueComplaints } from "./complaints";
@@ -82,6 +83,10 @@ export async function opsWatch(db: Db, now = new Date()) {
   if (mediaDrafts.length) items.push({ key: `media_drafts:${now.toISOString().slice(0, 10)}`, kind: "media", text: `${mediaDrafts.length} media drafts wait for your OK for over ${MEDIA.draftHours / 24} days (this week's posts and newsletter)`, link: "/cockpit/media" });
   const handed = await db.select({ id: mediaPosts.id, title: mediaPosts.title, channel: mediaPosts.channel }).from(mediaPosts).where(and(eq(mediaPosts.status, "handed"), lt(mediaPosts.updatedAt, before(MEDIA.handedHours))));
   for (const h of handed) items.push({ key: `media_handed:${h.id}`, kind: "media", text: `${h.channel === "linkedin" ? "LinkedIn post" : "Video"} "${h.title}" not confirmed as posted for ${MEDIA.handedHours / 24} days: post it or skip it`, link: `/cockpit/media#${h.id}` });
+
+  // radar: proposals are news; undecided after RADAR.decideHours they lose their value
+  const radarWaiting = await db.select({ id: radarItems.id }).from(radarItems).where(and(eq(radarItems.status, "proposed"), lt(radarItems.createdAt, before(RADAR.decideHours))));
+  if (radarWaiting.length) items.push({ key: `radar:${now.toISOString().slice(0, 10)}`, kind: "radar", text: `${radarWaiting.length} new solutions from the radar wait for keep / dismiss for over ${RADAR.decideHours / 24} days`, link: "/cockpit/radar" });
 
   const apps = await db.select({ id: partners.id, name: partners.name, at: partners.createdAt }).from(partners).where(and(eq(partners.status, "applied"), lt(partners.createdAt, before(WATCH.applicationHours))));
   for (const a of apps) items.push({ key: `application:${a.id}`, kind: "application", text: `Partner application from ${a.name} waits ${Math.round(age(now, a.at) / 24)} days`, link: "/cockpit/partners" });

@@ -1,6 +1,6 @@
 import { and, count, eq, gt, inArray, isNull, lt, notInArray, or } from "drizzle-orm";
 import type { Db } from "@/db";
-import { approvals, complaints, contracts, customerRequests, deliveries, experiments, mediaPosts, orders, partnerDocuments, partnerMessages, partners, payouts, projectInputs, subscriptions, supplyGaps, touches } from "@/db/schema";
+import { approvals, complaints, contracts, customerRequests, deliveries, experiments, mediaPosts, orders, radarItems, partnerDocuments, partnerMessages, partners, payouts, projectInputs, subscriptions, supplyGaps, touches } from "@/db/schema";
 
 /*
  * One "Needs you" inbox (step 10): everything that waits for Javad, from every module, with where to act.
@@ -22,6 +22,7 @@ export async function needsYou(db: Db, now = new Date()): Promise<Need[]> {
     { id: "inputs", label: "Customer files to check before partners see them", n: await c(db.select({ n: count() }).from(projectInputs).where(eq(projectInputs.status, "check"))), link: "/cockpit/projects", why: "partners are blocked until then" },
     { id: "content", label: "Website drafts to approve", n: await c(db.select({ n: count() }).from(approvals).where(eq(approvals.status, "pending"))), link: "/cockpit/approvals#content", why: "nothing public changes without you" },
     { id: "outreach", label: "Outreach messages to approve", n: await c(db.select({ n: count() }).from(touches).where(eq(touches.status, "draft"))), link: "/cockpit/outreach", why: "first message per company needs your OK" },
+    { id: "radar", label: "New solutions from the radar to keep or dismiss", n: await c(db.select({ n: count() }).from(radarItems).where(eq(radarItems.status, "proposed"))), link: "/cockpit/radar", why: "kept solutions become LinkedIn posts, hub news and marketplace candidates" },
     { id: "media", label: "Media drafts to approve, posts to put on LinkedIn", n: await c(db.select({ n: count() }).from(mediaPosts).where(inArray(mediaPosts.status, ["draft", "handed"]))), link: "/cockpit/media", why: "the newsletter and LinkedIn bring subscribers and check-ups" },
     { id: "experiments", label: "Finished tests to decide", n: await c(db.select({ n: count() }).from(experiments).where(eq(experiments.status, "ready"))), link: "/cockpit/experiments", why: "adopt the winner or keep the control" },
     { id: "applications", label: "Partner applications", n: await c(db.select({ n: count() }).from(partners).where(eq(partners.status, "applied"))), link: "/cockpit/partners", why: "decide within 3 days" },

@@ -1,1 +1,0 @@
-ALTER TABLE "media_posts" ADD COLUMN "image_url" text;

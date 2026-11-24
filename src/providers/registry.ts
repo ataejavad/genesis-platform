@@ -11,7 +11,7 @@
  * Cockpit › Systems and › API & connections show the active provider per kind from `providerBoard()`.
  */
 
-export type ProviderKind = "llm" | "email" | "voice" | "admin_chat" | "whatsapp" | "company_search" | "people_search" | "storage" | "payments" | "einvoice" | "vat_check" | "social";
+export type ProviderKind = "llm" | "email" | "voice" | "admin_chat" | "whatsapp" | "company_search" | "people_search" | "storage" | "payments" | "einvoice" | "vat_check" | "social" | "news_feed";
 
 export type ProviderOption = {
   id: string;
@@ -157,6 +157,17 @@ export const KINDS: KindDef[] = [
     options: [
       { id: "vies", label: "EU VIES (free, official)", keys: [], state: "ready" },
       { id: "none", label: "Off (VIES_DISABLED=1): orders stay unchecked", keys: [], state: "ready", fallback: true },
+    ],
+  },
+  {
+    kind: "news_feed",
+    label: "News & launches feed",
+    why: "solutions radar: new products and technology news to analyse every day",
+    env: "NEWS_FEED_PROVIDER",
+    options: [
+      { id: "rss", label: "Public RSS feeds (Product Hunt, Show HN, TechCrunch, EU-Startups, Hugging Face, The Verge AI; RADAR_FEEDS overrides)", keys: [], state: "ready", note: "Free, no key. Only titles, links and short descriptions are read; what we publish is our own analysis with a source link." },
+      { id: "producthunt", label: "Product Hunt API (categories, votes)", keys: ["PRODUCT_HUNT_TOKEN"], state: "planned" },
+      { id: "mock", label: "Mock (tests)", keys: [], state: "ready", fallback: true },
     ],
   },
 ];

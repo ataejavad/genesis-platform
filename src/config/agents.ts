@@ -4,7 +4,7 @@
  * spend) → Javad decides keep / stop in the daily brief. Javad's switches live in the database (agent_settings).
  */
 
-export type KpiId = "costPerLead" | "costPerReply" | "unlockRate" | "costPerActiveCustomer" | "costPerActivePartner" | "judgeAgreement" | "costPerConversation" | "costPerAdoption" | "costPerSubscriber";
+export type KpiId = "costPerLead" | "costPerReply" | "unlockRate" | "costPerActiveCustomer" | "costPerActivePartner" | "judgeAgreement" | "costPerConversation" | "costPerAdoption" | "costPerSubscriber" | "costPerKeptSolution";
 
 export type AgentDef = {
   id: string;
@@ -27,6 +27,7 @@ export const AGENTS: AgentDef[] = [
   { id: "qa-judge", name: "QA judge", job: "Checks deliveries against the protocol before customers see them", runs: "app", kpi: { id: "judgeAgreement", label: "agreement with human review", target: 85, better: "higher", unit: "%" }, budgetEur: 25 },
   { id: "ai-scout", name: "AI scout", job: "Monthly: new AI that takes over a person's step or cuts a partner cost", runs: "app", kpi: { id: "costPerAdoption", label: "€ per adopted idea", target: 20, better: "lower", unit: "€" }, budgetEur: 10 },
   { id: "media-writer", name: "Media writer", job: "Weekly: LinkedIn posts, a video script and the newsletter issue (news + our impact take)", runs: "app", kpi: { id: "costPerSubscriber", label: "€ per new newsletter subscriber", target: 1, better: "lower", unit: "€" }, budgetEur: 5 },
+  { id: "solutions-radar", name: "Solutions radar", job: "Daily: new products and tech news → problem solved, industries, resell / build / ignore; feeds posts, hubs, marketplace", runs: "app", kpi: { id: "costPerKeptSolution", label: "€ per solution Javad keeps", target: 1, better: "lower", unit: "€" }, budgetEur: 3 },
   { id: "whatsapp-agent", name: "WhatsApp agent", job: "Answers prospects on WhatsApp", runs: "app", kpi: { id: "costPerConversation", label: "€ per conversation", target: 0.5, better: "lower", unit: "€" }, budgetEur: 15 },
 ];
 

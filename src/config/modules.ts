@@ -74,6 +74,7 @@ export const MODULES: ModuleDef[] = [
   { n: 58, name: "Lead double opt-in → CRM", system: "acquire", runs: "on the confirmation link", events: ["lead.confirmed"], kpi: "confirmRate", link: "/cockpit/leads" },
   { n: 86, name: "Media writer (LinkedIn, video script, newsletter)", system: "acquire", runs: "Monday 07:00", agent: "media-writer", job: "media.drafts", uses: AI, webSearch: true, kpi: "mediaQueue", link: "/cockpit/media" },
   { n: 87, name: "Media approvals + publishing (one-tap LinkedIn, newsletter email)", system: "acquire", runs: "every 10 min", job: "media.publish", uses: ["social", "email", "admin_chat"], events: ["media.published"], kpi: "mediaReach", link: "/cockpit/media" },
+  { n: 89, name: "Solutions radar (new products → problem, industries, resell / build / ignore)", system: "acquire", runs: "daily 06:30", agent: "solutions-radar", job: "radar.daily", uses: ["news_feed", ...AI, "admin_chat"], events: ["radar.shortlisted"], kpi: "radar", link: "/cockpit/radar" },
   { n: 88, name: "Newsletter sign-up (double opt-in)", system: "acquire", runs: "every page footer + hubs", events: ["lead.captured", "lead.confirmed"], kpi: "mediaReach", link: "/cockpit/media" },
   { n: 61, name: "Opening-line experiment", system: "acquire", runs: "on every researched company", kpi: "experiments", link: "/cockpit/experiments" },
 

@@ -2,7 +2,7 @@ import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, like, lte, ne, or,
 import { type WriterInput, type WriterOut, writeWeek, writerEnabled } from "@/agents/media-writer";
 import { type Cta, MEDIA, type MediaChannel, type MediaTheme, mediaFocus, type Slot } from "@/config/media";
 import type { Db, DbOrTx } from "@/db";
-import { agentRuns, checkups, leads, mediaPosts, partners, prospects, touches } from "@/db/schema";
+import { agentRuns, checkups, leads, mediaPosts, partners, prospects, radarItems, touches } from "@/db/schema";
 import type { SocialPublisher } from "@/providers/social";
 import { type Actor, actorRef } from "./actor";
 import { runAgent, spentEur } from "./agents";
@@ -106,6 +106,12 @@ export function fallbackWeek(r: HubResearch | undefined, facts: Record<string, n
   return { linkedin, youtube, newsletter: newsletter.filter((n) => n.text.length >= 1) };
 }
 
+/** Solutions Javad kept from the radar in the last week: fresh seeds for the newsletter and posts (src/server/radar.ts). */
+async function keptSolutions(db: Db, now: Date) {
+  const rows = await db.select().from(radarItems).where(and(eq(radarItems.status, "shortlisted"), gte(radarItems.decidedAt, new Date(now.getTime() - 7 * DAY)))).orderBy(desc(radarItems.fit)).limit(5);
+  return rows.map((x) => ({ date: (x.publishedAt ?? x.createdAt).toISOString().slice(0, 10), publisher: x.maker ?? x.source, url: x.url, title: `New solution: ${x.title} (${x.problem ?? ""})`, takeaway: x.takeaway.en ?? "" }));
+}
+
 /** Monday job: the media agent writes the week's pieces as drafts for Javad. Once per week unless `force`. */
 export async function weeklyDrafts(db: Db, now = new Date(), opts: { force?: boolean; write?: (i: WriterInput) => Promise<WriterOut> } = {}) {
   const week = isoWeek(now);
@@ -125,7 +131,7 @@ export async function weeklyDrafts(db: Db, now = new Date(), opts: { force?: boo
     plan: [...MEDIA.linkedin.map((p, index) => ({ channel: "linkedin" as const, index, ...p })), ...MEDIA.youtube.map((p, index) => ({ channel: "youtube" as const, index, ...p }))].map(({ slot: _s, ...p }) => p),
     newsletterLangs: MEDIA.newsletter.langs,
     pains: (r?.pains ?? []).map((p) => ({ text: pickText(p.text, "en"), source: p.sources[0]?.url })),
-    news: (r?.news ?? []).map((n) => ({ date: n.date, publisher: n.publisher, url: n.url, title: pickText(n.title, "en"), takeaway: pickText(n.takeaway, "en") })),
+    news: [...(await keptSolutions(db, now)), ...(r?.news ?? []).map((n) => ({ date: n.date, publisher: n.publisher, url: n.url, title: pickText(n.title, "en"), takeaway: pickText(n.takeaway, "en") }))],
     week: facts,
     used: past.filter((p) => p.status !== "rejected").map((p) => p.title),
     rejected: past.filter((p) => p.status === "rejected").map((p) => ({ title: p.title, note: p.note })),
