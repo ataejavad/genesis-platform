@@ -6,8 +6,8 @@ export default defineConfig({
   test: {
     globalSetup: ["./tests/global-setup.ts"],
     fileParallelism: false,
-    // no calls to the EU VIES service from tests (tests pass their own fetch)
-    env: { VIES_DISABLED: "1" },
+    // no calls to the EU VIES service or the radar's news feeds from tests (tests pass their own fetch / feed)
+    env: { VIES_DISABLED: "1", NEWS_FEED_PROVIDER: "mock" },
     // next build copies the repo into .next/standalone; never run those copies
     exclude: ["**/node_modules/**", ".next/**"],
   },
