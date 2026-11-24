@@ -14,7 +14,8 @@ const THINKING: Record<string, number> = { low: 0, medium: 2048, high: 8192 };
 // day, so web-search calls try these next when a model has no free quota left. GEMINI_SEARCH_MODELS overrides the list.
 const SEARCH_FALLBACK = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-flash-lite-latest"];
 // plain calls: the free default model answers 503 "high demand" at busy hours; the lite model usually still answers
-const PLAIN_FALLBACK = ["gemini-flash-lite-latest"];
+// (2026-11-24: both answered 503 for an hour; the 2.5 models have their own capacity)
+const PLAIN_FALLBACK = ["gemini-flash-lite-latest", "gemini-2.5-flash", "gemini-2.5-flash-lite"];
 
 type GeminiError = { message?: string; details?: { "@type"?: string; violations?: { quotaMetric?: string; quotaId?: string; quotaValue?: string }[] }[] };
 /** The quota Google names in a 429 (metric, limit), so the cockpit says which limit was hit. */
