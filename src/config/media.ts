@@ -13,6 +13,8 @@ export type Cta = "newsletter" | "checkup";
 export type Slot = { weekday: number; at: string };
 
 export const MEDIA = {
+  /** our LinkedIn company page (created 2026-11-24); the site's media page links to it */
+  linkedinPage: "https://www.linkedin.com/company/legendpartner",
   /** one industry × country first (doc 11 §9.3: narrow beats broad); env MEDIA_FOCUS="installers-IT" overrides */
   focus: { industry: "installers", country: "IT" },
   /** 3–5 posts a week on the Legend Partner LinkedIn company page (doc 11 §5), English only (Javad 2026-11-24) */

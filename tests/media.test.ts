@@ -6,7 +6,7 @@ import { agentRuns, events, leads, mediaPosts, notifications } from "@/db/schema
 import { type ApprovalPress, mockAdminChat } from "@/providers/admin-chat";
 import { mockPublisher } from "@/providers/social";
 import { handlePress, sendWaitingAsks } from "@/server/admin-chat";
-import { confirmMediaPosted, decideMedia, editMedia, isoWeek, mediaKpi, publishDue, weeklyDrafts } from "@/server/media";
+import { confirmMediaPosted, decideMedia, editMedia, isoWeek, mediaKpi, publicMedia, publishDue, weeklyDrafts } from "@/server/media";
 import { javad, useTestDb } from "./helpers";
 
 const db = useTestDb();
@@ -91,6 +91,9 @@ describe("media engine", () => {
     expect(await handlePress(db, pressOf(ask.ref, "approved").press)).toBe("approved");
     expect((await db.select().from(mediaPosts).where(eq(mediaPosts.id, post.id)))[0].status).toBe("posted");
     expect((await db.select().from(events)).filter((e) => e.type === "media.published")).toHaveLength(1);
+    // the site's media page shows only posted LinkedIn pieces, from their time on (drafts and the rest of the week stay off)
+    expect((await publicMedia(db, new Date("2100-01-01"))).map((p) => p.id)).toEqual([post.id]);
+    expect(await publicMedia(db, monday)).toHaveLength(0);
     await expect(confirmMediaPosted(db, javad, post.id, true)).rejects.toThrow(/nothing waiting/);
   });
 

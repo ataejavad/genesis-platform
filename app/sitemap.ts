@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 // Every public page in every language: fixed pages, live industry hubs (one URL per country, as their
 // canonical says), marketplace listings, then the published content pages.
-const FIXED = ["", "/checkup", "/explore", "/market", "/tools", "/about", "/partners", "/signup", "/legal"];
+const FIXED = ["", "/checkup", "/explore", "/market", "/tools", "/media", "/about", "/partners", "/signup", "/legal"];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = process.env.APP_URL ?? "";

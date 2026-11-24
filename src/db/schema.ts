@@ -1471,7 +1471,7 @@ export const leases = pgTable("leases", {
 
 /* ───────────── Media engine (doc 11: newsletter as the hub, LinkedIn + YouTube feed it) ───────────── */
 
-// One piece of our own media: a LinkedIn post for Javad's profile, a short YouTube script he records, or a weekly
+// One piece of our own media: a LinkedIn post for the Legend Partner company page, a short YouTube script he records, or a weekly
 // newsletter issue. Written by the media agent each Monday, approved by Javad (phone or cockpit), then published at
 // its slot: through a posting provider, or handed to Javad as a one-tap post when the channel has no free API.
 // Our own marketing text, no personal data and no org_id.
@@ -1495,6 +1495,8 @@ export const mediaPosts = pgTable(
     bodyFa: text("body_fa"),
     sourceUrl: text("source_url"),
     sourceTitle: text("source_title"),
+    // picture shown with the post (LinkedIn and the site's media page); a path under /public or a full URL
+    imageUrl: text("image_url"),
     // where the piece sends people: newsletter | checkup
     cta: text("cta").notNull().default("newsletter"),
     // draft → approved → handed (waits for Javad to post) → posted | sent (newsletter) ; rejected | skipped

@@ -340,6 +340,16 @@ export async function mediaKpi(db: Db, now = new Date()) {
   };
 }
 
+/** The site's media page: LinkedIn posts that are out (posted by hand or by a provider), newest first, never before their time. */
+export async function publicMedia(db: Db, now = new Date(), limit = 30) {
+  return db
+    .select({ id: mediaPosts.id, title: mediaPosts.title, body: mediaPosts.body, lang: mediaPosts.lang, theme: mediaPosts.theme, cta: mediaPosts.cta, industry: mediaPosts.industry, imageUrl: mediaPosts.imageUrl, sourceUrl: mediaPosts.sourceUrl, sourceTitle: mediaPosts.sourceTitle, publishedAt: mediaPosts.publishedAt })
+    .from(mediaPosts)
+    .where(and(eq(mediaPosts.channel, "linkedin"), eq(mediaPosts.status, "posted"), isNotNull(mediaPosts.publishedAt), lte(mediaPosts.publishedAt, now)))
+    .orderBy(desc(mediaPosts.publishedAt))
+    .limit(limit);
+}
+
 export async function mediaList(db: Db, limit = 80) {
   return db.select().from(mediaPosts).orderBy(desc(mediaPosts.week), asc(mediaPosts.channel), asc(mediaPosts.lang), asc(mediaPosts.position)).limit(limit);
 }
