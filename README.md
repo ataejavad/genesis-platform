@@ -56,7 +56,7 @@ Opens on http://localhost:3000 with sample pages; the cockpit is http://localhos
 npm ci
 cp .env.example .env            # fill DATABASE_URL, BETTER_AUTH_SECRET
 npm run db:migrate
-ADMIN_EMAIL=you@example.com ADMIN_PASSWORD='at-least-12-chars' ADMIN_NAME=You npm run seed
+ADMIN_EMAIL=you@example.com ADMIN_PASSWORD='at-least-12-chars' ADMIN_NAME=You npm run seed   # runs on every deploy; ADMIN_PASSWORD always wins (change it + redeploy = reset)
 npm run apikey:create -- --name content-agent --scopes content:draft,content:read
 npm run dev                     # app on :3000
 npm run worker                  # in a second terminal
