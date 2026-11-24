@@ -66,8 +66,11 @@ export type RadarDeps = { feed?: NewsFeed; analyse?: (i: RadarInput) => Promise<
 /** Daily job: new items in, proposals out (asked on the phone by the tick), one digest line set to the founder chat. */
 export async function dailyRadar(db: Db, now = new Date(), deps: RadarDeps = {}) {
   const day = romeDay(now);
-  const done = await db.select({ id: radarItems.id }).from(radarItems).where(and(eq(radarItems.day, day), isNotNull(radarItems.analyzer))).limit(1);
-  if (done.length && !deps.force) return { skipped: `radar already ran for ${day}` };
+  const done = await db.select({ status: radarItems.status }).from(radarItems).where(and(eq(radarItems.day, day), isNotNull(radarItems.analyzer)));
+  const found = done.some((r) => ["proposed", "shortlisted", "dismissed"].includes(r.status));
+  if (found && !deps.force) return { skipped: `radar already ran for ${day}` };
+  // a run today that proposed nothing (or had no model) is looked at again when started once more (Cockpit "Run now")
+  if (done.length) await db.update(radarItems).set({ status: "new", analyzer: null }).where(and(eq(radarItems.day, day), inArray(radarItems.status, ["ignored", "unreviewed"])));
 
   const feed = deps.feed ?? newsFeedFromEnv();
   const { items: fetched, errors } = await feed.fetch(new Date(now.getTime() - RADAR.lookbackHours * 36e5));
@@ -136,7 +139,7 @@ export async function dailyRadar(db: Db, now = new Date(), deps: RadarDeps = {})
   });
 
   if (deps.adminChat && (list.length || error)) await deps.adminChat.alert(digestLines(day, list.length, proposed, error, errors), "/cockpit/radar").catch(() => null);
-  return { day, read: fetched.length, fresh: list.length, proposed: proposed.length, analyzer, top: proposed.map((p) => `${p.maker ?? p.title} [${p.decision}, fit ${p.fit}]`), ...(error ? { error } : {}), ...(errors.length ? { feedErrors: errors } : {}) };
+  return { day, read: fetched.length, fresh: list.length, picked: picks.length, proposed: proposed.length, analyzer, top: proposed.map((p) => `${p.maker ?? p.title} [${p.decision}, fit ${p.fit}]`), ...(error ? { error } : {}), ...(errors.length ? { feedErrors: errors } : {}) };
 }
 
 /** The one daily message: verdict first, then one line per proposal (each comes as its own ✅/❌ ask right after). */

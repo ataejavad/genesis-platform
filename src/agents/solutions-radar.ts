@@ -51,10 +51,11 @@ medium firms (5–250 people) time and money. We are a broker and integrator, no
 companies' tools into a result with a fixed monthly fee, or have partners build a simple version when nothing fits.
 Today is ${i.today}.
 
-Below are today's new products and technology news (title + the feed's short description). Pick at most ${i.maxPicks}
-that clearly solve a real, costly problem of SMEs, best first. Skip: tools only for developers, consumer apps, games,
-crypto, funding rounds without a product, big-company-only software, things that need personal data at scale we cannot
-handle under GDPR. Fewer picks is fine; an empty list is fine.
+Below are today's new products and technology news (title + the feed's short description). Pick the ${i.maxPicks} that
+best solve a real, costly problem of SMEs (office work, sales, quotes, invoices, customer service, scheduling, compliance,
+field work, hiring, marketing), best first. A product for any SME counts; it does not need to name our industries. Skip:
+tools only for developers, consumer apps, games, crypto, funding rounds without a product, big-company-only software.
+Return fewer only when fewer qualify; an empty list only when none of the items could help any small business.
 
 For each pick:
 - maker: the company or product name.
@@ -67,7 +68,8 @@ For each pick:
   API; "build" when the idea is simple enough for our partners to rebuild with AI in a few weeks and the maker does not
   serve EU SMEs (US-only, enterprise-only, English-only); "ignore" otherwise. why: one or two sentences with the reason
   (pricing, EU availability, GDPR, effort) and what to check first.
-- fit: 1–5, how strongly our customers need it and how easily we can sell it as a result. effort: low | medium | high.
+- fit: 1–5, how strongly our customers need it and how easily we can sell it as a result (3 = useful for many SMEs,
+  5 = a must-have for one of our industries). effort: low | medium | high.
 - takeaway: OUR impact analysis for business owners (never a paraphrase of the source's sentences): what it changes
   for a small firm, who should act, what to do this month. en always; it and de as faithful translations.
 - linkedin: an English LinkedIn post for our company page (600–1300 characters). First line is a hook under 12 words.
