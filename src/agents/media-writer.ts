@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { Cta, MediaTheme } from "@/config/media";
+import { BRAND_VOICE } from "@/config/brand";
 import { ask, extractJson, llmEnabled } from "@/providers/llm";
 
 /*
@@ -49,7 +50,9 @@ export type WriterInput = {
 
 const instructions = (i: WriterInput) => `You write the weekly media of ${i.brand}, a small EU company that removes the problems that cost small firms time
 and money and is paid for the result (we sell outcomes, never software, tools or "AI tokens"). Today is ${i.today}.
-Audience focus: ${i.focus.name} in ${i.focus.country}. Posts go on the PERSONAL LinkedIn profile of the founder, ${i.founder}, in the first person.
+Audience focus: ${i.focus.name} in ${i.focus.country}. Posts go on the ${i.brand} company page (LinkedIn, Facebook, Instagram), written as "we" (Javad 2026-11-24).
+
+${BRAND_VOICE}
 
 Write these pieces (one per line, keep the index):
 ${i.plan.map((p) => `- ${p.channel} #${p.index}: theme "${p.theme}", language ${LANG_NAME[p.lang] ?? p.lang}, ends by inviting to ${p.cta === "checkup" ? "the free 3-minute check-up" : "the weekly newsletter"}`).join("\n")}

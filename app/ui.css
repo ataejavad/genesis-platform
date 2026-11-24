@@ -1,13 +1,16 @@
-/* Design system for the platform (portal, partner portal, cockpit) and the public site. RTL-first. */
+/* Design system for the platform (portal, partner portal, cockpit) and the public site. RTL-first.
+   Brand: Legend Partner brand book (2026-11-24): Ink #111318 + Orange #FF5A1F core; Orange Deep #C93C0A for
+   white-text buttons/links on light (WCAG AA 5.1); Stone Dark #5E636C for secondary text (5.4 on paper). */
 :root {
-  --bg: #f6f7fb;
+  --bg: #f4f2ee;
   --panel: #ffffff;
-  --fg: #141824;
-  --muted: #667085;
-  --line: #e6e8f0;
-  --brand: #3b5bfd;
-  --brand-2: #7c4dff;
-  --brand-soft: #eef1ff;
+  --fg: #111318;
+  --muted: #5e636c;
+  --line: #e4e1db;
+  --brand: #c93c0a;
+  --brand-2: #ff5a1f;
+  --brand-soft: #fff1ea;
+  --link: #c93c0a;
   --ok: #12a150;
   --ok-soft: #e7f7ee;
   --warn: #c77700;
@@ -17,14 +20,14 @@
   --info-soft: #e9f4ff;
   --radius: 14px;
   --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 16px rgba(16, 24, 40, 0.06);
-  --sidebar: #0f1424;
-  --sidebar-fg: #c9cee0;
+  --sidebar: #111318;
+  --sidebar-fg: #c9ccd3;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0d111c; --panel: #151a29; --fg: #e8eaf2; --muted: #98a0b8; --line: #252c40;
-    --brand-soft: #1d2445; --ok-soft: #10301f; --warn-soft: #33260c; --bad-soft: #3a1513; --info-soft: #13263b;
-    --sidebar: #0a0d17;
+    --bg: #0e1014; --panel: #171a21; --fg: #eceae6; --muted: #a3a8b1; --line: #2a2e37;
+    --brand-soft: #3a1d12; --link: #ff7a45; --ok-soft: #10301f; --warn-soft: #33260c; --bad-soft: #3a1513; --info-soft: #13263b;
+    --sidebar: #0a0b0e;
   }
 }
 * { box-sizing: border-box; }
@@ -33,7 +36,7 @@ body {
   background: var(--bg); color: var(--fg);
   font: 15px/1.7 "Vazirmatn", system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
 }
-a { color: var(--brand); text-decoration: none; }
+a { color: var(--link); text-decoration: none; }
 a:hover { text-decoration: underline; }
 h1, h2, h3, h4 { line-height: 1.35; margin: 0 0 12px; }
 h1 { font-size: 26px; } h2 { font-size: 20px; } h3 { font-size: 16px; }
@@ -47,11 +50,14 @@ p { margin: 0 0 12px; }
 .shell { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
 .sidebar { background: var(--sidebar); color: var(--sidebar-fg); padding: 20px 14px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
 .sidebar .brand { display: flex; align-items: center; gap: 10px; color: #fff; font-weight: 800; font-size: 17px; padding: 4px 10px 18px; }
-.logo { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, var(--brand), var(--brand-2)); display: grid; place-items: center; color: #fff; font-weight: 800; }
+/* the brand symbol "The Pact"; the letter inside stays for screen readers */
+.logo { width: 30px; height: 30px; flex: none; display: inline-block; background: url(/brand/symbol.svg) center / contain no-repeat; color: transparent; font-size: 0; overflow: hidden; }
+.sidebar .logo, .logo.on-dark { background-image: url(/brand/symbol-reversed.svg); }
+@media (prefers-color-scheme: dark) { .logo { background-image: url(/brand/symbol-reversed.svg); } }
 .sidebar .door { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #7f88a6; padding: 14px 10px 6px; }
 .sidebar nav a { display: flex; align-items: center; gap: 10px; color: var(--sidebar-fg); padding: 9px 12px; border-radius: 10px; font-size: 14.5px; }
 .sidebar nav a:hover { background: rgba(255,255,255,.06); text-decoration: none; color: #fff; }
-.sidebar nav a.active { background: rgba(59,91,253,.22); color: #fff; }
+.sidebar nav a.active { background: rgba(255,90,31,.18); color: #fff; }
 .sidebar nav a .count { margin-inline-start: auto; background: var(--brand); color: #fff; border-radius: 999px; font-size: 11px; padding: 0 7px; }
 .sidebar .switch { margin-top: 18px; border-top: 1px solid rgba(255,255,255,.08); padding-top: 12px; }
 .main { min-width: 0; }
@@ -149,7 +155,7 @@ table.table tr:hover td { background: color-mix(in srgb, var(--brand-soft) 45%, 
 
 .tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--line); margin-bottom: 16px; overflow-x: auto; }
 .tabs a { padding: 8px 14px; border-bottom: 2px solid transparent; color: var(--muted); white-space: nowrap; }
-.tabs a.active { color: var(--brand); border-color: var(--brand); font-weight: 600; }
+.tabs a.active { color: var(--link); border-color: var(--brand); font-weight: 600; }
 
 .callout { border-radius: 12px; padding: 12px 16px; background: var(--info-soft); font-size: 14px; }
 .callout.ai { background: linear-gradient(135deg, var(--brand-soft), color-mix(in srgb, var(--brand-2) 12%, var(--panel))); border: 1px solid color-mix(in srgb, var(--brand) 25%, transparent); }
@@ -166,7 +172,7 @@ table.table tr:hover td { background: color-mix(in srgb, var(--brand-soft) 45%, 
 .wrap-site { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
 .hero { padding: 72px 0 56px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: center; }
 .hero h1 { font-size: 42px; line-height: 1.25; margin-bottom: 16px; }
-.hero h1 em { font-style: normal; background: linear-gradient(90deg, var(--brand), var(--brand-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero h1 em { font-style: normal; color: var(--link); }
 .hero .lead { font-size: 18px; color: var(--muted); margin-bottom: 24px; }
 .hero-card { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 22px; box-shadow: 0 20px 60px rgba(59, 91, 253, .15); }
 .section { padding: 56px 0; }
@@ -178,9 +184,9 @@ table.table tr:hover td { background: color-mix(in srgb, var(--brand-soft) 45%, 
 .ladder .rung.free { border-color: var(--brand); }
 .industry { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: grid; gap: 6px; }
 .industry .icon { font-size: 28px; }
-.band { background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #fff; border-radius: 22px; padding: 36px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+.band { background: #111318; color: #fff; border-radius: 22px; padding: 36px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
 .band h2 { color: #fff; }
-.band .btn { background: #fff; color: var(--brand); border-color: #fff; }
+.band .btn { background: #ff5a1f; color: #111318; border-color: #ff5a1f; }
 .site-footer { border-top: 1px solid var(--line); margin-top: 40px; padding: 32px 0; color: var(--muted); font-size: 14px; }
 .site-footer .cols { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 20px; }
 .steps { display: flex; gap: 8px; margin-bottom: 20px; }
@@ -327,3 +333,6 @@ a.tile:hover { border-color: var(--brand); text-decoration: none; }
   .sidebar .switch { margin-top: 6px; padding-top: 6px; }
   .pchat .plog { min-height: 30vh; }
 }
+
+/* Brand headline font (Latin): Archivo; Persian/Arabic and Greek/Cyrillic fall back to Vazirmatn / system */
+:lang(en) :is(h1, h2, .site-header .brand), :lang(it) :is(h1, h2, .site-header .brand), :lang(de) :is(h1, h2, .site-header .brand) { font-family: "Archivo", "Vazirmatn", system-ui, sans-serif; font-weight: 800; letter-spacing: -.01em; }

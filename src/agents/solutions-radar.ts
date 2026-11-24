@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { APQC } from "@/config/radar";
 import { ask, extractJson, llmEnabled } from "@/providers/llm";
+import { BRAND_VOICE } from "@/config/brand";
 
 /*
  * Solutions radar agent (daily, Javad 2026-11-24). Reads the day's product launches and technology news (titles +
@@ -51,6 +52,8 @@ const instructions = (i: RadarInput) => `You are the solutions radar of ${i.bran
 medium firms (5–250 people) time and money. We are a broker and integrator, not a software house: we package other
 companies' tools into a result with a fixed monthly fee, or have partners build a simple version when nothing fits.
 Today is ${i.today}.
+
+${BRAND_VOICE}
 
 Below are today's new products and technology news (title + the feed's short description). Pick the ${i.maxPicks} that
 best solve a real, costly problem of SMEs (office work, sales, quotes, invoices, customer service, scheduling, compliance,

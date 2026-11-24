@@ -14,6 +14,7 @@ const siteName = process.env.SITE_NAME ?? "Legend Partner";
 
 export const metadata: Metadata = {
   title: { default: siteName, template: `%s · ${siteName}` },
+  openGraph: { images: ["/brand/og-image.png"] },
   // test hosting shows demo data (sample companies, ratings): keep it out of search until SITE_INDEXABLE=1
   ...(siteIndexable() ? {} : { robots: { index: false, follow: false } }),
 };
@@ -29,7 +30,7 @@ export default async function SiteLayout({ children, params }: { children: React
     <html lang={lang} dir={dir}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@800;900&family=Vazirmatn:wght@400;500;600;700;800&display=swap" />
       </head>
       <body>
         <a className="skip" href="#main">Skip to content</a>
