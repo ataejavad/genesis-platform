@@ -45,7 +45,7 @@ export default async function SiteLayout({ children, params }: { children: React
               {mine && <Link href={`${home}/hub/${mine.slug}`} title={c.nav.myIndustry}>{mine.icon} {pick(mine.name, locale)}</Link>}
               <Link href={`${home}/explore`}>{c.nav.explore}</Link>
               <Link href={`${home}/tools`}>{c.nav.tools}</Link>
-              <a href={`${home}#latest`}>{c.nav.media}</a>
+              <Link href={`${home}/media`}>{c.nav.media}</Link>
               <Link href={`${home}/partners`}>{c.nav.partners}</Link>
             </nav>
             <div className="cta">
