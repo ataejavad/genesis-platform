@@ -44,7 +44,7 @@ const en = {
     signedOn: "signed {date}",
     toSign: "waiting for your signature",
   },
-  welcome: { title: "Set your password", sub: "Choose a password for your account.", password: "New password (at least 12 characters)", go: "Save and sign in", bad: "This link has expired. Ask us for a new one.", short: "Use at least 12 characters." },
+  welcome: { title: "Set your password", sub: "Choose a password for your account.", password: "New password (at least 12 characters)", go: "Save and sign in", bad: "This link has expired. Ask us for a new one.", short: "Use at least 12 characters.", show: "Show password", hide: "Hide password" },
   iban: { title: "Where we pay you", sub: "Payouts go by SEPA bank transfer to this account.", iban: "IBAN", name: "Account holder name", save: "Save", saved: "Saved.", bad: "Please check the IBAN." },
   partnerTodo: "Sign the framework agreement to start receiving job offers",
 };
@@ -94,7 +94,7 @@ const it: Copy = {
     signedOn: "firmato il {date}",
     toSign: "in attesa della tua firma",
   },
-  welcome: { title: "Imposta la password", sub: "Scegli una password per il tuo account.", password: "Nuova password (almeno 12 caratteri)", go: "Salva e accedi", bad: "Il link è scaduto. Chiedici un nuovo link.", short: "Usa almeno 12 caratteri." },
+  welcome: { title: "Imposta la password", sub: "Scegli una password per il tuo account.", password: "Nuova password (almeno 12 caratteri)", go: "Salva e accedi", bad: "Il link è scaduto. Chiedici un nuovo link.", short: "Usa almeno 12 caratteri.", show: "Mostra password", hide: "Nascondi password" },
   iban: { title: "Dove ti paghiamo", sub: "I compensi arrivano con bonifico SEPA su questo conto.", iban: "IBAN", name: "Intestatario del conto", save: "Salva", saved: "Salvato.", bad: "Controlla l'IBAN." },
   partnerTodo: "Firma il contratto quadro per ricevere offerte di lavoro",
 };
@@ -142,7 +142,7 @@ const de: Copy = {
     signedOn: "unterschrieben am {date}",
     toSign: "wartet auf Ihre Unterschrift",
   },
-  welcome: { title: "Passwort festlegen", sub: "Wählen Sie ein Passwort für Ihr Konto.", password: "Neues Passwort (mindestens 12 Zeichen)", go: "Speichern und anmelden", bad: "Dieser Link ist abgelaufen. Bitte fordern Sie einen neuen an.", short: "Mindestens 12 Zeichen." },
+  welcome: { title: "Passwort festlegen", sub: "Wählen Sie ein Passwort für Ihr Konto.", password: "Neues Passwort (mindestens 12 Zeichen)", go: "Speichern und anmelden", bad: "Dieser Link ist abgelaufen. Bitte fordern Sie einen neuen an.", short: "Mindestens 12 Zeichen.", show: "Passwort anzeigen", hide: "Passwort verbergen" },
   iban: { title: "Wohin wir zahlen", sub: "Auszahlungen per SEPA-Überweisung auf dieses Konto.", iban: "IBAN", name: "Kontoinhaber", save: "Speichern", saved: "Gespeichert.", bad: "Bitte IBAN prüfen." },
   partnerTodo: "Rahmenvertrag unterschreiben, um Auftragsangebote zu erhalten",
 };
@@ -190,7 +190,7 @@ const fa: Copy = {
     signedOn: "امضا در {date}",
     toSign: "در انتظار امضای شما",
   },
-  welcome: { title: "تعیین رمز عبور", sub: "برای حساب خود یک رمز انتخاب کنید.", password: "رمز تازه (دست‌کم ۱۲ نویسه)", go: "ذخیره و ورود", bad: "این پیوند منقضی شده است. پیوند تازه بخواهید.", short: "دست‌کم ۱۲ نویسه." },
+  welcome: { title: "تعیین رمز عبور", sub: "برای حساب خود یک رمز انتخاب کنید.", password: "رمز تازه (دست‌کم ۱۲ نویسه)", go: "ذخیره و ورود", bad: "این پیوند منقضی شده است. پیوند تازه بخواهید.", short: "دست‌کم ۱۲ نویسه.", show: "نمایش رمز", hide: "پنهان کردن رمز" },
   iban: { title: "کجا به شما پرداخت کنیم", sub: "دستمزدها با انتقال بانکی SEPA به این حساب واریز می‌شود.", iban: "IBAN", name: "نام صاحب حساب", save: "ذخیره", saved: "ذخیره شد.", bad: "IBAN را بررسی کنید." },
   partnerTodo: "برای دریافت پیشنهاد کار، قرارداد چارچوب را امضا کنید",
 };
