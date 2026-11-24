@@ -1,7 +1,8 @@
 import { createHash } from "node:crypto";
 import { and, asc, eq, gte, inArray, ne, sql } from "drizzle-orm";
 import type { Db } from "@/db";
-import { experiments, mediaPosts, partners, phoneAsks, prospects, touches } from "@/db/schema";
+import { experiments, mediaPosts, partners, phoneAsks, prospects, radarItems, touches } from "@/db/schema";
+import { DECISION_LABEL, type RadarDecision } from "@/config/radar";
 import type { AdminChat, ApprovalPress, DecisionAsk } from "@/providers/admin-chat";
 import { type Actor, actorRef } from "./actor";
 import { conflict, AppError } from "./errors";
@@ -10,6 +11,7 @@ import { decideExperiment } from "./improve";
 import { confirmMediaPosted, ctaLink, decideMedia } from "./media";
 import { approveSequence, rejectSequence } from "./outreach";
 import { decideApplication } from "./partners";
+import { decideRadar } from "./radar";
 
 /*
  * Approve / reject on the founder's phone for everything that waits on Javad as a plain yes/no, besides content
@@ -170,7 +172,7 @@ const experimentKind: Kind = {
 /* ───────────── media: drafts to approve, posts to put on LinkedIn ───────────── */
 
 const CHANNEL_FA: Record<string, string> = { linkedin: "💼 لینکدین", youtube: "🎬 ویدیو یوتیوب", newsletter: "📬 خبرنامه" };
-const THEME_FA: Record<string, string> = { news: "خبر + تحلیل ما", pain: "درد صنف", build: "ساختن شرکت با ایجنت‌ها", digest: "شماره هفتگی" };
+const THEME_FA: Record<string, string> = { news: "خبر + تحلیل ما", pain: "درد صنف", build: "ساختن شرکت با ایجنت‌ها", solution: "راه‌حل تازه از رادار", digest: "شماره هفتگی" };
 const romeTime = (d: Date | null) => (d ? new Intl.DateTimeFormat("fa-IR", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Rome" }).format(d) : "—");
 type MediaRow = typeof mediaPosts.$inferSelect;
 const mediaPrint = (p: MediaRow) => (p.status === "handed" ? `handed:${hash([p.publishedRef])}` : hash([p.title, p.body]));
@@ -237,7 +239,48 @@ const mediaKind: Kind = {
   },
 };
 
-export const PHONE_KINDS: Record<string, Kind> = { outreach, partner: partnerKind, experiment: experimentKind, media: mediaKind };
+/* ───────────── solutions radar: keep (+ LinkedIn post) or dismiss ───────────── */
+
+type RadarRow = typeof radarItems.$inferSelect;
+const radarPrint = (r: RadarRow) => hash([r.decision, r.linkedin]);
+
+const radarKind: Kind = {
+  async pending(db) {
+    const rows = await db.select().from(radarItems).where(eq(radarItems.status, "proposed")).orderBy(asc(radarItems.day), asc(radarItems.createdAt));
+    return rows.map((r) => {
+      const d = DECISION_LABEL[(r.decision ?? "ignore") as RadarDecision];
+      return {
+        subjectId: r.id,
+        fingerprint: radarPrint(r),
+        ask: {
+          title: `📡 راه‌حل تازه: ${r.maker ?? r.title} · ${d.icon} ${d.fa} · تناسب ${r.fit}/5`,
+          lines: [
+            r.summaryFa ?? "",
+            `صنعت‌ها: ${r.industries.map((i) => `${i.name} (${i.nace})`).join("، ")}\nفرایند: ${r.processes.join("، ")}`,
+            r.why ? `چرا: ${cut(r.why, 400)}` : "",
+            `منبع: ${r.source} ${r.url}`,
+            r.linkedin ? `💼 پست لینکدین (انگلیسی) که با ✅ زمان‌بندی می‌شود:\n\n${cut(r.linkedin, 1500)}` : "",
+            "با ✅: در فهرست راه‌حل‌ها می‌ماند، در هاب‌های همان صنعت با تحلیل ما نشان داده می‌شود، کاندید فروشگاه می‌شود و پست در اولین وقت آزاد آماده می‌شود.",
+          ],
+          approveLabel: "✅ نگه دار + پست",
+          rejectLabel: "❌ رد",
+          link: `/cockpit/radar#${r.id}`,
+          linkLabel: "✏️ جزئیات / فقط نگه داشتن بدون پست",
+        },
+      };
+    });
+  },
+  async current(db, id) {
+    const [r] = await db.select().from(radarItems).where(eq(radarItems.id, id));
+    return r?.status === "proposed" ? radarPrint(r) : null;
+  },
+  async decide(db, actor, id, approve) {
+    const r = await decideRadar(db, actor, id, approve ? "keep_post" : "dismiss", approve ? undefined : "dismissed in Telegram");
+    return approve ? `✅ نگه داشته شد${r.mediaPostId ? "؛ پست لینکدین در اولین وقت آزاد برایت می‌آید" : ""}.` : "❌ رد شد؛ رادار از آن یاد می‌گیرد.";
+  },
+};
+
+export const PHONE_KINDS: Record<string, Kind> = { outreach, partner: partnerKind, experiment: experimentKind, media: mediaKind, radar: radarKind };
 
 /** Sends asks for everything that waits and was not asked in this version yet (worker tick; cockpit button). */
 export async function sendWaitingAsks(db: Db, chat: AdminChat, max = 10) {

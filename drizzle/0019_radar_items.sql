@@ -1,0 +1,31 @@
+CREATE TABLE "radar_items" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"day" text NOT NULL,
+	"source" text NOT NULL,
+	"url" text NOT NULL,
+	"title" text NOT NULL,
+	"published_at" timestamp with time zone,
+	"summary" text DEFAULT '' NOT NULL,
+	"maker" text,
+	"problem" text,
+	"use_case" text,
+	"industries" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"processes" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"decision" text,
+	"why" text,
+	"fit" integer,
+	"effort" text,
+	"takeaway" jsonb DEFAULT '{}'::jsonb NOT NULL,
+	"linkedin" text,
+	"summary_fa" text,
+	"analyzer" text,
+	"status" text DEFAULT 'new' NOT NULL,
+	"media_post_id" uuid,
+	"decided_by" text,
+	"decided_at" timestamp with time zone,
+	"note" text,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "radar_items_url_unique" UNIQUE("url")
+);
+--> statement-breakpoint
+CREATE INDEX "radar_items_status_idx" ON "radar_items" USING btree ("status","day");

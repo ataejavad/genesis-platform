@@ -17,7 +17,7 @@ import { MODULES } from "@/config/modules";
  * stay inside src/providers.
  */
 const VENDOR_PACKAGES = ["@anthropic-ai/sdk", "openai", "stripe", "twilio", "@sendgrid/", "@aws-sdk/", "nodemailer", "@mistralai/", "@google/generative-ai", "@slack/"];
-const VENDOR_HOSTS = ["api.anthropic.com", "api.brevo.com", "api.vapi.ai", "api.telegram.org", "graph.facebook.com", "api.apify.com", "api.apollo.io", "api.openai.com", "api.stripe.com", "api.twilio.com", "api.mistral.ai"];
+const VENDOR_HOSTS = ["api.anthropic.com", "api.brevo.com", "api.vapi.ai", "api.telegram.org", "graph.facebook.com", "api.apify.com", "api.apollo.io", "api.openai.com", "api.stripe.com", "api.twilio.com", "api.mistral.ai", "www.producthunt.com", "hnrss.org"];
 
 function files(dir: string): string[] {
   return readdirSync(dir).flatMap((f) => {
@@ -77,8 +77,8 @@ describe("provider choice", () => {
     expect(adminChatFromEnv({})).toBeNull();
     expect(llmEnabled({}, {})).toBe(false);
     expect(llm({}).provider).toBe("mock");
-    // only the free official VAT check works with no key at all
-    expect(providerBoard({}).filter((k) => k.active.connected).map((k) => k.kind)).toEqual(["vat_check"]);
+    // only the free official VAT check and the public news feeds work with no key at all
+    expect(providerBoard({}).filter((k) => k.active.connected).map((k) => k.kind)).toEqual(["vat_check", "news_feed"]);
   });
 
   it("a model without web search keeps research agents off", () => {

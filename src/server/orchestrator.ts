@@ -12,6 +12,8 @@ import { customerHealthWeek, monthlyResults } from "./health";
 import { checkExperiments } from "./improve";
 import { leadReminders } from "./lead-reminders";
 import { publishDue, weeklyDrafts } from "./media";
+import { dailyRadar } from "./radar";
+import { RADAR } from "@/config/radar";
 import { socialFromEnv } from "@/providers/social";
 import type { Mailer } from "./mailer";
 import { opsWatch } from "./ops-watch";
@@ -44,6 +46,7 @@ export const JOBS: JobDef[] = [
   // after the free AI quota resets (midnight Pacific = 09:00 Rome): companies saved without research get it
   { id: "outbound.research", what: "Research companies saved without it; rewrite their drafts with the personal line", schedule: { daily: "09:30" }, run: (db, d, now) => researchBacklog(db, { type: "system", id: "research-backlog" }, { adminChat: d.adminChat }, now) },
   { id: "experiments", what: "Close experiment windows; mark winners ready for Javad", schedule: { daily: "07:30" }, run: (db, _d, now) => checkExperiments(db, now) },
+  { id: "radar.daily", what: "Solutions radar: new products + tech news → problem, industries, resell / build / ignore; proposals to Javad's phone", schedule: { daily: RADAR.at }, run: (db, d, now) => dailyRadar(db, now, { adminChat: d.adminChat }) },
   { id: "daily.report", what: "Javad's morning brief (phone chat + Cockpit › Today)", schedule: { daily: "08:00" }, run: async (db, d, now) => { const r = await dailyReport(db, now, d.adminChat); return { verdict: r.verdict, sent: Boolean(r.sentAt) }; } },
   { id: "media.drafts", what: "Media agent writes the week: LinkedIn posts, a video script, the newsletter issues (drafts for Javad)", schedule: { weekly: 1, at: "07:00" }, run: (db, _d, now) => weeklyDrafts(db, now) },
   { id: "customer.health", what: "Weekly health score per customer; at-risk alert", schedule: { weekly: 1, at: "07:00" }, run: (db, _d, now) => customerHealthWeek(db, now) },
