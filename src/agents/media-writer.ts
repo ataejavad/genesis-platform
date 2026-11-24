@@ -3,8 +3,8 @@ import type { Cta, MediaTheme } from "@/config/media";
 import { ask, extractJson, llmEnabled } from "@/providers/llm";
 
 /*
- * Media writer (weekly, doc 11). Writes the week's LinkedIn posts for Javad's personal profile, one short YouTube
- * script and the newsletter issue per language. Uses web search for fresh industry news; every news piece names its
+ * Media writer (weekly, doc 11). Writes the week's LinkedIn posts for the company page, the YouTube scripts (if
+ * any are planned) and the newsletter issue per language. Uses web search for fresh industry news; every news piece names its
  * source and gives OUR impact analysis (never a paraphrase of someone else's article, Javad 2026-10-22).
  * Our own marketing text with aggregate numbers only: no personal data, so a free-tier model is fine.
  * Without a model the rule-based fallback in src/server/media.ts builds posts from the hub research.

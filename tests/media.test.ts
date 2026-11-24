@@ -35,7 +35,7 @@ describe("media engine", () => {
   it("drafts the week once: posts, a video script and the newsletter issues, metered as an agent", async () => {
     const w = writer();
     const r = await weeklyDrafts(db, monday, { write: w.write });
-    expect(r).toMatchObject({ week: "2026-W48", drafts: MEDIA.linkedin.length + 1 + MEDIA.newsletter.langs.length, writer: "ai" });
+    expect(r).toMatchObject({ week: "2026-W48", drafts: MEDIA.linkedin.length + MEDIA.youtube.length + MEDIA.newsletter.langs.length, writer: "ai" });
     expect(await weeklyDrafts(db, monday, { write: w.write })).toEqual({ skipped: "week 2026-W48 already written" });
     expect(w.seen).toHaveLength(1);
     expect(w.seen[0].pains.length).toBeGreaterThan(0); // hub research feeds the writer
@@ -113,7 +113,7 @@ describe("media engine", () => {
     expect(e.status).toBe("draft");
   });
 
-  it("sends the newsletter only to confirmed subscribers, each in their language, with one-click unsubscribe", async () => {
+  it("sends the newsletter only to confirmed subscribers, in their language or English, with one-click unsubscribe", async () => {
     const base = { industry: "general", hook: "newsletter", tags: ["newsletter"], consentText: "I agree to the weekly brief", consentAt: monday };
     await db.insert(leads).values([
       { ...base, email: "it@x.it", country: "IT", locale: "it-it", confirmedAt: monday },
@@ -125,13 +125,13 @@ describe("media engine", () => {
     await weeklyDrafts(db, monday, { write: writer().write });
     for (const p of (await all()).filter((x) => x.channel === "newsletter")) await decideMedia(db, javad, p.id, true, undefined, monday);
     const r = await publishDue(db, mockPublisher(), new Date(monday.getTime() + 4 * 24 * HOUR));
-    expect(r).toMatchObject({ sent: 2, recipients: 2 });
+    expect(r).toMatchObject({ sent: MEDIA.newsletter.langs.length, recipients: 2 });
     const mails = await db.select().from(notifications);
     expect(mails.map((m) => m.email).sort()).toEqual(["de@x.de", "it@x.it"]);
-    expect(mails.find((m) => m.email === "it@x.it")).toMatchObject({ subject: "Brief it", kind: "marketing" });
+    expect(mails.find((m) => m.email === "it@x.it")).toMatchObject({ subject: MEDIA.newsletter.langs.includes("it") ? "Brief it" : "Brief en", kind: "marketing" });
     expect(mails.find((m) => m.email === "de@x.de")?.subject).toBe("Brief en"); // no German issue: English
     expect(mails.every((m) => m.unsubscribeUrl?.includes("/api/v1/leads/unsubscribe"))).toBe(true);
     const k = await mediaKpi(db, new Date(monday.getTime() + 4 * 24 * HOUR));
-    expect(k).toMatchObject({ subscribers: 2, publishedMonth: 2 });
+    expect(k).toMatchObject({ subscribers: 2, publishedMonth: MEDIA.newsletter.langs.length });
   });
 });
