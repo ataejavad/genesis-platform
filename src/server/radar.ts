@@ -138,7 +138,12 @@ export async function dailyRadar(db: Db, now = new Date(), deps: RadarDeps = {})
     await audit(tx, { type: "system", id: "solutions-radar" }, "radar.ran", { type: "radar_day", id: day }, null, { read: fetched.length, fresh: list.length, proposed: proposed.length, analyzer, error, feedErrors: errors });
   });
 
-  if (deps.adminChat && (list.length || error)) await deps.adminChat.alert(digestLines(day, list.length, proposed, error, errors), "/cockpit/radar").catch(() => null);
+  // the model was busy or out of free quota: the job fails, so the orchestrator tries again (items wait as unreviewed);
+  // the founder hears about it once a day at most, not on every retry
+  const busy = error && error !== "no AI model connected";
+  const told = busy && done.some((r) => r.status === "unreviewed");
+  if (deps.adminChat && (list.length || error) && !told) await deps.adminChat.alert(digestLines(day, list.length, proposed, error, errors), "/cockpit/radar").catch(() => null);
+  if (busy) throw new Error(`radar: ${list.length} items saved, analysis failed (${error}); retried on the next pass`);
   return { day, read: fetched.length, fresh: list.length, picked: picks.length, proposed: proposed.length, analyzer, top: proposed.map((p) => `${p.maker ?? p.title} [${p.decision}, fit ${p.fit}]`), ...(error ? { error } : {}), ...(errors.length ? { feedErrors: errors } : {}) };
 }
 

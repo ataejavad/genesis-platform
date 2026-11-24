@@ -88,10 +88,13 @@ describe("solutions radar", () => {
 
   it("without a model the items stay listed (unreviewed) and the digest says why", async () => {
     const chat = mockAdminChat();
-    const r = await dailyRadar(db, now, { feed: mockFeed([item(1)]), analyse: async () => { throw new Error("quota"); }, adminChat: chat });
-    expect(r).toMatchObject({ analyzer: "rules", error: "quota", proposed: 0 });
+    const busy = async () => { throw new Error("quota"); };
+    // the job fails so the orchestrator retries it; the items wait, the founder is told once
+    await expect(dailyRadar(db, now, { feed: mockFeed([item(1)]), analyse: busy, adminChat: chat })).rejects.toThrow(/1 items saved, analysis failed \(quota\)/);
     expect((await db.select().from(radarItems))[0].status).toBe("unreviewed");
     expect(chat.sent[0].lines[0]).toContain("quota");
+    await expect(dailyRadar(db, new Date(now.getTime() + HOUR / 2), { feed: mockFeed([item(1)]), analyse: busy, adminChat: chat })).rejects.toThrow();
+    expect(chat.sent).toHaveLength(1);
     // started again the same day (Cockpit "Run now"): the unanalysed items get their analysis
     const again = await dailyRadar(db, new Date(now.getTime() + HOUR), { feed: mockFeed([item(1)]), analyse: agent(() => [pick(0)]).analyse });
     expect(again).toMatchObject({ fresh: 1, proposed: 1, analyzer: "ai" });
