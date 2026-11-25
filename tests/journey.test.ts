@@ -54,7 +54,7 @@ describe("brief card and the 24h price", () => {
     expect(req.dueAt!.getTime() - req.createdAt.getTime()).toBeGreaterThanOrEqual(23.9 * HOUR);
     expect((await needsYou(db)).find((n) => n.id === "quotes")?.n).toBe(1);
     const late = await opsWatch(db, new Date(Date.now() + 25 * HOUR));
-    expect(late.items.find((i) => i.kind === "request")?.text).toContain("PRICE PROMISED");
+    expect(late.items.find((i) => i.kind === "request")?.text).toContain("We promised a price in 24h");
     await quoteRequest(db, javad, req.id, "lead-crm");
     const [answered] = await db.select().from(customerRequests).where(eq(customerRequests.id, req.id));
     expect(answered.status).toBe("done");

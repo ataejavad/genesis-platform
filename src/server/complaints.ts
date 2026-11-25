@@ -107,5 +107,5 @@ export async function listComplaints(db: Db, statuses = ["open"]) {
 
 /** Steps past their deadline (ops-watch and the Needs-you inbox). */
 export async function overdueComplaints(db: Db, now = new Date()) {
-  return db.select({ c: complaints, company: organizations.name }).from(complaints).innerJoin(organizations, eq(organizations.id, complaints.orgId)).where(and(eq(complaints.status, "open"), lt(complaints.dueAt, now)));
+  return db.select({ c: complaints, company: organizations.name, demo: organizations.demo }).from(complaints).innerJoin(organizations, eq(organizations.id, complaints.orgId)).where(and(eq(complaints.status, "open"), lt(complaints.dueAt, now)));
 }

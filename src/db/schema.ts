@@ -94,6 +94,8 @@ export const organizations = pgTable("organizations", {
   prospectId: uuid("prospect_id"),
   // monthly loss in € from the first check-up: the starting point every result is compared with
   baselineEur: integer("baseline_eur"),
+  // demo/test data (seed scripts, QA runs): kept for the demo logins, left out of alerts, reports and KPIs
+  demo: boolean("demo").notNull().default(false),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -684,6 +686,8 @@ export const partners = pgTable(
     screening: jsonb("screening").$type<{ score: number; why: string[]; by: string }>(),
     consentAt: timestamp("consent_at", { withTimezone: true }).notNull(),
     decidedAt: timestamp("decided_at", { withTimezone: true }),
+    // demo/test partner (partner@local.test): left out of alerts, reports and KPIs
+    demo: boolean("demo").notNull().default(false),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -945,6 +949,8 @@ export const orders = pgTable(
     depositEur: integer("deposit_eur"),
     // why it was rejected (LOSS_REASONS)
     lostReason: text("lost_reason"),
+    // demo/test order: left out of alerts, reports and KPIs
+    demo: boolean("demo").notNull().default(false),
     createdAt: createdAt(),
   },
   (t) => [index("orders_status_idx").on(t.status)],

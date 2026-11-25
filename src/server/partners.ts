@@ -5,6 +5,7 @@ import { z } from "zod";
 import type { Db, DbOrTx } from "@/db";
 import { account, apiKeys, deliveries, jobOffers, jobs, memberships, milestones, organizations, partnerDocuments, partnerMessages, partners, partnerServices, payouts, supplyGaps, user } from "@/db/schema";
 import type { Actor } from "./actor";
+import { isDemo } from "./demo";
 import { createApiKey } from "./api-keys";
 import { AppError, notFound } from "./errors";
 import { customerCode as codeFor } from "./delivery-rules";
@@ -63,7 +64,7 @@ export async function applyPartner(db: Db, input: z.input<typeof applyInput>) {
     }
     const [row] = await tx
       .insert(partners)
-      .values({ kind: v.kind, name: v.name, email, country: v.country.toUpperCase(), languages: v.languages, skills: v.skills, links: v.links, pitch: v.pitch ?? null, locale: v.locale.slice(0, 2), screening, consentAt: new Date() })
+      .values({ kind: v.kind, name: v.name, email, country: v.country.toUpperCase(), languages: v.languages, skills: v.skills, links: v.links, pitch: v.pitch ?? null, locale: v.locale.slice(0, 2), screening, consentAt: new Date(), demo: isDemo(v.name, email) })
       .returning();
     for (const link of v.links) await tx.insert(partnerDocuments).values({ partnerId: row.id, kind: "portfolio", link });
     const actor: Actor = { type: "system", id: "partner-apply" };

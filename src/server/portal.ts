@@ -20,6 +20,7 @@ import {
 } from "@/db/schema";
 import { type L, products } from "@/mock/site";
 import type { Actor } from "./actor";
+import { isDemo } from "./demo";
 import { AppError, notFound } from "./errors";
 import { audit, emit } from "./events";
 import { onApprovalDecided } from "./projects";
@@ -344,7 +345,7 @@ export async function createCustomer(tx: DbOrTx, actor: Actor, input: z.infer<ty
   const slug = `${v.name.toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40)}-${randomBytes(3).toString("hex")}`;
   const [org] = await tx
     .insert(organizations)
-    .values({ name: v.name, slug, kind: "customer", country: v.country.toUpperCase(), industry: v.industry, locale: v.locale, baselineEur: v.baselineEur ?? null, prospectId: v.prospectId })
+    .values({ name: v.name, slug, kind: "customer", country: v.country.toUpperCase(), industry: v.industry, locale: v.locale, baselineEur: v.baselineEur ?? null, prospectId: v.prospectId, demo: isDemo(v.name, v.email) })
     .returning();
   const email = v.email.toLowerCase();
   let [u] = await tx.select().from(user).where(eq(user.email, email));

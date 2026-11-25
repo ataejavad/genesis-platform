@@ -223,7 +223,7 @@ export async function endSubscriptions(db: Db, now = new Date()) {
 /** Customers who gave notice and are still with us: Javad's chance to call them. */
 export async function notices(db: DbOrTx, now = new Date()) {
   return db
-    .select({ s: subscriptions, company: organizations.name })
+    .select({ s: subscriptions, company: organizations.name, demo: organizations.demo })
     .from(subscriptions)
     .innerJoin(organizations, eq(organizations.id, subscriptions.orgId))
     .where(and(eq(subscriptions.status, "active"), gt(subscriptions.endsAt, now)));

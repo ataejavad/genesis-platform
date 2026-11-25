@@ -80,7 +80,7 @@ describe("monthly service", () => {
     await decideApplication(db, javad, old.id, false);
     await monthlyService(db, NOV);
     const w = await opsWatch(db, new Date("2026-11-01T08:00:00Z"));
-    expect(w.items.find((i) => i.kind === "no_match")?.text).toContain("recruiting post ready");
+    expect(w.items.find((i) => i.kind === "no_match")?.text).toContain("publish the ready recruiting post");
     const [gap] = await db.select().from(supplyGaps);
     expect(gap).toMatchObject({ skill: "ai-setup", language: "it", status: "open", candidates: [old.id] });
     expect(gap.post).toContain("/en/partners");

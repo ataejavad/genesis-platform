@@ -28,6 +28,7 @@ import {
   user,
 } from "@/db/schema";
 import type { Actor } from "./actor";
+import { isDemo } from "./demo";
 import { runAgent } from "./agents";
 import { customerCode, health, lessonsFrom, qaRoute, riskOf } from "./delivery-rules";
 import { AppError, notFound } from "./errors";
@@ -173,7 +174,8 @@ export async function createOrder(db: Db, actor: Actor, input: z.input<typeof or
   return db.transaction(async (tx) => {
     const [pkg] = await tx.select().from(servicePackages).where(and(eq(servicePackages.slug, v.packageSlug), eq(servicePackages.active, true)));
     if (!pkg) throw notFound("package");
-    const [row] = await tx.insert(orders).values({ ...v, country: v.country?.toUpperCase() }).returning();
+    const [org] = v.orgId ? await tx.select({ demo: organizations.demo }).from(organizations).where(eq(organizations.id, v.orgId)) : [];
+    const [row] = await tx.insert(orders).values({ ...v, country: v.country?.toUpperCase(), demo: !!org?.demo || isDemo(v.company, v.email) }).returning();
     await emit(tx, actor, "order.created", { type: "order", id: row.id }, { package: pkg.title, source: v.source, company: v.company ?? null, orgId: v.orgId ?? null, setupEur: pkg.setupEur, monthlyEur: pkg.monthlyEur });
     await audit(tx, actor, "order.created", { type: "order", id: row.id }, null, v);
     return row;
