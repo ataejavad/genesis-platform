@@ -56,12 +56,13 @@ ${BRAND_VOICE}
 
 Write these pieces (one per line, keep the index):
 ${i.plan.map((p) => `- ${p.channel} #${p.index}: theme "${p.theme}", language ${LANG_NAME[p.lang] ?? p.lang}, ends by inviting to ${p.cta === "checkup" ? "the free 3-minute check-up" : "the weekly newsletter"}`).join("\n")}
-- newsletter issue in each of: ${i.newsletterLangs.map((l) => LANG_NAME[l] ?? l).join(", ")}
+${i.newsletterLangs.length ? `- newsletter issue in each of: ${i.newsletterLangs.map((l) => LANG_NAME[l] ?? l).join(", ")}` : "- no newsletter this time (answer \"newsletter\": [] and \"youtube\": [] when none is listed)"}
 
 Themes:
 - news: use web search to find ONE concrete news item from the last 14 days that matters to ${i.focus.name} in ${i.focus.country}
   (a rule, an incentive, a deadline, a new technology, a market number). Give its sourceUrl and sourceTitle. Write OUR take: what it
   changes for a small firm, who should act, what to do this month. Never copy or paraphrase the article's sentences; one short fact is fine.
+  If you cannot search the web, pick the item from "News we already know" below; never invent a news item, a number or a URL.
 - pain: one real problem of these firms (see the list), told as a short scene with a number, and how it is solved today.
 - build: building this company in public with a small team and AI agents doing most of the work: one honest lesson or number from this week.
 - newsletter: the hub of all of it. Subject line + plain-text body (no HTML, no markdown tables): 1 new technology or rule and how to use it,

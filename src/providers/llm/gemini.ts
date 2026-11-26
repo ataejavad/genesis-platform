@@ -86,6 +86,12 @@ export function geminiLlm(env: Env = process.env, fetchImpl: typeof fetch = fetc
         usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number; thoughtsTokenCount?: number };
         error?: GeminiError;
       };
+      // Google Search grounding has its own (small) free quota: when every search model is out of it, the same request is
+      // answered without the search tool (the agents already pass the news they know), so a weekly job is not lost
+      if (!res.ok && req.webSearch && res.status === 429) {
+        const plain = await this.complete({ ...req, webSearch: undefined });
+        return { ...plain, model: `${plain.model} (no web search: ${used} 429)` };
+      }
       if (!res.ok) throw new Error(`gemini ${res.status} (${used}): ${(body.error?.message ?? "error").slice(0, 120)}${quotaLine(body.error)}${tried.length ? ` · tried ${tried.join(" · ")}` : ""}`);
       const c = body.candidates?.[0];
       const u = body.usageMetadata ?? {};

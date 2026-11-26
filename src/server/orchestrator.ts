@@ -11,7 +11,7 @@ import { billSubscriptions, dunning } from "./finance";
 import { customerHealthWeek, monthlyResults } from "./health";
 import { checkExperiments } from "./improve";
 import { leadReminders } from "./lead-reminders";
-import { publishDue, weeklyDrafts } from "./media";
+import { publishDue, todayPost, weeklyDrafts } from "./media";
 import { dailyRadar } from "./radar";
 import { RADAR } from "@/config/radar";
 import { socialFromEnv } from "@/providers/social";
@@ -33,7 +33,7 @@ import type { VoiceCaller } from "./voice";
 
 export type JobDeps = { mailer: Mailer | null; voice: VoiceCaller | null; adminChat: AdminChat | null };
 type Schedule = { every: number } | { daily: string } | { weekly: number; at: string } | { monthly: number; at: string };
-export type JobDef = { id: string; what: string; schedule: Schedule; /** reaches people outside: held by the emergency stop */ outward?: boolean; run: (db: Db, deps: JobDeps, now: Date) => Promise<unknown> };
+export type JobDef = { id: string; what: string; schedule: Schedule; /** reaches people outside: held by the emergency stop */ outward?: boolean; run: (db: Db, deps: JobDeps, now: Date, /** started by hand (cockpit "Run now", ?run=) */ manual: boolean) => Promise<unknown> };
 
 export const JOBS: JobDef[] = [
   { id: "outreach.send", what: "Approved emails that are due; AI calls where switched on", schedule: { every: 10 }, outward: true, run: async (db, d) => ({ emails: d.mailer ? await sendDueEmails(db, d.mailer) : "no mailer", calls: d.voice ? await startDueAiCalls(db, d.voice, planEnv()) : "no voice" }) },
@@ -49,6 +49,7 @@ export const JOBS: JobDef[] = [
   { id: "radar.daily", what: "Solutions radar: new products + tech news → problem, industries, resell / build / ignore; proposals to Javad's phone", schedule: { daily: RADAR.at }, run: (db, d, now) => dailyRadar(db, now, { adminChat: d.adminChat }) },
   { id: "daily.report", what: "Javad's morning brief (phone chat + Cockpit › Today)", schedule: { daily: "08:00" }, run: async (db, d, now) => { const r = await dailyReport(db, now, d.adminChat); return { verdict: r.verdict, sent: Boolean(r.sentAt) }; } },
   { id: "media.drafts", what: "Media agent writes the week: LinkedIn posts, a video script, the newsletter issues (drafts for Javad)", schedule: { weekly: 1, at: "07:00" }, run: (db, _d, now) => weeklyDrafts(db, now) },
+  { id: "media.today", what: "One fresh LinkedIn post for a working day that has none (planned piece missing or rejected); by hand: one post now (draft for Javad)", schedule: { daily: "07:15" }, run: (db, _d, now, manual) => todayPost(db, now, { manual }) },
   { id: "customer.health", what: "Weekly health score per customer; at-risk alert", schedule: { weekly: 1, at: "07:00" }, run: (db, _d, now) => customerHealthWeek(db, now) },
   { id: "results.monthly", what: "Each customer's results of last month by email", schedule: { monthly: 1, at: "09:00" }, outward: true, run: (db, _d, now) => monthlyResults(db, now) },
   { id: "service.monthly", what: "Monthly service: each subscription's check-up tasks to partners + its expected running costs", schedule: { monthly: 1, at: "06:00" }, run: (db, _d, now) => monthlyService(db, now) },
@@ -125,7 +126,7 @@ export async function runDue(db: Db, deps: JobDeps, now = new Date(), only?: str
     if (only ? !only.includes(job.id) : !isDue(job, last.get(job.id), now)) continue;
     // Javad switched it off, or the emergency stop holds everything that reaches people outside
     if (off.get(`job:${job.id}`)?.enabled === false || (stopped && job.outward)) continue;
-    const ok = await runJob(db, deps, job, now);
+    const ok = await runJob(db, deps, job, now, Boolean(only));
     // a short result next to each job, so the hourly tick's log (GitHub Actions) shows what happened without the cockpit
     const [done] = await db.select({ result: jobRuns.result, error: jobRuns.error }).from(jobRuns).where(eq(jobRuns.job, job.id)).orderBy(desc(jobRuns.startedAt)).limit(1);
     const short = JSON.stringify(ok ? (done?.result ?? null) : done?.error ?? null)?.slice(0, 800);
@@ -134,10 +135,10 @@ export async function runDue(db: Db, deps: JobDeps, now = new Date(), only?: str
   return ran;
 }
 
-export async function runJob(db: Db, deps: JobDeps, job: JobDef, now = new Date()) {
+export async function runJob(db: Db, deps: JobDeps, job: JobDef, now = new Date(), manual = false) {
   const [row] = await db.insert(jobRuns).values({ job: job.id, startedAt: now }).returning({ id: jobRuns.id });
   try {
-    const result = await job.run(db, deps, now);
+    const result = await job.run(db, deps, now, manual);
     await db.update(jobRuns).set({ finishedAt: new Date(), ok: true, result: result ?? null }).where(eq(jobRuns.id, row.id));
     return true;
   } catch (err) {
@@ -151,7 +152,7 @@ export async function runJob(db: Db, deps: JobDeps, job: JobDef, now = new Date(
 export async function runNow(db: Db, deps: JobDeps, id: string) {
   const job = JOBS.find((j) => j.id === id);
   if (!job) throw new Error(`unknown job ${id}`);
-  return runJob(db, deps, job);
+  return runJob(db, deps, job, new Date(), true);
 }
 
 /** The board for Cockpit › Today: every job, its schedule, last run and next due. */

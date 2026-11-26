@@ -19,9 +19,9 @@ export function AgentControls({ id, enabled, paused, budget }: { id: string; ena
   );
 }
 
-export function RunJob({ id }: { id: string }) {
+export function RunJob({ id, label = "Run now" }: { id: string; label?: string }) {
   const [state, action, pending] = useActionState<Result, FormData>(runJobNow, null);
-  return <form action={action} className="row" style={{ gap: 6 }}><input type="hidden" name="job" value={id} /><button className="btn sm" disabled={pending}>{pending ? "Running…" : "Run now"}</button><Status state={state} /></form>;
+  return <form action={action} className="row" style={{ gap: 6 }}><input type="hidden" name="job" value={id} /><button className="btn sm" disabled={pending}>{pending ? "Running…" : label}</button><Status state={state} /></form>;
 }
 
 export function RefreshBrief() {

@@ -25,8 +25,8 @@ export default async function Media() {
       <PageHead
         title="Media"
         crumbs="Cockpit › Growth"
-        sub={`Newsletter = the list we own; LinkedIn (your profile) and short videos feed it. Monday 07:00 the media writer drafts the week; you approve on the phone or here; pieces go out at their slot (Rome time). Goal by ${MEDIA.goals.by}: ${MEDIA.goals.subscribers} subscribers, ${MEDIA.goals.checkupsPerMonth} check-ups a month from media.`}
-        actions={<RunJob id="media.drafts" />}
+        sub={`Newsletter = the list we own; LinkedIn (company page) feeds it. Monday 07:00 the media writer drafts the week, and every working day without a post (none planned or you rejected it) gets one fresh post at 07:15; you approve on the phone or here; pieces go out at their slot (Rome time). Goal by ${MEDIA.goals.by}: ${MEDIA.goals.subscribers} subscribers, ${MEDIA.goals.checkupsPerMonth} check-ups a month from media.`}
+        actions={<div className="row" style={{ gap: 6 }}><RunJob id="media.today" label="✍️ One post now" /><RunJob id="media.drafts" label="Write the week" /></div>}
       />
       <section className="grid g4" style={{ marginBottom: 18 }}>
         <div className="card stat"><div className="label">Newsletter subscribers (confirmed)</div><div className="value">{k.subscribers} <span className="muted small">/ {k.subscribersGoal} · {pct(k.subscribers, k.subscribersGoal)}</span></div><div className="muted small">+{k.newSubscribers30} in 30 days</div></div>

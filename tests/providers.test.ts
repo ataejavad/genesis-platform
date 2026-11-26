@@ -163,6 +163,17 @@ describe("Gemini free-tier quota", () => {
 
     const all429 = (async () => Response.json(quota, { status: 429 })) as unknown as typeof fetch;
     await expect(geminiLlm({ GEMINI_API_KEY: "k" }, all429).complete({ maxTokens: 10, webSearch: { maxUses: 1 }, messages: [{ role: "user", content: "hi" }] })).rejects.toThrow(/FreeTier limit 0/);
+    // grounding quota out on every model: the same request is answered without the search tool (2026-11-23 media writer)
+    const bodies: { tools?: unknown }[] = [];
+    const searchOut = (async (_url: string, init: RequestInit) => {
+      const b = JSON.parse(String(init.body));
+      bodies.push(b);
+      return b.tools ? Response.json(quota, { status: 429 }) : Response.json({ candidates: [{ content: { parts: [{ text: "plain" }] }, finishReason: "STOP" }] });
+    }) as unknown as typeof fetch;
+    const plain = await geminiLlm({ GEMINI_API_KEY: "k" }, searchOut).complete({ maxTokens: 10, webSearch: { maxUses: 1 }, messages: [{ role: "user", content: "hi" }] });
+    expect(plain).toMatchObject({ text: "plain", usage: { searches: 0 } });
+    expect(plain.model).toMatch(/no web search/);
+    expect(bodies.at(-1)?.tools).toBeUndefined();
     // plain calls try the lite and the 2.5 models once each, then name them all
     await expect(geminiLlm({ GEMINI_API_KEY: "k" }, all429).complete({ maxTokens: 10, messages: [{ role: "user", content: "hi" }] })).rejects.toThrow(/gemini 429 \(gemini-2.5-flash-lite\).*tried gemini-flash-latest: 429.*gemini-flash-lite-latest: 429.*gemini-2.5-flash: 429/);
   });

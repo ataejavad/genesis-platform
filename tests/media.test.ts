@@ -2,11 +2,11 @@ import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 import type { WriterInput, WriterOut } from "@/agents/media-writer";
 import { MEDIA } from "@/config/media";
-import { agentRuns, events, leads, mediaPosts, notifications } from "@/db/schema";
+import { agentRuns, events, leads, mediaPosts, notifications, radarItems } from "@/db/schema";
 import { type ApprovalPress, mockAdminChat } from "@/providers/admin-chat";
 import { mockPublisher } from "@/providers/social";
 import { handlePress, sendWaitingAsks } from "@/server/admin-chat";
-import { confirmMediaPosted, decideMedia, editMedia, isoWeek, mediaKpi, publicMedia, publishDue, weeklyDrafts } from "@/server/media";
+import { confirmMediaPosted, decideMedia, editMedia, isoWeek, mediaKpi, publicMedia, publishDue, todayPost, weeklyDrafts } from "@/server/media";
 import { javad, useTestDb } from "./helpers";
 
 const db = useTestDb();
@@ -106,6 +106,38 @@ describe("media engine", () => {
     times.sort();
     for (let i = 1; i < times.length; i++) expect(times[i] - times[i - 1]).toBeGreaterThanOrEqual(MEDIA.minGapHours * HOUR);
     expect(times[0]).toBeGreaterThan(late.getTime());
+  });
+
+  it("a working day without a post gets one fresh draft; by hand it always writes one", async () => {
+    const thu = new Date("2026-11-26T06:15:00Z"); // Thursday 07:15 Rome
+    const one = writer(week({ linkedin: [{ index: 0, title: "Today's take", text: text(1), textFa: "ترجمه فارسی پست امروز", sourceUrl: "https://example.org/n", sourceTitle: "Example" }], youtube: [], newsletter: [] }));
+    const r = await todayPost(db, thu, { write: one.write });
+    expect(r).toMatchObject({ day: "2026-11-26", drafts: 1, writer: "ai" });
+    expect(one.seen[0].plan).toHaveLength(1);
+    expect(one.seen[0].newsletterLangs).toEqual([]);
+    const [p] = await all();
+    expect(p).toMatchObject({ status: "draft", channel: "linkedin", lang: "en", title: "Today's take" });
+    expect(p.position).toBeGreaterThanOrEqual(200);
+    expect(p.scheduledFor!.toISOString()).toBe("2026-11-26T11:30:00.000Z"); // 12:30 Rome
+    // the day has a post now (and a draft waits): the schedule does nothing more, a hand-started run still writes one
+    expect(await todayPost(db, thu, { write: one.write })).toMatchObject({ skipped: expect.stringMatching(/already planned/) });
+    expect(await todayPost(db, new Date("2026-11-28T06:15:00Z"), { write: one.write })).toEqual({ skipped: "weekend" });
+    const evening = new Date("2026-11-26T19:45:00Z");
+    expect(await todayPost(db, evening, { manual: true, write: one.write })).toMatchObject({ drafts: 1 });
+    const extra = (await all()).find((x) => x.id !== p.id)!;
+    // approved in the evening: next morning, kept a few hours from the other post, not a whole day
+    await decideMedia(db, javad, p.id, true, undefined, thu);
+    const at = (await decideMedia(db, javad, extra.id, true, undefined, evening)).scheduledFor!;
+    expect(at.getTime()).toBeGreaterThan(evening.getTime());
+    expect(at.getTime() - evening.getTime()).toBeLessThan(24 * HOUR);
+  });
+
+  it("without a model the daily post is the best fresh radar proposal", async () => {
+    const thu = new Date("2026-11-26T06:15:00Z");
+    await db.insert(radarItems).values({ day: "2026-11-26", source: "Product Hunt", url: "https://example.org/tool", title: "Tool", maker: "ToolCo", status: "proposed", fit: 4, linkedin: text(7), summaryFa: "خلاصه", createdAt: thu });
+    const r = await todayPost(db, thu, { write: async () => { throw new Error("quota"); } });
+    expect(r).toMatchObject({ drafts: 1, writer: "radar", error: "quota" });
+    expect((await all())[0]).toMatchObject({ title: "ToolCo", theme: "solution", body: text(7) });
   });
 
   it("an edit sends an approved piece back for approval", async () => {

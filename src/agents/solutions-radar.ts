@@ -15,6 +15,14 @@ import { BRAND_VOICE } from "@/config/brand";
 export const radarEnabled = () => llmEnabled();
 
 const text = (min: number, max: number) => z.string().min(min).max(max);
+/** An APQC entry as the plain label ("5.0 Deliver Services"), also when the model sends it as an object. */
+export function apqcLabel(v: unknown): unknown {
+  if (!v || typeof v !== "object" || Array.isArray(v)) return v;
+  const o = v as Record<string, unknown>;
+  const code = [o.code, o.id, o.number].find((x) => typeof x === "string" || typeof x === "number");
+  const name = [o.name, o.label, o.title, o.category, o.process].find((x) => typeof x === "string");
+  return [code, name].filter((x) => x !== undefined && x !== "").join(" ").trim() || v;
+}
 export const pickSchema = z.object({
   // small models often write numbers and choices as strings ("3", "Resell"): accept them
   index: z.coerce.number().int().min(0).max(500),
@@ -22,7 +30,8 @@ export const pickSchema = z.object({
   problem: text(10, 400),
   useCase: text(10, 500),
   industries: z.array(z.object({ nace: text(1, 12), name: text(2, 80) })).min(1).max(6),
-  processes: z.preprocess((v) => (typeof v === "string" ? [v] : v), z.array(text(3, 80)).min(1).max(4)),
+  // the model sometimes answers {"code":"5.0","name":"Deliver Services"} instead of the plain label (2026-11-26: most failed runs)
+  processes: z.preprocess((v) => (typeof v === "string" || (v && typeof v === "object" && !Array.isArray(v)) ? [v] : v), z.array(z.preprocess(apqcLabel, text(3, 80))).min(1).max(4)),
   decision: z.preprocess((v) => (typeof v === "string" ? v.trim().toLowerCase() : v), z.enum(["resell", "build", "ignore"])),
   why: text(10, 500),
   fit: z.coerce.number().int().min(1).max(5),

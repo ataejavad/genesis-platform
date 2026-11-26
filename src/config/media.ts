@@ -30,6 +30,8 @@ export const MEDIA = {
   newsletter: { langs: ["en"], slot: { weekday: 4, at: "09:00" } as Slot },
   /** never two LinkedIn posts closer than this (an approval after its slot moves to the next free time) */
   minGapHours: 20,
+  /** a daily post (media.today) or one Javad asked for keeps only this far from other posts */
+  dailyGapHours: 4,
   /** goal in 6 months (doc 11 §7 stage 1) */
   goals: { subscribers: 500, checkupsPerMonth: 5, openRate: 40, by: "2027-05-21" },
   /** a post handed to Javad and not confirmed as posted after this many hours shows up in ops-watch */
