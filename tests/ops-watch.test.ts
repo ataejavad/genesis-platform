@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 import { events, jobOffers, jobs, payouts } from "@/db/schema";
+import { buildBrief } from "@/server/daily-report";
 import { opsWatch } from "@/server/ops-watch";
 import { addDocument, applyPartner, checkDocument, decideApplication, offersFor, respondOffer } from "@/server/partners";
 import { createOrder, seedDelivery } from "@/server/projects";
@@ -62,5 +63,20 @@ describe("ops watchdog", () => {
     await db.insert(payouts).values({ partnerId: anna, amountEur: 300, dueAt: new Date(Date.now() - HOUR) });
     const r = await opsWatch(db);
     expect(r.counts.payout).toBe(1);
+  });
+
+  it("leaves demo and test data out of alerts and the daily brief, and says what to do", async () => {
+    await seedDelivery(db);
+    const base = { packageSlug: "phone-agent", source: "market", country: "IT", industry: "glass", locale: "it" } as const;
+    const demo = await createOrder(db, sys, { ...base, company: "Bianchi Serramenti (demo)", email: "bianchi@example.com" });
+    const qa = await createOrder(db, sys, { ...base, company: "QA Test Impianti", email: "qa@x.test" });
+    const real = await createOrder(db, sys, { ...base, company: "Verdi Srl", email: "verdi@x.test" });
+    expect([demo.demo, qa.demo, real.demo]).toEqual([true, true, false]);
+    const r = await opsWatch(db, new Date(Date.now() + 25 * HOUR));
+    const orders = r.items.filter((i) => i.kind === "order");
+    expect(orders.map((i) => i.key)).toEqual([`order:${real.id}`]);
+    expect(orders[0].text).toContain("To do:");
+    const brief = await buildBrief(db, new Date(Date.now() + 25 * HOUR));
+    expect(brief.decisions.find((d) => d.text.includes("send the contract"))?.text).toMatch(/^1 order/);
   });
 });

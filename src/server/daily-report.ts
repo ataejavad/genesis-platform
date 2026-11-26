@@ -3,6 +3,7 @@ import { AGENTS } from "@/config/agents";
 import type { Db } from "@/db";
 import { approvals, experiments, invoices, leads, orders, prospects, reports, subscriptions, touches } from "@/db/schema";
 import { agentBoard, monthSpend } from "./agents";
+import { realOrg } from "./demo";
 import { latestHealth } from "./health";
 import { type OpsItem, opsWatch } from "./ops-watch";
 import { type AdminChat, sendAlert } from "./admin-chat";
@@ -34,9 +35,9 @@ export async function buildBrief(db: Db, now = new Date()): Promise<Brief> {
   const n = sql<number>`count(*)::int`;
   const newLeads = await count(db.select({ n }).from(leads).where(gte(leads.createdAt, since)));
   const replies = await count(db.select({ n }).from(prospects).where(gte(prospects.repliedAt, since)));
-  const newOrders = await count(db.select({ n }).from(orders).where(gte(orders.createdAt, since)));
-  const [cash] = await db.select({ eur: sum(invoices.totalEur) }).from(invoices).where(gte(invoices.paidAt, since));
-  const [mrr] = await db.select({ eur: sum(subscriptions.monthlyEur) }).from(subscriptions).where(eq(subscriptions.status, "active"));
+  const newOrders = await count(db.select({ n }).from(orders).where(and(gte(orders.createdAt, since), eq(orders.demo, false), realOrg(orders.orgId))));
+  const [cash] = await db.select({ eur: sum(invoices.totalEur) }).from(invoices).where(and(gte(invoices.paidAt, since), realOrg(invoices.orgId)));
+  const [mrr] = await db.select({ eur: sum(subscriptions.monthlyEur) }).from(subscriptions).where(and(eq(subscriptions.status, "active"), realOrg(subscriptions.orgId)));
   const spend = await monthSpend(db, now);
   const budget = AGENTS.reduce((s, a) => s + a.budgetEur, 0);
 
@@ -47,7 +48,7 @@ export async function buildBrief(db: Db, now = new Date()): Promise<Brief> {
   const pendingApprovals = await count(db.select({ n }).from(approvals).where(eq(approvals.status, "pending")));
   if (pendingApprovals) decisions.push({ text: `${pendingApprovals} draft(s) to approve before they go public`, link: "/cockpit/approvals" });
   // an order waits for Javad's "Send contract" (order.convert, 1-day promise to the buyer); listed from the first minute
-  const newOrdersWaiting = await count(db.select({ n }).from(orders).where(eq(orders.status, "new")));
+  const newOrdersWaiting = await count(db.select({ n }).from(orders).where(and(eq(orders.status, "new"), eq(orders.demo, false), realOrg(orders.orgId))));
   if (newOrdersWaiting) decisions.push({ text: `${newOrdersWaiting} order(s) wait for you to send the contract`, link: "/cockpit/projects" });
   const drafts = await count(db.select({ n }).from(touches).where(eq(touches.status, "draft")));
   if (drafts) decisions.push({ text: `${drafts} outreach message(s) wait for your OK`, link: "/cockpit/outreach" });
@@ -60,7 +61,7 @@ export async function buildBrief(db: Db, now = new Date()): Promise<Brief> {
     if (a.decision) decisions.push({ text: a.decision, link: "/cockpit/agents" });
     if (a.paused) decisions.push({ text: `${a.def.name} paused: €${a.spentEur} of €${a.budgetEur} spent. Raise the budget or wait for the 1st`, link: "/cockpit/agents" });
   }
-  for (const h of (await latestHealth(db)).filter((x) => x.h.band === "red")) {
+  for (const h of (await latestHealth(db)).filter((x) => x.h.band === "red" && !x.demo)) {
     const why = (h.h.signals as { reasons?: string[] }).reasons?.[0] ?? "";
     decisions.push({ text: `${h.name} at risk (${h.h.score}/100): ${why}`, link: "/cockpit/customers" });
   }

@@ -88,7 +88,7 @@ export async function customerHealthWeek(db: Db, now = new Date()) {
 
 /** The newest score of each customer (cockpit and brief). */
 export async function latestHealth(db: Db) {
-  const rows = await db.select({ h: customerHealth, name: organizations.name }).from(customerHealth).innerJoin(organizations, eq(organizations.id, customerHealth.orgId)).orderBy(sql`${customerHealth.week} desc`);
+  const rows = await db.select({ h: customerHealth, name: organizations.name, demo: organizations.demo }).from(customerHealth).innerJoin(organizations, eq(organizations.id, customerHealth.orgId)).orderBy(sql`${customerHealth.week} desc`);
   const seen = new Set<string>();
   return rows.filter((r) => !seen.has(r.h.orgId) && seen.add(r.h.orgId));
 }

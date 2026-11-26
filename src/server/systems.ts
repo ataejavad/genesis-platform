@@ -1,6 +1,7 @@
 import { and, count, desc, eq, gte, inArray, gt, isNotNull, isNull, lt, sql, sum } from "drizzle-orm";
 import { mediaKpi } from "./media";
 import { radarKpi } from "./radar";
+import { realOrder, realOrg, realPartner } from "./demo";
 import { MODULES, type ModuleDef, SYSTEMS } from "@/config/modules";
 import { STEPS } from "@/config/process-map";
 import type { Db } from "@/db";
@@ -55,7 +56,7 @@ const KPI: Record<string, (c: Ctx) => Promise<string>> = {
     const cost = m.reduce((s, x) => s + x.costEur, 0);
     return fee ? `${Math.round(((fee - cost) / fee) * 100)}% on €${fee} MRR, ${m.filter((x) => x.marginPct !== null && x.marginPct < MARGIN_FLOOR).length} under ${MARGIN_FLOOR}%` : "no running subscriptions";
   },
-  churn: async ({ db, now, month }) => `${await n(db.select({ n: count() }).from(subscriptions).where(and(eq(subscriptions.status, "active"), gt(subscriptions.endsAt, now))))} on notice, ${await n(db.select({ n: count() }).from(events).where(and(eq(events.type, "loss.recorded"), gte(events.createdAt, month))))} losses with a reason this month`,
+  churn: async ({ db, now, month }) => `${await n(db.select({ n: count() }).from(subscriptions).where(and(eq(subscriptions.status, "active"), gt(subscriptions.endsAt, now), realOrg(subscriptions.orgId))))} on notice, ${await n(db.select({ n: count() }).from(events).where(and(eq(events.type, "loss.recorded"), gte(events.createdAt, month))))} losses with a reason this month`,
   supplyGaps: async ({ db, month }) => `${await n(db.select({ n: count() }).from(supplyGaps).where(eq(supplyGaps.status, "open")))} skills missing, ${await n(db.select({ n: count() }).from(supplyGaps).where(and(eq(supplyGaps.status, "closed"), gte(supplyGaps.closedAt, month))))} filled this month`,
   unpaidMilestones: async ({ db }) => `${await n(db.select({ n: count() }).from(milestones).where(eq(milestones.status, "unpaid")))} milestones waiting for payment`,
   hubPages: async ({ db }) => `${await n(db.select({ n: count() }).from(contentItems).where(eq(contentItems.status, "published")))} pages live`,
@@ -95,15 +96,15 @@ const KPI: Record<string, (c: Ctx) => Promise<string>> = {
     return `${pct(r.ok, r.all)} confirmed this month`;
   },
   experiments: async ({ db }) => `${await n(db.select({ n: count() }).from(experiments).where(eq(experiments.status, "running")))} running`,
-  orders: async ({ db, month }) => `${await n(db.select({ n: count() }).from(orders).where(gte(orders.createdAt, month)))} orders this month`,
-  contracts: async ({ db }) => `${await n(db.select({ n: count() }).from(contracts).where(eq(contracts.status, "sent")))} waiting for signature`,
+  orders: async ({ db, month }) => `${await n(db.select({ n: count() }).from(orders).where(and(gte(orders.createdAt, month), eq(orders.demo, false), realOrg(orders.orgId))))} orders this month`,
+  contracts: async ({ db }) => `${await n(db.select({ n: count() }).from(contracts).where(and(eq(contracts.status, "sent"), realOrg(contracts.orgId), realPartner(contracts.partnerId), realOrder(contracts.orderId))))} waiting for signature`,
   portalChats: async ({ db, month }) => `${await n(db.select({ n: count() }).from(portalMessages).where(and(eq(portalMessages.role, "user"), gte(portalMessages.createdAt, month))))} customer messages this month`,
-  results: async ({ db, month }) => `${eur(Number((await db.select({ v: sum(outcomes.eur) }).from(outcomes).where(gte(outcomes.at, month)))[0]?.v ?? 0))} won back for customers this month`,
-  customerWaiting: async ({ db }) => `${await n(db.select({ n: count() }).from(customerApprovals).where(eq(customerApprovals.status, "pending")))} waiting on customers`,
-  openRequests: async ({ db }) => `${await n(db.select({ n: count() }).from(customerRequests).where(eq(customerRequests.status, "open")))} open requests`,
-  mrr: async ({ db }) => `MRR ${eur(Number((await db.select({ v: sum(subscriptions.monthlyEur) }).from(subscriptions).where(eq(subscriptions.status, "active")))[0]?.v ?? 0))}`,
+  results: async ({ db, month }) => `${eur(Number((await db.select({ v: sum(outcomes.eur) }).from(outcomes).where(and(gte(outcomes.at, month), realOrg(outcomes.orgId))))[0]?.v ?? 0))} won back for customers this month`,
+  customerWaiting: async ({ db }) => `${await n(db.select({ n: count() }).from(customerApprovals).where(and(eq(customerApprovals.status, "pending"), realOrg(customerApprovals.orgId))))} waiting on customers`,
+  openRequests: async ({ db }) => `${await n(db.select({ n: count() }).from(customerRequests).where(and(eq(customerRequests.status, "open"), realOrg(customerRequests.orgId))))} open requests`,
+  mrr: async ({ db }) => `MRR ${eur(Number((await db.select({ v: sum(subscriptions.monthlyEur) }).from(subscriptions).where(and(eq(subscriptions.status, "active"), realOrg(subscriptions.orgId))))[0]?.v ?? 0))}`,
   atRisk: async ({ db }) => {
-    const rows = await db.select({ orgId: customerHealth.orgId, band: customerHealth.band, week: customerHealth.week }).from(customerHealth).orderBy(desc(customerHealth.week));
+    const rows = await db.select({ orgId: customerHealth.orgId, band: customerHealth.band, week: customerHealth.week }).from(customerHealth).where(realOrg(customerHealth.orgId)).orderBy(desc(customerHealth.week));
     const seen = new Set<string>();
     const latest = rows.filter((r) => !seen.has(r.orgId) && seen.add(r.orgId));
     return latest.length ? `${latest.filter((r) => r.band === "red").length} red of ${latest.length}` : "first score on Monday";
