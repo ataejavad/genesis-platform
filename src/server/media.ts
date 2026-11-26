@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, like, lte, ne, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, like, lt, lte, ne, or, sql } from "drizzle-orm";
 import { type WriterInput, type WriterOut, writeWeek, writerEnabled } from "@/agents/media-writer";
 import { type Cta, MEDIA, type MediaChannel, type MediaTheme, mediaFocus, type Slot } from "@/config/media";
 import type { Db, DbOrTx } from "@/db";
@@ -112,30 +112,37 @@ async function keptSolutions(db: Db, now: Date) {
   return rows.map((x) => ({ date: (x.publishedAt ?? x.createdAt).toISOString().slice(0, 10), publisher: x.maker ?? x.source, url: x.url, title: `New solution: ${x.title} (${x.problem ?? ""})`, takeaway: x.takeaway.en ?? "" }));
 }
 
+/** What the media writer gets: the plan, the sector research, fresh news and kept solutions, what was used or rejected. */
+async function writerInput(db: Db, now: Date, plan: WriterInput["plan"], newsletterLangs: string[], extraNews: WriterInput["news"] = []) {
+  const focus = mediaFocus();
+  const research = loadResearch();
+  const r = research.find((x) => x.industry === focus.industry && x.country === focus.country) ?? research[0];
+  const past = await db.select({ title: mediaPosts.title, status: mediaPosts.status, note: mediaPosts.note }).from(mediaPosts).where(gte(mediaPosts.createdAt, new Date(now.getTime() - 84 * DAY)));
+  const input: WriterInput = {
+    today: romeDay(now),
+    brand: planEnv().brand,
+    founder: planEnv().sender,
+    focus: { industry: focus.industry, country: focus.country, name: pickText(r?.name, "en") || focus.industry },
+    plan,
+    newsletterLangs,
+    pains: (r?.pains ?? []).map((p) => ({ text: pickText(p.text, "en"), source: p.sources[0]?.url })),
+    news: [...extraNews, ...(await keptSolutions(db, now)), ...(r?.news ?? []).map((n) => ({ date: n.date, publisher: n.publisher, url: n.url, title: pickText(n.title, "en"), takeaway: pickText(n.takeaway, "en") }))],
+    week: await weekFacts(db, now),
+    used: past.filter((p) => p.status !== "rejected").map((p) => p.title),
+    rejected: past.filter((p) => p.status === "rejected").map((p) => ({ title: p.title, note: p.note })),
+  };
+  return { input, r };
+}
+
 /** Monday job: the media agent writes the week's pieces as drafts for Javad. Once per week unless `force`. */
 export async function weeklyDrafts(db: Db, now = new Date(), opts: { force?: boolean; write?: (i: WriterInput) => Promise<WriterOut> } = {}) {
   const week = isoWeek(now);
   const monday = weekMonday(now);
   const have = await db.select({ id: mediaPosts.id }).from(mediaPosts).where(eq(mediaPosts.week, week)).limit(1);
   if (have.length && !opts.force) return { skipped: `week ${week} already written` };
+  const { input, r } = await writerInput(db, now, [...MEDIA.linkedin.map((p, index) => ({ channel: "linkedin" as const, index, ...p })), ...MEDIA.youtube.map((p, index) => ({ channel: "youtube" as const, index, ...p }))].map(({ slot: _s, ...p }) => p), MEDIA.newsletter.langs);
   const focus = mediaFocus();
-  const research = loadResearch();
-  const r = research.find((x) => x.industry === focus.industry && x.country === focus.country) ?? research[0];
-  const past = await db.select({ title: mediaPosts.title, status: mediaPosts.status, note: mediaPosts.note }).from(mediaPosts).where(gte(mediaPosts.createdAt, new Date(now.getTime() - 84 * DAY)));
-  const facts = await weekFacts(db, now);
-  const input: WriterInput = {
-    today: romeDay(now),
-    brand: planEnv().brand,
-    founder: planEnv().sender,
-    focus: { industry: focus.industry, country: focus.country, name: pickText(r?.name, "en") || focus.industry },
-    plan: [...MEDIA.linkedin.map((p, index) => ({ channel: "linkedin" as const, index, ...p })), ...MEDIA.youtube.map((p, index) => ({ channel: "youtube" as const, index, ...p }))].map(({ slot: _s, ...p }) => p),
-    newsletterLangs: MEDIA.newsletter.langs,
-    pains: (r?.pains ?? []).map((p) => ({ text: pickText(p.text, "en"), source: p.sources[0]?.url })),
-    news: [...(await keptSolutions(db, now)), ...(r?.news ?? []).map((n) => ({ date: n.date, publisher: n.publisher, url: n.url, title: pickText(n.title, "en"), takeaway: pickText(n.takeaway, "en") }))],
-    week: facts,
-    used: past.filter((p) => p.status !== "rejected").map((p) => p.title),
-    rejected: past.filter((p) => p.status === "rejected").map((p) => ({ title: p.title, note: p.note })),
-  };
+  const facts = input.week;
 
   let out: WriterOut;
   let writer = "ai";
@@ -172,6 +179,60 @@ export async function weeklyDrafts(db: Db, now = new Date(), opts: { force?: boo
   return { week, drafts: saved.length, writer, ...(error ? { error } : {}) };
 }
 
+/* ───────────── one post a working day ───────────── */
+
+/** Daily posts and posts Javad asked for live from this position on (weekly plan 0–99, radar 100–199). */
+export const DAILY_POSITION = 200;
+
+/**
+ * Daily 07:15 (Mon–Fri): when today has no LinkedIn piece (none planned, or Javad rejected it) and no draft waits, the media
+ * writer writes ONE fresh post (news + our take, from the radar and the hub research) as a draft for today's 12:30 slot; Javad
+ * approves it on the phone. Started by hand ("Run now", or GitHub "Run workflow" with media.today) it always writes one,
+ * for the next free time. Without a model: the best solution the radar proposed in the last 3 days (its post is AI-written).
+ */
+export async function todayPost(db: Db, now = new Date(), opts: { manual?: boolean; write?: (i: WriterInput) => Promise<WriterOut> } = {}) {
+  const day = romeDay(now);
+  if (!opts.manual) {
+    if (isoDow(day) > 5) return { skipped: "weekend" };
+    const from = romeInstant(day, "00:00");
+    const to = romeInstant(addDays(day, 1), "00:00");
+    const [planned] = await db.select({ id: mediaPosts.id }).from(mediaPosts).where(and(eq(mediaPosts.channel, "linkedin"), inArray(mediaPosts.status, ["draft", "approved", "handed", "posted"]), gte(mediaPosts.scheduledFor, from), lt(mediaPosts.scheduledFor, to))).limit(1);
+    if (planned) return { skipped: `a LinkedIn post is already planned for ${day}` };
+    const [waiting] = await db.select({ id: mediaPosts.id }).from(mediaPosts).where(and(eq(mediaPosts.channel, "linkedin"), eq(mediaPosts.status, "draft"))).limit(1);
+    if (waiting) return { skipped: "a LinkedIn draft already waits for Javad" };
+  }
+  const week = isoWeek(now);
+  const recent = await db.select().from(radarItems).where(and(inArray(radarItems.status, ["proposed", "shortlisted"]), gte(radarItems.createdAt, new Date(now.getTime() - 3 * DAY)))).orderBy(desc(radarItems.fit), desc(radarItems.createdAt)).limit(8);
+  const fresh = recent.map((x) => ({ date: (x.publishedAt ?? x.createdAt).toISOString().slice(0, 10), publisher: x.maker ?? x.source, url: x.url, title: `${x.title}${x.problem ? ` (problem it solves: ${x.problem})` : ""}`, takeaway: x.takeaway.en ?? "" }));
+  const { input } = await writerInput(db, now, [{ channel: "linkedin", index: 0, theme: "news", lang: "en", cta: "checkup" }], [], fresh);
+  const used = new Set(input.used);
+
+  let row: Row | null = null;
+  let writer = "ai";
+  let error: string | null = null;
+  const base = { week, channel: "linkedin", lang: "en", industry: input.focus.industry, country: input.focus.country, status: "draft" } as const;
+  const write = opts.write ?? (writerEnabled() ? writeWeek : null);
+  try {
+    if (!write) throw new Error("no AI model connected");
+    const out = await runAgent(db, "media-writer", "day", () => write(input), { day });
+    const it = out.linkedin[0];
+    if (!it) throw new Error("the writer returned no LinkedIn post");
+    row = { ...base, position: 0, theme: "news", cta: "checkup", title: it.title, body: it.text, bodyFa: it.textFa, sourceUrl: it.sourceUrl ?? null, sourceTitle: it.sourceTitle ?? null, writer };
+  } catch (err) {
+    error = err instanceof Error ? err.message.slice(0, 200) : "failed";
+    writer = "radar";
+    const r = recent.find((x) => x.linkedin && !used.has(x.maker ?? x.title));
+    if (r) row = { ...base, position: 0, theme: "solution", cta: "newsletter", title: `${r.maker ?? r.title}`.slice(0, 140), body: r.linkedin!, bodyFa: r.summaryFa, sourceUrl: r.url, sourceTitle: r.source, writer };
+  }
+  if (!row) return { day, drafts: 0, ...(error ? { error } : {}) };
+  const [{ pos }] = await db.select({ pos: sql<number>`coalesce(max(${mediaPosts.position}), ${DAILY_POSITION - 1})::int` }).from(mediaPosts).where(and(eq(mediaPosts.week, week), eq(mediaPosts.channel, "linkedin"), eq(mediaPosts.lang, "en"), gte(mediaPosts.position, DAILY_POSITION)));
+  const noon = romeInstant(day, "12:30");
+  const scheduledFor = !opts.manual && noon.getTime() > now.getTime() + 30 * 60e3 ? noon : new Date(now.getTime() + 10 * 60e3);
+  const [saved] = await db.insert(mediaPosts).values({ ...row, position: Number(pos) + 1, scheduledFor }).returning({ id: mediaPosts.id, title: mediaPosts.title });
+  await audit(db, { type: "system", id: "media-writer" }, "media.drafted", { type: "media_post", id: saved.id }, null, { day, writer, manual: Boolean(opts.manual), error });
+  return { day, drafts: 1, writer, title: saved.title, ...(error ? { error } : {}) };
+}
+
 /* ───────────── decisions (cockpit and phone call the same functions) ───────────── */
 
 /** The next time this piece may go out: its slot, or (slot passed) soon in working hours, never too close to another post. */
@@ -183,7 +244,8 @@ export async function nextFree(db: DbOrTx, p: Post, now: Date) {
   };
   at = workday(at);
   if (p.channel !== "linkedin") return at;
-  const gap = MEDIA.minGapHours * HOUR;
+  // a daily post (or one Javad asked for) fills a day without a post; it only keeps clear of the next post by a few hours
+  const gap = (p.position >= DAILY_POSITION ? MEDIA.dailyGapHours : MEDIA.minGapHours) * HOUR;
   const others = await db
     .select({ at: mediaPosts.scheduledFor })
     .from(mediaPosts)

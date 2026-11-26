@@ -145,5 +145,9 @@ describe("radar agent answer", () => {
     const { pickSchema } = await import("@/agents/solutions-radar");
     const p = pickSchema.parse({ ...pick(0), index: "2", fit: "4", decision: "Resell", effort: "Low", processes: "9.0 Manage Financial Resources" });
     expect(p).toMatchObject({ index: 2, fit: 4, decision: "resell", effort: "low", processes: ["9.0 Manage Financial Resources"] });
+    // 2026-11-26: most failed runs were APQC entries sent as objects
+    const o = pickSchema.parse({ ...pick(0), processes: [{ code: "5.0", name: "Deliver Services" }, "8.0 Manage Information Technology"] });
+    expect(o.processes).toEqual(["5.0 Deliver Services", "8.0 Manage Information Technology"]);
+    expect(pickSchema.parse({ ...pick(0), processes: { id: 3, label: "Market and Sell" } }).processes).toEqual(["3 Market and Sell"]);
   });
 });
