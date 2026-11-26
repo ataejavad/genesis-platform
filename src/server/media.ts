@@ -179,6 +179,20 @@ export async function weeklyDrafts(db: Db, now = new Date(), opts: { force?: boo
   return { week, drafts: saved.length, writer, ...(error ? { error } : {}) };
 }
 
+/* ───────────── one topic, one post ───────────── */
+
+const topicUrl = (u: string | null | undefined) => (u ? u.trim().toLowerCase().replace(/^https?:\/\/(www\.)?/, "").replace(/[?#].*$/, "").replace(/\/+$/, "") : "");
+/** Two LinkedIn pieces are about the same thing: same source page, or one's short title (a product name) appears in the other's title. */
+export function sameTopic(a: Pick<Post, "title" | "sourceUrl">, b: Pick<Post, "title" | "sourceUrl">) {
+  const ua = topicUrl(a.sourceUrl);
+  if (ua && ua === topicUrl(b.sourceUrl)) return true;
+  const ta = a.title.trim().toLowerCase();
+  const tb = b.title.trim().toLowerCase();
+  const short = (t: string) => t.length >= 4 && t.split(/\s+/).length <= 3;
+  const has = (hay: string, needle: string) => new RegExp(`(^|[^a-z0-9])${needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}([^a-z0-9]|$)`).test(hay);
+  return (short(ta) && has(tb, ta)) || (short(tb) && has(ta, tb));
+}
+
 /* ───────────── one post a working day ───────────── */
 
 /** Daily posts and posts Javad asked for live from this position on (weekly plan 0–99, radar 100–199). */
@@ -205,6 +219,10 @@ export async function todayPost(db: Db, now = new Date(), opts: { manual?: boole
   const recent = await db.select().from(radarItems).where(and(inArray(radarItems.status, ["proposed", "shortlisted"]), gte(radarItems.createdAt, new Date(now.getTime() - 3 * DAY)))).orderBy(desc(radarItems.fit), desc(radarItems.createdAt)).limit(8);
   const fresh = recent.map((x) => ({ date: (x.publishedAt ?? x.createdAt).toISOString().slice(0, 10), publisher: x.maker ?? x.source, url: x.url, title: `${x.title}${x.problem ? ` (problem it solves: ${x.problem})` : ""}`, takeaway: x.takeaway.en ?? "" }));
   const { input } = await writerInput(db, now, [{ channel: "linkedin", index: 0, theme: "news", lang: "en", cta: "checkup" }], [], fresh);
+  // a topic already posted, approved or waiting (e.g. a kept radar solution with its own post) is not offered again
+  const live = await db.select({ title: mediaPosts.title, sourceUrl: mediaPosts.sourceUrl }).from(mediaPosts).where(and(eq(mediaPosts.channel, "linkedin"), inArray(mediaPosts.status, ["draft", "approved", "handed", "posted"]), gte(mediaPosts.createdAt, new Date(now.getTime() - 30 * DAY))));
+  const taken = (n: { title: string; url: string; publisher?: string }) => live.some((l) => sameTopic(l, { title: n.title, sourceUrl: n.url }) || (n.publisher ? sameTopic(l, { title: n.publisher, sourceUrl: null }) : false));
+  input.news = input.news.filter((n) => !taken(n));
   const used = new Set(input.used);
 
   let row: Row | null = null;
@@ -221,7 +239,7 @@ export async function todayPost(db: Db, now = new Date(), opts: { manual?: boole
   } catch (err) {
     error = err instanceof Error ? err.message.slice(0, 200) : "failed";
     writer = "radar";
-    const r = recent.find((x) => x.linkedin && !used.has(x.maker ?? x.title));
+    const r = recent.find((x) => x.linkedin && !used.has(x.maker ?? x.title) && !taken({ title: x.maker ?? x.title, url: x.url }));
     if (r) row = { ...base, position: 0, theme: "solution", cta: "newsletter", title: `${r.maker ?? r.title}`.slice(0, 140), body: r.linkedin!, bodyFa: r.summaryFa, sourceUrl: r.url, sourceTitle: r.source, writer };
   }
   if (!row) return { day, drafts: 0, ...(error ? { error } : {}) };
@@ -270,6 +288,14 @@ export async function decideMedia(db: Db, actor: Actor, id: string, approve: boo
       : { status: "rejected", note: note?.slice(0, 500) ?? null };
     const [row] = await tx.update(mediaPosts).set({ ...set, decidedBy: actorRef(actor), decidedAt: now }).where(eq(mediaPosts.id, id)).returning();
     await audit(tx, actor, approve ? "media.approved" : "media.rejected", { type: "media_post", id }, { status: p.status }, { status: row.status, scheduledFor: row.scheduledFor?.toISOString() ?? null, note: row.note });
+    // one topic, one post: the same topic waiting for its slot (or still a draft) steps aside, so Javad never skips it by hand
+    if (approve && p.channel === "linkedin") {
+      const others = await tx.select().from(mediaPosts).where(and(eq(mediaPosts.channel, "linkedin"), inArray(mediaPosts.status, ["draft", "approved"]), ne(mediaPosts.id, id)));
+      for (const o of others.filter((o) => sameTopic(o, p))) {
+        await tx.update(mediaPosts).set({ status: "skipped", note: `same topic as "${p.title}" (approved ${romeDay(now)})`.slice(0, 500) }).where(eq(mediaPosts.id, o.id));
+        await audit(tx, { type: "system", id: "media-dedupe" }, "media.skipped", { type: "media_post", id: o.id }, { status: o.status }, { status: "skipped", duplicateOf: id });
+      }
+    }
     return row;
   });
 }
