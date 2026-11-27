@@ -6,7 +6,7 @@ import { agentRuns, events, leads, mediaPosts, notifications, radarItems } from 
 import { type ApprovalPress, mockAdminChat } from "@/providers/admin-chat";
 import { mockPublisher } from "@/providers/social";
 import { handlePress, sendWaitingAsks } from "@/server/admin-chat";
-import { confirmMediaPosted, decideMedia, editMedia, isoWeek, mediaKpi, publicMedia, publishDue, todayPost, weeklyDrafts } from "@/server/media";
+import { confirmMediaPosted, decideMedia, editMedia, isoWeek, mediaKpi, publicMedia, publishDue, sameTopic, todayPost, weeklyDrafts } from "@/server/media";
 import { javad, useTestDb } from "./helpers";
 
 const db = useTestDb();
@@ -15,7 +15,7 @@ const HOUR = 36e5;
 
 const text = (n: number) => `Post number ${n}. `.repeat(10);
 const week = (over: Partial<WriterOut> = {}): WriterOut => ({
-  linkedin: MEDIA.linkedin.map((p, index) => ({ index, title: `LinkedIn ${index} ${p.theme}`, text: text(index), textFa: "ترجمه فارسی این پست", sourceUrl: p.theme === "news" ? "https://example.org/news" : null, sourceTitle: p.theme === "news" ? "Example News" : null })),
+  linkedin: MEDIA.linkedin.map((p, index) => ({ index, title: `LinkedIn ${index} ${p.theme}`, text: text(index), textFa: "ترجمه فارسی این پست", sourceUrl: p.theme === "news" ? `https://example.org/news/${index}` : null, sourceTitle: p.theme === "news" ? "Example News" : null })),
   youtube: [{ index: 0, title: "Video", text: text(9), textFa: "اسکریپت ویدیو به فارسی" }],
   newsletter: MEDIA.newsletter.langs.map((lang) => ({ lang, subject: `Brief ${lang}`, text: `Issue in ${lang}. `.repeat(20), summaryFa: "خلاصه این شماره به فارسی" })),
   ...over,
@@ -41,7 +41,7 @@ describe("media engine", () => {
     expect(w.seen[0].pains.length).toBeGreaterThan(0); // hub research feeds the writer
     const rows = await all();
     expect(rows.every((p) => p.status === "draft" && p.scheduledFor! > monday)).toBe(true);
-    expect(rows.find((p) => p.theme === "news")?.sourceUrl).toBe("https://example.org/news");
+    expect(rows.find((p) => p.theme === "news")?.sourceUrl).toBe("https://example.org/news/0");
     expect((await db.select().from(agentRuns)).some((a) => a.agent === "media-writer" && a.ok)).toBe(true);
     expect(isoWeek(new Date("2026-12-31T12:00:00Z"))).toBe("2026-W53");
   });
@@ -123,13 +123,33 @@ describe("media engine", () => {
     expect(await todayPost(db, thu, { write: one.write })).toMatchObject({ skipped: expect.stringMatching(/already planned/) });
     expect(await todayPost(db, new Date("2026-11-28T06:15:00Z"), { write: one.write })).toEqual({ skipped: "weekend" });
     const evening = new Date("2026-11-26T19:45:00Z");
-    expect(await todayPost(db, evening, { manual: true, write: one.write })).toMatchObject({ drafts: 1 });
+    const two = writer(week({ linkedin: [{ index: 0, title: "Another take", text: text(2), textFa: "ترجمه فارسی پست دوم", sourceUrl: "https://example.org/m", sourceTitle: "Example" }], youtube: [], newsletter: [] }));
+    expect(await todayPost(db, evening, { manual: true, write: two.write })).toMatchObject({ drafts: 1 });
     const extra = (await all()).find((x) => x.id !== p.id)!;
     // approved in the evening: next morning, kept a few hours from the other post, not a whole day
     await decideMedia(db, javad, p.id, true, undefined, thu);
     const at = (await decideMedia(db, javad, extra.id, true, undefined, evening)).scheduledFor!;
     expect(at.getTime()).toBeGreaterThan(evening.getTime());
     expect(at.getTime() - evening.getTime()).toBeLessThan(24 * HOUR);
+  });
+
+  it("one topic, one post: approving a post skips the same topic waiting for its slot, and the daily post avoids taken topics", async () => {
+    expect(sameTopic({ title: "elbic", sourceUrl: "https://www.eu-startups.com/2026/11/elbic?utm=x" }, { title: "elbic voice AI funding news", sourceUrl: null })).toBe(true);
+    expect(sameTopic({ title: "x", sourceUrl: "https://eu-startups.com/2026/11/elbic/" }, { title: "y", sourceUrl: "http://www.eu-startups.com/2026/11/elbic?utm=x" })).toBe(true);
+    expect(sameTopic({ title: "Bound", sourceUrl: null }, { title: "Boundless growth for installers", sourceUrl: null })).toBe(false);
+    const thu = new Date("2026-11-26T19:45:00Z");
+    const [radarPost] = await db.insert(mediaPosts).values({ week: "2026-W48", channel: "linkedin", position: 100, theme: "solution", lang: "en", title: "elbic", body: text(3), sourceUrl: "https://example.org/elbic", cta: "newsletter", status: "approved", scheduledFor: new Date("2026-11-29T07:30:00Z") }).returning();
+    // the writer is offered no news about a topic that already has a post
+    const w = writer(week({ linkedin: [{ index: 0, title: "elbic voice AI funding news", text: text(4), textFa: "ترجمه فارسی پست امروز", sourceUrl: "https://example.org/elbic", sourceTitle: "EU-Startups" }], youtube: [], newsletter: [] }));
+    await db.insert(radarItems).values({ day: "2026-11-26", source: "EU-Startups", url: "https://example.org/elbic", title: "elbic raises", maker: "elbic", status: "shortlisted", fit: 5, takeaway: { en: "voice agents for small firms" }, decidedAt: thu, createdAt: thu });
+    await todayPost(db, thu, { manual: true, write: w.write });
+    expect(w.seen[0].news.some((n) => n.url === "https://example.org/elbic")).toBe(false);
+    // approving the new post moves the queued one aside by itself
+    const fresh = (await all()).find((p) => p.status === "draft")!;
+    await decideMedia(db, javad, fresh.id, true, undefined, thu);
+    const [after] = await db.select().from(mediaPosts).where(eq(mediaPosts.id, radarPost.id));
+    expect(after.status).toBe("skipped");
+    expect(after.note).toMatch(/same topic/);
   });
 
   it("without a model the daily post is the best fresh radar proposal", async () => {
